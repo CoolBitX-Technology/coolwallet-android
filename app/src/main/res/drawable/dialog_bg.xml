@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android" >
+    <item>
+        <shape>
+            <!-- 實心-->
+            <!--<solid android:color="#C2DAEF"></solid>-->
+            <!-- 顏色漸變 -->
+            <gradient
+                android:type="linear"
+                android:startColor="#FFF3F3F3"
+                android:endColor="#C2DAEF"
+                android:angle="270"/>
+            <!-- 轉角弧度 -->
+            <corners
+                android:radius="10dp"
+                />
+            <!-- 邊界縮放 -->
+            <padding
+                android:left="1dp"
+                android:top="1dp"
+                android:right="1dp"
+                android:bottom="1dp"
+                />
+
+        </shape>
+    </item>
+
+</selector>

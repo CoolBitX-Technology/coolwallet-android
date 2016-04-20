@@ -1,0 +1,79 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black"
+    android:orientation="vertical">
+
+    <include layout="@layout/toolbar" />
+
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:background="@color/col_black">
+
+        <TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginTop="10sp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_column="0"
+                android:layout_marginLeft="20px"
+                android:text="@string/txt_createHDWallet"
+                android:textColor="@color/bottomtab_normal"
+                android:textSize="20dp" />
+
+        </TableRow>
+
+        <TableRow
+            android:layout_marginTop="10sp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_column="0"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="30dp"
+                android:text="@string/txt_createHDWallet_example"
+                android:textColor="@color/bottomtab_normal"
+                android:textSize="20dp" />
+
+        </TableRow>
+
+    </TableLayout>
+
+    <EditText
+        android:layout_width="330dp"
+        android:layout_height="30dp"
+        android:id="@+id/edt_createHD"
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="20dp"
+        android:background="@drawable/edit_format"
+        style="@style/TextView_Black_16"
+        android:numeric="integer"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_column="0"
+        android:layout_marginLeft="40px"
+        android:layout_marginTop="100dp"
+        android:text="@string/txt_createHDWallet_alert"
+        android:textColor="@android:color/holo_red_dark"
+        android:textSize="20dp" />
+
+    <Button
+        android:id="@+id/btn_create_wallet"
+        style="@style/TextView_Black_16"
+        android:layout_width="200dp"
+        android:layout_height="30dp"
+        android:background="@drawable/selector_button"
+        android:src="@color/button_material_dark"
+        android:text="@string/strCreateWallet"
+        android:layout_gravity="center"
+        android:layout_marginTop="40dp" />
+</LinearLayout>

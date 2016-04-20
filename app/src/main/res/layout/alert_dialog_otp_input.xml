@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="300dp"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_vertical|center_horizontal"
+    android:orientation="vertical"
+    android:background="@android:color/darker_gray">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="@string/strEnterOtp"
+        android:textColor="@android:color/black"
+        android:layout_marginTop="10dp"
+        style="@style/TextView_Gray_18"
+        android:textStyle="bold"/>
+
+    <EditText
+        android:layout_width="250dp"
+        android:layout_height="40dp"
+        android:id="@+id/alert_editotp"
+        android:layout_marginTop="20dp"
+        android:maxLength="6"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/textview_border"
+        style="@style/TextView_Black_16"
+        android:layout_gravity="center"
+        android:numeric="integer"
+        android:textColor="@android:color/black"
+        android:imeOptions="actionDone"/>
+
+    <View
+        android:layout_height="0.5dip"
+        android:layout_marginTop="20sp"
+        android:background="@color/dark_gray"
+        android:layout_width="match_parent" />
+
+</LinearLayout>

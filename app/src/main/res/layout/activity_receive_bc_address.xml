@@ -1,0 +1,98 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black"
+    android:orientation="vertical">
+
+    <!--<include layout="@layout/toolbar_main" />-->
+
+    <ImageView
+        android:id="@+id/img_qrcode"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_centerHorizontal="true"
+        android:layout_gravity="center"
+        android:layout_marginTop="5dp"
+        android:contentDescription="@string/img_logo1"
+        android:src="@mipmap/x"
+        android:layout_alignParentStart="false"
+        android:layout_alignParentTop="true" />
+
+    <TextView
+        android:id="@+id/receive_click_label"
+        style="@style/TextView_White_Bold_18"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="30dp"
+        android:singleLine="true"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/img_qrcode" />
+
+    <LinearLayout
+        android:id="@+id/ll_action"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/black"
+        android:orientation="horizontal"
+        android:gravity="center_horizontal"
+        android:layout_below="@+id/receive_click_label"
+        android:layout_centerHorizontal="true">
+
+        <Button
+            android:id="@+id/btn_edit_label"
+            style="@style/TextView_Black_16"
+            android:layout_width="90dp"
+            android:layout_height="25dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/selector_button"
+            android:src="@color/button_material_dark"
+            android:text="@string/btn_str_edit"
+            android:visibility="invisible"/>
+
+        <Button
+            android:id="@+id/btn_request"
+            style="@style/TextView_Black_16"
+            android:layout_width="160dp"
+            android:layout_height="25dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/selector_button"
+            android:text="@string/btn_str_request"
+            android:visibility="invisible"/>
+
+        <Button
+            android:id="@+id/btn_copy"
+            style="@style/TextView_Black_16"
+            android:layout_width="70dp"
+            android:layout_height="25dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/selector_button"
+            android:text="@string/btn_str_copy"
+            android:visibility="invisible"/>
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btn_gen_address"
+        style="@style/TextView_Black_16"
+        android:layout_alignParentBottom="true"
+        android:layout_width="wrap_content"
+        android:layout_height="28dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginLeft="50dp"
+        android:layout_marginRight="50dp"
+        android:background="@drawable/selector_button"
+        android:text="@string/btn_str_create_new_address" />
+
+    <ListView
+        android:id="@+id/lvAddress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:listSelector="@android:color/transparent"
+        android:layout_margin="5dp"
+        android:layout_below="@id/ll_action"
+        android:layout_above="@id/btn_gen_address" />
+
+
+</RelativeLayout>

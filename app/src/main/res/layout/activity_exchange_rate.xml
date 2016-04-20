@@ -1,0 +1,18 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black"
+    android:orientation="vertical">
+
+    <include layout="@layout/toolbar" />
+
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="fill_parent"
+        android:id="@+id/lv_rate"
+        android:layout_gravity="center_horizontal"
+        android:divider="@color/dark_gray"
+        android:dividerHeight="1dp"
+        android:listSelector="@color/bottomtab_press"/>
+
+</LinearLayout>

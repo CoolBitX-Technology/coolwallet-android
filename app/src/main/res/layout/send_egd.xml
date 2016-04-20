@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp"
+    android:paddingTop="15dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            style="@style/TextView_Black_16"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Receiver Address" />
+
+        <Button
+            android:id="@+id/send_take_receiveraddr"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:background="@color/bottomtab_press"
+            android:text="拍照"
+            android:textColor="@android:color/white" />
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/send_receiveraddr"
+        style="@style/TextView_Black_16"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="text"
+        android:text="EUQfV4ZS2E8R561HFWTDM36kFZxrEugJBP"/>
+
+    <TextView
+        style="@style/TextView_Black_16"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Amount" />
+
+    <EditText
+        android:id="@+id/send_amount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:text="0.0001" />
+
+    <TextView
+        style="@style/TextView_Black_16"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Note" />
+
+    <EditText
+        android:id="@+id/send_note"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="text" />
+
+    <Button
+        android:id="@+id/send_egd"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:background="@color/bottomtab_press"
+        android:text="Send EGD"
+        android:textAllCaps="false"
+        android:textColor="@android:color/white" />
+
+    <TextView
+        style="@style/TextView_Black_16"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="验证otp" />
+
+    <EditText
+        android:id="@+id/send_otp_et"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="text" />
+
+    <Button
+        android:id="@+id/send_otp"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:background="@color/bottomtab_press"
+        android:text="VerifyOtp"
+        android:textAllCaps="false"
+        android:textColor="@android:color/white" />
+
+</LinearLayout>

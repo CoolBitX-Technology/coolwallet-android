@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+
+    <SwitchPreference
+        android:key="security_otp"
+        android:title="@string/pref_title_security_otp" />
+    <SwitchPreference
+        android:key="security_crad_transaction"
+        android:title="@string/pref_title_security_crad_transaction" />
+    <!--<Preference-->
+        <!--android:key="security_watch_dog"-->
+        <!--android:title="@string/pref_title_security_watch_dog" />-->
+    <!--<Preference-->
+        <!--android:key="about_reader_sleep_timeout"-->
+        <!--android:title="@string/pref_title_sleep_timeout" />-->
+
+
+</PreferenceScreen>

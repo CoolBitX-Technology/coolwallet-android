@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal">
+
+    <TextView
+        android:id="@+id/tv_date"
+        android:layout_width="90dp"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+
+        android:gravity="center"
+        android:ellipsize="end"/>
+    <!--   android:hint="20 Oct 2015 11:13AM"-->
+
+    <TextView
+        android:id="@+id/tv_address"
+        android:layout_width="170dp"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:ellipsize="marquee"
+        android:maxLines="2"
+        android:marqueeRepeatLimit="marquee_forever"
+       />
+    <!--android:hint="1JURSwQ8SLxN6RsyjGoLajAustCnvqwQrA"-->
+    <!--android:ellipsize="end"-->
+
+    <TextView
+        android:id="@+id/tv_btc"
+        android:layout_width="140dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="5dp"
+        android:textSize="18sp" />
+    <!--   android:hint="+0.0002"-->
+</LinearLayout>

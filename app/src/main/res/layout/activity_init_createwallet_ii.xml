@@ -1,0 +1,196 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black"
+    android:orientation="vertical">
+
+    <include layout="@layout/toolbar" />
+
+    <TableLayout
+        android:id="@+id/tl_create"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:background="@color/col_black"
+        >
+
+        <TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginTop="10sp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20px"
+                android:text="@string/tv_generate_seed"
+                android:textColor="@color/bottomtab_normal"
+                android:textSize="20dp" />
+
+            <TextView
+                android:id="@+id/tv_seed_type"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textColor="@color/bottomtab_normal"
+                android:textSize="20dp" />
+
+        </TableRow>
+
+        <Spinner
+            android:id="@+id/seed_spinner"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:background="@android:color/black"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20px"
+                android:text="@string/tv_seed_length"
+                android:textColor="@color/bottomtab_normal"
+                android:textSize="20dp" />
+
+            <SeekBar
+                android:id="@+id/seekBar"
+                android:layout_width="160dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal" />
+
+            <TextView
+                android:id="@+id/hdw_seed_length_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="12 "
+                android:textColor="@color/bottomtab_normal"
+                android:textSize="20dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=" Sets"
+                android:textColor="@color/bottomtab_normal"
+                android:textSize="20dp" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/hdw_word"
+            style="@style/TextView_Black_16"
+            android:layout_width="200dp"
+            android:layout_height="150dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginTop="10dp"
+            android:background="@android:color/white" />
+
+        <CheckBox
+            android:id="@+id/checkWords"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_column="0"
+            android:text="@string/chk_create_word"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:id="@+id/layoutWords"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:visibility="gone"
+          >
+
+            <TextView
+                android:id="@+id/hdw_word2"
+                style="@style/TextView_Black_20"
+                android:layout_width="200dp"
+                android:layout_height="250dp"
+                android:background="@android:color/white" />
+
+            <TextView
+                android:id="@+id/hdw_word3"
+                style="@style/TextView_Black_20"
+                android:layout_width="200dp"
+                android:layout_height="250dp"
+                android:layout_span="2"
+                android:background="@android:color/white"
+                android:gravity="top|left" />
+            >
+
+        </LinearLayout>
+
+        <!--<TableRow-->
+        <!--android:layout_width="fill_parent"-->
+        <!--android:layout_height="fill_parent"-->
+        <!--android:layout_marginBottom="50dp"-->
+        <!--android:gravity="center|bottom">-->
+
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:gravity="center|bottom">
+
+            <Button
+                android:id="@+id/btn_hdw_create"
+                style="@style/TextView_Black_16"
+                android:layout_width="200dp"
+                android:layout_height="40dp"
+                android:layout_marginBottom="10dp"
+                android:background="@drawable/selector_button"
+                android:text="@string/hdw_create" />
+            <!--</TableRow>-->
+        </LinearLayout>
+
+    </TableLayout>
+
+    <LinearLayout
+        android:id="@+id/hdw_sum_lin"
+        android:layout_width="match_parent"
+        android:layout_height="fill_parent"
+        android:layout_marginTop="10dp"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <TextView
+            style="@style/TextView_Gray_18"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/str_sum_of_seeds" />
+
+        <EditText
+            android:id="@+id/hdw_sum_et"
+            style="@style/TextView_Black_16"
+            android:layout_width="300dp"
+            android:layout_height="30dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/edit_format"
+            android:inputType="number" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="fill_parent"
+            android:gravity="center|bottom"
+            android:orientation="vertical">
+
+            <Button
+                android:id="@+id/hdw_confirm"
+                style="@style/TextView_Black_16"
+                android:layout_width="200dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center"
+                android:layout_marginBottom="20dp"
+                android:background="@drawable/selector_button"
+                android:text="@string/btn_create_HDW" />
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,0 +1,194 @@
+<resources>
+    <string name="app_name">CoolWallet</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="img_logo1">logo1</string>
+
+    <string name="drawer_open">Drawer Open</string>
+    <string name="drawer_close">Drawer Close</string>
+
+    <string name="strErase">Are you sure you want to\nreset your CoolWallet?...</string>
+    <string name="strEnterOtp">Please enter OTP</string>
+    <string name="strSearch">Searching for CoolWallet...</string>
+    <string name="strSearchDetail">Please turn on CoolWallet by\npressing the button on card.</string>
+    <string name="strPullMsg">Pull down to refresh card list</string>
+    <string name="strConfirmOtp">Confirm One Time Password (OTP)</string>
+    <string name="strKeyOtp">Type in OTP shown on card</string>
+    <string name="strPairSuccessful">Pairing successful</string>
+
+    <string name="BLOCKR_ADDRESS_INFO_API">http://btc.blockr.io/api/v1/address/info/</string>
+
+    <!--Preference-->
+    <string name="pref_title_security_otp">Enable One Time Password\n(OTP) on transactions</string>
+    <string name="pref_title_security_crad_transaction">Enable press the button on the\ncard to complete transactions</string>
+    <string name="pref_title_security_watch_dog">Enable Watch dig function</string>
+
+    <string name="strPairSuccessfulDetail">CoolWallet allows you to pair up to\n3 devices,This device will be able to authenticate the second device.</string>
+    <string name="strCancel">Cancel</string>
+    <string name="strReset">Reset</string>
+    <string name="strPairPhone">Pair With This Phone</string>
+    <string name="connetc_status">Connect status</string>
+    <string name="ok">ok</string>
+
+    <!--security layout-->
+    <string name="tv_security_otp">Enable One Time Password\n(OTP) on transactions</string>
+    <string name="tv_security_enable_press_button">Enable press the button on the\ncard to complete transactions</string>
+    <string name="tv_security_dog">Enable Watch dog function</string>
+    <string name="tv_security_dog_explain">Set an alert that warms you when CoolWallet\nand your device are certain distance apart</string>
+    <string name="tv_security_show_address">Show sending address on card</string>
+    <string name="tv_security_show_address_guide">Please see the segments guide</string>
+    <string name="btn_security_str_update">Update Security Policy</string>
+
+    <string name="tv_import_my_seed">Import my seed</string>
+
+
+    <!--host-->
+    <string name="tv_host_str">Tap to confirm,Swip to delete</string>
+    <!--logout-->
+    <string name="tv_logout_str1">Do you want to disconnect the\n CoolWallet?</string>
+    <string name="tv_logout_str2">The watchdog feature will be\ndisabled once disconnected.</string>
+    <string name="btn_str_logout">Disconnect CoolWallet</string>
+    <!--other setting-->
+    <string name="btn_setting_str_update">Update</string>
+    <string name="tv_str_show_fiat">Show fiat value card</string>
+    <!--Create Wallet-->
+    <string name="tv_generate_seed">Generate Seed On</string>
+    <string name="str_sum_of_seeds">
+        Plese use a calculator to add all the sets of\numbers and enter the result
+        below in order\nto verify that you have written them down\ncorrectly.\n\n\n For example:\n
+        1111111+123456+234434+.....
+    </string>
+
+
+    <string name="str_seedWords_confirm">
+        Plese double check the words you\n
+        have written down carefully.\n
+        This is to make sure you can recover\n
+        your wallet if the card gets lost.
+    </string>
+
+    <string name="tv_generate_seed_highly">Highly Recommended</string>
+    <string name="tv_seed_length">Seed Length</string>
+    <string name="btn_create_HDW">Create Wallet</string>
+    <string name="btn_next">Next</string>
+    <string name="btn_previous">Verify again</string>
+    <string name="hdw_create">Create Wallet</string>
+    <string name="tv_write_down_seed">Please write down all sets of the\nnumbers shown on the CoolWallet\nonto the seed paper</string>
+    <string name="tv_see_next_seed">Press the button on the card to see\nthe next set of numbers</string>
+    <string name="chk_create_word"> I have written down all the numbers.  </string>
+
+
+    <string name="hdw_create_word">
+        Warning:It takes about 1 minute to generate seed on card, please wait until it is done.
+    </string>
+
+    <string name="hdw_create_word_write_down">
+        Please write down all sets of the\n
+        numbers shown on the CoolWallet\n
+        onto the seed paper.\n
+        \n
+        Press the button on the card to see\n
+        the next set of numbers.
+    </string>
+
+    <!--recov wallet-->
+    <string name="tv_recv_msg">Please enter your seed(with spaces)</string>
+    <string name="tv_choose_seed_msg">Choose your seed type</string>
+    <string name="tv_recovery_title">Recovering...</string>
+    <string name="tv_recovery_msg">Please wait and put your\nCollWallet on the charger.</string>
+
+    <!--Create HD Wallet-->
+    <string name="txt_createNewWallet">Create a new Wallet</string>
+    <string name="txt_recoverMyOldWallet">Recover my old wallet</string>
+    <string name="txt_createHDWallet">Please user a calculator to add all the\nsets of numbers and enter the result\nbelow in order to verivy that you have\nwritten them down correctly.</string>
+    <string name="txt_createHDWallet_example">For example:\n1111111+123456+234434+.....</string>
+    <string name="txt_createHDWallet_alert">IMPORTANT!This is the only time\nyou can make a backup of your\nbitcoins.</string>
+    <string name="strCreateWallet">Create Wallet</string>
+
+
+    <!--send-->
+    <string name="btn_str_send">Send</string>
+
+    <!--txs-->
+    <string name="btn_str_view_blockchain">View at Blockchain.info</string>
+
+    <!--Receive BC-->
+    <!--<string name="btn_edit">Edit label</string>-->
+    <string name="btn_str_edit">Edit label</string>
+    <string name="btn_str_request">Request Payment</string>
+    <string name="btn_str_copy">Copy</string>
+    <string name="btn_str_create_new_address">Create New Address</string>
+
+
+    <!-- database -->
+    <string-array name="db_table_name">
+        <item>ADDR</item>
+        <item>TXS</item>
+        <item>CURRENT</item>
+        <item>LOGIN</item>
+
+    </string-array>
+
+    <!--table-->
+    <string-array name="ADDR">
+        <item>WID               TEXT  NOT NULL   </item>
+        <!--WALLET ID(CARD ID)-->
+        <item>ACCOUNT_ID        INTEGER  NOT NULL   </item>
+        <item>ADDRESS           TEXT  NOT NULL      </item>
+        <item>KCID              INTEGER  NOT NULL   </item>
+        <!--0:External ; 1:Internal-->
+        <item>KID               INTEGER   NOT NULL  </item>
+        <!--Address KID-->
+        <item>N_TX              INTEGER   NOT NULL  </item>
+        <item>ADDRESS_BALANCE   BIGINT   NOT NULL   </item>
+        <item>ADDRESS_LABEL     TEXT                </item>
+        <item>PRIMARY KEY (WID,ADDRESS) </item>
+    </string-array>
+
+    <string-array name="TXS">
+        <item>WID               TEXT  NOT NULL   </item>
+        <item>ACCOUNT_ID        INTEGER  NOT NULL   </item>
+        <item>ADDRESS           TEXT  NOT NULL      </item>
+        <item>TX_ID             TEXT     NOT NULL   </item>
+        <item>TX_ADDRESS        TEXT  NOT NULL      </item>
+        <item>TX_RESULT         BIGINT  NOT NULL   </item>
+        <item>TX_DATE           TEXT     NOT NULL   </item>
+        <item>TX_CONFIRMATION   INTEGER  			</item>
+        <item>ID   INTEGER PRIMARY KEY</item>
+    </string-array>
+
+    <string-array name="CURRENT">
+        <item>WID               TEXT  NOT NULL   </item>
+        <item>COUNTRY           TEXT    NOT NULL   </item>
+        <!--WALLET ID(CARD ID)-->
+        <item>RATES             REAL    NOT NULL   </item>
+        <item>PRIMARY KEY (WID,COUNTRY) </item>
+    </string-array>
+
+    <string-array name="LOGIN">
+        <item>DATE              TEXT    NOT NULL   </item>
+        <item>WID               TEXT    NOT NULL   </item>
+        <!--WALLET ID(CARD ID)-->
+        <item>UUID              TEXT    NOT NULL   </item>
+        <item>OTP               TEXT    NOT NULL   </item>
+        <item>PRIMARY KEY (WID) </item>
+    </string-array>
+    <!--jSon parser-->
+    <string-array name="addressInfo">
+        <item>address</item>
+        <item>is_unknown</item>
+        <item>balance</item>
+        <item>balance_multisig</item>
+        <item>totalreceived</item>
+        <item>nb_txs</item>
+    </string-array>
+
+    <string-array name="first_tx">
+        <item>time_utc</item>
+        <item>tx</item>
+        <item>block_nb</item>
+        <item>value</item>
+        <item>confirmations</item>
+    </string-array>
+
+</resources>

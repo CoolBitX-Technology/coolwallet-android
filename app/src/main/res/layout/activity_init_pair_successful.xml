@@ -1,0 +1,54 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/col_black">
+
+    <ImageView
+        android:id="@+id/imgLogo"
+        android:layout_width="180dp"
+        android:layout_height="180dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="73dp"
+        android:contentDescription="@string/img_logo1"
+        android:src="@mipmap/logo1" />
+
+    <TextView
+        android:id="@+id/txtPair"
+        style="@style/TextView_White_Bold_18"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="15dp"
+        android:text="@string/strPairSuccessful"
+        android:layout_below="@+id/imgLogo"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:id="@+id/txtPair2"
+        style="@style/TextView_White_18"
+        android:layout_marginLeft="40dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/strPairSuccessfulDetail"
+        android:layout_marginTop="10dp"
+        android:layout_centerHorizontal="true"
+        android:layout_gravity="center"
+        android:layout_below="@+id/txtPair"
+        android:layout_alignParentEnd="true" />
+
+    <Button
+        android:id="@+id/btn_pair_next"
+        style="@style/TextView_Black_16"
+        android:layout_width="200dp"
+        android:layout_height="30dp"
+        android:layout_marginLeft="30dp"
+        android:background="@drawable/selector_button"
+        android:text="@string/btn_next"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="40dp" />
+
+
+</RelativeLayout>

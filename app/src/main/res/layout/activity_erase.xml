@@ -1,0 +1,69 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/col_black">
+
+    <ImageView
+        android:id="@+id/imgLogo"
+        android:layout_width="180dp"
+        android:layout_height="180dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="73dp"
+        android:contentDescription="@string/img_logo1"
+        android:src="@mipmap/logo1" />
+
+    <EditText
+        android:layout_width="180dp"
+        android:layout_height="30dp"
+        android:id="@+id/editotp"
+        android:background="@drawable/edit_format"
+        style="@style/TextView_Black_16"
+        android:numeric="integer"
+        android:maxLength="6"
+        android:layout_below="@+id/txtErase"
+        android:layout_alignStart="@+id/imgLogo"
+        android:imeOptions="actionDone"/>
+
+    <TextView
+        android:id="@+id/txtErase"
+        style="@style/TextView_White_Bold_18"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="@string/strErase"
+        android:layout_below="@+id/imgLogo"
+        android:layout_centerHorizontal="true" />
+
+    <Button
+        android:id="@+id/btn_cancel"
+        style="@style/TextView_Black_16"
+        android:layout_width="200dp"
+        android:layout_height="30dp"
+        android:background="@drawable/selector_button"
+        android:text="@string/strCancel"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="88dp" />
+
+    <Button
+        android:id="@+id/btn_reset"
+        style="@style/TextView_Black_16"
+        android:layout_width="200dp"
+        android:layout_height="30dp"
+        android:background="@drawable/selector_button"
+        android:text="@string/strReset"
+        android:layout_alignParentBottom="true"
+        android:layout_alignStart="@+id/btn_cancel"
+        android:layout_marginBottom="43dp" />
+
+    <!--<ProgressBar-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:id="@+id/pBarConnecting"-->
+        <!--android:layout_below="@+id/imgLogo"-->
+        <!--android:layout_centerHorizontal="true"-->
+        <!--android:visibility="invisible"/>-->
+
+</RelativeLayout>

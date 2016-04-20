@@ -1,0 +1,940 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 http://docs.oasis-open.org/xliff/v1.2/os/xliff-core-1.2-strict.xsd">
+  <file original="CoolWallet/Base.lproj/Accounts.storyboard" source-language="en" datatype="plaintext" target-language="zh-Hant">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="7.1" build-num="7B91b"/>
+    </header>
+    <body>
+      <trans-unit id="0J7-Sm-VOo.title">
+        <source>Exit</source>
+        <target>Exit</target>
+        <note>Class = "UITabBarItem"; title = "Exit"; ObjectID = "0J7-Sm-VOo";</note>
+      </trans-unit>
+      <trans-unit id="1Im-aT-IIE.text">
+        <source>Enable Watch dog function</source>
+        <target>啟動看門狗功能</target>
+        <note>Class = "UILabel"; text = "Enable Watch dog function"; ObjectID = "1Im-aT-IIE";</note>
+      </trans-unit>
+      <trans-unit id="1bs-S6-P1z.text">
+        <source>Note</source>
+        <target>Note</target>
+        <note>Class = "UILabel"; text = "Note"; ObjectID = "1bs-S6-P1z";</note>
+      </trans-unit>
+      <trans-unit id="1ff-Mo-LmS.text">
+        <source>HDW Name</source>
+        <target>HDW Name</target>
+        <note>Class = "UILabel"; text = "HDW Name"; ObjectID = "1ff-Mo-LmS";</note>
+      </trans-unit>
+      <trans-unit id="2ZI-qD-hgF.title">
+        <source>CW Card</source>
+        <target>CW Card</target>
+        <note>Class = "UITabBarItem"; title = "CW Card"; ObjectID = "2ZI-qD-hgF";</note>
+      </trans-unit>
+      <trans-unit id="2dB-th-Hrg.normalTitle">
+        <source>Confirm HDW</source>
+        <target>Confirm HDW</target>
+        <note>Class = "UIButton"; normalTitle = "Confirm HDW"; ObjectID = "2dB-th-Hrg";</note>
+      </trans-unit>
+      <trans-unit id="3M5-JR-pSt.title">
+        <source>CoolWallet card</source>
+        <target>CoolWallet card</target>
+        <note>Class = "UINavigationItem"; title = "CoolWallet card"; ObjectID = "3M5-JR-pSt";</note>
+      </trans-unit>
+      <trans-unit id="5Gq-st-Q9Y.normalTitle">
+        <source>Next</source>
+        <target>Next</target>
+        <note>Class = "UIButton"; normalTitle = "Next"; ObjectID = "5Gq-st-Q9Y";</note>
+      </trans-unit>
+      <trans-unit id="5Kb-Hd-AOw.text">
+        <source>--</source>
+        <target>--</target>
+        <note>Class = "UILabel"; text = "--"; ObjectID = "5Kb-Hd-AOw";</note>
+      </trans-unit>
+      <trans-unit id="5Nd-6g-vFi.normalTitle">
+        <source>Create New Address</source>
+        <target>產生新地址</target>
+        <note>Class = "UIButton"; normalTitle = "Create New Address"; ObjectID = "5Nd-6g-vFi";</note>
+      </trans-unit>
+      <trans-unit id="5QQ-ee-uZ9.text">
+        <source>HDW Status: </source>
+        <target>HDW Status: </target>
+        <note>Class = "UILabel"; text = "HDW Status: "; ObjectID = "5QQ-ee-uZ9";</note>
+      </trans-unit>
+      <trans-unit id="7Hq-Wl-rhy.normalTitle">
+        <source>Edit label</source>
+        <target>Edit label</target>
+        <note>Class = "UIButton"; normalTitle = "Edit label"; ObjectID = "7Hq-Wl-rhy";</note>
+      </trans-unit>
+      <trans-unit id="7Jg-jH-jQG.text">
+        <source>I have written down all the numbers</source>
+        <target>我已寫下所有的數字</target>
+        <note>Class = "UILabel"; text = "I have written down all the numbers"; ObjectID = "7Jg-jH-jQG";</note>
+      </trans-unit>
+      <trans-unit id="7aT-bx-cZA.text">
+        <source>Name</source>
+        <target>Name</target>
+        <note>Class = "UILabel"; text = "Name"; ObjectID = "7aT-bx-cZA";</note>
+      </trans-unit>
+      <trans-unit id="7xr-FY-fxK.text">
+        <source>Amount</source>
+        <target>Amount</target>
+        <note>Class = "UILabel"; text = "Amount"; ObjectID = "7xr-FY-fxK";</note>
+      </trans-unit>
+      <trans-unit id="8HE-Me-rs1.title">
+        <source>Address Book</source>
+        <target>Address Book</target>
+        <note>Class = "UINavigationItem"; title = "Address Book"; ObjectID = "8HE-Me-rs1";</note>
+      </trans-unit>
+      <trans-unit id="8k3-FY-p0f.text">
+        <source>Preserve Host Info</source>
+        <target>Preserve Host Info</target>
+        <note>Class = "UILabel"; text = "Preserve Host Info"; ObjectID = "8k3-FY-p0f";</note>
+      </trans-unit>
+      <trans-unit id="9dz-cB-ORR.text">
+        <source>Logout</source>
+        <target>登出</target>
+        <note>Class = "UILabel"; text = "Logout"; ObjectID = "9dz-cB-ORR";</note>
+      </trans-unit>
+      <trans-unit id="9zJ-9T-yeD.title">
+        <source>Exit</source>
+        <target>Exit</target>
+        <note>Class = "UINavigationItem"; title = "Exit"; ObjectID = "9zJ-9T-yeD";</note>
+      </trans-unit>
+      <trans-unit id="61Y-z6-fj4.normalTitle">
+        <source>Disconnect CoolWallet</source>
+        <target>Disconnect CoolWallet</target>
+        <note>Class = "UIButton"; normalTitle = "Disconnect CoolWallet"; ObjectID = "61Y-z6-fj4";</note>
+      </trans-unit>
+      <trans-unit id="AoB-Jc-soZ.normalTitle">
+        <source>5</source>
+        <target>5</target>
+        <note>Class = "UIButton"; normalTitle = "5"; ObjectID = "AoB-Jc-soZ";</note>
+      </trans-unit>
+      <trans-unit id="AuY-uy-uAI.normalTitle">
+        <source>Update Security Policy</source>
+        <target>更新安全設定</target>
+        <note>Class = "UIButton"; normalTitle = "Update Security Policy"; ObjectID = "AuY-uy-uAI";</note>
+      </trans-unit>
+      <trans-unit id="AyI-Mr-fb1.normalTitle">
+        <source>Create Wallet</source>
+        <target>建立錢包</target>
+        <note>Class = "UIButton"; normalTitle = "Create Wallet"; ObjectID = "AyI-Mr-fb1";</note>
+      </trans-unit>
+      <trans-unit id="BBg-Vx-SWD.text">
+        <source>To</source>
+        <target>To</target>
+        <note>Class = "UILabel"; text = "To"; ObjectID = "BBg-Vx-SWD";</note>
+      </trans-unit>
+      <trans-unit id="D7i-QE-8XV.title">
+        <source>Create New Contact</source>
+        <target>Create New Contact</target>
+        <note>Class = "UINavigationItem"; title = "Create New Contact"; ObjectID = "D7i-QE-8XV";</note>
+      </trans-unit>
+      <trans-unit id="DSA-f8-S1U.normalTitle">
+        <source>5</source>
+        <target>5</target>
+        <note>Class = "UIButton"; normalTitle = "5"; ObjectID = "DSA-f8-S1U";</note>
+      </trans-unit>
+      <trans-unit id="DYR-0h-PJS.text">
+        <source>1 BTC = 1,000 mBTC</source>
+        <target>1 BTC = 1,000 mBTC</target>
+        <note>Class = "UILabel"; text = "1 BTC = 1,000 mBTC"; ObjectID = "DYR-0h-PJS";</note>
+      </trans-unit>
+      <trans-unit id="DjK-xa-ckk.text">
+        <source>Please double check the words you have written down carefully.
+This is to make sure you can recover your wallet if the card gets lost.</source>
+        <target>請再次確認您抄下來的Seed是否正確。
+這是為了確保您可以在卡片遺失後重新還原錢包的內容。</target>
+        <note>Class = "UILabel"; text = "Please double check the words you have written down carefully.\nThis is to make sure you can recover your wallet if the card gets lost."; ObjectID = "DjK-xa-ckk";</note>
+      </trans-unit>
+      <trans-unit id="EGc-bp-J1Z.text">
+        <source>Please wait and put your CoolWallet on the charger.</source>
+        <target>Please wait and put your CoolWallet on the charger.</target>
+        <note>Class = "UILabel"; text = "Please wait and put your CoolWallet on the charger."; ObjectID = "EGc-bp-J1Z";</note>
+      </trans-unit>
+      <trans-unit id="Ed9-1K-Nxk.normalTitle">
+        <source>3</source>
+        <target>3</target>
+        <note>Class = "UIButton"; normalTitle = "3"; ObjectID = "Ed9-1K-Nxk";</note>
+      </trans-unit>
+      <trans-unit id="Ery-8e-wSm.normalTitle">
+        <source>2</source>
+        <target>2</target>
+        <note>Class = "UIButton"; normalTitle = "2"; ObjectID = "Ery-8e-wSm";</note>
+      </trans-unit>
+      <trans-unit id="Fw3-mc-BUZ.normalTitle">
+        <source>4</source>
+        <target>4</target>
+        <note>Class = "UIButton"; normalTitle = "4"; ObjectID = "Fw3-mc-BUZ";</note>
+      </trans-unit>
+      <trans-unit id="GiR-4r-gKY.text">
+        <source>Recover my old wallet  </source>
+        <target>還原我的舊錢包</target>
+        <note>Class = "UILabel"; text = "Recover my old wallet  "; ObjectID = "GiR-4r-gKY";</note>
+      </trans-unit>
+      <trans-unit id="HoY-dB-fIm.text">
+        <source>BTC</source>
+        <target>BTC</target>
+        <note>Class = "UILabel"; text = "BTC"; ObjectID = "HoY-dB-fIm";</note>
+      </trans-unit>
+      <trans-unit id="Iq6-d7-TkM.text">
+        <source>Create a new wallet  </source>
+        <target>建立一個新錢包</target>
+        <note>Class = "UILabel"; text = "Create a new wallet  "; ObjectID = "Iq6-d7-TkM";</note>
+      </trans-unit>
+      <trans-unit id="JW2-QL-1Xa.normalTitle">
+        <source>4</source>
+        <target>4</target>
+        <note>Class = "UIButton"; normalTitle = "4"; ObjectID = "JW2-QL-1Xa";</note>
+      </trans-unit>
+      <trans-unit id="JWE-V4-LBM.normalTitle">
+        <source>Update HDW Name</source>
+        <target>Update HDW Name</target>
+        <note>Class = "UIButton"; normalTitle = "Update HDW Name"; ObjectID = "JWE-V4-LBM";</note>
+      </trans-unit>
+      <trans-unit id="JWd-U9-CNZ.text">
+        <source>0 BTC</source>
+        <target>0 BTC</target>
+        <note>Class = "UILabel"; text = "0 BTC"; ObjectID = "JWd-U9-CNZ";</note>
+      </trans-unit>
+      <trans-unit id="KBJ-9Z-Htz.title">
+        <source>Hosts</source>
+        <target>Hosts</target>
+        <note>Class = "UITabBarItem"; title = "Hosts"; ObjectID = "KBJ-9Z-Htz";</note>
+      </trans-unit>
+      <trans-unit id="Lfx-F2-inM.text">
+        <source>Highly Recommended</source>
+        <target>Highly Recommended</target>
+        <note>Class = "UILabel"; text = "Highly Recommended"; ObjectID = "Lfx-F2-inM";</note>
+      </trans-unit>
+      <trans-unit id="Ll2-TF-Bjz.text">
+        <source>Erase CW</source>
+        <target>Erase CW</target>
+        <note>Class = "UILabel"; text = "Erase CW"; ObjectID = "Ll2-TF-Bjz";</note>
+      </trans-unit>
+      <trans-unit id="Lvh-7z-cuV.text">
+        <source>--</source>
+        <target>--</target>
+        <note>Class = "UILabel"; text = "--"; ObjectID = "Lvh-7z-cuV";</note>
+      </trans-unit>
+      <trans-unit id="MZj-ru-yOL.title">
+        <source>Settings</source>
+        <target>Settings</target>
+        <note>Class = "UINavigationItem"; title = "Settings"; ObjectID = "MZj-ru-yOL";</note>
+      </trans-unit>
+      <trans-unit id="Mya-6v-NX3.normalTitle">
+        <source>Add to address book</source>
+        <target>Add to address book</target>
+        <note>Class = "UIButton"; normalTitle = "Add to address book"; ObjectID = "Mya-6v-NX3";</note>
+      </trans-unit>
+      <trans-unit id="NOW-wa-2cA.text">
+        <source>Generate Seed On Card</source>
+        <target>在CoolWallet上產生Seed</target>
+        <note>Class = "UILabel"; text = "Generate Seed On Card"; ObjectID = "NOW-wa-2cA";</note>
+      </trans-unit>
+      <trans-unit id="NiF-i8-OGI.text">
+        <source>--</source>
+        <target>--</target>
+        <note>Class = "UILabel"; text = "--"; ObjectID = "NiF-i8-OGI";</note>
+      </trans-unit>
+      <trans-unit id="Njd-cf-Wfa.text">
+        <source>Enable One Time Password (OTP) on transactions </source>
+        <target>啟動一次性密碼(OTP)認證</target>
+        <note>Class = "UILabel"; text = "Enable One Time Password (OTP) on transactions "; ObjectID = "Njd-cf-Wfa";</note>
+      </trans-unit>
+      <trans-unit id="Nvp-Uw-wvf.title">
+        <source>Exit</source>
+        <target>Exit</target>
+        <note>Class = "UITabBarItem"; title = "Exit"; ObjectID = "Nvp-Uw-wvf";</note>
+      </trans-unit>
+      <trans-unit id="OAA-kP-Pom.text">
+        <source>IMPORTANT! This is the only time you can make a backup of your bitcoins.</source>
+        <target>重要! 這是您唯一可以備份錢包的時機</target>
+        <note>Class = "UILabel"; text = "IMPORTANT! This is the only time you can make a backup of your bitcoins."; ObjectID = "OAA-kP-Pom";</note>
+      </trans-unit>
+      <trans-unit id="OVG-dI-sbw.text">
+        <source>Transation ID</source>
+        <target>Transation ID</target>
+        <note>Class = "UILabel"; text = "Transation ID"; ObjectID = "OVG-dI-sbw";</note>
+      </trans-unit>
+      <trans-unit id="OnH-rp-o6H.normalTitle">
+        <source>2</source>
+        <target>2</target>
+        <note>Class = "UIButton"; normalTitle = "2"; ObjectID = "OnH-rp-o6H";</note>
+      </trans-unit>
+      <trans-unit id="Ooa-zu-4fA.text">
+        <source>Set an alert that warns you when CoolWallet and your device are certain distance apart</source>
+        <target>此功能是用來警示您的CoolWallet和您的裝置相離一段距離</target>
+        <note>Class = "UILabel"; text = "Set an alert that warns you when CoolWallet and your device are certain distance apart"; ObjectID = "Ooa-zu-4fA";</note>
+      </trans-unit>
+      <trans-unit id="PlA-2P-xCQ.normalTitle">
+        <source>Verify</source>
+        <target>Verify</target>
+        <note>Class = "UIButton"; normalTitle = "Verify"; ObjectID = "PlA-2P-xCQ";</note>
+      </trans-unit>
+      <trans-unit id="RBm-Ax-aYx.text">
+        <source>--</source>
+        <target>--</target>
+        <note>Class = "UILabel"; text = "--"; ObjectID = "RBm-Ax-aYx";</note>
+      </trans-unit>
+      <trans-unit id="RNG-9h-bJS.text">
+        <source>Please write down all sets of the numbers shown on the CoolWallet onto the seed paper
+
+Press the button on the card to see the next set of numbers</source>
+        <target>請將卡上顯示的數字抄在復原卡上（順序很重要）
+
+按下卡上的按鈕可以看下一組Seed，請將它抄下並重複此動作到您所選的組數。</target>
+        <note>Class = "UILabel"; text = "Please write down all sets of the numbers shown on the CoolWallet onto the seed paper\n\nPress the button on the card to see the next set of numbers"; ObjectID = "RNG-9h-bJS";</note>
+      </trans-unit>
+      <trans-unit id="RRI-eH-pHG.text">
+        <source>For example:
+1111111+123456+234434+.....</source>
+        <target>例如:
+1111111+123456+234434+.....</target>
+        <note>Class = "UILabel"; text = "For example:\n1111111+123456+234434+....."; ObjectID = "RRI-eH-pHG";</note>
+      </trans-unit>
+      <trans-unit id="RZF-l1-SCv.text">
+        <source>--</source>
+        <target>--</target>
+        <note>Class = "UILabel"; text = "--"; ObjectID = "RZF-l1-SCv";</note>
+      </trans-unit>
+      <trans-unit id="ReR-F3-ubG.text">
+        <source>Please see the segments guide</source>
+        <target>此為選擇性的功能，您可以在卡上看到接收地址，請參照傳送時的安全政策</target>
+        <note>Class = "UILabel"; text = "Please see the segments guide"; ObjectID = "ReR-F3-ubG";</note>
+      </trans-unit>
+      <trans-unit id="S4k-in-dde.text">
+        <source>AccPtr:</source>
+        <target>AccPtr:</target>
+        <note>Class = "UILabel"; text = "AccPtr:"; ObjectID = "S4k-in-dde";</note>
+      </trans-unit>
+      <trans-unit id="SBJ-ha-pbJ.text">
+        <source>CW HDW Info</source>
+        <target>CW HDW Info</target>
+        <note>Class = "UILabel"; text = "CW HDW Info"; ObjectID = "SBJ-ha-pbJ";</note>
+      </trans-unit>
+      <trans-unit id="ScJ-OJ-sfF.title">
+        <source>Security</source>
+        <target>安全設定</target>
+        <note>Class = "UINavigationItem"; title = "Security"; ObjectID = "ScJ-OJ-sfF";</note>
+      </trans-unit>
+      <trans-unit id="SdQ-VI-SiR.text">
+        <source>Transactions</source>
+        <target>Transactions</target>
+        <note>Class = "UILabel"; text = "Transactions"; ObjectID = "SdQ-VI-SiR";</note>
+      </trans-unit>
+      <trans-unit id="Sq4-rH-Bd3.text">
+        <source>--</source>
+        <target>--</target>
+        <note>Class = "UILabel"; text = "--"; ObjectID = "Sq4-rH-Bd3";</note>
+      </trans-unit>
+      <trans-unit id="TL7-65-AJD.text">
+        <source>Please use a calculator to add all the sets of numbers and enter the result below in order to verify that you have written them down correctly.</source>
+        <target>請用計算機將所有的組數加起來，將加起來的總和輸入app裡，app會與CoolWallet確認您加總的數字正確性</target>
+        <note>Class = "UILabel"; text = "Please use a calculator to add all the sets of numbers and enter the result below in order to verify that you have written them down correctly."; ObjectID = "TL7-65-AJD";</note>
+      </trans-unit>
+      <trans-unit id="TL8-81-nFL.title">
+        <source>+</source>
+        <target>+</target>
+        <note>Class = "UIBarButtonItem"; title = "+"; ObjectID = "TL8-81-nFL";</note>
+      </trans-unit>
+      <trans-unit id="TZs-ai-RsI.text">
+        <source>Date</source>
+        <target>Date</target>
+        <note>Class = "UILabel"; text = "Date"; ObjectID = "TZs-ai-RsI";</note>
+      </trans-unit>
+      <trans-unit id="Td3-4I-HYD.normalTitle">
+        <source>1</source>
+        <target>1</target>
+        <note>Class = "UIButton"; normalTitle = "1"; ObjectID = "Td3-4I-HYD";</note>
+      </trans-unit>
+      <trans-unit id="Tez-gK-Xwy.text">
+        <source>HDW Name</source>
+        <target>HDW Name</target>
+        <note>Class = "UILabel"; text = "HDW Name"; ObjectID = "Tez-gK-Xwy";</note>
+      </trans-unit>
+      <trans-unit id="UKr-Rl-fMy.normalTitle">
+        <source>Request Payment</source>
+        <target>Request Payment</target>
+        <note>Class = "UIButton"; normalTitle = "Request Payment"; ObjectID = "UKr-Rl-fMy";</note>
+      </trans-unit>
+      <trans-unit id="USl-fb-rVJ.title">
+        <source>Create Wallet</source>
+        <target>建立錢包</target>
+        <note>Class = "UINavigationItem"; title = "Create Wallet"; ObjectID = "USl-fb-rVJ";</note>
+      </trans-unit>
+      <trans-unit id="UUt-pK-8VY.text">
+        <source>Import my seed</source>
+        <target>需輸入seed</target>
+        <note>Class = "UILabel"; text = "Import my seed"; ObjectID = "UUt-pK-8VY";</note>
+      </trans-unit>
+      <trans-unit id="Ulq-vI-IXF.title">
+        <source>CW Card</source>
+        <target>CW Card</target>
+        <note>Class = "UITabBarItem"; title = "CW Card"; ObjectID = "Ulq-vI-IXF";</note>
+      </trans-unit>
+      <trans-unit id="UmG-Sw-rMN.normalTitle">
+        <source>1</source>
+        <target>1</target>
+        <note>Class = "UIButton"; normalTitle = "1"; ObjectID = "UmG-Sw-rMN";</note>
+      </trans-unit>
+      <trans-unit id="VIS-eO-Yem.normalTitle">
+        <source>Create Wallet</source>
+        <target>建立錢包</target>
+        <note>Class = "UIButton"; normalTitle = "Create Wallet"; ObjectID = "VIS-eO-Yem";</note>
+      </trans-unit>
+      <trans-unit id="VlG-3V-FVb.normalTitle">
+        <source>Erase CW</source>
+        <target>重設CoolWallet</target>
+        <note>Class = "UIButton"; normalTitle = "Erase CW"; ObjectID = "VlG-3V-FVb";</note>
+      </trans-unit>
+      <trans-unit id="VzY-lr-EEn.text">
+        <source>Security</source>
+        <target>Security</target>
+        <note>Class = "UILabel"; text = "Security"; ObjectID = "VzY-lr-EEn";</note>
+      </trans-unit>
+      <trans-unit id="WOT-bg-CmQ.title">
+        <source>Bitcoin Units preferences</source>
+        <target>Bitcoin Units preferences</target>
+        <note>Class = "UINavigationItem"; title = "Bitcoin Units preferences"; ObjectID = "WOT-bg-CmQ";</note>
+      </trans-unit>
+      <trans-unit id="Wlz-iZ-ToL.normalTitle">
+        <source>Update</source>
+        <target>Update</target>
+        <note>Class = "UIButton"; normalTitle = "Update"; ObjectID = "Wlz-iZ-ToL";</note>
+      </trans-unit>
+      <trans-unit id="XCP-0a-q19.text">
+        <source>mBTC</source>
+        <target>mBTC</target>
+        <note>Class = "UILabel"; text = "mBTC"; ObjectID = "XCP-0a-q19";</note>
+      </trans-unit>
+      <trans-unit id="XGu-fY-zqU.text">
+        <source>1 BTC = 1,000,000 µBTC</source>
+        <target>1 BTC = 1,000,000 µBTC</target>
+        <note>Class = "UILabel"; text = "1 BTC = 1,000,000 µBTC"; ObjectID = "XGu-fY-zqU";</note>
+      </trans-unit>
+      <trans-unit id="XTz-OH-qR3.normalTitle">
+        <source>Update Exchange Rate</source>
+        <target>Update Exchange Rate</target>
+        <note>Class = "UIButton"; normalTitle = "Update Exchange Rate"; ObjectID = "XTz-OH-qR3";</note>
+      </trans-unit>
+      <trans-unit id="Xeh-pu-sXE.text">
+        <source>Settings</source>
+        <target>設定</target>
+        <note>Class = "UILabel"; text = "Settings"; ObjectID = "Xeh-pu-sXE";</note>
+      </trans-unit>
+      <trans-unit id="Xx3-9J-83r.text">
+        <source>0</source>
+        <target>0</target>
+        <note>Class = "UILabel"; text = "0"; ObjectID = "Xx3-9J-83r";</note>
+      </trans-unit>
+      <trans-unit id="YLV-AL-7hq.text">
+        <source>address</source>
+        <target>address</target>
+        <note>Class = "UILabel"; text = "address"; ObjectID = "YLV-AL-7hq";</note>
+      </trans-unit>
+      <trans-unit id="YcE-ob-nRZ.text">
+        <source>Bitcoin Units preferences   </source>
+        <target>Bitcoin Units preferences   </target>
+        <note>Class = "UILabel"; text = "Bitcoin Units preferences   "; ObjectID = "YcE-ob-nRZ";</note>
+      </trans-unit>
+      <trans-unit id="YcT-hs-ud6.text">
+        <source>Amount</source>
+        <target>Amount</target>
+        <note>Class = "UILabel"; text = "Amount"; ObjectID = "YcT-hs-ud6";</note>
+      </trans-unit>
+      <trans-unit id="Yw1-KI-ihg.text">
+        <source>Show recipient's address on card</source>
+        <target>顯示接收地址在卡上</target>
+        <note>Class = "UILabel"; text = "Show recipient's address on card"; ObjectID = "Yw1-KI-ihg";</note>
+      </trans-unit>
+      <trans-unit id="Z58-MN-7jo.text">
+        <source>Exchange Rate</source>
+        <target>Exchange Rate</target>
+        <note>Class = "UILabel"; text = "Exchange Rate"; ObjectID = "Z58-MN-7jo";</note>
+      </trans-unit>
+      <trans-unit id="ZnF-vF-PWh.text">
+        <source>Progress</source>
+        <target>Progress</target>
+        <note>Class = "UILabel"; text = "Progress"; ObjectID = "ZnF-vF-PWh";</note>
+      </trans-unit>
+      <trans-unit id="aBI-PC-fS8.title">
+        <source>Hosts</source>
+        <target>Hosts</target>
+        <note>Class = "UITabBarItem"; title = "Hosts"; ObjectID = "aBI-PC-fS8";</note>
+      </trans-unit>
+      <trans-unit id="aCc-pB-vjv.normalTitle">
+        <source>3</source>
+        <target>3</target>
+        <note>Class = "UIButton"; normalTitle = "3"; ObjectID = "aCc-pB-vjv";</note>
+      </trans-unit>
+      <trans-unit id="afy-SC-jVH.title">
+        <source>Setting</source>
+        <target>Setting</target>
+        <note>Class = "UITabBarItem"; title = "Setting"; ObjectID = "afy-SC-jVH";</note>
+      </trans-unit>
+      <trans-unit id="ak1-f7-eZt.normalTitle">
+        <source>2</source>
+        <target>2</target>
+        <note>Class = "UIButton"; normalTitle = "2"; ObjectID = "ak1-f7-eZt";</note>
+      </trans-unit>
+      <trans-unit id="atk-Yo-FAg.title">
+        <source>Create HD Wallet</source>
+        <target>Create HD Wallet</target>
+        <note>Class = "UINavigationItem"; title = "Create HD Wallet"; ObjectID = "atk-Yo-FAg";</note>
+      </trans-unit>
+      <trans-unit id="bUY-TP-ZAB.text">
+        <source>Label</source>
+        <target>Label</target>
+        <note>Class = "UILabel"; text = "Label"; ObjectID = "bUY-TP-ZAB";</note>
+      </trans-unit>
+      <trans-unit id="bwt-Ca-UHv.text">
+        <source>SubTitle</source>
+        <target>SubTitle</target>
+        <note>Class = "UILabel"; text = "SubTitle"; ObjectID = "bwt-Ca-UHv";</note>
+      </trans-unit>
+      <trans-unit id="cES-s5-Hb9.text">
+        <source>USD</source>
+        <target>USD</target>
+        <note>Class = "UILabel"; text = "USD"; ObjectID = "cES-s5-Hb9";</note>
+      </trans-unit>
+      <trans-unit id="cEr-OR-sOH.normalTitle">
+        <source>My seeds is in words</source>
+        <target>英文字</target>
+        <note>Class = "UIButton"; normalTitle = "My seeds is in words"; ObjectID = "cEr-OR-sOH";</note>
+      </trans-unit>
+      <trans-unit id="cFX-ji-VNO.normalTitle">
+        <source>Next</source>
+        <target>Next</target>
+        <note>Class = "UIButton"; normalTitle = "Next"; ObjectID = "cFX-ji-VNO";</note>
+      </trans-unit>
+      <trans-unit id="ce0-hp-7LT.text">
+        <source>Host devices</source>
+        <target>Host devices</target>
+        <note>Class = "UILabel"; text = "Host devices"; ObjectID = "ce0-hp-7LT";</note>
+      </trans-unit>
+      <trans-unit id="ciH-F4-fs9.text">
+        <source>Card Name</source>
+        <target>卡片名稱</target>
+        <note>Class = "UILabel"; text = "Card Name"; ObjectID = "ciH-F4-fs9";</note>
+      </trans-unit>
+      <trans-unit id="dey-aQ-HC9.text">
+        <source>BTC</source>
+        <target>BTC</target>
+        <note>Class = "UILabel"; text = "BTC"; ObjectID = "dey-aQ-HC9";</note>
+      </trans-unit>
+      <trans-unit id="dsK-JY-MZW.text">
+        <source>Inactive</source>
+        <target>Inactive</target>
+        <note>Class = "UILabel"; text = "Inactive"; ObjectID = "dsK-JY-MZW";</note>
+      </trans-unit>
+      <trans-unit id="eW3-Mq-fHE.normalTitle">
+        <source>4</source>
+        <target>4</target>
+        <note>Class = "UIButton"; normalTitle = "4"; ObjectID = "eW3-Mq-fHE";</note>
+      </trans-unit>
+      <trans-unit id="f9G-Aw-gjl.text">
+        <source>18</source>
+        <target>18</target>
+        <note>Class = "UILabel"; text = "18"; ObjectID = "f9G-Aw-gjl";</note>
+      </trans-unit>
+      <trans-unit id="fIV-Eh-uvO.text">
+        <source>Seed Length</source>
+        <target>Seed組數</target>
+        <note>Class = "UILabel"; text = "Seed Length"; ObjectID = "fIV-Eh-uvO";</note>
+      </trans-unit>
+      <trans-unit id="faj-fv-4Vm.text">
+        <source>Subtitle</source>
+        <target>Subtitle</target>
+        <note>Class = "UILabel"; text = "Subtitle"; ObjectID = "faj-fv-4Vm";</note>
+      </trans-unit>
+      <trans-unit id="fbt-pW-ztx.text">
+        <source>Title</source>
+        <target>Title</target>
+        <note>Class = "UILabel"; text = "Title"; ObjectID = "fbt-pW-ztx";</note>
+      </trans-unit>
+      <trans-unit id="fqT-hp-7Js.text">
+        <source>--</source>
+        <target>--</target>
+        <note>Class = "UILabel"; text = "--"; ObjectID = "fqT-hp-7Js";</note>
+      </trans-unit>
+      <trans-unit id="fu0-iG-aND.title">
+        <source>Scan QR Code</source>
+        <target>掃描QR Code</target>
+        <note>Class = "UINavigationItem"; title = "Scan QR Code"; ObjectID = "fu0-iG-aND";</note>
+      </trans-unit>
+      <trans-unit id="gAw-Wd-gUD.text">
+        <source>Exchange Rate</source>
+        <target>Exchange Rate</target>
+        <note>Class = "UILabel"; text = "Exchange Rate"; ObjectID = "gAw-Wd-gUD";</note>
+      </trans-unit>
+      <trans-unit id="gSA-21-vt4.title">
+        <source>Import Seed</source>
+        <target>輸入Seed</target>
+        <note>Class = "UINavigationItem"; title = "Import Seed"; ObjectID = "gSA-21-vt4";</note>
+      </trans-unit>
+      <trans-unit id="giA-hG-rId.text">
+        <source>Title</source>
+        <target>Title</target>
+        <note>Class = "UILabel"; text = "Title"; ObjectID = "giA-hG-rId";</note>
+      </trans-unit>
+      <trans-unit id="gqA-Ot-kKD.title">
+        <source>Host devices</source>
+        <target>Host devices</target>
+        <note>Class = "UINavigationItem"; title = "Host devices"; ObjectID = "gqA-Ot-kKD";</note>
+      </trans-unit>
+      <trans-unit id="hGS-WQ-Pjh.text">
+        <source>--</source>
+        <target>--</target>
+        <note>Class = "UILabel"; text = "--"; ObjectID = "hGS-WQ-Pjh";</note>
+      </trans-unit>
+      <trans-unit id="hgI-KS-EvS.text">
+        <source>0 BTC</source>
+        <target>0 BTC</target>
+        <note>Class = "UILabel"; text = "0 BTC"; ObjectID = "hgI-KS-EvS";</note>
+      </trans-unit>
+      <trans-unit id="iWh-Z8-30e.text">
+        <source>Enable press the button on the card to complete transactions</source>
+        <target>啟動按卡片按鈕來完成交易</target>
+        <note>Class = "UILabel"; text = "Enable press the button on the card to complete transactions"; ObjectID = "iWh-Z8-30e";</note>
+      </trans-unit>
+      <trans-unit id="kbt-Io-41O.normalTitle">
+        <source>3</source>
+        <target>3</target>
+        <note>Class = "UIButton"; normalTitle = "3"; ObjectID = "kbt-Io-41O";</note>
+      </trans-unit>
+      <trans-unit id="l0N-XD-EOX.text">
+        <source>Address</source>
+        <target>地址</target>
+        <note>Class = "UILabel"; text = "Address"; ObjectID = "l0N-XD-EOX";</note>
+      </trans-unit>
+      <trans-unit id="mgT-NM-nrh.text">
+        <source>Recovering...</source>
+        <target>還原中...</target>
+        <note>Class = "UILabel"; text = "Recovering..."; ObjectID = "mgT-NM-nrh";</note>
+      </trans-unit>
+      <trans-unit id="nMO-EQ-xM2.text">
+        <source>Confirmation</source>
+        <target>Confirmation</target>
+        <note>Class = "UILabel"; text = "Confirmation"; ObjectID = "nMO-EQ-xM2";</note>
+      </trans-unit>
+      <trans-unit id="ndD-qJ-a0n.title">
+        <source>Sidebar</source>
+        <target>Sidebar</target>
+        <note>Class = "UIViewController"; title = "Sidebar"; ObjectID = "ndD-qJ-a0n";</note>
+      </trans-unit>
+      <trans-unit id="oWR-Vk-qz2.normalTitle">
+        <source>Create Wallet</source>
+        <target>建立錢包</target>
+        <note>Class = "UIButton"; normalTitle = "Create Wallet"; ObjectID = "oWR-Vk-qz2";</note>
+      </trans-unit>
+      <trans-unit id="oyf-Ea-VPP.title">
+        <source> </source>
+        <target> </target>
+        <note>Class = "UIBarButtonItem"; title = " "; ObjectID = "oyf-Ea-VPP";</note>
+      </trans-unit>
+      <trans-unit id="qBP-KB-HQH.text">
+        <source>amount</source>
+        <target>amount</target>
+        <note>Class = "UILabel"; text = "amount"; ObjectID = "qBP-KB-HQH";</note>
+      </trans-unit>
+      <trans-unit id="qTV-w1-CwN.text">
+        <source>1. monitor
+2. cannon
+3. area
+4. now
+5. body
+6. miner</source>
+        <target>1. monitor
+2. cannon
+3. area
+4. now
+5. body
+6. miner</target>
+        <note>Class = "UILabel"; text = "1. monitor\n2. cannon\n3. area\n4. now\n5. body\n6. miner"; ObjectID = "qTV-w1-CwN";</note>
+      </trans-unit>
+      <trans-unit id="qdb-2T-K9H.text">
+        <source>Choose your seed type</source>
+        <target>選擇你的Seed類型</target>
+        <note>Class = "UILabel"; text = "Choose your seed type"; ObjectID = "qdb-2T-K9H";</note>
+      </trans-unit>
+      <trans-unit id="rK0-27-QOJ.text">
+        <source>Notes</source>
+        <target>Notes</target>
+        <note>Class = "UILabel"; text = "Notes"; ObjectID = "rK0-27-QOJ";</note>
+      </trans-unit>
+      <trans-unit id="rQV-8n-e3O.text">
+        <source>Tap to confirm, Swip to delete</source>
+        <target>Tap to confirm, Swip to delete</target>
+        <note>Class = "UILabel"; text = "Tap to confirm, Swip to delete"; ObjectID = "rQV-8n-e3O";</note>
+      </trans-unit>
+      <trans-unit id="rhh-em-eqz.text">
+        <source>The watchdog feature will be disabled once disconnected.</source>
+        <target>The watchdog feature will be disabled once disconnected.</target>
+        <note>Class = "UILabel"; text = "The watchdog feature will be disabled once disconnected."; ObjectID = "rhh-em-eqz";</note>
+      </trans-unit>
+      <trans-unit id="slz-v5-3qg.text">
+        <source>Please enter your seed (with spaces)</source>
+        <target>請輸入你的seed(以一個空白隔開)</target>
+        <note>Class = "UILabel"; text = "Please enter your seed (with spaces)"; ObjectID = "slz-v5-3qg";</note>
+      </trans-unit>
+      <trans-unit id="sog-Um-ZvQ.normalTitle">
+        <source>Copy</source>
+        <target>複製</target>
+        <note>Class = "UIButton"; normalTitle = "Copy"; ObjectID = "sog-Um-ZvQ";</note>
+      </trans-unit>
+      <trans-unit id="tPp-CX-xZ1.title">
+        <source>Exchange Rate</source>
+        <target>Exchange Rate</target>
+        <note>Class = "UINavigationItem"; title = "Exchange Rate"; ObjectID = "tPp-CX-xZ1";</note>
+      </trans-unit>
+      <trans-unit id="tSq-IB-eDw.placeholder">
+        <source>max 8 charaters</source>
+        <target>最多8個字</target>
+        <note>Class = "UITextField"; placeholder = "max 8 charaters"; ObjectID = "tSq-IB-eDw";</note>
+      </trans-unit>
+      <trans-unit id="tYK-aR-pge.text">
+        <source>Sets</source>
+        <target>組</target>
+        <note>Class = "UILabel"; text = "Sets"; ObjectID = "tYK-aR-pge";</note>
+      </trans-unit>
+      <trans-unit id="uB1-8f-pgG.text">
+        <source>Label</source>
+        <target>Label</target>
+        <note>Class = "UILabel"; text = "Label"; ObjectID = "uB1-8f-pgG";</note>
+      </trans-unit>
+      <trans-unit id="uPl-B4-yPs.normalTitle">
+        <source>SEND</source>
+        <target>SEND</target>
+        <note>Class = "UIButton"; normalTitle = "SEND"; ObjectID = "uPl-B4-yPs";</note>
+      </trans-unit>
+      <trans-unit id="uX1-oV-zJy.title">
+        <source>Tansaction Details</source>
+        <target>Tansaction Details</target>
+        <note>Class = "UINavigationItem"; title = "Tansaction Details"; ObjectID = "uX1-oV-zJy";</note>
+      </trans-unit>
+      <trans-unit id="v2u-nV-IyZ.text">
+        <source>Do you want to disconnect the CoolWallet?</source>
+        <target>Do you want to disconnect the CoolWallet?</target>
+        <note>Class = "UILabel"; text = "Do you want to disconnect the CoolWallet?"; ObjectID = "v2u-nV-IyZ";</note>
+      </trans-unit>
+      <trans-unit id="vae-9f-wJt.normalTitle">
+        <source>5</source>
+        <target>5</target>
+        <note>Class = "UIButton"; normalTitle = "5"; ObjectID = "vae-9f-wJt";</note>
+      </trans-unit>
+      <trans-unit id="viF-Fh-Vyh.title">
+        <source>Create Wallet</source>
+        <target>Create Wallet</target>
+        <note>Class = "UINavigationItem"; title = "Create Wallet"; ObjectID = "viF-Fh-Vyh";</note>
+      </trans-unit>
+      <trans-unit id="w1O-rD-oaY.text">
+        <source>CoolWallet card</source>
+        <target>CoolWallet card</target>
+        <note>Class = "UILabel"; text = "CoolWallet card"; ObjectID = "w1O-rD-oaY";</note>
+      </trans-unit>
+      <trans-unit id="wwP-t0-c2q.normalTitle">
+        <source>View at Blockchain.info</source>
+        <target>View at Blockchain.info</target>
+        <note>Class = "UIButton"; normalTitle = "View at Blockchain.info"; ObjectID = "wwP-t0-c2q";</note>
+      </trans-unit>
+      <trans-unit id="xcj-fs-2c3.normalTitle">
+        <source>1</source>
+        <target>1</target>
+        <note>Class = "UIButton"; normalTitle = "1"; ObjectID = "xcj-fs-2c3";</note>
+      </trans-unit>
+      <trans-unit id="xg6-A9-eBW.text">
+        <source>0.0001 BTC</source>
+        <target>0.0001 BTC</target>
+        <note>Class = "UILabel"; text = "0.0001 BTC"; ObjectID = "xg6-A9-eBW";</note>
+      </trans-unit>
+      <trans-unit id="xnn-kA-tJW.text">
+        <source>Date</source>
+        <target>Date</target>
+        <note>Class = "UILabel"; text = "Date"; ObjectID = "xnn-kA-tJW";</note>
+      </trans-unit>
+      <trans-unit id="y0P-8l-ALw.text">
+        <source>µBTC (bits)</source>
+        <target>µBTC (bits)</target>
+        <note>Class = "UILabel"; text = "µBTC (bits)"; ObjectID = "y0P-8l-ALw";</note>
+      </trans-unit>
+      <trans-unit id="yYF-Zh-Wzi.text">
+        <source>Receive from</source>
+        <target>Receive from</target>
+        <note>Class = "UILabel"; text = "Receive from"; ObjectID = "yYF-Zh-Wzi";</note>
+      </trans-unit>
+      <trans-unit id="ypF-hM-jrp.text">
+        <source>BTC</source>
+        <target>BTC</target>
+        <note>Class = "UILabel"; text = "BTC"; ObjectID = "ypF-hM-jrp";</note>
+      </trans-unit>
+    </body>
+  </file>
+  <file original="CoolWallet/Base.lproj/LaunchScreen.xib" source-language="en" datatype="plaintext" target-language="zh-Hant">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="7.1" build-num="7B91b"/>
+    </header>
+    <body>
+      <trans-unit id="kId-c2-rCX.text">
+        <source>CoolWallet</source>
+        <target>CoolWallet</target>
+        <note>Class = "UILabel"; text = "CoolWallet"; ObjectID = "kId-c2-rCX";</note>
+      </trans-unit>
+    </body>
+  </file>
+  <file original="CoolWallet/Base.lproj/Main.storyboard" source-language="en" datatype="plaintext" target-language="zh-Hant">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="7.1" build-num="7B91b"/>
+    </header>
+    <body>
+      <trans-unit id="2hu-u0-ycd.normalTitle">
+        <source>Refresh Info</source>
+        <target>更新資訊</target>
+        <note>Class = "UIButton"; normalTitle = "Refresh Info"; ObjectID = "2hu-u0-ycd";</note>
+      </trans-unit>
+      <trans-unit id="5Ch-VO-Zf2.normalTitle">
+        <source>Cancel</source>
+        <target>取消</target>
+        <note>Class = "UIButton"; normalTitle = "Cancel"; ObjectID = "5Ch-VO-Zf2";</note>
+      </trans-unit>
+      <trans-unit id="13M-Nu-HjR.text">
+        <source>Searching for CoolWallet...</source>
+        <target>搜尋CoolWallet...</target>
+        <note>Class = "UILabel"; text = "Searching for CoolWallet..."; ObjectID = "13M-Nu-HjR";</note>
+      </trans-unit>
+      <trans-unit id="57x-PC-Jsi.text">
+        <source>Are you sure you want to reset your CoolWallet?</source>
+        <target>確定重設CoolWallet?</target>
+        <note>Class = "UILabel"; text = "Are you sure you want to reset your CoolWallet?"; ObjectID = "57x-PC-Jsi";</note>
+      </trans-unit>
+      <trans-unit id="739-UZ-l9o.text">
+        <source>Title</source>
+        <target>Title</target>
+        <note>Class = "UILabel"; text = "Title"; ObjectID = "739-UZ-l9o";</note>
+      </trans-unit>
+      <trans-unit id="Kee-WI-Roa.text">
+        <source>Pairing successful</source>
+        <target>配對成功</target>
+        <note>Class = "UILabel"; text = "Pairing successful"; ObjectID = "Kee-WI-Roa";</note>
+      </trans-unit>
+      <trans-unit id="KrB-kR-cgF.text">
+        <source>Subtitle</source>
+        <target>Subtitle</target>
+        <note>Class = "UILabel"; text = "Subtitle"; ObjectID = "KrB-kR-cgF";</note>
+      </trans-unit>
+      <trans-unit id="MnQ-Ih-EVv.text">
+        <source>Please turn on CoolWallet by
+pressing the button on card.</source>
+        <target>請按下卡片上的電源鍵兩秒開啟CoolWallet</target>
+        <note>Class = "UILabel"; text = "Please turn on CoolWallet by\npressing the button on card."; ObjectID = "MnQ-Ih-EVv";</note>
+      </trans-unit>
+      <trans-unit id="RPX-jL-xJd.text">
+        <source>CoolWallet allows you to pair up to 3 devices, This device will be able to authenticate the second device.</source>
+        <target>一張CoolWallet可以配對三支裝置，第一個配對的裝置可以授權其它裝置使用</target>
+        <note>Class = "UILabel"; text = "CoolWallet allows you to pair up to 3 devices, This device will be able to authenticate the second device."; ObjectID = "RPX-jL-xJd";</note>
+      </trans-unit>
+      <trans-unit id="UEP-ij-kBO.normalTitle">
+        <source>Reset</source>
+        <target>重設</target>
+        <note>Class = "UIButton"; normalTitle = "Reset"; ObjectID = "UEP-ij-kBO";</note>
+      </trans-unit>
+      <trans-unit id="a2q-6z-gQt.text">
+        <source>OTP incorrect, please ty again</source>
+        <target>OTP驗證失敗，請重新輸入</target>
+        <note>Class = "UILabel"; text = "OTP incorrect, please ty again"; ObjectID = "a2q-6z-gQt";</note>
+      </trans-unit>
+      <trans-unit id="aOw-RQ-zY4.title">
+        <source>CW List</source>
+        <target>CW List</target>
+        <note>Class = "UINavigationItem"; title = "CW List"; ObjectID = "aOw-RQ-zY4";</note>
+      </trans-unit>
+      <trans-unit id="hCk-TX-6dV.normalTitle">
+        <source>Pair with this device</source>
+        <target>與此裝置配對</target>
+        <note>Class = "UIButton"; normalTitle = "Pair with this device"; ObjectID = "hCk-TX-6dV";</note>
+      </trans-unit>
+      <trans-unit id="jau-8x-Rn4.normalTitle">
+        <source>Next</source>
+        <target>下一步</target>
+        <note>Class = "UIButton"; normalTitle = "Next"; ObjectID = "jau-8x-Rn4";</note>
+      </trans-unit>
+      <trans-unit id="mHu-2X-7D0.text">
+        <source>Confirm One Time Password (OTP)</source>
+        <target>一次性密碼(OTP)</target>
+        <note>Class = "UILabel"; text = "Confirm One Time Password (OTP)"; ObjectID = "mHu-2X-7D0";</note>
+      </trans-unit>
+      <trans-unit id="q62-az-DPT.title">
+        <source>Erase CW</source>
+        <target>重設CoolWallet</target>
+        <note>Class = "UINavigationItem"; title = "Erase CW"; ObjectID = "q62-az-DPT";</note>
+      </trans-unit>
+      <trans-unit id="qjh-VR-2Yk.normalTitle">
+        <source>Cancel</source>
+        <target>取消</target>
+        <note>Class = "UIButton"; normalTitle = "Cancel"; ObjectID = "qjh-VR-2Yk";</note>
+      </trans-unit>
+      <trans-unit id="wTt-Cg-MOB.text">
+        <source>Type in OTP shown on card</source>
+        <target>請輸入卡片上顯示的OTP</target>
+        <note>Class = "UILabel"; text = "Type in OTP shown on card"; ObjectID = "wTt-Cg-MOB";</note>
+      </trans-unit>
+    </body>
+  </file>
+  <file original="CoolWallet/Info.plist" source-language="en" datatype="plaintext" target-language="zh-Hant">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="7.1" build-num="7B91b"/>
+    </header>
+    <body>
+      <trans-unit id="CFBundleName">
+        <source>$(PRODUCT_NAME)</source>
+      </trans-unit>
+      <trans-unit id="CFBundleShortVersionString">
+        <source>1.0.3</source>
+      </trans-unit>
+    </body>
+  </file>
+  <file original="CoolWallet/Localizable.strings" source-language="en" datatype="plaintext" target-language="zh-Hant">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="7.1" build-num="7B91b"/>
+    </header>
+    <body>
+      <trans-unit id="%@ is not allowed to access the camera">
+        <source>%@ is not allowed to access the camera</source>
+        <note>No comment provided by engineer.</note>
+      </trans-unit>
+      <trans-unit id="DENIED">
+        <source>DENIED</source>
+        <note>No comment provided by engineer.</note>
+      </trans-unit>
+      <trans-unit id="Front View">
+        <source>Front View</source>
+        <note>No comment provided by engineer.</note>
+      </trans-unit>
+      <trans-unit id="GRANTED">
+        <source>GRANTED</source>
+        <note>No comment provided by engineer.</note>
+      </trans-unit>
+      <trans-unit id="UNKNOWN">
+        <source>UNKNOWN</source>
+        <note>No comment provided by engineer.</note>
+      </trans-unit>
+      <trans-unit id="ok">
+        <source>ok</source>
+        <note>No comment provided by engineer.</note>
+      </trans-unit>
+    </body>
+  </file>
+  <file original="CoolWalletTests/Info.plist" source-language="en" datatype="plaintext" target-language="zh-Hant">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="7.1" build-num="7B91b"/>
+    </header>
+    <body>
+      <trans-unit id="CFBundleName">
+        <source>$(PRODUCT_NAME)</source>
+      </trans-unit>
+      <trans-unit id="CFBundleShortVersionString">
+        <source>1.0</source>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

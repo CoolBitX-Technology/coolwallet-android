@@ -1,0 +1,202 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black"
+    android:orientation="vertical">
+
+    <include layout="@layout/toolbar_main" />
+
+    <TableLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+
+        <TableRow>
+            <TextView
+                android:id="@+id/tvTitle"
+                style="@style/TextView_White_Bold_18"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="20dp"
+                android:text="Send to" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10sp"
+            android:background="@color/md_grey_800">
+
+            <TextView
+                android:id="@+id/tvAddress"
+                style="@style/TextView_White_Bold_18"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="3dp"
+                android:hint="address"
+                android:singleLine="true"
+                />
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                style="@style/TextView_White_Bold_18"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="10dp"
+                android:text="Amount" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10sp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="6"
+                android:background="@color/md_grey_800"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tvBtc"
+                    style="@style/TextView_White_Bold_18"
+                    android:layout_width="200dp"
+                    android:layout_height="30dp"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginTop="3dp"
+                    android:hint="0"
+
+                    />
+
+                <View
+                    android:layout_width="5dp"
+                    android:layout_height="fill_parent"
+                    android:background="@color/col_black" />
+
+                <TextView
+                    android:id="@+id/tvUsd"
+                    style="@style/TextView_White_Bold_18"
+                    android:layout_width="wrap_content"
+                    android:layout_height="30dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginTop="3dp"
+                    android:hint="0" />
+            </LinearLayout>
+        </TableRow>
+
+
+        <TableRow>
+
+            <TextView
+                style="@style/TextView_White_Bold_18"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="10dp"
+                android:text="Date" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginTop="10sp"
+            android:background="@color/md_grey_800">
+
+            <TextView
+                android:id="@+id/tvDate"
+                style="@style/TextView_White_Bold_18"
+                android:layout_width="fill_parent"
+                android:layout_height="30dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="3dp"
+                android:hint="1970/"
+
+                />
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                style="@style/TextView_White_Bold_18"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="10dp"
+                android:text="Confirmations" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginTop="10sp"
+            android:background="@color/md_grey_800">
+
+            <TextView
+                android:id="@+id/tvConfirmation"
+                style="@style/TextView_White_Bold_18"
+                android:layout_width="fill_parent"
+                android:layout_height="30dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="3dp"
+                android:hint="100" />
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                style="@style/TextView_White_Bold_18"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="10dp"
+                android:text="Transation ID" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginTop="10sp"
+            android:background="@color/md_grey_800">
+
+            <TextView
+                android:id="@+id/tvTransantionID"
+                style="@style/TextView_White_Bold_18"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="3dp"
+                android:lines="2"
+                android:singleLine="false"
+                android:ellipsize="end"
+                android:hint="2d66bba9a9c9f4413e750a7eb3b46c58d32568e98296dfba9d61a75150e85c67...." />
+        </TableRow>
+    </TableLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="fill_parent"
+        android:gravity="center_horizontal"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btn_view_blockchain"
+            style="@style/TextView_Black_16"
+            android:layout_width="250dp"
+            android:layout_height="40dp"
+            android:layout_gravity="bottom"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/selector_button"
+            android:text="@string/btn_str_view_blockchain" />
+    </LinearLayout>
+
+</LinearLayout>

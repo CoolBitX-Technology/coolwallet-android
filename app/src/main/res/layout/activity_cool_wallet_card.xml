@@ -1,0 +1,81 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black"
+    android:orientation="vertical">
+
+    <include layout="@layout/toolbar" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="20dp"
+        android:text="Card Name"
+        android:textColor="@color/bottomtab_normal"
+        android:textSize="20dp" />
+
+    <EditText
+        android:id="@+id/edt_card_name"
+        style="@style/TextView_Black_16"
+        android:layout_width="350dp"
+        android:layout_height="30dp"
+        android:layout_below="@+id/txtsearch"
+        android:layout_centerHorizontal="true"
+        android:layout_gravity="center"
+        android:maxLength="8"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/edit_format"
+        android:imeOptions="actionDone"/>
+
+    <!--border lines for rows-->
+    <View
+        android:layout_width="wrap_content"
+        android:layout_height="0.5dip"
+        android:layout_marginTop="15dp"
+        android:background="@color/dark_gray" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/black"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="10dp"
+            android:text="@string/tv_str_show_fiat"
+            android:textColor="@color/bottomtab_normal"
+            android:textSize="20dp" />
+
+        <Switch
+            android:id="@+id/switch_currency"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_marginLeft="100dp"
+            android:layout_marginTop="10dp"
+            android:text="" />
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="wrap_content"
+        android:layout_height="0.5dip"
+        android:layout_marginTop="10sp"
+        android:background="@color/dark_gray" />
+
+    <Button
+        android:id="@+id/btn_card_update"
+        style="@style/TextView_Black_16"
+        android:layout_width="350dp"
+        android:layout_height="40dp"
+        android:layout_alignParentBottom="true"
+        android:layout_gravity="center"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/selector_button"
+        android:text="@string/btn_setting_str_update" />
+
+</LinearLayout>

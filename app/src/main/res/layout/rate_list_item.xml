@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="5dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:weightSum="10">
+
+<android.widget.Space
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_weight="1" />
+
+        <TextView
+            android:id="@+id/rate_list_item"
+            style="@style/TextView_White_18"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="7" />
+
+        <TextView
+            android:id="@+id/host_list_item_chk"
+            style="@style/TextView_Orange_18"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2" />
+
+
+    </LinearLayout>
+
+    <!--<RadioButton-->
+    <!--android:id="@+id/host_list_item_rb"-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:checked="true"-->
+    <!--android:clickable="false" />-->
+
+</LinearLayout>
