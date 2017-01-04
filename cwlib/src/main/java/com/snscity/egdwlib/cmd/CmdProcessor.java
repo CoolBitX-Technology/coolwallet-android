@@ -41,10 +41,8 @@ public class CmdProcessor implements BleGattCallback {
     }
 
     public void addCmd(CmdPacket cmdPacket) {
-        if (cmdPacket != null) {
-            cmdPackets.add(cmdPacket);
-            getCmd();
-        }
+        cmdPackets.add(cmdPacket);
+        getCmd();
     }
 
     public void getCmd() {
@@ -93,7 +91,7 @@ public class CmdProcessor implements BleGattCallback {
     private void excuteCmd() {
         byte[] bytes = currentCmdPacket.getInputCmdPacket();
 //        LogUtil.i("executecmd=" + LogUtil.byte2HexString((bytes)));
-        if (gattCharacteristics.size()>0) {
+        if (gattCharacteristics != null) {
             final BluetoothGattCharacteristic characteristic = gattCharacteristics.get(1);
             characteristic.setValue(bytes);
             if (bluetoothGatt == null) {
@@ -109,14 +107,14 @@ public class CmdProcessor implements BleGattCallback {
     @Override
     public void onWriteToA007(byte[] data) {
 
-        // 0X72 = se_trx_begin ; 0X73 = se_trx_verify_otp
-//        if ((data[3] == 0x72 ||data[3] == 0x73) && isBtnFlag) {
-//            isBeginFlag = true;
-//            isBtnFlag = false;
-//        } else {
-//            isBeginFlag = false;
-//        }
-        LogUtil.e("send commond is:" + LogUtil.byte2HexString(data) );
+
+        if ((data[3] == 0x72 ||data[3] == 0x73)&& isBtnFlag) {
+            isBeginFlag = true;
+            isBtnFlag = false;
+        } else {
+            isBeginFlag = false;
+        }
+        LogUtil.e("send commond is:" + LogUtil.byte2HexString(data) + " ; isBtnFlag=" + isBtnFlag + " ; isBeginFlag=" + isBeginFlag);
 
         if (gattCharacteristics != null) {
             if (data != null && data.length > 0 && data[data.length - 1] != (byte) 0x00) {
@@ -135,7 +133,6 @@ public class CmdProcessor implements BleGattCallback {
         }
     }
 
-    //command data
     @Override
     public void onWriteToA008(byte[] data) {
         LogUtil.e("inputData is:" + LogUtil.byte2HexString(data));
@@ -154,20 +151,16 @@ public class CmdProcessor implements BleGattCallback {
         }
     }
 
-    //waiting sign
     @Override
     public void onReadFromA006(byte[] data) {
-//        LogUtil.e("A006:" + LogUtil.byte2HexString(data));
+        LogUtil.e("A006:" + LogUtil.byte2HexString(data));
         if (gattCharacteristics != null) {
 
-            // for didGetButton , the data will become 0x80 after pressed button
-//            if (isBeginFlag == true) {
-//            LogUtil.i("isBtnFlag=" + isBtnFlag);
-            if (isBtnFlag) {
+            // for didGetButton
+            if (isBeginFlag == true) {
 //                LogUtil.i("isBtnFlag=true && data=" + LogUtil.byte2HexString(data));
                 if (data[data.length - 1] == (byte) 0x80) {
                     //button pressed
-                    isBtnFlag = false;
                     if (isReady) {
                         isBusy = false;
                         if (!outputDatas.isEmpty()) {
@@ -238,40 +231,16 @@ public class CmdProcessor implements BleGattCallback {
         }
     }
 
-    public void readButton() {
-        new Thread() {
-            @Override
-            public void run() {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } finally {
-                    final BluetoothGattCharacteristic characteristic = gattCharacteristics.get(0);
-                    bluetoothGatt.readCharacteristic(characteristic);
-                }
-            }
-        }.start();
-    }
-
-    boolean isWaitA009;
 
     public void setButtonA006(boolean flag) {
         isBtnFlag = flag;
-        isWaitA009 = flag;
-    }
-
-    public String ReadWaitResponse() {
-        return WaitResponse;
     }
 
     private List<byte[]> outputDatas = new ArrayList<>();
-    String WaitResponse;
 
     @Override
     public void onReadFromA009(byte[] data) {
-        LogUtil.e("card response is:" + LogUtil.byte2HexString(data) );//+ " ; isBtnFlag=" + isBtnFlag + " ; isBeginFlag=" + isBeginFlag
-
+        LogUtil.e("card response is:" + LogUtil.byte2HexString(data));
         if (gattCharacteristics != null) {
             if (data.length == 1 && data[0] == (byte) 0xFC) {
                 //读取完毕，最后遇到0xfc标识
@@ -303,12 +272,6 @@ public class CmdProcessor implements BleGattCallback {
 //                LogUtil.e("准备请求uuid：" + characteristic.getUuid());
                 bluetoothGatt.readCharacteristic(characteristic);
             } else {
-                //for taptap function
-                if (isWaitA009) {
-                    WaitResponse = LogUtil.byte2DecString(data);
-                    LogUtil.i("WaitResponse=" + WaitResponse);
-                    isWaitA009 = false;
-                }
                 //继续读取其他数据
                 outputDatas.add(data);
                 final BluetoothGattCharacteristic characteristic = gattCharacteristics.get(3);

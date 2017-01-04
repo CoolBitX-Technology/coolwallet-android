@@ -14,15 +14,18 @@ import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.PopupWindow;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.coolbitx.coolwallet.DataBase.DatabaseHelper;
 import com.coolbitx.coolwallet.R;
@@ -35,10 +38,10 @@ import com.coolbitx.coolwallet.general.BtcUrl;
 import com.coolbitx.coolwallet.general.DbName;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.coolbitx.coolwallet.general.RefreshBlockChainInfo;
+import com.coolbitx.coolwallet.httpRequest.CwBtcNetWork;
 import com.coolbitx.coolwallet.ui.Fragment.FragMainActivity;
 import com.coolbitx.coolwallet.util.BIP39;
 import com.coolbitx.coolwallet.util.BTCUtils;
-import com.coolbitx.coolwallet.util.CwBtcNetWork;
 import com.coolbitx.coolwallet.util.ExtendedKey;
 import com.snscity.egdwlib.CmdManager;
 import com.snscity.egdwlib.cmd.CmdResultCallback;
@@ -46,6 +49,7 @@ import com.snscity.egdwlib.utils.ByteUtil;
 import com.snscity.egdwlib.utils.LogUtil;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -66,33 +70,38 @@ public class RecovWalletActivity extends BaseActivity implements View.OnClickLis
     private CmdManager cmdManager;
     private ArrayAdapter<String> listSeed;
     private Context mContext;
-//    private ProgressDialog mProgress;
-    private ProgressDialog mHorizontalDialog = null;
+    private ProgressDialog mProgress;
     private boolean isSumChk;
     private List<Account> cwAccountList;
     CwBtcNetWork cwBtcNetWork;
     int accountCNT = 5;
     int addrAuccess;
     //    for secpo
-    public  boolean[] settingOptions = new boolean[4];
+    public static boolean[] settingOptions = new boolean[4];
     private byte CwSecurityPolicyMaskOtp = 0x01;
     private byte CwSecurityPolicyMaskBtn = 0x02;
     private byte CwSecurityPolicyMaskWatchDog = 0x10;
     private byte CwSecurityPolicyMaskAddress = 0x20;
+    private ProgressDialog mHorizontalDialog = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recov_wallet_ii);
         initViews();
-//        edtHdWord.setText("517654 314479 247980 117694 500184 583422 257105 431064");
-//        edtHdWord.setText("increase correct orient solve glow riot offer fish exile during lava clock");
+//
+//        seedSpinner.setSelection(1, true);
+//        edtHdWord.addTextChangedListener(null);
 
         initToolbar();
         mContext = this;
         cmdManager = new CmdManager();
+        mProgress = new ProgressDialog(RecovWalletActivity.this);
+        mProgress.setCancelable(false);
+        mProgress.setIndeterminate(true);
         cwBtcNetWork = new CwBtcNetWork();
 
+        PublicPun.showNoticeDialog(mContext, "Reminder", "Please put the CoolWallet on CoolLink while recovery.");
         GetSecpo();
     }
 
@@ -129,6 +138,8 @@ public class RecovWalletActivity extends BaseActivity implements View.OnClickLis
                         LogUtil.i("get安全設置:otp=" + settingOptions[0] + ";button_up=" + settingOptions[1] +
                                 ";address" + settingOptions[2] + ";dog=" + settingOptions[3]);
                     }
+
+                    SetSecpo(true);
                 }
             }
         });
@@ -155,8 +166,12 @@ public class RecovWalletActivity extends BaseActivity implements View.OnClickLis
         });
     }
 
+    Pattern p;
+    Matcher m;
+
     @Override
     public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
 
     }
 
@@ -166,8 +181,6 @@ public class RecovWalletActivity extends BaseActivity implements View.OnClickLis
 
     int preSpacePos;
     int lastPos;
-    Pattern p;
-    Matcher m;
 
     //-----------------------------------CHECK hdwSumStr begin----------------------------------//
     @Override
@@ -178,15 +191,18 @@ public class RecovWalletActivity extends BaseActivity implements View.OnClickLis
             p = Pattern.compile("[0-9\\s]*");
             m = p.matcher(mInput);
             if (!m.matches()) {
-                PublicPun.ClickFunction(mContext, "Seed Invalid", "You've chosen to recover with 'numbers'. If your seed is in words please switch to recover with words.!");
+                PublicPun.showNoticeDialog(mContext, getString(R.string.notice_recovery_invalid), getString(R.string.notice_recovery_invalid_numbers));
                 edtHdWord.setText(s.toString().substring(0, s.length() - 1));
                 edtHdWord.setSelection(edtHdWord.getText().toString().length());
             }
+
         } else {
             p = Pattern.compile("[a-zA-Z\\s]*");
             m = p.matcher(mInput);
             if (!m.matches()) {
-                PublicPun.ClickFunction(mContext, "Seed Invalid", "You've chosen to recover with 'word'. If your seed is in numbers please switch to recover with words.!");
+                PublicPun.showNoticeDialog(mContext, getString(R.string.notice_recovery_invalid), getString(R.string.notice_recovery_invalid_word));
+                edtHdWord.setText(s.toString().substring(0, s.length() - 1));
+                edtHdWord.setSelection(edtHdWord.getText().toString().length());
             }
         }
         if (s.length() > 1) {
@@ -199,17 +215,19 @@ public class RecovWalletActivity extends BaseActivity implements View.OnClickLis
                 chkStr = mInput.substring(preSpacePos, lastPos);
                 boolean isSeedCorrect = false;
                 if (isSeedOn) {
+                    //NUMBER
                     if (lastPos >= 6) {
 //                        chkStr = mInput.substring(lastPos - 6, lastPos);
                         if ((lastPos - preSpacePos) != 6) {
-                            PublicPun.ClickFunction(mContext, "Seed Invalid", "The numbers of characters are not correct!");
+                            PublicPun.showNoticeDialog(mContext, "Seed Invalid", "The numbers of characters are not correct!");
                         } else {
                             isSeedCorrect = ChkSumByNumbers(chkStr);
                         }
                     } else {
-                        PublicPun.ClickFunction(mContext, "Seed Invalid", "The numbers of characters are not correct!");
+                        PublicPun.showNoticeDialog(mContext, "Seed Invalid", "The numbers of characters are not correct!");
                     }
                 } else {
+                    //WORD
                     isSeedCorrect = BIP39.chkSeedWords(chkStr);
                 }
                 LogUtil.e("ChkSum:" + (isSeedOn ? "numbers" : "words") + "=" + isSeedCorrect);
@@ -217,7 +235,7 @@ public class RecovWalletActivity extends BaseActivity implements View.OnClickLis
                 if (isSeedCorrect) {
 
                 } else {
-                    PublicPun.ClickFunction(mContext, "Seed Invalid", "'" + chkStr + "' is an invalid seed.");
+                    PublicPun.showNoticeDialog(mContext, "Seed Invalid", "'" + chkStr + "' is an invalid seed.");
                 }
             }
         }
@@ -246,19 +264,55 @@ public class RecovWalletActivity extends BaseActivity implements View.OnClickLis
     @Override
     public void onClick(View view) {
         if (view == btnCreateWallet) {
-            DatabaseHelper.deleteTable(mContext, DbName.DATA_BASE_TXS);
-            DatabaseHelper.deleteTable(mContext, DbName.DATA_BASE_ADDR);
-            DatabaseHelper.deleteTable(mContext, DbName.DATA_BASE_CURRENT);
-            SetSecpo(true);
-            InitWallet();
+
+            if (checkSeedLength()) {
+                DatabaseHelper.deleteTable(mContext, DbName.DATA_BASE_TXS);
+                DatabaseHelper.deleteTable(mContext, DbName.DATA_BASE_ADDR);
+                DatabaseHelper.deleteTable(mContext, DbName.DATA_BASE_CURRENT);
+                SetSecpo(true);
+                InitWallet();
+            }
         }
     }
 
+    private boolean checkSeedLength() {
+        boolean result;
+        List<String> allMatches = Arrays.asList(edtHdWord.getText().toString().trim().split(" "));
+        LogUtil.d("allMatches長度=" + allMatches.size());
+        if (isSeedOn) {
+            if (allMatches.size() == 8 || allMatches.size() == 12 || allMatches.size() == 16) {
+                result = true;
+            } else {
+                PublicPun.showNoticeDialog(mContext, getString(R.string.notice_recovery_invalid), getString(R.string.notice_recovery_invalid_numbers_length));
+                result = false;
+            }
+        } else {
+            if (allMatches.size() == 12 || allMatches.size() == 18 || allMatches.size() == 24) {
+                result = true;
+            } else {
+                PublicPun.showNoticeDialog(mContext, getString(R.string.notice_recovery_invalid), getString(R.string.notice_recovery_invalid_word_length));
+                result = false;
+            }
+        }
+        return result;
+    }
+
     PopupWindow pop;
+    String hdwSeed;
 
     private void InitWallet() {
         final String name = "";
-        final String hdwSeed = edtHdWord.getText().toString().trim();
+        final String strhdwSeed = edtHdWord.getText().toString().trim();
+        /**
+         * 判斷是否為舊用戶(which create wallet replace " "->""; but recovery not)
+         */
+        if (BIP39.isSimpleEntropy(strhdwSeed)) {
+            hdwSeed = strhdwSeed.replace(" ", "");
+            LogUtil.e("是舊用戶=" + hdwSeed);
+        } else {
+            hdwSeed = strhdwSeed;
+            LogUtil.e("是新用戶=" + strhdwSeed);
+        }
 
         LayoutInflater lf = LayoutInflater.from(mContext);
         View layout = lf.inflate(R.layout.pupwindow_bg, null);
@@ -266,24 +320,14 @@ public class RecovWalletActivity extends BaseActivity implements View.OnClickLis
                 WindowManager.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.MATCH_PARENT,
                 true);
-        pop.setBackgroundDrawable(new ColorDrawable(0xffffff));//支持点击Back虚拟键退出
+        pop.setBackgroundDrawable(new ColorDrawable(0xffffff));//支持點擊back虛擬鍵退出
         pop.showAtLocation(findViewById(R.id.tl_create), Gravity.NO_GRAVITY, 0, 0);
-
         showHorizontalDialog();
-
-        Thread thread = new Thread() {
+        new Thread() {
             @Override
             public void run() {
                 super.run();
-                /* Show the progress. */
-//                runOnUiThread(new Runnable() {
-//
-//                    @Override
-//                    public void run() {
-//                        mProgress.setMessage("Recovering  Wallet...");
-//                        mProgress.show();
-//                    }
-//                });
+
                 //PublicPun.user.getEncKey(), PublicPun.user.getMacKey()這兩個bleActivity已抓
                 // 1. Create wallet
                 cmdManager.hdwInitWallet(name, hdwSeed, PublicPun.user.getEncKey(), PublicPun.user.getMacKey(), new CmdResultCallback() {
@@ -298,6 +342,9 @@ public class RecovWalletActivity extends BaseActivity implements View.OnClickLis
                                     if ((status + 65536) == 0x9000) {
                                         LogUtil.i("hdwQryWaInfot account  HEX=" + LogUtil.byte2HexString(outputData));
 
+//                                        Intent intent = new Intent(getApplicationContext(), FragMainActivity.class);
+//                                        startActivity(intent);
+                                        //
                                         byte[] hdwAccountPointer = outputData;
                                         LogUtil.e("Recovery account數=" + LogUtil.byte2HexString(outputData));
                                         if (hdwAccountPointer != null && hdwAccountPointer.length == 4) {
@@ -310,27 +357,22 @@ public class RecovWalletActivity extends BaseActivity implements View.OnClickLis
                                             for (int i = accountId; i < accountCNT; i++) {
                                                 CreateNewAccount(i);
                                             }
-//                                            } else {
-//                                                for (int i = accountId; i < 5; i++) {
-//                                                    QueryAccountKeyInfo(i);
-//                                                }
-//                                            }
                                         }
                                     } else {
                                         dialogDismiss();
-                                        PublicPun.ClickFunction(mContext, "Error Message", "Error:" + Integer.toHexString(status));
+                                        PublicPun.showNoticeDialog(mContext, "Error Message", "Error:" + Integer.toHexString(status));
                                     }
                                 }
                             });
                         } else {
+//                            mProgress.dismiss();
                             dialogDismiss();
-                            PublicPun.ClickFunction(mContext, "Error Message", "Error:" + Integer.toHexString(status));
+                            PublicPun.showNoticeDialog(mContext, "Error Message", "Error:" + Integer.toHexString(status));
                         }
                     }
                 });
             }
-        };
-        thread.start();
+        }.start();
     }
 
     private void CreateNewAccount(final int accountId) {
@@ -347,7 +389,6 @@ public class RecovWalletActivity extends BaseActivity implements View.OnClickLis
                         public void onSuccess(int status, byte[] outputData) {
                             if ((status + 65536) == 0x9000) {
                                 LogUtil.i("CwAccount " + accountId + " created!");
-
                                 mHorizontalDialog.incrementProgressBy(2);
                                 //Get public key & chainCode to generate  address
                                 FunQueryAccountKeyInfo(accountId);
@@ -356,7 +397,7 @@ public class RecovWalletActivity extends BaseActivity implements View.OnClickLis
                     });
                 } else {
                     dialogDismiss();
-                    PublicPun.ClickFunction(mContext, "Error Message", "CreateNewAccount Error:" + Integer.toHexString(status));
+                    PublicPun.showNoticeDialog(mContext, "Error Message", "CreateNewAccount Error:" + Integer.toHexString(status));
                 }
             }
         });
@@ -502,8 +543,6 @@ public class RecovWalletActivity extends BaseActivity implements View.OnClickLis
 
                                 new Thread(new MyRunnable(mHandler, cv, 0, 0)).start();
                             }
-                        }else{
-                            // 舊卡或exception情況,改用se_hdw_next_trx_addr(B7)取得地址資訊
                         }
                     }
                 });
@@ -569,6 +608,7 @@ public class RecovWalletActivity extends BaseActivity implements View.OnClickLis
                     msgCnt = 0;
                     msg.what = msgCnt;
                     handler.sendMessage(msg);
+//                    mProgress.dismiss();
                     dialogDismiss();
                 }
 
@@ -632,21 +672,18 @@ public class RecovWalletActivity extends BaseActivity implements View.OnClickLis
 
                                 @Override
                                 public void fail(String msg) {
-                                    PublicPun.ClickFunction(mContext, "Unstable internet connection", msg);
+                                    PublicPun.showNoticeDialog(mContext, "Unstable internet connection", msg);
                                     FunhdwSetAccInfo(mAccount);
                                 }
 
-                                @Override
-                                public void exception(String msg) {
-
-                                }
                             });
                         }
                     }
                     break;
                 case 0:
+//                    mProgress.dismiss();
                     dialogDismiss();
-                    PublicPun.ClickFunction(mContext, "Error Message", result);
+                    PublicPun.showNoticeDialog(mContext, "Erro Message", result);
                     break;
             }
         }
@@ -733,6 +770,7 @@ public class RecovWalletActivity extends BaseActivity implements View.OnClickLis
                         public void onSuccess(int status, byte[] outputData) {
                             if ((status + 65536) == 0x9000) {
                                 flag[setAcctInfoIndex] = true;
+
                                 if (flag[0] && flag[1] && flag[2] && flag[3]) {
                                     mHorizontalDialog.incrementProgressBy(3);
                                     msgSetAccInfoExcute++;
@@ -754,9 +792,9 @@ public class RecovWalletActivity extends BaseActivity implements View.OnClickLis
                                                 }
                                             }
                                     );
+
                                     dialogDismiss();
                                     PublicPun.toast(mContext, "Recovery finish!");
-
                                     Intent intent = new Intent();
                                     intent.setClass(getApplicationContext(), FragMainActivity.class);
                                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);//关掉所要到的界面中间的activity
@@ -767,19 +805,14 @@ public class RecovWalletActivity extends BaseActivity implements View.OnClickLis
                                 }
                             } else {
                                 LogUtil.i("setAccountInfo failed.");
+                                PublicPun.showNoticeDialog(mContext, "Recovery Message", "setAccountInfo failed!");
+//                                mProgress.dismiss();
                                 dialogDismiss();
-                                PublicPun.ClickFunction(mContext, "Recovery failed", "Set Account Information failed("+Integer.toHexString(status)+")");
-
                             }
                         }
                     }
             );
         }
-    }
-
-    private void dialogDismiss(){
-        if (mHorizontalDialog != null) mHorizontalDialog.dismiss();
-        pop.dismiss();
     }
 
     private void initViews() {
@@ -796,6 +829,18 @@ public class RecovWalletActivity extends BaseActivity implements View.OnClickLis
 //        edtHdWord.setOnKeyListener(this);
         edtHdWord.addTextChangedListener(this);
 
+        edtHdWord.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                //按下完成鍵要執行的動作
+                InputMethodManager imm = (InputMethodManager) getSystemService(mContext.INPUT_METHOD_SERVICE);
+                boolean isOpen = imm.isActive();//isOpen若返回true，則表示輸入法打開
+                if (isOpen) {
+                    imm.hideSoftInputFromWindow(edtHdWord.getWindowToken(), 0); //強制隱藏鍵盤
+                }
+                return true;
+            }
+        });
         //當介面再次顯示時，資料清空歸零
         isSeedOn = true;
     }
@@ -819,7 +864,6 @@ public class RecovWalletActivity extends BaseActivity implements View.OnClickLis
         if (parent == seedSpinner) {
             if (position == 0) {
                 //by numbers gen seed
-                //加了InputType設定後會無法自動換行
 //                edtHdWord.setInputType(InputType.TYPE_NUMBER_FLAG_SIGNED);
                 isSeedOn = true;
                 edtHdWord.setText("");
@@ -846,15 +890,14 @@ public class RecovWalletActivity extends BaseActivity implements View.OnClickLis
         mHorizontalDialog.show();
     }
 
-
-    @Override
-    public Intent getSupportParentActivityIntent() {
-        finish();
-        return null;
+    private void dialogDismiss() {
+        if (mHorizontalDialog != null) mHorizontalDialog.dismiss();
+        pop.dismiss();
     }
 
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
+
     }
 
     @Override
@@ -870,7 +913,7 @@ public class RecovWalletActivity extends BaseActivity implements View.OnClickLis
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if( settingOptions[3]) {
+        if (settingOptions[3]) {
             SetSecpo(false);
         }
     }

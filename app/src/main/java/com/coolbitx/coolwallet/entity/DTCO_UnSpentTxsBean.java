@@ -10,11 +10,10 @@ public class DTCO_UnSpentTxsBean {
     private int vout;//outputIndex
     private String ts;
     private String scriptPubKey;//script
+    private int keyId;//地址在卡片里的索引
     private double amount;//value
     private int confirmations;//confirmations
     private boolean confirmationsFromCache;
-
-    private int keyId;//地址在卡片里的索引
 
     public int getKeyId() {
         return keyId;

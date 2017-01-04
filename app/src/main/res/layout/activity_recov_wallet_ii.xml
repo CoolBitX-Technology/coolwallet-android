@@ -8,7 +8,7 @@
 
     <TableLayout
         android:id="@+id/tl_create"
-        android:layout_width="wrap_content"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
@@ -31,16 +31,31 @@
 
         </TableRow>
 
+        <!--<TextView-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_column="0"-->
+        <!--android:layout_marginLeft="20px"-->
+        <!--android:text="@string/tv_generate_seed_highly"-->
+        <!--android:textColor="@color/dark_gray"-->
+        <!--android:textSize="17dp" />-->
         <Spinner
             android:id="@+id/seed_spinner"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp" />
+            android:background="@color/dark_gray"
+            android:textSize="28sp" />
 
         <View
             android:layout_height="0.5dip"
             android:layout_marginTop="20sp"
             android:background="@color/dark_gray" />
+
+        <!--border lines for rows-->
+        <!--<View-->
+        <!--android:layout_height="0.5dip"-->
+        <!--android:layout_marginTop="5sp"-->
+        <!--android:background="@color/dark_gray" />-->
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -57,27 +72,45 @@
                 android:textColor="@color/bottomtab_normal"
                 android:textSize="20dp" />
 
+            <!--<SeekBar-->
+            <!--android:id="@+id/seekBar"-->
+            <!--android:layout_width="160dp"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_gravity="center_horizontal" />-->
+
+            <!--<TextView-->
+            <!--android:id="@+id/hdw_seed_length_tv"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:text="12 "-->
+            <!--android:textColor="@color/bottomtab_normal"-->
+            <!--android:textSize="20dp" />-->
+
+            <!--<TextView-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:text=" Sets"-->
+            <!--android:textColor="@color/bottomtab_normal"-->
+            <!--android:textSize="20dp" />-->
+
         </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center|bottom">
 
-            <EditText
-                android:id="@+id/hdw_word"
-                style="@style/TextView_Black_16"
-                android:layout_width="400dp"
-                android:layout_height="200dp"
-                android:layout_marginTop="10dp"
-                android:background="@android:color/white"
-                android:gravity="top"
-                android:paddingLeft="20dp"
-                android:paddingRight="20dp"
-                android:paddingTop="10dp"
-                android:singleLine="false"
-                android:imeOptions="actionDone"/>
-        </LinearLayout>
+        <EditText
+            android:id="@+id/hdw_word"
+            style="@style/TextView_Black_16"
+            android:layout_width="400dp"
+            android:layout_height="200dp"
+            android:layout_marginTop="10dp"
+            android:background="@android:color/white"
+            android:gravity="top"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:paddingTop="10dp"
+            android:singleLine="false"
+            android:imeOptions="actionDone"/>
+
+
 
         <TableRow
 
@@ -85,6 +118,24 @@
             android:layout_height="match_parent"
             android:layout_marginTop="50dp"
             android:gravity="center">
+
+            <!--<Button-->
+            <!--android:id="@+id/btn_hdw_create1"-->
+            <!--style="@style/TextView_Black_16"-->
+            <!--android:layout_width="200dp"-->
+            <!--android:layout_height="40dp"-->
+            <!--android:background="@mipmap/button_up"-->
+            <!--android:gravity="center"-->
+            <!--android:text="@string/hdw_create" />-->
+
+            <!--<Button-->
+            <!--android:id="@+id/btn_hdw_create2"-->
+            <!--style="@style/TextView_Black_16"-->
+            <!--android:layout_width="200dp"-->
+            <!--android:layout_height="40dp"-->
+            <!--android:background="@mipmap/button_up"-->
+            <!--android:gravity="center"-->
+            <!--android:text="@string/hdw_create" />-->
 
             <Button
                 android:id="@+id/btn_hdw_create"
@@ -96,5 +147,41 @@
                 android:text="@string/hdw_create" />
         </TableRow>
     </TableLayout>
+
+
+    <!--<LinearLayout-->
+    <!--android:id="@+id/hdw_sum_lin"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="fill_parent"-->
+    <!--android:layout_marginTop="10dp"-->
+    <!--android:orientation="vertical"-->
+    <!--android:visibility="gone">-->
+
+    <!--<TextView-->
+    <!--style="@style/TextView_Gray_18"-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:text="@string/str_sum_of_seeds" />-->
+
+    <!--<EditText-->
+    <!--android:id="@+id/hdw_sum_et"-->
+    <!--style="@style/TextView_Black_16"-->
+    <!--android:layout_width="300dp"-->
+    <!--android:layout_height="30dp"-->
+    <!--android:layout_gravity="center"-->
+    <!--android:layout_marginTop="10dp"-->
+    <!--android:background="@drawable/edit_format"-->
+    <!--android:inputType="number" />-->
+
+    <!--<Button-->
+    <!--android:id="@+id/hdw_confirm"-->
+    <!--style="@style/TextView_Black_16"-->
+    <!--android:layout_width="200dp"-->
+    <!--android:layout_height="40dp"-->
+    <!--android:layout_gravity="center"-->
+    <!--android:layout_marginTop="50dp"-->
+    <!--android:background="@mipmap/button_up"-->
+    <!--android:text="@string/btn_create_HDW" />-->
+    <!--</LinearLayout>-->
 
 </LinearLayout>

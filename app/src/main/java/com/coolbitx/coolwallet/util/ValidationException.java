@@ -36,4 +36,8 @@ public class ValidationException  extends Exception{
         super (message);
     }
 
+    public void myException(){
+
+    }
+
 }

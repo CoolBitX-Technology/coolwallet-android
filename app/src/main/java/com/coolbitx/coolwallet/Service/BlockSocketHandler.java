@@ -2,18 +2,26 @@ package com.coolbitx.coolwallet.Service;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.util.Log;
+import android.os.Build;
 
+import com.coolbitx.coolwallet.general.BtcUrl;
+import com.coolbitx.coolwallet.general.PublicPun;
+import com.crashlytics.android.Crashlytics;
 import com.snscity.egdwlib.utils.LogUtil;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.net.InetAddress;
-import java.net.Socket;
+import org.java_websocket.WebSocketImpl;
+import org.java_websocket.drafts.Draft_17;
+
+import java.net.URI;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 /**
  * Created by ShihYi on 2016/3/17.
@@ -23,103 +31,115 @@ public class BlockSocketHandler {
 
     private static final int TIMEOUT = 10000;
     BlockWebSocketClient blockWebSocketClient;
+    private Set<SocketConnector> taskCollection;
     Context mContext;
-    private PrintWriter out = null;
-    private BufferedReader in = null;
+    SSLContext SSLContext;
 
-    public BlockSocketHandler(Context context, String output) {
-        LogUtil.i("websocket SocketHandler_temp in");
+    public BlockSocketHandler(Context context) {
+        LogUtil.i("webSocket BlockSocketHandler in");
         this.mContext = context;
+        try {
+            HashMap<String, String> cmap = new HashMap<String, String>();
+            taskCollection = new HashSet<SocketConnector>();
+            URI uri = new URI(BtcUrl.SOCKET_BLOCK_IO);
+            WebSocketImpl.DEBUG = true;
 
-        SocketConnector socketConnector = new SocketConnector();
-        socketConnector.sendString = output;
-        socketConnector.execute();
+            blockWebSocketClient = new BlockWebSocketClient(mContext, uri, new Draft_17(), cmap, TIMEOUT);
+
+            //This part is needed in case you are going to use self-signed certificates
+            TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {
+                public X509Certificate[] getAcceptedIssuers() {
+                    return new X509Certificate[]{};
+                }
+
+                public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+                }
+
+                public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+                }
+            }};
+
+            try {
+                SSLContext = SSLContext.getInstance("TLS");
+                SSLContext.init(null, trustAllCerts, new java.security.SecureRandom());
+
+                /** for test */
+//                SSLSocket socket = (SSLSocket) SSLSocketFactory.getDefault().createSocket("n.block.io", 443);
+//                socket.startHandshake();
+//                SSLSession session = socket.getSession();
+//                LogUtil.i("socket.Info =" + session.getProtocol() + " ; " + session.getCipherSuite());
+
+                if ("wss".equals(uri.getScheme()) && SSLContext != null) {
+                    LogUtil.i("webSocket sdk 當前=" + Build.VERSION.SDK_INT + " ; " + Build.VERSION_CODES.LOLLIPOP); //5.0
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+                        blockWebSocketClient.setWebSocketFactory(new org.java_websocket.client.DefaultSSLWebSocketClientFactory(SSLContext));
+                    } else {
+                        blockWebSocketClient.setWebSocketFactory(new DefaultSSLWebSocketClientFactory(SSLContext));
+                    }
+                }
+                //webSocket onOpen
+                boolean isConn = blockWebSocketClient.connectBlocking();
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            LogUtil.e("webSocket BlockSocketHandler create failed II=" + e.getMessage());
+            Crashlytics.log(new String(PublicPun.hexStringToByteArray(PublicPun.card.getCardId()))+":"+ e.getMessage());
+        }
+
     }
 
-    public BlockSocketHandler() {
-        LogUtil.i("websocket SocketHandler_temp in");
-        SocketConnector socketConnector = new SocketConnector();
-//        socketConnector.sendString = output;
-        socketConnector.execute();
+    public void Connect() {
+        blockWebSocketClient.connect();
     }
 
+    public void SendMessage(String msg) {
 
-    private class SocketConnector extends AsyncTask<Void, Void, Void> {
+        SocketConnector task = new SocketConnector();
+        task.sendString = msg;
+        taskCollection.add(task);
+        task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, blockWebSocketClient);
+    }
+
+    public void cancelALLTasks() {
+        if (taskCollection != null) {
+            for (SocketConnector task : taskCollection) {
+                task.cancel(false);
+            }
+        }
+        try {
+            if (blockWebSocketClient != null)
+                blockWebSocketClient.close();
+        } catch (Exception e) {
+
+        }
+    }
+
+    private class SocketConnector extends AsyncTask<BlockWebSocketClient, Void, Boolean> {
         private String sendString;
 
         @Override
-        protected Void doInBackground(Void... voids) {
-//                PersistentCookieStore cookieStore = SingletonPersistentCookieStore.getInstance(main);
-//                final Cookie cookie = cookieStore.getCookies().get(0);
+        protected Boolean doInBackground(BlockWebSocketClient... params) {
             try {
-                LogUtil.i("websocket doInBackground");
-                HashMap<String, String> cmap = new HashMap<String, String>();
-//                    String cookieString = cookie.getName()+"="+cookie.getValue();
-//                    cmap.put("cookie", cookieString);
+                LogUtil.d("webSocket doInBackground:send msg=" + sendString);
+                params[0].send(sendString);
 
-//                URI uri = new URI(BtcUrl.SOCKET_BLOCK_IO);
-//                blockWebSocketClient = new BlockWebSocketClient(mContext,uri, new Draft_17(), cmap, TIMEOUT);
-                String SERVERIP = "wss://n.block.io";
-                int SERVERPORT = 443;
-                try {
-                    InetAddress serverAddr = InetAddress.getByName(SERVERIP);
-                    Log.e("TCP SI Client", "SI: Connecting...");
-                    Socket socket = new Socket(serverAddr, SERVERPORT);
-
-
-                    //send the message to the server
-                    out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);
-
-                    Log.e("TCP SI Client", "SI: Sent.");
-
-                    Log.e("TCP SI Client", "SI: Done.");
-
-                    //receive the message which the server sends back
-                    in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-
-                } catch (Exception e) {
-                    LogUtil.i("websocket doInBackground error=" + e.getMessage());
-                }
-//                blockWebSocketClient = new BlockWebSocketClient(mContext,uri, new Draft_17());
-                //This part is needed in case you are going to use self-signed certificates
-//                TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {
-//                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-//                        return new java.security.cert.X509Certificate[]{};
-//                    }
-//                    public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-//                    }
-//                    public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-//                    }
-//                }};
-//
-//                try {
-//                    SSLContext sc = SSLContext.getInstance("TLS");
-////                    sc.init(null, trustAllCerts, new java.security.SecureRandom());
-////                    sc.getDefault();
-//                    //Otherwise the line below is all that is needed.
-//                    sc.init(null, null, null);
-//                    blockWebSocketClient.setWebSocketFactory(new DefaultSSLWebSocketClientFactory(sc));
-//                } catch (Exception e) {
-//                    LogUtil.i("websocket doInBackground error=" + e.getMessage());
-//                    e.printStackTrace();
-//                }
-//                blockWebSocketClient.connectBlocking();
-//
             } catch (Exception e) {
-                LogUtil.i("websocket error=" + e.getMessage());
                 e.printStackTrace();
-            }finally{
-//                blockWebSocketClient.close();
+                return false;
             }
-                return null;
-            }
+            return true;
         }
 
-//    public boolean isSocketConnect() throws InterruptedException {
-//        return  blockWebSocketClient.connectBlocking();
-//    }
-//
-//    public void sendSocketMsg(String sendString){
-//        blockWebSocketClient.send(sendString);
-//    }
+        @Override
+        protected void onPostExecute(Boolean isSuccess) {
+            super.onPostExecute(isSuccess);
+            if (!isSuccess) {
+
+            }
+            taskCollection.remove(this);
+        }
     }
+}

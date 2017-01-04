@@ -12,10 +12,10 @@ public class Txs {
     public String relayed_by;
     public Out[] out;
     public int lock_time;
-    public int result;
+    public long result;
     public int size;
     @SerializedName("balance")
-    public int balance;
+    public long balance;
     public boolean double_spend;
     @SerializedName("time")
     public long time;
@@ -73,11 +73,11 @@ public class Txs {
         this.lock_time = lock_time;
     }
 
-    public int getResult() {
+    public long getResult() {
         return result;
     }
 
-    public void setResult(int result) {
+    public void setResult(long result) {
         this.result = result;
     }
 
@@ -89,11 +89,11 @@ public class Txs {
         this.size = size;
     }
 
-    public int getBalance() {
+    public long getBalance() {
         return balance;
     }
 
-    public void setBalance(int balance) {
+    public void setBalance(long balance) {
         this.balance = balance;
     }
 
@@ -147,10 +147,10 @@ public class Txs {
 
     public class Out {
         public boolean spent;
-        public int tx_index;
+        public long tx_index;
         public int type;
         public String addr;
-        public int value;
+        public long value;
         public int n;
         public String script;
 
@@ -162,11 +162,11 @@ public class Txs {
             this.spent = spent;
         }
 
-        public int getTx_index() {
+        public long getTx_index() {
             return tx_index;
         }
 
-        public void setTx_index(int tx_index) {
+        public void setTx_index(long tx_index) {
             this.tx_index = tx_index;
         }
 
@@ -186,11 +186,11 @@ public class Txs {
             this.addr = addr;
         }
 
-        public int getValue() {
+        public long getValue() {
             return value;
         }
 
-        public void setValue(int value) {
+        public void setValue(long value) {
             this.value = value;
         }
 
@@ -242,10 +242,10 @@ public class Txs {
 
         public class PrevOut {
             public boolean spent;
-            public int tx_index;
+            public long tx_index;
             public int type;
             public String addr;
-            public int value;
+            public long value;
             public int n;
             public String script;
 
@@ -257,11 +257,11 @@ public class Txs {
                 this.spent = spent;
             }
 
-            public int getTx_index() {
+            public long getTx_index() {
                 return tx_index;
             }
 
-            public void setTx_index(int tx_index) {
+            public void setTx_index(long tx_index) {
                 this.tx_index = tx_index;
             }
 
@@ -281,11 +281,11 @@ public class Txs {
                 this.addr = addr;
             }
 
-            public int getValue() {
+            public long getValue() {
                 return value;
             }
 
-            public void setValue(int value) {
+            public void setValue(long value) {
                 this.value = value;
             }
 

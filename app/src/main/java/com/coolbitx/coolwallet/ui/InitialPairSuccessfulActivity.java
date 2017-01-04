@@ -102,7 +102,7 @@ public class InitialPairSuccessfulActivity extends BaseActivity implements View.
     public void onClick(View v) {
         if (v == btnPair) {
             // Handle clicks for btnPair
-            mProgress.setMessage("Login...");
+            mProgress.setMessage("Login Host...");
             mProgress.show();
 
             cmdManager.bindLoginChlng(hostId, new CmdResultCallback() {
@@ -192,31 +192,6 @@ public class InitialPairSuccessfulActivity extends BaseActivity implements View.
 
 
         }
-    }
-
-    private void setPersoSecurity(boolean otp, boolean pressBtn, boolean switchAddress, boolean watchDog) {
-        boolean[] settingOptions = new boolean[4];
-        settingOptions[0] = otp;
-        settingOptions[1] = pressBtn;
-        settingOptions[2] = switchAddress;
-        settingOptions[3] = watchDog;
-
-        cmdManager.persoSetData(PublicPun.user.getMacKey(), settingOptions, new CmdResultCallback() {
-            @Override
-            public void onSuccess(int status, byte[] outputData) {
-                if ((status + 65536) == 0x9000) {
-                    cmdManager.persoConfirm(new CmdResultCallback() {
-                        @Override
-                        public void onSuccess(int status, byte[] outputData) {
-                            if ((status + 65536) == 0x9000) {
-                                Intent intent = new Intent(getApplicationContext(), InitialCreateWalletActivity.class);
-                                startActivity(intent);
-                            }
-                        }
-                    });
-                }
-            }
-        });
     }
 
     private byte[] calcKey(byte[] devKey, String s) {

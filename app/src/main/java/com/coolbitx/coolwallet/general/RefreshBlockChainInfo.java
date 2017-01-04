@@ -13,8 +13,9 @@ import com.coolbitx.coolwallet.entity.Constant;
 import com.coolbitx.coolwallet.entity.dbAddress;
 import com.coolbitx.coolwallet.ui.Fragment.FragMainActivity;
 import com.coolbitx.coolwallet.util.BTCUtils;
-import com.coolbitx.coolwallet.util.CwBtcNetWork;
+import com.coolbitx.coolwallet.httpRequest.CwBtcNetWork;
 import com.coolbitx.coolwallet.util.ExtendedKey;
+import com.crashlytics.android.Crashlytics;
 import com.snscity.egdwlib.cmd.CmdResultCallback;
 import com.snscity.egdwlib.utils.LogUtil;
 
@@ -184,15 +185,12 @@ public class RefreshBlockChainInfo {
 
                             if (flag[0] && flag[1] && flag[2] && flag[3] && flag[4]) {
                                 LogUtil.i("QryAccInfo跑完=" + accountID);
-
                                 if (isPointerSame) {
                                     cmdResultCallback.success();
 
                                 }
                             }
                         }
-                    }else{
-                        cmdResultCallback.fail("Internal module error ("+Integer.toHexString(status)+")");
                     }
                 }
             });
@@ -252,8 +250,6 @@ public class RefreshBlockChainInfo {
 
                                 new Thread(new BIP32Runnable(BIP32Handler, cv, 0, 0)).start();
                             }
-                        }else{
-                            cmdResultCallback.fail("Internal module error.");
                         }
                     }
                 });
@@ -296,7 +292,6 @@ public class RefreshBlockChainInfo {
         @Override
         public void run() {
             String result = "";
-
             for (int i = 0; i < kid; i++) {
                 LogUtil.i("kcid="+kcId + ", 產地址的serializepub=" + km.serializepub(true));
                 ExtendedKey k = null;
@@ -312,7 +307,7 @@ public class RefreshBlockChainInfo {
                     LogUtil.i("ExtendedKey:" + kcId + " 第 " + String.valueOf(getAddrID) + " 個地址,error:" + e.getMessage());
                     Message msg = handler.obtainMessage();
                     Bundle data = new Bundle();
-                    data.putString("resultMsg","Addresses generated failed!("+e.getMessage() +")");
+                    data.putString("resultMsg", e.getMessage() + " create error!");
                     msg.setData(data);
                     msgCnt = 0;
                     msg.what = msgCnt;
@@ -400,7 +395,7 @@ public class RefreshBlockChainInfo {
             // TODO Auto-generated catch block
             msgResult = -1;
             e.printStackTrace();
-            cmdResultCallback.fail("Unable to sync with the blcokchain. Please try again later.");
+            cmdResultCallback.fail( "Account:"+mAccount+" get transaction data from BLOCKCHAIN failed, Please do again later.");
         }
 
         //使用Handler和Message把資料丟給主UI去後續處理
@@ -420,25 +415,24 @@ public class RefreshBlockChainInfo {
                         //https://blockchain.info/multiaddr?offset=51&active=
                         LogUtil.i("refresh超過50筆,跑param=" + param);
                         result = cwBtcNetWork.doGet(cv, BtcUrl.URL_BLICKCHAIN_TXS_MULTIADDR, String.valueOf(param));
-//                        PublicPun.jsonParserRecoveryTxs(mContext, result, PublicPun.card.getCardId(), mAccount);
                         PublicPun.jsonParserRefresh(mContext, result, mAccount, false);
 
                     } catch (Exception e) {
                         // TODO Auto-generated catch block
                         msgResult = -1;
                         e.printStackTrace();
+                        Crashlytics.logException(e);
                     }
                 }
-            } else {
-//                PublicPun.jsonParserRecoveryTxs(mContext, result, PublicPun.card.getCardId(), mAccount);
             }
             msgResult = 1;
         } else {
-            LogUtil.i("return 非 200");
+            LogUtil.e("return 非 200");
             msgResult = -1;
         }
         Bundle data = new Bundle();
         data.putInt("accountID", mAccount);
+        data.putString("msg",result);
         msg.setData(data);
         msg.what = msgResult;
         txsHandler.sendMessage(msg);
@@ -453,14 +447,11 @@ public class RefreshBlockChainInfo {
             int mAccountID = data.getInt("accountID");
             switch (msg.what) {
                 case 1:
-//                    FunhdwSetAccInfo(mAccountID);
-                    LogUtil.i("refresh success");
                     cmdResultCallback.success();
                     break;
                 case -1:
-//                    cmdResultCallback.fail( "Account:"+(mAccountID+1)+" get transaction data from BLOCKCHAIN failed, Please do again later.");
-                    cmdResultCallback.fail( "Unable to sync with the blcokchain. Please try again later.");
-//                    ClickFunction("Erro Message", "Get Txs data from BLOCKCHAIN failed!");
+                    cmdResultCallback.fail( "Account:"+(mAccountID+1)+" get transaction data from BLOCKCHAIN failed, Please do again later.");
+//                    showNoticeDialog("Erro Message", "Get Txs data from BLOCKCHAIN failed!");
                     break;
             }
         }

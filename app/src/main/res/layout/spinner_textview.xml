@@ -6,8 +6,8 @@
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:background="@color/md_white_1000"
+    android:padding="5dp"
     android:singleLine="true"
     android:textColor="@color/md_black_1000"
-    android:textSize="22sp"
-    android:padding="5dp"/><!--</LinearLayout>-->
+    android:textSize="22sp" /><!--</LinearLayout>-->
 

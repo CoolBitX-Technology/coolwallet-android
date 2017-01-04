@@ -20,15 +20,15 @@ import javax.net.ssl.SSLEngine;
 /**
  * Created by ShihYi on 2016/4/13.
  */
-public class DefaultSSLWebSocketClientFactory  implements WebSocketClient.WebSocketClientFactory {
+public class DefaultSSLWebSocketClientFactory implements WebSocketClient.WebSocketClientFactory {
     protected SSLContext sslcontext;
     protected ExecutorService exec;
 
-    public DefaultSSLWebSocketClientFactory( SSLContext sslContext ) {
+    public DefaultSSLWebSocketClientFactory(SSLContext sslContext ) {
         this( sslContext, Executors.newSingleThreadScheduledExecutor() );
     }
 
-    public DefaultSSLWebSocketClientFactory( SSLContext sslContext , ExecutorService exec ) {
+    public DefaultSSLWebSocketClientFactory(SSLContext sslContext , ExecutorService exec ) {
         if( sslContext == null || exec == null )
             throw new IllegalArgumentException();
         this.sslcontext = sslContext;

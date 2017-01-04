@@ -1,7 +1,9 @@
 package com.coolbitx.coolwallet.entity;
 
+import com.coolbitx.coolwallet.general.PublicPun;
 import com.coolbitx.coolwallet.util.BTCUtils;
 import com.coolbitx.coolwallet.util.BitcoinOutputStream;
+import com.coolbitx.coolwallet.util.ValidationException;
 import com.snscity.egdwlib.utils.LogUtil;
 
 import java.io.ByteArrayOutputStream;
@@ -142,6 +144,7 @@ public class Transaction {
         public final Script script;
 
         public Output(long value, Script script) {
+            LogUtil.e("output data:value=" + String.valueOf(value) );
             this.value = value;
             this.script = script;
         }
@@ -229,12 +232,13 @@ public class Transaction {
         }
 
         public void run(Stack<byte[]> stack) throws ScriptInvalidException {
+            LogUtil.e("Script run");
             run(0, null, stack);
         }
 
         public void run(int inputIndex, Transaction tx, Stack<byte[]> stack) throws ScriptInvalidException {
             for (int pos = 0; pos < bytes.length; pos++) {
-                LogUtil.i("trancsation run:tx=" + tx + " ; bytes[pos]=" + bytes[pos]);
+                LogUtil.e("trancsation run:tx=" + tx + " ; bytes[pos]=" + bytes[pos]);
                 switch (bytes[pos]) {
                     case OP_NOP:
                         break;
@@ -329,21 +333,28 @@ public class Transaction {
                 }
             }
             Transaction unsignedTransaction = new Transaction(unsignedInputs, tx.outputs, tx.lockTime);
-            return hashTransactionForSigning(unsignedTransaction);
+            byte[] result = null;
+            try {
+                result = hashTransactionForSigning(unsignedTransaction);
+            } catch (ValidationException e) {
+                e.printStackTrace();
+                LogUtil.e("hashTransaction error=" + e.getMessage());
+            }
+            return result;
         }
 
         public static byte[]
-        hashTransactionForSigning(Transaction unsignedTransaction) {
+        hashTransactionForSigning(Transaction unsignedTransaction) throws ValidationException {
 //            byte[] txUnsignedBytes = unsignedTransaction.getBitcoinOutputStreamBytes(); //
             byte[] txUnsignedBytes = unsignedTransaction.getBytes();
-            LogUtil.i("hashTransactionForSigning hex=" + LogUtil.byte2HexStringNoBlank(txUnsignedBytes));
+            LogUtil.d("hashTransactionForSigning hex=" + LogUtil.byte2HexStringNoBlank(txUnsignedBytes));
             BitcoinOutputStream baos = new BitcoinOutputStream();
             try {
                 baos.write(txUnsignedBytes);
                 baos.writeInt32(Transaction.Script.SIGHASH_ALL);
                 baos.close();
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                throw new ValidationException(e);
             }
             return BTCUtils.doubleSha256(baos.toByteArray());
         }
@@ -378,37 +389,83 @@ public class Transaction {
             return Arrays.hashCode(bytes);
         }
 
-        public static Script buildOutput(String address) {
-            //noinspection TryWithIdenticalCatches
-            try {
-                byte[] addressWithCheckSumAndNetworkCode = BTCUtils.decodeBase58(address);
-                if (addressWithCheckSumAndNetworkCode[0] != 0) {
-                    LogUtil.e("Unknown address type " + address);
-                }
-                byte[] bareAddress = new byte[20];
-                System.arraycopy(addressWithCheckSumAndNetworkCode, 1, bareAddress, 0, bareAddress.length);
-                MessageDigest digestSha = MessageDigest.getInstance("SHA-256");
-                digestSha.update(addressWithCheckSumAndNetworkCode, 0, addressWithCheckSumAndNetworkCode.length - 4);
-                byte[] calculatedDigest = digestSha.digest(digestSha.digest());
-                for (int i = 0; i < 4; i++) {
-                    if (calculatedDigest[i] != addressWithCheckSumAndNetworkCode[addressWithCheckSumAndNetworkCode.length - 4 + i]) {
-                        LogUtil.e("Bad address " + address);
-                    }
-                }
+//        /** Creates a scriptPubKey that encodes payment to the given address. */
+//        public static Script createOutputScript(Address to) {
+//            if (to.isP2SHAddress()) {
+//                // OP_HASH160 <scriptHash> OP_EQUAL
+//                return new ScriptBuilder()
+//                        .op(OP_HASH160)
+//                        .data(to.getHash160())
+//                        .op(OP_EQUAL)
+//                        .build();
+//            } else {
+//                // OP_DUP OP_HASH160 <pubKeyHash> OP_EQUALVERIFY OP_CHECKSIG
+//                return new ScriptBuilder()
+//                        .op(OP_DUP)
+//                        .op(OP_HASH160)
+//                        .data(to.getHash160())
+//                        .op(OP_EQUALVERIFY)
+//                        .op(OP_CHECKSIG)
+//                        .build();
+//            }
+//        }
 
-                ByteArrayOutputStream buf = new ByteArrayOutputStream(25);
+        public static Script buildOutput(String address) throws ValidationException, NoSuchAlgorithmException, IOException {
+            //noinspection TryWithIdenticalCatches
+//            try {
+            byte[] addressWithCheckSumAndNetworkCode = BTCUtils.decodeBase58(address);
+//                if (addressWithCheckSumAndNetworkCode[0] != 0 ||  addressWithCheckSumAndNetworkCode[0]!=5) {
+            if (addressWithCheckSumAndNetworkCode[0] != 0 && addressWithCheckSumAndNetworkCode[0] != 5) {
+                LogUtil.e("Unknown address type: " + addressWithCheckSumAndNetworkCode[0] + ";addr=" + address);
+                throw new ValidationException("Unknown address type " + address);
+//                    return null;
+            }
+
+            if (!BTCUtils.ValidateBitcoinAddress(address)) {
+                LogUtil.e("Unknown address type " + address);
+                throw new ValidationException("Unknown address type " + address);
+//                    return null;
+            }
+            byte[] bareAddress = new byte[20];
+            System.arraycopy(addressWithCheckSumAndNetworkCode, 1, bareAddress, 0, bareAddress.length);
+            LogUtil.d("addressWithCheckSumAndNetworkCode=" + PublicPun.byte2HexString(addressWithCheckSumAndNetworkCode) + "\n" + "bareAddress=" + PublicPun.byte2HexString(bareAddress));
+            MessageDigest digestSha = MessageDigest.getInstance("SHA-256");
+            digestSha.update(addressWithCheckSumAndNetworkCode, 0, addressWithCheckSumAndNetworkCode.length - 4);
+            byte[] calculatedDigest = digestSha.digest(digestSha.digest());
+            LogUtil.d("calculatedDigest=" + PublicPun.byte2HexString(calculatedDigest));
+            for (int i = 0; i < 4; i++) {
+                if (calculatedDigest[i] != addressWithCheckSumAndNetworkCode[addressWithCheckSumAndNetworkCode.length - 4 + i]) {
+//                        LogUtil.e("Bad address " + address);
+                    throw new ValidationException("Bad address " + address);
+                }
+            }
+            ByteArrayOutputStream buf;
+            if (addressWithCheckSumAndNetworkCode[0] == 0) {//single address
+                buf = new ByteArrayOutputStream(25);
                 buf.write(OP_DUP);
                 buf.write(OP_HASH160);
                 writeBytes(bareAddress, buf);
                 buf.write(OP_EQUALVERIFY);
                 buf.write(OP_CHECKSIG);
                 ScriptAdd = buf.toByteArray();
-                return new Script(buf.toByteArray());
-            } catch (NoSuchAlgorithmException e) {
-                throw new RuntimeException(e);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+            } else {
+                buf = new ByteArrayOutputStream(23);
+//                    buf.write(OP_DUP);
+                buf.write(OP_HASH160);
+                writeBytes(bareAddress, buf);
+                buf.write(OP_EQUAL);
+//                    buf.write(OP_CHECKSIG);
+                ScriptAdd = buf.toByteArray();
             }
+            LogUtil.d("產生script的output地址=" + LogUtil.byte2HexString(ScriptAdd));
+            return new Script(buf.toByteArray());
+//            } catch (NoSuchAlgorithmException e) {
+//                throw new RuntimeException(e);
+//            } catch (IOException e) {
+//                throw new RuntimeException(e);
+//            }catch( ValidationException e){
+//                throw  new ValidationException(e.getMessage());
+//            }
         }
     }
 }

@@ -27,13 +27,13 @@ public class BlockWebSocketClient extends org.java_websocket.client.WebSocketCli
 
     public BlockWebSocketClient(Context context, URI serverUri, Draft draft, HashMap<String, String> headers, int timeout) {
         super(serverUri, draft, headers, timeout);
-        LogUtil.i("websocket create");
+        LogUtil.i("webSocket create");
         this.mContext = context;
     }
 
     public BlockWebSocketClient(Context context,URI serverUri, Draft draft) {
         super(serverUri,draft);
-        LogUtil.i("TEST websocket create");
+        LogUtil.i("TEST webSocket create");
         this.mContext = context;
     }
 
@@ -45,7 +45,7 @@ public class BlockWebSocketClient extends org.java_websocket.client.WebSocketCli
     @Override
     public void onOpen(ServerHandshake handshakedata) {
 
-        LogUtil.i("websocket open You are connected to BLOCK_IO Server: " + getURI() + "\n");
+        LogUtil.i("webSocket open You are connected to BLOCK_IO Server: " + getURI() + "\n");
     }
 
     /**
@@ -59,7 +59,7 @@ public class BlockWebSocketClient extends org.java_websocket.client.WebSocketCli
         String mResult = null;
         //Handle this message
         //json pasing
-        LogUtil.i("websocket msg="+msg);
+//        LogUtil.i("websocket msg="+msg);
 //        if (msg != null) {
 //            //準備資料
 //            String type = "address";
@@ -90,6 +90,7 @@ public class BlockWebSocketClient extends org.java_websocket.client.WebSocketCli
 //            mResult = sb.toString();
 //        }
         socketByAddress socketAddress=null;
+        LogUtil.d("webSocket received=" + msg);
         if(msg.contains("address")){
             socketAddress = PublicPun.jsonParserSocketAddress(msg);
         }
@@ -97,26 +98,22 @@ public class BlockWebSocketClient extends org.java_websocket.client.WebSocketCli
         if (socketAddress != null ) {
             //都要廣播 for refresh data,but show only received msg.
 //            if(socketAddress.getTx_type().equals("Received")) {
-                broadCast(socketAddress);
+            broadCast(socketAddress);
 //            }
         }
     }
 
 
-
     @Override
     public void onClose(int code, String reason, boolean remote) {
-        LogUtil.i("websocket closed");
+        LogUtil.i("webSocket closed");
     }
 
     @Override
     public void onError(Exception ex) {
-        LogUtil.i("websocket ERROR=" + ex.getMessage());
+        LogUtil.d("webSocket ERROR=" + ex.getMessage());
         ex.printStackTrace();
     }
-
-
-
 
     /**
      * 發送廣播訊息
@@ -125,7 +122,7 @@ public class BlockWebSocketClient extends org.java_websocket.client.WebSocketCli
      */
     private void broadCast(socketByAddress socketAddress) {
         Intent SocketIntent = new Intent(BTConfig.SOCKET_ADDRESS_MSG);
-        LogUtil.i("websocket broadcast=" + socketAddress.getAddress());
+        LogUtil.d("put broadcast from webSocket =" + socketAddress.getAddress());
         SocketIntent.putExtra("socketAddrMsg", socketAddress);
         mContext.sendBroadcast(SocketIntent);
     }

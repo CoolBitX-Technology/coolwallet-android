@@ -9,11 +9,10 @@
     <TableLayout
         android:id="@+id/tl_create"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:background="@color/col_black"
-        >
+        android:background="@color/col_black">
 
         <TableRow
             android:layout_width="wrap_content"
@@ -42,12 +41,12 @@
             android:id="@+id/seed_spinner"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp" />
+            android:textSize="24sp" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="30px"
             android:background="@android:color/black"
             android:orientation="horizontal">
 
@@ -82,74 +81,64 @@
 
         </LinearLayout>
 
+
         <TextView
             android:id="@+id/hdw_word"
             style="@style/TextView_Black_16"
-            android:layout_width="200dp"
-            android:layout_height="150dp"
-            android:layout_marginRight="20dp"
+            android:layout_width="fill_parent"
+            android:layout_height="200dp"
             android:layout_marginTop="10dp"
-            android:background="@android:color/white" />
-
-        <CheckBox
-            android:id="@+id/checkWords"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_column="0"
-            android:text="@string/chk_create_word"
+            android:layout_span="2"
+            android:background="@android:color/white"
+            android:gravity="top|left"
+            android:minLines="5"
+            android:padding="5dp"
             android:visibility="gone" />
 
         <LinearLayout
             android:id="@+id/layoutWords"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:visibility="gone"
-          >
+            android:layout_height="match_parent"
+            android:layout_marginTop="10dp">
 
             <TextView
                 android:id="@+id/hdw_word2"
-                style="@style/TextView_Black_20"
+                style="@style/TextView_Black_16"
                 android:layout_width="200dp"
                 android:layout_height="250dp"
                 android:background="@android:color/white" />
 
             <TextView
                 android:id="@+id/hdw_word3"
-                style="@style/TextView_Black_20"
+                style="@style/TextView_Black_16"
                 android:layout_width="200dp"
                 android:layout_height="250dp"
                 android:layout_span="2"
                 android:background="@android:color/white"
-                android:gravity="top|left" />
+                android:gravity="top|left"
+                android:minLines="5"
+                />
             >
 
         </LinearLayout>
 
-        <!--<TableRow-->
-        <!--android:layout_width="fill_parent"-->
-        <!--android:layout_height="fill_parent"-->
-        <!--android:layout_marginBottom="50dp"-->
-        <!--android:gravity="center|bottom">-->
-
-
-        <LinearLayout
+        <TableRow
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:gravity="center|bottom">
+            android:layout_height="match_parent"
+            android:layout_marginTop="50dp"
+            android:gravity="center">
 
             <Button
                 android:id="@+id/btn_hdw_create"
                 style="@style/TextView_Black_16"
                 android:layout_width="200dp"
                 android:layout_height="40dp"
-                android:layout_marginBottom="10dp"
                 android:background="@drawable/selector_button"
+                android:gravity="center"
                 android:text="@string/hdw_create" />
-            <!--</TableRow>-->
-        </LinearLayout>
-
+        </TableRow>
     </TableLayout>
+
 
     <LinearLayout
         android:id="@+id/hdw_sum_lin"
@@ -175,22 +164,15 @@
             android:background="@drawable/edit_format"
             android:inputType="number" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="fill_parent"
-            android:gravity="center|bottom"
-            android:orientation="vertical">
-
-            <Button
-                android:id="@+id/hdw_confirm"
-                style="@style/TextView_Black_16"
-                android:layout_width="200dp"
-                android:layout_height="40dp"
-                android:layout_gravity="center"
-                android:layout_marginBottom="20dp"
-                android:background="@drawable/selector_button"
-                android:text="@string/btn_create_HDW" />
-        </LinearLayout>
+        <Button
+            android:id="@+id/hdw_confirm"
+            style="@style/TextView_Black_16"
+            android:layout_width="200dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="50dp"
+            android:background="@drawable/selector_button"
+            android:text="@string/btn_create_HDW" />
     </LinearLayout>
 
 </LinearLayout>

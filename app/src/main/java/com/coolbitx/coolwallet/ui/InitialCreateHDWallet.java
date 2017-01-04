@@ -31,6 +31,7 @@ public class InitialCreateHDWallet extends BaseActivity implements View.OnClickL
         textView.setText("Create HD Wallet");
         findViews();
         initToolbar();
+
     }
 
     @Override

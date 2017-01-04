@@ -14,9 +14,9 @@ public class ParsingAddress implements Serializable {
     @SerializedName("n_tx")
     public int n_tx;
     @SerializedName("total_received")
-    public int total_received;
+    public long total_received;
     @SerializedName("total_sent")
-    public int total_sent;
+    public long total_sent;
     @SerializedName("final_balance")
     public int final_balance;
 
@@ -36,7 +36,7 @@ public class ParsingAddress implements Serializable {
         this.n_tx = n_tx;
     }
 
-    public int getTotal_received() {
+    public long getTotal_received() {
         return total_received;
     }
 
@@ -44,7 +44,7 @@ public class ParsingAddress implements Serializable {
         this.total_received = total_received;
     }
 
-    public int getTotal_sent() {
+    public long getTotal_sent() {
         return total_sent;
     }
 

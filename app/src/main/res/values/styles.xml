@@ -1,5 +1,4 @@
 <resources>
-
     <!--progressDialog bg-->
     <style name="CustomProgressDialog" parent="@android:style/Theme.Dialog">
         <!--邊框-->
@@ -38,13 +37,11 @@
         <item name="android:textSize">30sp</item>
         <item name="android:textStyle">bold</item>
     </style>
-
     <style name="TextView_White_Bold_20">
         <item name="android:textColor">@android:color/white</item>
         <item name="android:textSize">20sp</item>
         <item name="android:textStyle">bold</item>
     </style>
-
     <style name="TextView_White_Bold_18">
         <item name="android:textColor">@android:color/white</item>
         <item name="android:textSize">18sp</item>
@@ -77,14 +74,29 @@
         <item name="android:textSize">18sp</item>
     </style>
 
+    <style name="TextView_Gray_16">
+        <item name="android:textColor">@android:color/darker_gray</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="TextView_Gray_14">
+        <item name="android:textColor">@android:color/darker_gray</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
     <style name="TextView_Black_16">
         <item name="android:textColor">@android:color/black</item>
         <item name="android:textSize">16sp</item>
     </style>
-
-    <style name="TextView_Black_20">
+    <style name="TextView_Black_16_Bold">
         <item name="android:textColor">@android:color/black</item>
-        <item name="android:textSize">20sp</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="TextView_Black_18">
+        <item name="android:textColor">@android:color/black</item>
+        <item name="android:textSize">18sp</item>
     </style>
 
     <style name="TextView_Black_14">
@@ -126,4 +138,16 @@
         <item name="android:windowContentOverlay">@null</item>
     </style>
 
+    <style name="popupDialog" parent="@android:style/Theme.Dialog">
+        <!--<item name="android:windowBackground">@drawable/filled_activity_bg</item>-->
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <!--<item name="android:windowAnimationStyle">@style/dialog_animation</item>-->
+        <item name="android:colorBackgroundCacheHint">@null</item>
+        <item name="android:backgroundDimAmount">0.6</item><!-- 灰度 -->
+        <!--<item name="android:windowFullscreen">true</item>-->
+    </style>
 </resources>

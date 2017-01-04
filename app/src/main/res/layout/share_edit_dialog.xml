@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/bc1layout"
+    android:layout_width="300dp"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_vertical|center_horizontal"
+    android:orientation="vertical"
+    android:background="@android:color/darker_gray">
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/dialog_title"
+        android:layout_gravity="center_horizontal"
+        android:textColor="@android:color/black"
+        android:layout_marginTop="10dp"
+        style="@style/TextView_Gray_18"
+        android:textStyle="bold"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Request Payment"
+        android:id="@+id/dialog_msg_id"
+        android:layout_gravity="center_horizontal"
+        android:textColor="@android:color/black"
+        android:layout_marginTop="10dp"
+        style="@style/TextView_Gray_18"
+        android:textStyle="bold"
+        />
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Request Payment"
+        android:id="@+id/dialog_message"
+        android:layout_gravity="center_horizontal"
+        android:textColor="@android:color/black"
+        style="@style/TextView_Black_14"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Request Payment"
+        android:id="@+id/dialog_msg_ref"
+        android:layout_gravity="center_horizontal"
+        android:textColor="@android:color/black"
+        style="@style/TextView_Gray_18"
+        android:textStyle="bold"
+        />
+    <View
+        android:layout_height="0.5dip"
+        android:layout_marginTop="20sp"
+        android:background="@color/dark_gray"
+        android:layout_width="match_parent" />
+
+</LinearLayout>

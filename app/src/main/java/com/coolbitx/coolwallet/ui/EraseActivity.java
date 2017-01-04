@@ -4,7 +4,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -21,7 +20,7 @@ import com.snscity.egdwlib.utils.LogUtil;
 /**
  * Created by MyPC on 2015/8/28.
  */
-public class EraseActivity extends AppCompatActivity implements View.OnClickListener {
+public class EraseActivity extends BaseActivity implements View.OnClickListener {
 
     private Context context;
     private EditText editOTP;
@@ -48,10 +47,10 @@ public class EraseActivity extends AppCompatActivity implements View.OnClickList
         mProgress = new ProgressDialog(EraseActivity.this);
         mProgress.setCancelable(false);
         mProgress.setIndeterminate(true);
-
         //睡毫秒
         mProgress.setMessage("Generating Reset OTP...");
         mProgress.show();
+
         genOTP();
 
         sharedPreferences = getSharedPreferences("card", Context.MODE_PRIVATE);
@@ -71,9 +70,8 @@ public class EraseActivity extends AppCompatActivity implements View.OnClickList
                     mProgress.dismiss();
                 } else if ((status + 65536) == 0x16601) {
                     isNewCard = false;
-                    editOTP.setVisibility(View.GONE);
-                    mProgress.dismiss();
                 }
+
             }
         });
     }
@@ -92,7 +90,6 @@ public class EraseActivity extends AppCompatActivity implements View.OnClickList
     public void onClick(View v) {
         //工程版使用
         if (v == btnCancel) {
-//            PublicPun.toast(context, "CoolWallet has been reset.");
             setResult(RESULT_OK);
             finish();
 
@@ -101,11 +98,12 @@ public class EraseActivity extends AppCompatActivity implements View.OnClickList
 
             DatabaseHelper.deleteTable(EraseActivity.this, DbName.DATA_BASE_TXS);
             DatabaseHelper.deleteTable(EraseActivity.this, DbName.DATA_BASE_ADDR);
+            DatabaseHelper.deleteTable(EraseActivity.this, DbName.DATA_BASE_CURRENT);
             DatabaseHelper.deleteTable(context, DbName.DATA_BASE_LOGIN);
 
             LogUtil.i("Erase mode=" + PublicPun.card.getMode());
             if (PublicPun.card.getMode().equals("NOHOST")) {
-                PublicPun.toast(context, "CoolWallet has been reset.");
+                PublicPun.toast(context, "Initial Success");
                 BleActivity.bleManager.disConnectBle();
                 finish();
                 System.exit(0);
@@ -121,7 +119,7 @@ public class EraseActivity extends AppCompatActivity implements View.OnClickList
 
                             @Override
                             public void run() {
-                                mProgress.setMessage("Resetting...");
+                                mProgress.setMessage("Reseting...");
                                 mProgress.show();
                             }
                         });
@@ -134,13 +132,13 @@ public class EraseActivity extends AppCompatActivity implements View.OnClickList
                                         resetCard();
                                     } else if ((status + 65536) == 0x16606) {
                                         mProgress.dismiss();
-//                                        ClickFunction("Erro Message", "Error:" + "OTP incorrect !");
-                                        PublicPun.ClickFunction(context,"Incorrect OTP ", "Please try again");
+//                                        showNoticeDialog("Erro Message", "Error:" + "OTP incorrect !");
+                                        PublicPun.showNoticeDialog(context,"OTP incorrect", "Please try again");
                                         editOTP.setText("");
                                         genOTP();
                                     } else {
                                         mProgress.dismiss();
-                                        PublicPun.ClickFunctionToFinish(context,"Error Message", "Error:" + Integer.toHexString(status));
+                                        PublicPun.showNoticeDialogToFinish(context,"Error Message", "Error:" + Integer.toHexString(status));
                                     }
                                 }
                             });
@@ -171,13 +169,12 @@ public class EraseActivity extends AppCompatActivity implements View.OnClickList
                                     public void onSuccess(int status, byte[] outputData) {
                                         if ((status + 65536) == 0x9000) {
                                             mProgress.dismiss();
-                                            PublicPun.toast(context, "CoolWallet has been reset.");
-
+                                            PublicPun.toast(context, " Initial Success");
                                             setResult(RESULT_OK);
                                             finish();
                                         }else{
                                             mProgress.dismiss();
-                                            PublicPun.ClickFunctionToFinish(context,"Error Message", "Error:" + Integer.toHexString(status));
+                                            PublicPun.showNoticeDialogToFinish(context,"Error Message", "Error:" + Integer.toHexString(status));
                                         }
                                     }
                                 });

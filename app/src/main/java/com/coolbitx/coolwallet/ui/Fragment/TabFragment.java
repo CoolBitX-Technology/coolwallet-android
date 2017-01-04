@@ -23,7 +23,6 @@ import com.coolbitx.coolwallet.entity.dbAddress;
 import com.coolbitx.coolwallet.general.AppPrefrence;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.coolbitx.coolwallet.general.RefreshBlockChainInfo;
-import com.coolbitx.coolwallet.ui.BaseActivity;
 import com.coolbitx.coolwallet.util.Base58;
 import com.snscity.egdwlib.cmd.CmdResultCallback;
 import com.snscity.egdwlib.utils.ByteUtil;
@@ -33,6 +32,8 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 
 /**
@@ -66,7 +67,7 @@ public class TabFragment extends Fragment {
     private ProgressDialog mProgress;
     public static DecimalFormat currentFormatter = new DecimalFormat("#.##");
     public static DecimalFormat BtcFormatter = new DecimalFormat("#.########");
-
+    private Timer mTimer;
     public static Fragment newInstance() {
         TabFragment f = new TabFragment();
 
@@ -168,7 +169,14 @@ public class TabFragment extends Fragment {
      */
 
     public int getAccoutId() {
-        return pager.getCurrentItem();
+        int currPage;
+        try {
+            currPage = pager.getCurrentItem();
+        }catch(Exception e){
+            currPage = 0;
+        }
+
+        return currPage;
     }
 
     /**
@@ -237,7 +245,8 @@ public class TabFragment extends Fragment {
         rbSend.setBackgroundResource(R.mipmap.send_grey);
         rbReceive.setBackgroundResource(R.mipmap.receive_grey);
 
-//        clicked "+" default page
+
+//        FragMainActivity.ACCOUNT_CNT++;
         mPageType = HOME_PAGE;
 
         getFragments(mPageType);
@@ -285,53 +294,50 @@ public class TabFragment extends Fragment {
                 CreateNewAccount(accountID);
                 addFragmentToList(mPageType);
             } else {
-
                 //當切換位置
                 if (!PublicPun.accountRefresh[accountID]) {
-                    mProgress.setMessage("Syncing...");
+                    mProgress.setMessage("Synchronizing data...");
                     mProgress.show();
+                    mTimer = new Timer();
+                    mTimer.schedule(new TimerTask() {
+                        @Override
+                        public void run() {
+                            getActivity().runOnUiThread(new Runnable(){
+                                @Override
+                                public void run() {
+                                    if (mProgress.isShowing()) {
+                                        mProgress.dismiss();
+                                    }
+                                }
+                            });
+                            mTimer.cancel();
+                        }
+                    }, 15000);////15s沒成功就自動cacel
                     final RefreshBlockChainInfo refreshBlockChainInfo = new RefreshBlockChainInfo(getActivity(), accountID);
-
                     refreshBlockChainInfo.FunQueryAccountInfo(new RefreshCallback() {
-
                         @Override
                         public void success() {
-
                             refreshBlockChainInfo.callTxsRunnable(new RefreshCallback() {
                                 @Override
                                 public void success() {
-
+                                    mProgress.dismiss();
                                     FunhdwSetAccInfo(accountID);
-                                    PublicPun.accountRefresh[accountID] = true;
                                 }
-
                                 @Override
                                 public void fail(String msg) {
-                                    PublicPun.ClickFunction(getActivity(), "Unstable internet connection", msg);
+                                    PublicPun.showNoticeDialog(getActivity(), "Unstable internet connection", msg);
                                     mProgress.dismiss();
                                 }
-
-                                @Override
-                                public void exception(String msg) {
-
-                                }
-
-
                             });
                         }
-
                         @Override
                         public void fail(String msg) {
-                            PublicPun.ClickFunction(getActivity(), "Unstable internet connection", msg);
-                        }
-
-                        @Override
-                        public void exception(String msg) {
-
+                            PublicPun.showNoticeDialog(getActivity(), "Error Message", msg);
+                            mProgress.dismiss();
                         }
                     });
+                    PublicPun.accountRefresh[accountID] = true;
                 }
-
                 //1.進行refresh
                 AccountRefresh(accountID);
                 //2.change card display
@@ -350,7 +356,6 @@ public class TabFragment extends Fragment {
 
         @Override
         public void onPageScrollStateChanged(int state) {
-
         }
     }
 
@@ -360,7 +365,7 @@ public class TabFragment extends Fragment {
         LogUtil.e("這是Main FunhdwSetAccInfo=" + account);
         byte ByteAccId = (byte) account;
         //for card display
-        BaseActivity.cmdManager.McuSetAccountState(ByteAccId, new CmdResultCallback() {
+        FragMainActivity.cmdManager.McuSetAccountState(ByteAccId, new CmdResultCallback() {
                     @Override
                     public void onSuccess(int status, byte[] outputData) {
                         if ((status + 65536) == 0x9000) {
@@ -381,11 +386,11 @@ public class TabFragment extends Fragment {
         int intKey = 0;
         ArrayList<dbAddress> listAddress = new ArrayList<dbAddress>();
         listAddress = DatabaseHelper.queryAddress(getActivity(), account, -1);//ext+int
-        LogUtil.i("before set socket account=" + PublicPun.accountSocketReg[account]+" ; send size="+listAddress.size());
+
+        LogUtil.i("before set webSocket account=" + PublicPun.accountSocketReg[account]+" ; send size="+listAddress.size());
 
         for (int i = 0; i < listAddress.size(); i++) {
             if (!PublicPun.accountSocketReg[account]) {
-//                new BlockSocketHandler(getActivity(), PublicPun.jSonGen(listAddress.get(i).getAddress()));
                 if (listAddress.get(i).getKcid() == 0) { //只需註冊external地址
                     try {
                         FragMainActivity.socketHandler.SendMessage(PublicPun.jSonGen(listAddress.get(i).getAddress()));
@@ -404,10 +409,8 @@ public class TabFragment extends Fragment {
                 intKey++;
             }
         }
-
         PublicPun.accountSocketReg[account] = true;
         LogUtil.i("after set socket account=" + PublicPun.accountSocketReg[account]);
-
         final boolean[] flag = new boolean[4];
 
         final byte[] cwHdwAccountInfo = new byte[]{cwHdwAccountInfoName, cwHdwAccountInfoBalance,
@@ -451,14 +454,21 @@ public class TabFragment extends Fragment {
 
                                 if (flag[0] && flag[1] && flag[2] && flag[3]) {
 
-                                    if (mProgress.isShowing()) {
-                                        mProgress.dismiss();
-                                    }
-                                    AccountRefresh(account);
+                                    FragMainActivity.cmdManager.McuSetAccountState((byte) 0, new CmdResultCallback() {
+                                                @Override
+                                                public void onSuccess(int status, byte[] outputData) {
+
+                                                    if ((status + 65536) == 0x9000) {
+                                                        LogUtil.i("McuSetAccountState !!!");
+                                                    }
+                                                    AccountRefresh(account);
+                                                }
+                                            }
+                                    );
                                 }
                             } else {
                                 LogUtil.i("setAccountInfo failed.");
-                                PublicPun.ClickFunction(getActivity(), "Alert Message", "setAccountInfo failed!");
+                                PublicPun.showNoticeDialog(getActivity(), "Alert Message", "setAccountInfo failed!");
                                 mProgress.dismiss();
                             }
                         }
@@ -557,7 +567,6 @@ public class TabFragment extends Fragment {
                         public void onSuccess(int status, byte[] outputData) {
                             if ((status + 65536) == 0x9000) {
                                 LogUtil.i("CwAccount " + accountId + " created!");
-                                PublicPun.accountRefresh[accountId] = true;
                                 FragMainActivity.ACCOUNT_CNT++;
                                 addFragmentToList(mPageType);
                                 genChangeAddress(Constant.CwAddressKeyChainExternal, accountId);
@@ -567,7 +576,7 @@ public class TabFragment extends Fragment {
                     });
                 } else {
                     mProgress.dismiss();
-                    PublicPun.ClickFunction(getActivity(), "Erro Message", "CreateNewAccount Error:" + Integer.toHexString(status));
+                    PublicPun.showNoticeDialog(getActivity(), "Erro Message", "CreateNewAccount Error:" + Integer.toHexString(status));
                 }
             }
         });
@@ -652,11 +661,11 @@ public class TabFragment extends Fragment {
                     lisCwBtcAdd = DatabaseHelper.queryAddress(getActivity(), position, -1);// 0 = display ext addr only
                     ExchangeRate = DatabaseHelper.queryCurrent(getActivity(), AppPrefrence.getCurrentCountry(getActivity()));
                     AppPrefrence.saveCurrentRate(getActivity(), (float) ExchangeRate);
-                    ((SendFragment) fragments.get(position)).refresh(position);
+                    ((SendFragment) fragments.get(position)).refresh(position, FragMainActivity.scanningResult);
 
                 } else {
                     lisCwBtcAdd = DatabaseHelper.queryAddress(getActivity(), position, 0);// 0 = display ext addr only
-                    ((ReceiveFragment) fragments.get(position)).refresh(false, 0);
+                    ((ReceiveFragment) fragments.get(position)).refresh(false);
                 }
             }
         }

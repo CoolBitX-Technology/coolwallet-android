@@ -93,7 +93,7 @@ public class AddressInfoAdapter extends BaseAdapter {
 
         //建構時決定資料輸出格式
         //#字號當為小數後面為0時會自動去除
-        DecimalFormat formatter = new DecimalFormat("#.######");
+        DecimalFormat formatter = new DecimalFormat("#.########");
 
         CwBtcTxs txs = getItem(position);
         strDate = txs.getTxs_Date();

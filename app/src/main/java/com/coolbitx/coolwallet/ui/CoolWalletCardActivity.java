@@ -54,7 +54,7 @@ public class CoolWalletCardActivity extends BaseActivity implements View.OnClick
 
     private void initValues() {
 
-        edtCardName.setText(PublicPun.card.getCardName());
+        edtCardName.setText(AppPrefrence.getCardName(mContext));
         swtTurCurrency.setChecked(AppPrefrence.getCurrency(mContext));
     }
 
@@ -81,7 +81,8 @@ public class CoolWalletCardActivity extends BaseActivity implements View.OnClick
                     public void onSuccess(int status, byte[] outputData) {
                         if ((status + 65536) == 0x9000) {
                             PublicPun.card.setCardName(cardNameStr);
-                            PublicPun.ClickFunction(mContext, "Updated!","");
+                            AppPrefrence.saveCardName(mContext, cardNameStr);
+                            PublicPun.showNoticeDialog(mContext, "Updated!","");
 
                             cmdManager.turnCurrency(isturnCurrency, new CmdResultCallback() {
                                 @Override

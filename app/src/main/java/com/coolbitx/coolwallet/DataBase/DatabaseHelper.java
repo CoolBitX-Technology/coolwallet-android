@@ -3,7 +3,6 @@ package com.coolbitx.coolwallet.DataBase;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.DatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
@@ -12,6 +11,7 @@ import com.coolbitx.coolwallet.entity.CwBtcTxs;
 import com.coolbitx.coolwallet.entity.dbAddress;
 import com.coolbitx.coolwallet.general.DbName;
 import com.coolbitx.coolwallet.general.PublicPun;
+import com.crashlytics.android.Crashlytics;
 import com.snscity.egdwlib.utils.LogUtil;
 
 import java.text.SimpleDateFormat;
@@ -29,21 +29,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static String sql = "";
     SQLiteDatabase db;
     private static String wid;
-    private static boolean  isUpgrade=false;
+    private static boolean isUpgrade = false;
     private static DatabaseHelper mInstance;
 
     public DatabaseHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
         super(context, name, factory, version);
+        this.wid = PublicPun.card.getCardId();
         this.mContext = context;
     }
 
-    public DatabaseHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version, DatabaseErrorHandler errorHandler) {
-        super(context, name, factory, version, errorHandler);
-    }
+//    public DatabaseHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version, DatabaseErrorHandler errorHandler) {
+//        super(context, name, factory, version, errorHandler);
+//    }
 
     public DatabaseHelper(Context context) {
         this(context, DATABASE_NAME, null, DATABASE_VERSION);
-        wid = PublicPun.card.getCardId();
     }
 
     public synchronized static DatabaseHelper getInstance(Context context) {
@@ -66,12 +66,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
                 tableName = table_array[i];
                 //更新時不變動login file
-                if(isUpgrade) {
+                if (isUpgrade) {
                     if (!tableName.equals(DbName.DATA_BASE_LOGIN)) {
                         sql = "DROP TABLE  IF  EXISTS " + tableName;
                         db.execSQL(sql);
                     }
-                }else{
+                } else {
                     sql = "DROP TABLE  IF  EXISTS " + tableName;
                     db.execSQL(sql);
                 }
@@ -91,7 +91,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         LogUtil.i("onUpgrade Ver: " + newVersion);
-        isUpgrade=true;
+        isUpgrade = true;
         onCreate(db);
     }
 
@@ -100,6 +100,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         String nullColumnHack = "id";
         boolean mResult = false;
         long resultID;
+        long updateResultID;
         // 取出資料庫物件, 並且是可以寫入狀態
         // 當APP空間不夠時, 該方法會呈唯讀狀態
         SQLiteDatabase mDatabase = mOpenHelper.getWritableDatabase();
@@ -110,19 +111,29 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             values.put("RATES", rates);
             resultID = mDatabase.insert(DbName.DATA_BASE_CURRENT, nullColumnHack, values);
             if (resultID == -1) {
-                mResult = false;
+//                mResult = false;
+                updateResultID = mDatabase.update(DbName.DATA_BASE_CURRENT, values, "WID='" + wid + "' AND " + " COUNTRY='" + country + "'", null);
+                LogUtil.d("update CURRENT: " + updateResultID + " ,COUNTRY:" + country + " ,RATES:" + rates);
+                if (updateResultID == -1) {
+                    mResult = false;
+                } else {
+                    mResult = true;
+                }
             } else {
+                LogUtil.d("insert CURRENT: " + resultID + " ,COUNTRY:" + country + " ,RATES:" + rates);
                 mResult = true;
             }
-            LogUtil.i("DbName.DATA_BASE_CURRENT insert: " + resultID + " ,COUNTRY:" + country + " ,RATES:" + rates);
+
             return mResult;
         } catch (Exception e) {
             LogUtil.i("sql insert Error: " + e.toString());
             return mResult;
         } finally {
             mDatabase.close();
+
         }
     }
+
 
     public static ArrayList<String> queryLogin(Context context) {
         ArrayList<String> arraylist = new ArrayList<String>();
@@ -169,7 +180,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // 取得唯讀模式資料庫
         SQLiteDatabase db = mOpenHelper.getReadableDatabase();
         // 透過query來查詢資料
-        LogUtil.i("querySendAddress=" + addr);
+        LogUtil.d("querySendAddress=" + addr);
         Cursor c = null;
         try {
             c = db.query(DbName.DATA_BASE_ADDR,                                 // 資料表名字
@@ -189,7 +200,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 result.setBalance(c.getLong(2));
             }
         } catch (Exception e) {
-
+            LogUtil.e("querySendAddress exception=" + e.getMessage());
+            Crashlytics.log("querySendAddress exception=" + e.getMessage());
         } finally {
             // 釋放資源
             c.close();
@@ -363,8 +375,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // 當APP空間不夠時, 該方法會呈唯讀狀態
         SQLiteDatabase mDatabase = mOpenHelper.getWritableDatabase();
 //        mDatabase.beginTransaction();
-
-
         try {
             ContentValues values = new ContentValues();
             values.put("WID", wid);
@@ -563,6 +573,69 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
+//
+//    public static ArrayList<dbAddress> queryUnspend(Context context, int accountIndex, int pointer) {
+//        //accountIndex -1 代表只抓ext addr
+//        //accountIndex -2 代表只抓int addr
+//        ArrayList<dbAddress> listResult = new ArrayList<dbAddress>();
+//        int mCount = 0;
+//        DatabaseHelper mOpenHelper = new DatabaseHelper(context);
+//        // 取得唯讀模式資料庫
+//        SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+//        // 透過query來查詢資料
+//        Cursor c = null;
+//        try {
+//            if (pointer == 0 || pointer == 1) {
+//                LogUtil.i("queryAddress: wid=" + wid + " ;" + accountIndex + " AND POINTER=" + pointer);
+//                c = db.query("ADDR",                                 // 資料表名字
+//                        new String[]{"WID", "ACCOUNT_ID", "ADDRESS", "KCID", "KID", "N_TX", "ADDRESS_BALANCE", "ADDRESS_LABEL"},  // 要取出的欄位資料
+//                        "WID='" + wid + "' AND ACCOUNT_ID=" + accountIndex + " and KCID=" + pointer,                                              // 查詢條件式
+//                        null,                                              // 查詢條件值字串陣列
+//                        null,                                              // Group By字串語法
+//                        null,                                              // Having字串法
+//                        "ADDRESS_BALANCE DESC",                        // Order By字串語法(排序)
+//                        null);                                             // Limit字串語法
+//            } else {
+//                LogUtil.i("queryAddress: wid" + wid + " ;" + accountIndex + " AND POINTER all");
+//                c = db.query("ADDR",                                 // 資料表名字
+//                        new String[]{"WID", "ACCOUNT_ID", "ADDRESS", "KCID", "KID", "N_TX", "ADDRESS_BALANCE", "ADDRESS_LABEL"},  // 要取出的欄位資料
+//                        "WID='" + wid + "' AND ACCOUNT_ID=" + accountIndex,                                                            // 查詢條件式
+//                        null,                                              // 查詢條件值字串陣列
+//                        null,                                              // Group By字串語法
+//                        null,                                              // Having字串法
+//                        "ADDRESS_BALANCE DESC",                        // Order By字串語法(排序)
+//                        null);                                             // Limit字串語法
+//            }
+//
+//            while (c.moveToNext()) {
+//                mCount++;
+//                dbAddress d = new dbAddress();
+//                d.setWid(c.getString(0));
+//                d.setAccountID(c.getInt(1));
+//                d.setAddress(c.getString(2));
+//                d.setKcid(c.getInt(3));
+//                d.setKid(c.getInt(4));
+//                d.setN_tx(c.getInt(5));
+//                d.setBalance(c.getLong(6));
+//                d.setAddLabel(c.getString(7));
+//                LogUtil.i("query record:" + mCount + "=" + c.getString(0) + ",AccountID=" + c.getInt(1) + ",kcID=" + c.getInt(3) + ",KID=" + c.getInt(4)
+//                        + ",ADDR=" + c.getString(2)
+//                        + ",N_tx=" + c.getInt(5)
+//                        + "," + c.getLong(6));
+//
+//                listResult.add(d);
+//            }
+//        } catch (Exception e) {
+//
+//        } finally {
+//            // 釋放資源
+//            c.close();
+//            db.close();
+//
+//            return listResult;
+//        }
+//    }
+
     public static ArrayList<String> queryExchangeRate(Context context) {
         ArrayList<String> arraylist = new ArrayList<String>();
         int mCount = 0;
@@ -608,7 +681,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         try {
             c = db.query("ADDR",                                 // 資料表名字
                     new String[]{"ACCOUNT_ID"},  // 要取出的欄位資料
-                    "WID='" + wid + "' AND ADDRESS='"+addr+"'",                                              // 查詢條件式
+                    "WID='" + wid + "' AND ADDRESS='" + addr + "'",                                              // 查詢條件式
                     null,                                              // 查詢條件值字串陣列
                     null,                                              // Group By字串語法
                     null,                                              // Having字串法
@@ -619,7 +692,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
                 resultAccount = c.getInt(0);
             }
-            LogUtil.i(addr+" queryAccountByAddress " + resultAccount );
+            LogUtil.i(addr + " queryAccountByAddress " + resultAccount);
             // 釋放資源
         } catch (Exception e) {
 
@@ -631,11 +704,51 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
+//    public static double queryCurrent(Context context, String country) {
+//        double BtcRates = 0;
+//        double ChooseRate = 0;
+//        double rate = 0;
+//        int mCount = 0;
+//        DatabaseHelper mOpenHelper = new DatabaseHelper(context);
+//        // 取得唯讀模式資料庫
+//        SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+//        // 透過query來查詢資料
+//        Cursor c = null;
+//        try {
+//            c = db.query("CURRENT",                                 // 資料表名字
+//                    new String[]{"COUNTRY", "RATES"},  // 要取出的欄位資料
+//                    "WID='" + wid + "'",                                              // 查詢條件式
+//                    null,                                              // 查詢條件值字串陣列
+//                    null,                                              // Group By字串語法
+//                    null,                                              // Having字串法
+//                    "COUNTRY",                        // Order By字串語法(排序)
+//                    null);                                             // Limit字串語法
+//
+//            while (c.moveToNext()) {
+//                mCount++;
+//                if (c.getString(0).equals("BTC")) {
+//                    BtcRates = c.getDouble(1);
+//                }
+//                if (c.getString(0).equals(country)) {
+//                    ChooseRate = c.getDouble(1);
+//                }
+//                rate = ChooseRate / BtcRates;
+//
+//            }
+//            LogUtil.i("query rate " + mCount + " BTC=" + String.valueOf(BtcRates) + ",ChooseRate=" + String.valueOf(ChooseRate) + " ;rate=" + rate);
+//            // 釋放資源
+//        } catch (Exception e) {
+//
+//        } finally {
+//            c.close();
+//            db.close();
+//
+//            return rate;
+//        }
+//    }
+
     public static double queryCurrent(Context context, String country) {
-        double BtcRates = 0;
-        double ChooseRate = 0;
         double rate = 0;
-        int mCount = 0;
         DatabaseHelper mOpenHelper = new DatabaseHelper(context);
         // 取得唯讀模式資料庫
         SQLiteDatabase db = mOpenHelper.getReadableDatabase();
@@ -644,7 +757,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         try {
             c = db.query("CURRENT",                                 // 資料表名字
                     new String[]{"COUNTRY", "RATES"},  // 要取出的欄位資料
-                    "WID='" + wid + "'",                                              // 查詢條件式
+                    "WID='" + wid + "' and COUNTRY='" + country + "'",                                              // 查詢條件式
                     null,                                              // 查詢條件值字串陣列
                     null,                                              // Group By字串語法
                     null,                                              // Having字串法
@@ -652,24 +765,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     null);                                             // Limit字串語法
 
             while (c.moveToNext()) {
-                mCount++;
-                if (c.getString(0).equals("BTC")) {
-                    BtcRates = c.getDouble(1);
-                }
-                if (c.getString(0).equals(country)) {
-                    ChooseRate = c.getDouble(1);
-                }
-                rate = ChooseRate / BtcRates;
+                rate = c.getDouble(1);
 
             }
-            LogUtil.i("query rate " + mCount + " BTC=" + String.valueOf(BtcRates) + ",ChooseRate=" + String.valueOf(ChooseRate) + " ;rate=" + rate);
+            LogUtil.d("query rate " + c.getString(0) + "=" + rate);
             // 釋放資源
         } catch (Exception e) {
 
         } finally {
             c.close();
             db.close();
-
             return rate;
         }
     }

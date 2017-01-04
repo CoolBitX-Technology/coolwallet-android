@@ -1,12 +1,10 @@
 package com.coolbitx.coolwallet.general;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.graphics.Point;
-import android.text.InputFilter;
-import android.text.Spanned;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,7 +30,7 @@ import com.coolbitx.coolwallet.entity.User;
 import com.coolbitx.coolwallet.entity.Wallet;
 import com.coolbitx.coolwallet.entity.socketByAddress;
 import com.coolbitx.coolwallet.ui.BleActivity;
-import com.coolbitx.coolwallet.ui.Fragment.TabFragment;
+import com.crashlytics.android.Crashlytics;
 import com.google.gson.Gson;
 import com.snscity.egdwlib.utils.LogUtil;
 
@@ -92,10 +90,6 @@ public class PublicPun {
 
     public static Wallet wallet = new Wallet();
 
-//    public static String AlertToFinish = "Finish";
-//    public static String AlertToKill = "Kill";
-//    public static String AlertToNothing="Nothing";
-
     /**
      * 管理fragment栈
      */
@@ -117,35 +111,6 @@ public class PublicPun {
     static ArrayList<ExchangeRate> lisExchangeRate = new ArrayList<ExchangeRate>();
     public static double SATOSHI_RATE = 0.00000001;
 
-    /**
-     * 输入框小数的位数
-     */
-    private static final int DECIMAL_DIGITS = 8;
-    /**
-     * 设置小数位数控制
-     */
-    // 设置小数位数控制
-
-    public static InputFilter lengthfilter = new InputFilter() {
-        public CharSequence filter(CharSequence source, int start, int end,
-                                   Spanned dest, int dstart, int dend) {
-            // 删除等特殊字符，直接返回
-            if ("".equals(source.toString())) {
-                return null;
-            }
-            String dValue = dest.toString();
-            String[] splitArray = dValue.split("\\.");
-            if (splitArray.length > 1) {
-
-                String dotValue = splitArray[1];
-                int diff = dotValue.length() + 1 - DECIMAL_DIGITS;
-                if (diff > 0) {
-                    return source.subSequence(start, end - diff);
-                }
-            }
-            return null;
-        }
-    };
 
     public static int FindScreenSize(Context mContext) {
         //Find screen size
@@ -162,13 +127,17 @@ public class PublicPun {
 
 
     public static byte[] hexStringToByteArray(String s) {
-        int len = s.length();
-        byte[] data = new byte[len / 2];
+        byte[] data = null;
+        try {
+            int len = s.length();
+            data = new byte[len / 2];
 
-        for (int i = 0; i < len; i += 2) {
-            data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4) + Character.digit(s.charAt(i + 1), 16));
+            for (int i = 0; i < len; i += 2) {
+                data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4) + Character.digit(s.charAt(i + 1), 16));
+            }
+        } catch (Exception e) {
+
         }
-
         return data;
     }
 
@@ -201,52 +170,83 @@ public class PublicPun {
         return mResult;
     }
 
-    public static ArrayList<UnSpentTxsBean> jsonParserUnspent(String jsonString, int unspendNum) {
+    public static ArrayList<UnSpentTxsBean> jsonParserUnspentII(String jsonString) {
 
         ArrayList<UnSpentTxsBean> lisUnSpentTxs = new ArrayList<UnSpentTxsBean>();
         String UnSpentTxsAddr = null;
         try {
             JSONObject jsonObject = new JSONObject(jsonString);
             Gson gson = new Gson();
-            if (unspendNum == 1) {
-                JSONObject jsonObjectData = jsonObject.getJSONObject("data");
-                UnSpentTxsAddr = jsonObjectData.getString("address");
-                JSONArray jsonArrayUnspentData = jsonObjectData.getJSONArray("unspent");
+            JSONArray jsonArrayData = jsonObject.getJSONArray("data");
+        } catch (Exception e) {
+            LogUtil.e("Unspent JSON Parsing error:" + e.toString());
+            e.printStackTrace();
+        } finally {
+            return lisUnSpentTxs;
+        }
+    }
 
-                for (int j = 0; j < jsonArrayUnspentData.length(); j++) {
-                    JSONObject jsonObjectUnspentData = jsonArrayUnspentData.getJSONObject(j);
-                    UnSpentTxsBean mUnSpentTxsBean = gson.fromJson(jsonObjectUnspentData.toString(), UnSpentTxsBean.class);
-                    mUnSpentTxsBean.setAddress(UnSpentTxsAddr);
-                    LogUtil.i("mUnSpentTxsBean第" + String.valueOf(j) + " 筆= " + mUnSpentTxsBean.getAddress() + " ; " + TabFragment.BtcFormatter.format(mUnSpentTxsBean.getAmount()) + ";" + mUnSpentTxsBean.getTx());
-                    //skip the data of confirmation=0
-                    if (mUnSpentTxsBean.getConfirmations() > 0) {
-                        lisUnSpentTxs.add(mUnSpentTxsBean);
-                    }
-                }
-            } else {
-                JSONArray jsonArrayData = jsonObject.getJSONArray("data");
-                for (int i = 0; i < jsonArrayData.length(); i++) {
-                    JSONObject jsonObjectData = jsonArrayData.getJSONObject(i);
-                    UnSpentTxsAddr = jsonObjectData.getString("address");
-                    JSONArray jsonArrayUnspentData = jsonObjectData.getJSONArray("unspent");
+    public static ArrayList<UnSpentTxsBean> jsonParserUnspent(String jsonString) {
 
+//      JSONObject  json = RestManager.getJSONfromURL(myuri); // retrieve the entire json stream
+        ArrayList<UnSpentTxsBean> lisUnSpentTxs = new ArrayList<UnSpentTxsBean>();
+        Gson gson = new Gson();
+        String UnSpentTxsAddr;
+        Object jsonData;
+        JSONArray jsonDataJsonArray;
+        JSONObject jsonDataJsonObject;
+
+        try {
+            LogUtil.e("jsonString=" + jsonString);
+            jsonData = new JSONObject(jsonString).get("data");
+            LogUtil.e("JSONObject" + jsonData.toString());
+
+            if (jsonData instanceof JSONArray) {
+                // It's an array
+                jsonDataJsonArray = (JSONArray) jsonData;
+
+                for (int i = 0; i < jsonDataJsonArray.length(); i++) {
+                    JSONObject jsonObjectDate = jsonDataJsonArray.getJSONObject(i);
+                    UnSpentTxsAddr = jsonObjectDate.getString("address");
+                    LogUtil.e("JSONArray1" + UnSpentTxsAddr.toString());
+                    JSONArray jsonArrayUnspentData = jsonObjectDate.getJSONArray("unspent");
+                    LogUtil.e("JSONArray2" + jsonArrayUnspentData.toString());
                     for (int j = 0; j < jsonArrayUnspentData.length(); j++) {
                         JSONObject jsonObjectUnspentData = jsonArrayUnspentData.getJSONObject(j);
                         UnSpentTxsBean mUnSpentTxsBean = gson.fromJson(jsonObjectUnspentData.toString(), UnSpentTxsBean.class);
                         mUnSpentTxsBean.setAddress(UnSpentTxsAddr);
-                        LogUtil.i("mUnSpentTxsBean第" + String.valueOf(j) + " 筆= " + mUnSpentTxsBean.getAddress() + " ; " + TabFragment.BtcFormatter.format(mUnSpentTxsBean.getAmount()) + ";" + mUnSpentTxsBean.getTx());
+                        LogUtil.i("mUnSpentTxsBean第" + String.valueOf(j) + " 筆= " + mUnSpentTxsBean.getAddress() + " ; " + String.valueOf(mUnSpentTxsBean.getAmount()) + ";" + mUnSpentTxsBean.getTx());
                         //skip the data of confirmation=0
-                        if (mUnSpentTxsBean.getConfirmations() > 0) {
+                        if (mUnSpentTxsBean.getConfirmations() != 0) {
                             lisUnSpentTxs.add(mUnSpentTxsBean);
                         }
                     }
                 }
+            } else if (jsonData instanceof JSONObject) {
+                // It's an object
+                jsonDataJsonObject = (JSONObject) jsonData;
+                UnSpentTxsAddr = jsonDataJsonObject.getString("address");
+                LogUtil.e("JSONObject1" + UnSpentTxsAddr.toString());
+                JSONArray jsonArrayUnspentData = jsonDataJsonObject.getJSONArray("unspent");
+                LogUtil.e("JSONObject2" + jsonArrayUnspentData.toString());
+                for (int j = 0; j < jsonArrayUnspentData.length(); j++) {
+                    JSONObject jsonObjectUnspentData = jsonArrayUnspentData.getJSONObject(j);
+                    UnSpentTxsBean mUnSpentTxsBean = gson.fromJson(jsonObjectUnspentData.toString(), UnSpentTxsBean.class);
+                    mUnSpentTxsBean.setAddress(UnSpentTxsAddr);
+                    LogUtil.i("mUnSpentTxsBean第" + String.valueOf(j) + " 筆= " + mUnSpentTxsBean.getAddress() + " ; " + String.valueOf(mUnSpentTxsBean.getAmount()) + ";" + mUnSpentTxsBean.getTx());
+                    //skip the data of confirmation=0
+                    if (mUnSpentTxsBean.getConfirmations() != 0) {
+                        lisUnSpentTxs.add(mUnSpentTxsBean);
+                    }
+                }
+            } else {
+                LogUtil.e("jSon type wrong");
             }
+
         } catch (Exception e) {
             LogUtil.e("JSONException:" + e.toString());
             e.printStackTrace();
         } finally {
-
             return lisUnSpentTxs;
         }
     }
@@ -259,7 +259,6 @@ public class PublicPun {
             //建立Gson類別並將JSON資料裝入class物件裡
             Gson gson = new Gson();
             if (jsonObject.get("type").equals("address")) {
-                LogUtil.i("json ok");
                 socketAddress = new socketByAddress();
                 JSONObject jsonObjectSocket = jsonObject.getJSONObject("data");
                 socketAddress = gson.fromJson(jsonObjectSocket.toString(), socketByAddress.class);
@@ -295,12 +294,58 @@ public class PublicPun {
                 JSONObject jsonObjectExchangeRate = jsonArrayExchangeRate.getJSONObject(i).getJSONObject("rates");
 
                 for (int j = 0; j < jsonObjectExchangeRate.names().length(); j++) {
-                    String strRates = jsonObjectExchangeRate.get((jsonObjectExchangeRate.names().getString(j))).toString();
+                    String strRates = jsonObjectExchangeRate.get(jsonObjectExchangeRate.names().getString(j)).toString();
                     double rates = Double.parseDouble(strRates);
                     String key = jsonObjectExchangeRate.names().getString(j);
 //                    LogUtil.i("key = " + key + " value = " + rates);
                     DatabaseHelper.insertCurrent(mContext, key, rates);
                 }
+            }
+            mResult = true;
+        } catch (Exception e) {
+            mResult = false;
+            LogUtil.e("GsonEception:" + e.toString());
+            e.printStackTrace();
+        } finally {
+            return mResult;
+        }
+    }
+
+
+    public static boolean jsonParsingFeeaRate(Context mContext, String jsonString) {
+        boolean mResult = false;
+        try {
+            LogUtil.d("jsonParsingFeeaRate="+jsonString);
+            JSONObject jsonObjectFeesRate = new JSONObject(jsonString);
+            int halfHourFee = jsonObjectFeesRate.getInt("halfHourFee");
+            LogUtil.d("halfHourFee="+halfHourFee);
+            AppPrefrence.saveRecommendedHalfHourFees(mContext,halfHourFee);
+
+            mResult = true;
+        } catch (Exception e) {
+            mResult = false;
+            LogUtil.e("GsonEception:" + e.toString());
+            e.printStackTrace();
+        } finally {
+            return mResult;
+        }
+
+    }
+
+    public static boolean jsonParserBlockChainRate(Context mContext, String jsonString) {
+
+        boolean mResult = false;
+        try {
+            JSONObject jsonObjectExchangeRate = new JSONObject(jsonString);
+            for (int j = 0; j < jsonObjectExchangeRate.names().length(); j++) {
+//                    String strRates = jsonObjectExchangeRate.get(jsonObjectExchangeRate.names().getString(j)).toString();
+                Object objList = jsonObjectExchangeRate.getString(jsonObjectExchangeRate.names().getString(j));
+                JSONObject jsonObjList = new JSONObject(objList.toString());
+                String strRates = jsonObjList.get("last").toString();
+                double rates = Double.parseDouble(strRates);
+                String key = jsonObjectExchangeRate.names().getString(j);
+//                    LogUtil.d("匯率: " + key + " value = " + rates);
+                DatabaseHelper.insertCurrent(mContext, key, rates);
             }
             mResult = true;
         } catch (Exception e) {
@@ -413,7 +458,8 @@ public class PublicPun {
                 DatabaseHelper.insertTxs(mContext, mCwBtcTxs);
             }
         } catch (Exception e) {
-            LogUtil.e("GsonEception:" + e.toString());
+            LogUtil.e("JsonEception:" + e.toString());
+            Crashlytics.log("jsonParserRefresh failed jSon=" + jsonString);
             e.printStackTrace();
 
         } finally {
@@ -498,64 +544,71 @@ public class PublicPun {
         return bytes;
     }
 
+//    public static void showNoticeDialog(Context mContext, String mTitle, String mMessage) {
+//        LayoutInflater inflater = LayoutInflater.from(mContext);
+//        View alert_view = inflater.inflate(R.layout.edit_dialog, null);//alert為另外做給alert用的layout
+////        final EditText mEditText = (EditText) alert_view.findViewById(R.id.etInputLabel);
+//        final TextView mDialogTitle = (TextView) alert_view.findViewById(R.id.dialog_title);
+//        final TextView mDialogMessage = (TextView) alert_view.findViewById(R.id.dialog_message);
+////        mEditText.setVisibility(View.INVISIBLE);
+//        //-----------產生輸入視窗--------
+//        AlertDialog.Builder builder = new AlertDialog.Builder(mContext, AlertDialog.THEME_DEVICE_DEFAULT_LIGHT);
+//        mDialogTitle.setText(mTitle);
+//        mDialogMessage.setText(mMessage);
+//        builder.setView(alert_view);
+//        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+//            public void onClick(DialogInterface dialog, int whichButton) {
+//
+//            }
+//        });
+//        LogUtil.e("clickFunction");
+//        builder.show();
+//    }
+
     /**
      * show Dialog Messahe
      **/
-    public static void ClickFunction(Context mContext, String mTitle, String mMessage) {
+    public static void showNoticeDialog(Context mContext, String mTitle, String mMessage) {
+
         LayoutInflater inflater = LayoutInflater.from(mContext);
         View alert_view = inflater.inflate(R.layout.edit_dialog, null);//alert為另外做給alert用的layout
-        final EditText mEditText = (EditText) alert_view.findViewById(R.id.etInputLabel);
         final TextView mDialogTitle = (TextView) alert_view.findViewById(R.id.dialog_title);
         final TextView mDialogMessage = (TextView) alert_view.findViewById(R.id.dialog_message);
-        mEditText.setVisibility(View.INVISIBLE);
+        mDialogTitle.setText(mTitle);
         mDialogMessage.setText(mMessage);
         //-----------產生輸入視窗--------
-        AlertDialog.Builder builder = new AlertDialog.Builder(mContext, AlertDialog.THEME_HOLO_LIGHT);
-        mDialogTitle.setText(mTitle);
-        builder.setView(alert_view);
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
+        new AlertDialog.Builder(mContext, AlertDialog.THEME_DEVICE_DEFAULT_LIGHT)
+                .setView(alert_view)
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
 
-            }
-        });
-        builder.show();
+                    }
+                }).show();
     }
 
-    public static void ClickFunctionToFinish(final Context mContext, String mTitle, String mMessage) {
 
-        //獲取當前activity
-//        ActivityManager am = (ActivityManager) mContext.gete(mContext.ACTIVITY_SERVICE);
-//        ComponentName cn = am.getRunningTasks(1).get(0).topActivity;
-//        LogUtil.i( "pkg:"+cn.getPackageName());
-//        LogUtil.i( "cls:"+cn.getClassName());
-
+    public static void showNoticeDialogToFinish(final Context mContext, String mTitle, String mMessage) {
         LayoutInflater inflater = LayoutInflater.from(mContext);
         View alert_view = inflater.inflate(R.layout.edit_dialog, null);//alert為另外做給alert用的layout
         final EditText mEditText = (EditText) alert_view.findViewById(R.id.etInputLabel);
         final TextView mDialogTitle = (TextView) alert_view.findViewById(R.id.dialog_title);
         final TextView mDialogMessage = (TextView) alert_view.findViewById(R.id.dialog_message);
-        mEditText.setVisibility(View.INVISIBLE);
-        mDialogMessage.setText(mMessage);
+//        mEditText.setVisibility(View.INVISIBLE);
         //-----------產生輸入視窗--------
-        AlertDialog.Builder builder = new AlertDialog.Builder(mContext, AlertDialog.THEME_HOLO_LIGHT);
+        AlertDialog.Builder builder = new AlertDialog.Builder(mContext, AlertDialog.THEME_DEVICE_DEFAULT_LIGHT);
+        builder.setCancelable(false);
         mDialogTitle.setText(mTitle);
+        mDialogMessage.setText(mMessage);
         builder.setView(alert_view);
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
-//                    BleActivity.bleManager.disConnectBle();
-//                ((Activity) mContext).finish(); // 離開程式
-//                System.exit(0);
-//                android.os.Process.killProcess(android.os.Process.myPid());
                 BleActivity.bleManager.disConnectBle();
-                Intent intent = new Intent();
-                intent.setClass(mContext, BleActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);//关掉所要到的界面中间的activity
-                mContext.startActivity(intent);
+                ((Activity) mContext).finish(); // 離開程式
+                System.exit(0);
             }
         });
         builder.show();
     }
-
 
     /**
      * 短土司
@@ -675,6 +728,7 @@ public class PublicPun {
         str = (temp + str).substring(0, maxLength);
         return str;
     }
+
 
 //    /**
 //     * Author :

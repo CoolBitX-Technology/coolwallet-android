@@ -8,8 +8,8 @@ import com.google.gson.annotations.SerializedName;
 public class PasingWallet {
     public int n_tx;
     public int n_tx_filtered;
-    public int total_received;
-    public int total_sent;
+    public long total_received;
+    public long total_sent;
     @SerializedName("final_balance")
     public long final_balance;
 
@@ -29,7 +29,7 @@ public class PasingWallet {
         this.n_tx_filtered = n_tx_filtered;
     }
 
-    public int getTotal_received() {
+    public long getTotal_received() {
         return total_received;
     }
 
@@ -37,7 +37,7 @@ public class PasingWallet {
         this.total_received = total_received;
     }
 
-    public int getTotal_sent() {
+    public long getTotal_sent() {
         return total_sent;
     }
 

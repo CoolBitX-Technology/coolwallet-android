@@ -12,12 +12,14 @@ import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Handler;
+import android.widget.Toast;
 
 import com.snscity.egdwlib.ble.BleGattCallback;
 import com.snscity.egdwlib.ble.BleScanCallback;
 import com.snscity.egdwlib.ble.BleStateCallback;
 import com.snscity.egdwlib.cmd.CmdProcessor;
 import com.snscity.egdwlib.utils.LogUtil;
+import com.snscity.egdwlib.utils.ValidationException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,25 +40,33 @@ public class BleManager {
 
     private Handler handler;
 
-    public BleManager(Context context) {
+    public BleManager(Context context)  {
         this.context = context;
         handler = new Handler();
-        initialize();
+        try {
+            initialize();
+        }catch(ValidationException ve){
+//            LogUtil.ClickFunction(context,"Alert Message",ve.getMessage());
+            Toast.makeText(context,ve.getMessage(),Toast.LENGTH_LONG).show();
+        }
     }
 
-    private void initialize() {
+    private void initialize() throws ValidationException {
         BluetoothManager bluetoothManager = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
         bluetoothAdapter = bluetoothManager.getAdapter();
         if (bluetoothAdapter == null) {
             LogUtil.e("your device not support bluetooth");
-            return;
+            throw new ValidationException("your device not support bluetooth");
+//            return;
         }
         if (!context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
             LogUtil.e("your device not support ble");
+            throw new ValidationException("your device not support bluetooth");
         }
     }
 
-    public boolean isOpen(){
+    public boolean isOpen() {
+
         return bluetoothAdapter.isEnabled();
     }
 
@@ -162,7 +172,7 @@ public class BleManager {
                     cmdProcessor = CmdProcessor.getInstance();
                     cmdProcessor.init(bluetoothGatt, gattCharacteristics);
                     setBleGattCallback(cmdProcessor);
-                }catch(Exception e){
+                } catch (Exception e) {
                     e.getStackTrace();
                 }
                 final BleStateCallback callback = bleStateCallback;

@@ -4,64 +4,53 @@
     android:layout_width="300dp"
     android:layout_height="wrap_content"
     android:layout_gravity="center_vertical|center_horizontal"
+    android:background="@android:color/darker_gray"
     android:orientation="vertical"
-    android:background="@android:color/darker_gray">
+    android:padding="@dimen/send_dialog_margin">
 
 
     <TextView
+        android:id="@+id/dialog_title"
+        style="@style/TextView_Gray_18"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Request Payment"
-        android:id="@+id/dialog_title"
         android:layout_gravity="center_horizontal"
-        android:textColor="@android:color/black"
         android:layout_marginTop="10dp"
-        style="@style/TextView_Gray_18"
-        android:textStyle="bold"
-        />
+        android:text="Request Payment"
+        android:textColor="@android:color/black"
+        android:textStyle="bold" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.5dip"
+        android:layout_marginTop="10sp"
+        android:background="@color/dark_gray" />
 
     <EditText
         android:id="@+id/etInputLabel"
         android:layout_width="250dp"
         android:layout_height="40dp"
         android:layout_gravity="center"
-        android:hint="label"
-        android:textColor="@android:color/black"
+        android:layout_marginTop="10dp"
         android:background="@drawable/textview_border"
-        android:textSize="18sp"
-        android:text=""
-        android:layout_marginTop="20dp"
-        android:inputType="numberDecimal"
-        android:imeOptions="actionDone"/>
+        style="@style/TextView_Black_18"
+        android:hint="label"
+        android:inputType="number"
+        android:visibility="gone"
+      />
 
     <TextView
+        android:id="@+id/dialog_message"
+        style="@style/TextView_Black_14"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Request Payment"
-        android:id="@+id/dialog_message"
         android:layout_gravity="center_horizontal"
-        android:textColor="@android:color/black"
-        style="@style/TextView_Black_14"
         android:layout_marginLeft="5dp"
-        />
+        android:layout_marginTop="10dp"
+        android:text="Your balance needs at least one confirmation on Blockchain before you can send it out. Please try again late"
+        android:textColor="@android:color/black" />
     <!--android:background="@android:color/white"-->
     <!--border lines for rows-->
-    <View
-        android:layout_height="0.5dip"
-        android:layout_marginTop="20sp"
-        android:background="@color/dark_gray"
-        android:layout_width="match_parent" />
-
-    <!--<Button-->
-        <!--android:id="@+id/dialog_button_yes"-->
-        <!--android:layout_width="fill_parent"-->
-        <!--android:layout_height="45dip"-->
-        <!--android:layout_weight="1"-->
-        <!--android:background="@android:color/darker_gray"-->
-        <!--android:text="OK"-->
-        <!--android:layout_gravity="center"-->
-        <!--android:textColor="@color/md_deep_purple_900"-->
-        <!--android:textSize="18sp" />-->
 
 
 </LinearLayout>

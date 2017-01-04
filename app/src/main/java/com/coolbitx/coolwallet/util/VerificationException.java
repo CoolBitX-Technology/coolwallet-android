@@ -17,7 +17,7 @@
 package com.coolbitx.coolwallet.util;
 
 @SuppressWarnings("serial")
-public class VerificationException extends RuntimeException {
+public class VerificationException extends Exception {
     private static final long serialVersionUID = 1L;
 
 

@@ -3,10 +3,12 @@ package com.coolbitx.coolwallet.util;
 import com.snscity.egdwlib.utils.LogUtil;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.StringTokenizer;
@@ -58,7 +60,7 @@ public class BIP39 {
         return data;
     }
 
-    public static String encode(byte[] data, String passphrase) {
+    public static String encode(byte[] data, String passphrase) throws ValidationException{
         if (data.length % 8 != 0) {
         }
         try {
@@ -74,7 +76,7 @@ public class BIP39 {
         return getMnemonic(data);
     }
 
-    public static String getMnemonic(byte[] data) {
+    public static String getMnemonic(byte[] data) throws ValidationException{
         if (data.length % 8 != 0) {
             return "";
         }
@@ -100,11 +102,13 @@ public class BIP39 {
             int idx = 0;
             for (int j = 0; j < 11; j++) {
                 idx += (bits[i * 11 + j] ? 1 : 0) << (10 - j);
+                LogUtil.d("idx="+idx+";i="+i+";j="+j);
             }
+
             mnemo.append(englishWords[idx]);
 
             bip39Word[i] = String.valueOf(i + 1) + ". " + englishWords[idx];
-//            LogUtil.i("words: "+bip39Word[i]);
+            LogUtil.i("words: "+bip39Word[i]);
 
             if (i < mlen - 1) {
                 mnemo.append(" ");
@@ -114,6 +118,75 @@ public class BIP39 {
         return mnemo.toString();
     }
 
+    /**
+     * 功能：檢查是否舊版seed的方法
+     * 说明：mnemonic還原Entropy檢查是舊字元還是新字元方法
+     *
+     * @author: Dora
+     * @return:
+     */
+
+    public static byte[] getEntropy(String mnemonic) throws ParseException {
+        StringBuilder sentopyb = new StringBuilder();
+        String[] amneonic = mnemonic.split(" ");
+        int WORDIDX_BITS=11;//entropy轉成mnemonic時每11個bit切成一個單字
+        int off = 0;
+        for (String w : amneonic) {
+            int idx = Arrays.binarySearch(englishWords, w);
+            if (idx < 0) {
+                throw new ParseException("Unknown word: " + w, off);
+            }
+            byte[] bidx = ByteBuffer.allocate(4).putInt(idx).array();
+            String sidx = toBitString(bidx);
+            sidx = sidx.substring(sidx.length() - WORDIDX_BITS, sidx.length());
+            sentopyb.append(sidx);
+            off++;
+        }
+        String sentopy = sentopyb.toString();
+        int cs = (int) (sentopy.length() / 33.0);
+        sentopy = sentopy.substring(0, sentopy.length() - cs);
+
+        byte[] entopy = new byte[sentopy.length() / 8];
+        for (int i = 0, p = 0; i < sentopy.length(); i += 8) {
+            String t = sentopy.substring(i, i + 8);
+            entopy[p++] = (byte) Integer.parseInt(t, 2);
+        }
+        return entopy;
+    }
+
+
+    private final static byte[] SIMPLE_AN=new byte[] {0x30,0x31,0x32,0x33,0x34,0x35,0x36,0x37,0x38,0x39,0x61,0x62,0x63,0x64,0x65,0x66,0x67,0x68,0x69,0x6a,0x6b,0x6c,0x6d,0x6e,0x6f,0x70,0x71,0x72,0x73,0x74,0x75,0x76,0x77,0x78,0x79,0x7a};
+    public static boolean isSimpleEntropy(String mnemonic) {
+        try {
+            byte[] entropy = getEntropy(mnemonic);
+            for (byte b : entropy) {
+                if (Arrays.binarySearch(SIMPLE_AN, b) < 0)
+                    return false;
+            }
+        }catch(ParseException pe){
+            return false;
+        }
+        return true;
+    }
+
+    private static String toBitString(final byte[] b) {
+        final char[] bits = new char[8 * b.length];
+        for (int i = 0; i < b.length; i++) {
+            final byte byteval = b[i];
+            int bytei = i << 3;
+            int mask = 0x1;
+            for (int j = 7; j >= 0; j--) {
+                final int bitval = byteval & mask;
+                if (bitval == 0) {
+                    bits[bytei + j] = '0';
+                } else {
+                    bits[bytei + j] = '1';
+                }
+                mask <<= 1;
+            }
+        }
+        return String.valueOf(bits);
+    }
 
     /**
      * 功能：分兩行顯示seedWords
@@ -135,6 +208,9 @@ public class BIP39 {
                 seedWprdsLine2 = SeedWords.toString();
             }
         }
+//        LogUtil.i("show 1=" + seedWprdsLine1);
+//        LogUtil.i("show 2=" + seedWprdsLine2);
+
         return SeedWords.toString();
     }
 
@@ -143,6 +219,7 @@ public class BIP39 {
         //先排序在搜尋比較快
         int mSearch = -1;
         mSearch = java.util.Arrays.binarySearch(englishWords, strSeed);
+//        LogUtil.d("englishWords length="+englishWords.length);
         if (mSearch > 0) {
             return true;
         } else {

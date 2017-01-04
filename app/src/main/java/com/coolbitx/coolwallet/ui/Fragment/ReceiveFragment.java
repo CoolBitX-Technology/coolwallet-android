@@ -27,7 +27,9 @@ import com.coolbitx.coolwallet.entity.Constant;
 import com.coolbitx.coolwallet.entity.Contents;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.coolbitx.coolwallet.util.Base58;
+import com.coolbitx.coolwallet.util.ExtendedKey;
 import com.coolbitx.coolwallet.util.QRCodeEncoder;
+import com.coolbitx.coolwallet.util.ValidationException;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 import com.snscity.egdwlib.CmdManager;
@@ -55,8 +57,6 @@ public class ReceiveFragment extends BaseFragment implements View.OnClickListene
     public static byte[] hdwAccountPointer;
     private int accountId = -1;
     private Address address;
-    private int cntAdd;
-    private int cntCmpAdd;
     private List<Account> cwAccountList = new ArrayList<>();
     private Button item_btn_edit;
     private Button item_btn_request;
@@ -66,7 +66,7 @@ public class ReceiveFragment extends BaseFragment implements View.OnClickListene
     private TextView vClickLabel;
     private static int genKid = 0;
     private ReceiveListViewAdapter.OnRecvListClickListener mOnRecvListClickListener = null;
-    //    private Context mContext;
+//    private Context mContext;
     //for Bundle
     private String value = "";
     private String title = "";
@@ -96,10 +96,7 @@ public class ReceiveFragment extends BaseFragment implements View.OnClickListene
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-
-//        FragMainActivity mainActivity = (FragMainActivity) activity;
-//        mContext = mainActivity;
-
+        //already do it on BaseFragment
     }
 
     @Override
@@ -110,6 +107,7 @@ public class ReceiveFragment extends BaseFragment implements View.OnClickListene
         id = getArguments().getInt(DATA_ID);
         value = ((FragMainActivity) mContext).getAccountFrag(id);
     }
+
 
 
     @Override
@@ -126,7 +124,7 @@ public class ReceiveFragment extends BaseFragment implements View.OnClickListene
 //        if (lisCwBtcAdd.size()==0) {
 //            lisCwBtcAdd = new ArrayList<>();
 //            syncFromCard();
-        refresh(false, 0);
+        refresh(false);
 //        } else {
 //            Refresh(false);
 //        }
@@ -137,13 +135,14 @@ public class ReceiveFragment extends BaseFragment implements View.OnClickListene
     private void syncFromCard() {
 
         //infoId 1B (=00 status, 01 name, 02 accountPointer)
-//        queryWallteInfo(getWalltePointer);
+        queryWallteInfo(getWalltePointer);
     }
 
     private void ClickFunction(String mTitle, final int position, String mMessage, View v) {
-        LayoutInflater inflater = LayoutInflater.from(getActivity());
+        LayoutInflater inflater = LayoutInflater.from(mContext);
         View alert_view = inflater.inflate(R.layout.edit_dialog, null);//alert為另外做給alert用的layout
         final EditText mEditText = (EditText) alert_view.findViewById(R.id.etInputLabel);
+        mEditText.setVisibility(View.VISIBLE);
         final TextView mDialogTitle = (TextView) alert_view.findViewById(R.id.dialog_title);
         final TextView mDialogMessage = (TextView) alert_view.findViewById(R.id.dialog_message);
         final int id = v.getId();
@@ -155,7 +154,7 @@ public class ReceiveFragment extends BaseFragment implements View.OnClickListene
                 LogUtil.i("按edit");
                 break;
             case R.id.btn_request:
-                mEditText.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+                mEditText.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL);
                 mDialogMessage.setVisibility(View.GONE);
                 LogUtil.i("按request");
                 break;
@@ -163,12 +162,12 @@ public class ReceiveFragment extends BaseFragment implements View.OnClickListene
                 mEditText.setVisibility(View.GONE);
                 LogUtil.i("按copy");
                 ClipboardManager clipboardManager
-                        = (ClipboardManager) getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
+                        = (ClipboardManager) mContext.getSystemService(Context.CLIPBOARD_SERVICE);
                 clipboardManager.setText(TabFragment.lisCwBtcAdd.get(position).getAddress());
                 break;
         }
         //-----------產生輸入視窗--------
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), AlertDialog.THEME_HOLO_LIGHT);
+        AlertDialog.Builder builder = new AlertDialog.Builder(mContext, AlertDialog.THEME_DEVICE_DEFAULT_LIGHT);
         mDialogTitle.setText(mTitle);
         builder.setView(alert_view);
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -181,19 +180,19 @@ public class ReceiveFragment extends BaseFragment implements View.OnClickListene
                             TabFragment.lisCwBtcAdd.get(mPosition).setAddLabel(mLable);
                         }
 
-                        Refresh(false, position);
+                        Refresh(false);
                         break;
                     case R.id.btn_request:
                         if (mEditText.getText().toString().isEmpty()) {
 
                         } else {
                             String mBCaddress;
-                            mBCaddress = "bitcoin:" + TabFragment.lisCwBtcAdd.get(position).getAddress()
+                            mBCaddress ="bitcoin:"+TabFragment.lisCwBtcAdd.get(position).getAddress()
                                     + "?amount="
                                     + mEditText.getText().toString().trim();
-//                            TabFragment.lisCwBtcAdd.get(position).setBCAddress(mBCaddress);
+                            TabFragment.lisCwBtcAdd.get(position).setBCAddress(mBCaddress);
                             LogUtil.i(mBCaddress);
-                            Refresh(false, position);
+                            Refresh(false);
                             EncoderQRcode(mBCaddress);
                         }
                 }
@@ -203,18 +202,134 @@ public class ReceiveFragment extends BaseFragment implements View.OnClickListene
         builder.show();
     }
 
-    private void Refresh(boolean isAddData, int position) {
+    private void queryWallteInfo(int infoId) {
+        //infoId 1B (=00 status, 01 name, 02 accountPointer)
+
+        cmdManager.hdwQryWaInfo(getWalltePointer, new CmdResultCallback() {
+            @Override
+            public void onSuccess(int status, byte[] outputData) {
+                if ((status + 65536) == 0x9000) {
+                    if (outputData != null) {
+                        hdwAccountPointer = outputData;
+                        int accountIndex = Integer.valueOf(PublicPun.byte2HexString(outputData).replace(" ", ""));
+                        LogUtil.i("hdwAccountPointer=" + accountIndex);
+                        PublicPun.wallet.setAccountIndex(accountIndex);
+
+                        if (hdwAccountPointer != null && hdwAccountPointer.length == 4) {
+                            accountId = Integer.parseInt(PublicPun.byte2HexString(hdwAccountPointer[0]));
+                            LogUtil.i("accountId=" + accountId);
+
+                            LogUtil.i("有" + accountId + "個帳戶" + "依序讀取帳戶訊息");
+                            for (int i = 0; i < accountId; i++) {
+                                getAccounts(i);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+
+    private void getAccounts(final int accountId) {
+        byte cwHdwAccountInfoExtKeyPtr = 0x02;
+        LogUtil.e("getAccounts accountId=" + accountId);
+        final Account account = new Account();
+        account.setId(accountId);
+
+        cmdManager.hdwQueryAccountInfo(cwHdwAccountInfoExtKeyPtr, accountId, new CmdResultCallback() {
+            @Override
+            public void onSuccess(int status, byte[] outputData) {
+                if ((status + 65536) == 0x9000) {
+                    if (outputData != null) {
+                        String extKey = PublicPun.byte2HexString(outputData[0]);
+
+                        account.setOutputIndex(Integer.valueOf(extKey, 16));
+//                        genKid = Integer.valueOf(extKey, 16) + 1;
+                        LogUtil.e("ExtKey="+ Integer.valueOf(extKey, 16) );
+//                        cntAdd += Integer.valueOf(extKey, 16);
+                        getAccountKeyInfo(accountId, Integer.valueOf(extKey, 16), Constant.CwAddressKeyChainExternal);
+                        cwAccountList.add(account);
+                    }
+                }
+            }
+        });
+
+    }
+
+    private void getAccountKeyInfo(final int accountId, final int kid, final byte kcId) {
+
+        cmdManager.hdwQueryAccountKeyInfo(Constant.CwHdwAccountKeyInfoPubKeyAndChainCd,
+                kcId,
+                accountId,
+                kid,
+                new CmdResultCallback() {
+                    @Override
+                    public void onSuccess(int status, byte[] outputData) {
+                        if ((status + 65536) == 0x9000) {
+                            if (outputData != null) {
+                                byte[] publicKeyBytes = new byte[64];
+                                byte[] chainCodeBytes = new byte[32];
+                                int length = outputData.length;
+                                byte[] extendPub = new byte[33];
+                                if (length >= 96) {
+
+                                    for (int i = 0; i < 64; i++) {
+                                        publicKeyBytes[i] = outputData[i];
+                                    }
+                                    for (int j = 64; j < 96; j++) {
+                                        chainCodeBytes[j - 64] = outputData[j];
+                                    }
+                                    if (Integer.parseInt(PublicPun.byte2HexString(publicKeyBytes[63]), 16) / 2 == 0) {
+                                        extendPub[0] = 02;
+                                    } else {
+                                        extendPub[0] = 03;
+                                    }
+
+                                    for (int a = 0; a < 32; a++) {
+                                        extendPub[a + 1] = publicKeyBytes[a];
+                                    }
+                                }
+                                LogUtil.i("keyinfo的pub key=" + LogUtil.byte2HexString(publicKeyBytes));
+                                LogUtil.i("keyinfo的chainCodeBytes=" + LogUtil.byte2HexString(chainCodeBytes));
+                                LogUtil.i("keyinfo的=" + LogUtil.byte2HexString(extendPub));
+                                ExtendedKey km = ExtendedKey.createCwEk(extendPub, chainCodeBytes);
+                                LogUtil.i("serializepub=" + km.serializepub(true));
+                                for (int i = 0; i < kid; i++) {
+                                    ExtendedKey k = null;
+                                    String addr = null;
+                                    address = new Address();
+                                    try {
+//                                        address.setPublickey(PublicPun.byte2HexString(publicKeyBytes));
+//                                        address.setPublickey(publicKeyBytes);
+                                        k = km.getChild(i);
+                                        LogUtil.i("ExtendedKey addr=" + String.valueOf(i) + ":" + k.getAddress());
+                                        addr = k.getAddress();
+                                        address.setAddress(addr);
+                                        address.setBCAddress(addr + "?amount=0");
+                                        intputAddressList.add(address);
+                                    } catch (ValidationException e) {
+                                        LogUtil.i("ExtendedKey i=" + String.valueOf(i) + ",error:" + e.getMessage());
+                                        e.printStackTrace();
+                                    }
+                                }
+                                PublicPun.account.setInputAddressList(intputAddressList);
+                                Refresh(false);
+                            }
+                        }
+                    }
+                });
+    }
+
+    private void Refresh(boolean isAddData) {
 
         if (isAddData) {
             intputAddressList.add(address);
             PublicPun.account.setInputAddressList(intputAddressList);
-
             TabFragment.lisCwBtcAdd = DatabaseHelper.queryAddress(mContext, id - 1, 0);
-            LogUtil.i("Refresh="+ TabFragment.lisCwBtcAdd.size());
-            adapter.notifyDataSetChanged();
         }
         intputAddressList = PublicPun.account.getInputAddressList();
-        refresh(isAddData, position);
+        refresh(isAddData);
     }
 
     private void initView(View view) {
@@ -231,7 +346,7 @@ public class ReceiveFragment extends BaseFragment implements View.OnClickListene
         item_btn_copy.setOnClickListener(this);
         btnGenAddress.setOnClickListener(this);
 
-        mProgress = new ProgressDialog(getActivity());
+        mProgress = new ProgressDialog(mContext);
         mProgress.setCancelable(false);
         mProgress.setIndeterminate(true);
     }
@@ -262,7 +377,7 @@ public class ReceiveFragment extends BaseFragment implements View.OnClickListene
         String mTitle;
         String mMessage;
         if (mPosition == -1) {
-            PublicPun.toast(getActivity(), "No Address found!");
+            PublicPun.toast(mContext, "No Address found!");
         } else {
             switch (id) {
                 case R.id.btn_gen_address:
@@ -317,7 +432,7 @@ public class ReceiveFragment extends BaseFragment implements View.OnClickListene
             }
         }
         if (NotrsAddress >= 5) {
-            PublicPun.ClickFunction(mContext, "Unable to create new address", "Maximum number of 5 unused addresses reached in this account");
+            PublicPun.showNoticeDialog(mContext,"Unable to create new address","Maximum number of 5 unused addresses reached in this account");
         } else {
             mProgress.setMessage("Generating New address...");
             mProgress.show();
@@ -357,12 +472,10 @@ public class ReceiveFragment extends BaseFragment implements View.OnClickListene
 
 //                        intputAddressList.add(address);
 //                        PublicPun.account.setInputAddressList(intputAddressList);
-
                             DatabaseHelper.insertAddress(mContext, id - 1, addr, 0, keyId, 0, 0);
-                            Refresh(true, 0);//這裡的position不重要,會再重算
+                            Refresh(true);
                             mProgress.dismiss();
                             PublicPun.account.setInputIndex(PublicPun.account.getInputIndex() + 1);
-
                         }
                     }
                 }
@@ -370,16 +483,13 @@ public class ReceiveFragment extends BaseFragment implements View.OnClickListene
         }
     }
 
-    /**
-     * @param isGenAddress , 是否為新增地址
-     * @param position     , for 焦點位置
-     */
-    public void refresh(boolean isGenAddress, int position) {
+    public void refresh(boolean isGenAddress) {
+
         mOnRecvListClickListener = new ReceiveListViewAdapter.OnRecvListClickListener() {
             @Override
             public void onClick(View v, int position, String mBCaddr) {
-                LogUtil.i("click position=" + position + " ; addr =" + mBCaddr);
 
+                LogUtil.i("position=" + position + " ; addr click=" + mBCaddr);
                 EncoderQRcode(mBCaddr);
                 item_btn_edit.setVisibility(View.VISIBLE);
                 item_btn_request.setVisibility(View.VISIBLE);
@@ -390,12 +500,7 @@ public class ReceiveFragment extends BaseFragment implements View.OnClickListene
         };
         adapter.registerOnRecvListClickListenerCallback(mOnRecvListClickListener);
 
-//        if (adapter == null) {
-        LogUtil.i("TabFragment.lisCwBtcAdd.size=" + TabFragment.lisCwBtcAdd.size());
-        adapter = new ReceiveListViewAdapter(getActivity(), TabFragment.lisCwBtcAdd, imgQRcode);
-//        } else {
-//            adapter.notifyDataSetChanged();
-//        }
+        adapter = new ReceiveListViewAdapter(mContext, TabFragment.lisCwBtcAdd, imgQRcode);
         listView.setAdapter(adapter);
 
         LogUtil.i("isGenAddress=" + isGenAddress + " ;" + "lisCwBtcAdd.size=" + TabFragment.lisCwBtcAdd.size());
@@ -406,8 +511,7 @@ public class ReceiveFragment extends BaseFragment implements View.OnClickListene
                 mOnRecvListClickListener.onClick(null, clickPosition, TabFragment.lisCwBtcAdd.get(clickPosition).getAddress() + "?amount=0.000");
                 item_btn_edit.callOnClick();
             } else {
-                // TabFragment.lisCwBtcAdd.get(0).getAddress() + "?amount=0.000"
-                mOnRecvListClickListener.onClick(null, position, "bitcoin:" + TabFragment.lisCwBtcAdd.get(0).getAddress() + "?amount=0.0000");
+                mOnRecvListClickListener.onClick(null, 0, TabFragment.lisCwBtcAdd.get(0).getAddress() + "?amount=0.000");
             }
         }
     }

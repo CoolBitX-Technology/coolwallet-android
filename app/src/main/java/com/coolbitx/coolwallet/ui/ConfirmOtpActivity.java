@@ -85,7 +85,7 @@ public class ConfirmOtpActivity extends BaseActivity implements View.OnClickList
         if (isRegistered) {
             DatabaseHelper.deleteTable(getApplicationContext(), DbName.DATA_BASE_ADDR);
             DatabaseHelper.deleteTable(getApplicationContext(), DbName.DATA_BASE_TXS);
-            PublicPun.ClickFunctionToFinish(context, "Waiting for authorization from paired device", "");
+            PublicPun.showNoticeDialogToFinish(context, "Waiting for authorization from paired device", "");
         } else {
             genOTP();
         }
@@ -108,39 +108,15 @@ public class ConfirmOtpActivity extends BaseActivity implements View.OnClickList
                     }
                     //16進制的9000在10進制是36864;6645是26181;status=91717
                 } else if ((status + 65536) == 0x16645) {
-                    PublicPun.ClickFunctionToFinish(context, "Unable to pair", "maximum number of 3 hosts have been paired with this card");
+                    PublicPun.showNoticeDialogToFinish(context, "Unable to pair", "maximum number of 3 hosts have been paired with this card");
                 } else {
 //                    LogUtil.i("status="+String.valueOf(status));
-                    PublicPun.ClickFunctionToFinish(context, "Unable to pair", "Error:" + Integer.toHexString(status));
+                    PublicPun.showNoticeDialogToFinish(context, "Unable to pair", "Error:" + Integer.toHexString(status));
                 }
             }
         });
     }
 
-    private void setPersoSecurity(boolean otp, boolean pressBtn, boolean switchAddress, boolean watchDog) {
-        boolean[] settingOptions = new boolean[4];
-        settingOptions[0] = otp;
-        settingOptions[1] = pressBtn;
-        settingOptions[2] = switchAddress;
-        settingOptions[3] = watchDog;
-
-        cmdManager.persoSetData(PublicPun.user.getMacKey(), settingOptions, new CmdResultCallback() {
-            @Override
-            public void onSuccess(int status, byte[] outputData) {
-                if ((status + 65536) == 0x9000) {
-                    cmdManager.persoConfirm(new CmdResultCallback() {
-                        @Override
-                        public void onSuccess(int status, byte[] outputData) {
-                            if ((status + 65536) == 0x9000) {
-                                Intent intent = new Intent(getApplicationContext(), InitialCreateWalletActivity.class);
-                                startActivity(intent);
-                            }
-                        }
-                    });
-                }
-            }
-        });
-    }
 
     @Override
     public void onClick(View v) {
@@ -241,17 +217,17 @@ public class ConfirmOtpActivity extends BaseActivity implements View.OnClickList
                                                             LogUtil.i("bindRegFinish2 isConfirm:" + isConfirm + ", uuid:" + currentUuid + ",hostId" + hostId);
                                                             DatabaseHelper.deleteTable(getApplicationContext(), DbName.DATA_BASE_ADDR);
                                                             DatabaseHelper.deleteTable(getApplicationContext(), DbName.DATA_BASE_TXS);
-                                                            PublicPun.ClickFunctionToFinish(context, "Waiting for authorization from paired device", "");
+                                                            PublicPun.showNoticeDialogToFinish(context, "Waiting for authorization from paired device", "");
                                                         }
                                                     }
                                                 } else if ((status + 65536) == 0x16648) {
                                                     mProgress.dismiss();
-                                                    PublicPun.ClickFunction(context, "Unable to pair", "Incorrect OTP, Please try again.");
+                                                    PublicPun.showNoticeDialog(context, "Unable to pair", "Incorrect OTP, Please try again.");
                                                     editotp.setText("");
                                                     genOTP();
                                                 } else {
                                                     mProgress.dismiss();
-                                                    PublicPun.ClickFunctionToFinish(context, "Unable to pair", "Error:" + Integer.toHexString(status));
+                                                    PublicPun.showNoticeDialogToFinish(context, "Unable to pair", "Error:" + Integer.toHexString(status));
                                                 }
                                             }
                                         });
@@ -261,7 +237,7 @@ public class ConfirmOtpActivity extends BaseActivity implements View.OnClickList
                         });
                     } else {
                         mProgress.dismiss();
-                        PublicPun.ClickFunction(ConfirmOtpActivity.this, "Unable to pair error", "Please entry OPT");
+                        PublicPun.showNoticeDialog(ConfirmOtpActivity.this, "Unable to pair error", "Please entry OTP");
                     }
                 }
                 break;

@@ -1,0 +1,29 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black"
+    android:orientation="vertical">
+    <include layout="@layout/toolbar" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:padding="@dimen/share_addr_screen_margin"
+        android:text="@string/tv_sharing_str"
+        android:layout_gravity="center"
+        android:textColor="@color/bottomtab_normal"
+        android:textSize="20dp" />
+
+    <Button
+        android:id="@+id/btn_sharing"
+        style="@style/TextView_Black_16"
+        android:layout_width="350dp"
+        android:layout_height="40dp"
+        android:layout_alignParentBottom="true"
+        android:layout_gravity="center"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/selector_button"
+        android:text="@string/btn_str_sharing" />
+
+</LinearLayout>

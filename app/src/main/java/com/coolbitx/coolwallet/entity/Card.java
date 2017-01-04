@@ -11,7 +11,6 @@ public class Card {
     private String uid;
     private String cardId;
     private String cardName;
-    private String deviceName;
 
     public String getMode() {
         return mode;
@@ -54,21 +53,11 @@ public class Card {
     }
 
     public String getCardName() {
-        if (cardName == null)
-            cardName = "CoolWallet";
         return cardName;
     }
 
     public void setCardName(String cardName) {
         this.cardName = cardName;
-    }
-
-    public String getDeviceName() {
-        return deviceName;
-    }
-
-    public void setDeviceName(String cardName) {
-        this.deviceName = cardName;
     }
 
 

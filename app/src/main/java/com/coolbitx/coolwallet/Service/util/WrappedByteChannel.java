@@ -22,6 +22,6 @@ public interface WrappedByteChannel extends ByteChannel {
      * This function does not read data from the underlying channel at all. It is just a way to fetch data which has already be received or decoded but was but was not yet returned to the user.
      * This could be the case when the decoded data did not fit into the buffer the user passed to {@link #read(ByteBuffer)}.
      **/
-    public int readMore( ByteBuffer dst ) throws IOException;
+    public int readMore(ByteBuffer dst) throws IOException;
     public boolean isBlocking();
 }

@@ -18,6 +18,8 @@
 
     <string name="BLOCKR_ADDRESS_INFO_API">http://btc.blockr.io/api/v1/address/info/</string>
 
+
+
     <!--Preference-->
     <string name="pref_title_security_otp">Enable One Time Password\n(OTP) on transactions</string>
     <string name="pref_title_security_crad_transaction">Enable press the button on the\ncard to complete transactions</string>
@@ -30,6 +32,15 @@
     <string name="connetc_status">Connect status</string>
     <string name="ok">ok</string>
 
+
+    <!--ISSUEFEEDBACK-->
+    <string name="issue_feedback_title">Issue FeedBack</string>
+    <string name="issue_feedback_message">This issue feedback is used to diagnose problems and improve CoolWallet.
+        No sensitive data or private key will be shared. Any personal information you submit whether explicitly or incidentally
+        will be protected in accordance with our privacy policies. By submitting this feedback, you agree that
+        CoolBitX may use feedback that you provide to improve any CoolBitX product or service.</string>
+
+
     <!--security layout-->
     <string name="tv_security_otp">Enable One Time Password\n(OTP) on transactions</string>
     <string name="tv_security_enable_press_button">Enable press the button on the\ncard to complete transactions</string>
@@ -41,7 +52,11 @@
 
     <string name="tv_import_my_seed">Import my seed</string>
 
-
+    <!--StartSharing-->
+    <string name="btn_str_sharing">Share Address</string>
+    <string name="tv_sharing_str">This function allows you to share ONE of your addresses to a Bitcoin exchange platform you use, so the exchange platfrom will be able to send bitcoins to your CoolWallet
+        directly.\n\nIf you agreed, currently this function will share the first address of your first account to a few exchanges we are testing with.\n\n
+        Do you want to share CoolWallet address with external exchange platforms?</string>
     <!--host-->
     <string name="tv_host_str">Tap to confirm,Swip to delete</string>
     <!--logout-->
@@ -71,24 +86,12 @@
     <string name="tv_seed_length">Seed Length</string>
     <string name="btn_create_HDW">Create Wallet</string>
     <string name="btn_next">Next</string>
-    <string name="btn_previous">Verify again</string>
+    <string name="btn_previous">Previous</string>
     <string name="hdw_create">Create Wallet</string>
     <string name="tv_write_down_seed">Please write down all sets of the\nnumbers shown on the CoolWallet\nonto the seed paper</string>
     <string name="tv_see_next_seed">Press the button on the card to see\nthe next set of numbers</string>
-    <string name="chk_create_word"> I have written down all the numbers.  </string>
-
-
     <string name="hdw_create_word">
         Warning:It takes about 1 minute to generate seed on card, please wait until it is done.
-    </string>
-
-    <string name="hdw_create_word_write_down">
-        Please write down all sets of the\n
-        numbers shown on the CoolWallet\n
-        onto the seed paper.\n
-        \n
-        Press the button on the card to see\n
-        the next set of numbers.
     </string>
 
     <!--recov wallet-->
@@ -96,6 +99,14 @@
     <string name="tv_choose_seed_msg">Choose your seed type</string>
     <string name="tv_recovery_title">Recovering...</string>
     <string name="tv_recovery_msg">Please wait and put your\nCollWallet on the charger.</string>
+
+    <string name="notice_recovery_invalid_numbers">You\'ve chosen to recover with \'numbers\'. If your seed is in words please switch to recover with words.!</string>
+    <string name="notice_recovery_invalid_word">You\'ve chosen to recover with \'word\'. If your seed is in numbers please switch to recover with words.!</string>
+    <string name="notice_recovery_invalid_numbers_length">The total seed length of numbers should be 8, 12, 16 sets.!</string>
+    <string name="notice_recovery_invalid_word_length">The total seed length of words should be 12, 18, 24 sets.!</string>
+    <string name="notice_recovery_parsing_seed_incorrect">The seed being parsed is not in the correct form</string>
+
+    <string name="notice_recovery_invalid">Seed Invalid</string>
 
     <!--Create HD Wallet-->
     <string name="txt_createNewWallet">Create a new Wallet</string>
@@ -105,9 +116,26 @@
     <string name="txt_createHDWallet_alert">IMPORTANT!This is the only time\nyou can make a backup of your\nbitcoins.</string>
     <string name="strCreateWallet">Create Wallet</string>
 
-
     <!--send-->
+    <string name="send_notification_unable_to_send_with_change_error">Change address equals to recipient address, it is likely an error.</string>
+    <string name="send_notification_unable_to_send">Unable to Send</string>
     <string name="btn_str_send">Send</string>
+    <string name="note_unspent">Your balance needs at least one confirmation on Blockchain before you can send it out. Please try again later.</string>
+    <string name="send_notification_str_failed_title">Transaction Failed</string>
+    <string name="send_notification_str_failed_msg">Timeout.Please try again.</string>
+    <string name="send_confirm_btn_send">Send</string>
+    <string name="send_confirm_btn_cancel">Cancel</string>
+    <string name="send_call_unspent_failed">Returns unspent transactions from api failed.</string>
+    <string name="send_call_unspent_success">Returns unspent transactions from api success.multiple addresses to api call including:</string>
+    <string name="send_call_unspent_list_addresses">multiple addresses to api call including:\n</string>
+
+
+    <!--TransactionConfirmDialog-->
+    <string name="send_confirm_str_pay">PAY TO</string>
+    <string name="send_confirm_str_fee">Fees</string>
+    <string name="send_confirm_str_total">Total</string>
+    <string name="send_confirm_str_payment">PAYMENT</string>
+    <string name="send_confirm_str_change">Change</string>
 
     <!--txs-->
     <string name="btn_str_view_blockchain">View at Blockchain.info</string>

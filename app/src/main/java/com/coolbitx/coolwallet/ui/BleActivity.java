@@ -13,7 +13,6 @@ import android.os.Handler;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.TextUtils;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.ExpandableListView;
 import android.widget.ImageView;
@@ -24,7 +23,6 @@ import com.coolbitx.coolwallet.R;
 import com.coolbitx.coolwallet.Service.BTConfig;
 import com.coolbitx.coolwallet.adapter.ListViewAdapter;
 import com.coolbitx.coolwallet.entity.Constant;
-import com.coolbitx.coolwallet.entity.Host;
 import com.coolbitx.coolwallet.entity.MyDevice;
 import com.coolbitx.coolwallet.general.CSVReadWrite;
 import com.coolbitx.coolwallet.general.PublicPun;
@@ -78,20 +76,12 @@ public class BleActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_ble);
+        LogUtil.d("BleActivity onCreate");
         bleManager = new BleManager(this);
         cmdManager = new CmdManager();
-        mLoginCsv = new CSVReadWrite(BleActivity.this);
-        LogUtil.i("BleActivity onCreate");
-
-        if (bleManager.isOpen()) {
-            bleManager.startScanBle(bleScanCallback);
-            isScanning = true;
-        }
-
         IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
         listener = new BluetoothStateListener();
         registerReceiver(listener, filter);
-
         sharedPreferences = getSharedPreferences("card", Context.MODE_PRIVATE);
         editor = sharedPreferences.edit();
         initView();
@@ -146,7 +136,6 @@ public class BleActivity extends BaseActivity {
                 address = device.getAddress();
                 if (!address.isEmpty()) {
                     LogUtil.i("卡片連線=" + address + "---" + device.getName());
-                    PublicPun.card.setDeviceName(device.getName());
                     Thread thread = new Thread() {
                         @Override
                         public void run() {
@@ -169,7 +158,7 @@ public class BleActivity extends BaseActivity {
                             mTimer.schedule(new TimerTask() {
                                 @Override
                                 public void run() {
-                                    if(!isConnected){
+                                    if (!isConnected) {
                                         mProgress.dismiss();
                                     }
                                     mTimer.cancel();
@@ -238,25 +227,13 @@ public class BleActivity extends BaseActivity {
             LogUtil.i("連線address:" + address);
             PublicPun.user.settMacID(address);
             isConnected = true;
+            mProgress.dismiss();
 
-            cmdManager.getFwVersion(new CmdResultCallback() {
-                @Override
-                public void onSuccess(int status, byte[] outputData) {
-                    if ((status + 65536) == 0x9000) {
-                        PublicPun.fwVersion = PublicPun.byte2HexString(outputData).replace(" ", "");
-                        LogUtil.i("getFwVersion:" + PublicPun.fwVersion);
-                    }
-                }
-            });
-            cmdManager.getUniqueId(new CmdResultCallback() {
-                @Override
-                public void onSuccess(int status, byte[] outputData) {
-                    if ((status + 65536) == 0x9000) {
-                        PublicPun.uid = PublicPun.byte2HexString(outputData).replace(" ", "");
-                        LogUtil.i("getUniqueId:" + PublicPun.uid);
-                    }
-                }
-            });
+            mProgress.setMessage("Login Host...");
+            mProgress.show();
+
+            getFwVersion();
+            getUniqueId();
 
             cmdManager.getCardId(new CmdResultCallback() {
                 @Override
@@ -264,13 +241,11 @@ public class BleActivity extends BaseActivity {
                     if ((status + 65536) == 0x9000) {//8byte cardId
                         if (outputData != null) {
                             PublicPun.card.setCardId(PublicPun.byte2HexString(outputData).replace(" ", ""));
-                            LogUtil.i("卡片id:" + PublicPun.card.getCardId());
+                            Crashlytics.setUserIdentifier(new String(PublicPun.hexStringToByteArray(PublicPun.card.getCardId())));
                         }
                     } else {
                         PublicPun.toast(mContext, "Get Card ID failed,please connect again!");
                         BleActivity.bleManager.disConnectBle();
-//                        finish(); // 離開程式
-//                        System.exit(0);
                     }
                 }
             });
@@ -281,12 +256,9 @@ public class BleActivity extends BaseActivity {
                     if ((status + 65536) == 0x9000) {//-28672//36864
                         PublicPun.card.setMode(PublicPun.selectMode(PublicPun.byte2HexString(outputData[0])));
                         PublicPun.card.setState(String.valueOf(outputData[1]));
-//                        mProgress.dismiss();
-
                         PublicPun.modeState = PublicPun.selectMode(PublicPun.byte2HexString(outputData[0]));
-//                        PublicPun.toast(getApplicationContext(), "Connected..\nMode=" + PublicPun.modeState + "\nState=" + outputData[1]);
-                        LogUtil.i("getModeState:" + "PAIRED \nMode=" + PublicPun.modeState + "\nState=" + outputData[1]);
-                        LogUtil.i("Reset:" + isReset);
+                        LogUtil.d("getModeState:" + "PAIRED \nMode=" + PublicPun.modeState + "\nState=" + outputData[1]);
+                        LogUtil.d("Reset:" + isReset);
                         if (isReset) {
                             if (PublicPun.card.getMode().equals("NOHOST")) {
                                 mProgress.dismiss();
@@ -387,7 +359,8 @@ public class BleActivity extends BaseActivity {
         }
 
         public void onBleDisConnected() {
-            LogUtil.i("xxx onBleDisConnected");
+            LogUtil.i("onBleDisConnected");
+            Crashlytics.log("BleDisConnected");
             Disconnhandler.post(Disconnrunnable);
         }
     };
@@ -427,7 +400,6 @@ public class BleActivity extends BaseActivity {
                                     byte[] macKey = PublicPun.encryptSHA256(PublicPun.calcKey(devKey, "MAC", loginChallenge));
                                     LogUtil.i("macKey=" + LogUtil.byte2HexString(macKey));
 
-
                                     PublicPun.user.setUuid(currentUuid);
                                     PublicPun.user.setOtpCode(currentOptCode);
                                     PublicPun.user.setEncKey(encKey);
@@ -455,8 +427,8 @@ public class BleActivity extends BaseActivity {
 //                                                PublicPun.toast(getApplicationContext(), "Connected..\nMode=" + PublicPun.modeState + "\nState=" + outputData[1]);
                                                 LogUtil.i("BLE Login  ModeState:" + "\nMode=" + PublicPun.modeState + "\nState=" + outputData[1]);
 
-                                                getRegInfo();
-
+//                                                getRegInfo();
+                                                getHosts();
                                                 if (PublicPun.modeState.equals("PERSO")) {
 //                                                    Intent intent = new Intent(getApplicationContext(), InitialSecuritySettingActivity.class);
 //                                                    startActivity(intent);
@@ -504,40 +476,18 @@ public class BleActivity extends BaseActivity {
         });
     }
 
-    private void setPersoSecurity(boolean otp, boolean pressBtn, boolean switchAddress, boolean watchDog) {
-        boolean[] settingOptions = new boolean[4];
-        settingOptions[0] = otp;
-        settingOptions[1] = pressBtn;
-        settingOptions[2] = switchAddress;
-        settingOptions[3] = watchDog;
 
-        cmdManager.persoSetData(PublicPun.user.getMacKey(), settingOptions, new CmdResultCallback() {
-            @Override
-            public void onSuccess(int status, byte[] outputData) {
-                if ((status + 65536) == 0x9000) {
-                    cmdManager.persoConfirm(new CmdResultCallback() {
-                        @Override
-                        public void onSuccess(int status, byte[] outputData) {
-                            if ((status + 65536) == 0x9000) {
-//                                PublicPun.toast(mContext, "CW Security Policy Set (32)");
-                                Intent intent = new Intent(getApplicationContext(), InitialCreateWalletActivity.class);
-                                startActivity(intent);
-                            }
-                        }
-                    });
-                }
-            }
-        });
-    }
 
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         LogUtil.i("onDestroy");
+        mProgress.dismiss();
         bleManager.disConnectBle();
         bleManager.closeBluetooth();
         unregisterReceiver(listener);
+
     }
 
     @Override
@@ -545,21 +495,6 @@ public class BleActivity extends BaseActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button_up, s
-
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     private boolean contains(String address) {
@@ -579,109 +514,84 @@ public class BleActivity extends BaseActivity {
         return flag;
     }
 
-    private void getRegInfo() {
-
-        final byte first = 0x00;
-        final byte second = 0x01;
-        final byte third = 0x02;
-
-        cmdManager.bindRegInfo(first, new CmdResultCallback() {
-            @Override
-            public void onSuccess(int status, byte[] outputData) {
-                if ((status + 65536) == 0x9000) {
-                    if (outputData != null) {
-                        LogUtil.i("bindRegInfo 第一個:" + dealRegInfo(outputData));
-                        addHostList(outputData, first);
-                    }
-                }
-            }
-        });
-        cmdManager.bindRegInfo(second, new CmdResultCallback() {
-            @Override
-            public void onSuccess(int status, byte[] outputData) {
-                if ((status + 65536) == 0x9000) {
-                    if (outputData != null) {
-                        LogUtil.i("bindRegInfo 第二個:" + dealRegInfo(outputData));
-                        addHostList(outputData, second);
-                    }
-                }
-            }
-        });
-        cmdManager.bindRegInfo(third, new CmdResultCallback() {
-            @Override
-            public void onSuccess(int status, byte[] outputData) {
-                if ((status + 65536) == 0x9000) {
-                    if (outputData != null) {
-                        LogUtil.i("bindRegInfo 第三個:" + dealRegInfo(outputData));
-                        addHostList(outputData, third);
-                    }
-                }
-            }
-        });
-    }
-
-    private void addHostList(byte[] outputData, byte hostId) {
-        Host bean = new Host();
-        byte bindStatus = outputData[0];
-        int length = outputData.length - 1;
-        byte[] desc = new byte[length];
-        if (length > 0) {
-            for (int i = 0; i < length; i++) {
-                desc[i] = outputData[i + 1];
-            }
-        }
-        bean.setBindStatus(bindStatus);
-        bean.setId(hostId);
-        bean.setDesc(new String(desc, Constant.UTF8).toString().trim());
-        LogUtil.i("卡片描述 id=" + hostId + ";status" + bindStatus + ";" + ";desc=" + new String(desc, Constant.UTF8).toString().trim());
-        //會發生0x01先跑完,IndexOutOfBoundsException, remove ind
-//        if (hostId == 0x00) {
-//            PublicPun.hostList.add(0, bean);
-//        } else if (hostId == 0x01) {
-//            PublicPun.hostList.add(1, bean);
-//        } else if (hostId == 0x02) {
-//            PublicPun.hostList.add(2, bean);
+//    private void getRegInfo() {
+//
+//        final byte first = 0x00;
+//        final byte second = 0x01;
+//        final byte third = 0x02;
+//
+//        cmdManager.bindRegInfo(first, new CmdResultCallback() {
+//            @Override
+//            public void onSuccess(int status, byte[] outputData) {
+//                if ((status + 65536) == 0x9000) {
+//                    if (outputData != null) {
+//                        LogUtil.i("bindRegInfo 第一個:" + dealRegInfo(outputData));
+//                        addHostList(outputData, first);
+//                    }
+//                }
+//            }
+//        });
+//        cmdManager.bindRegInfo(second, new CmdResultCallback() {
+//            @Override
+//            public void onSuccess(int status, byte[] outputData) {
+//                if ((status + 65536) == 0x9000) {
+//                    if (outputData != null) {
+//                        LogUtil.i("bindRegInfo 第二個:" + dealRegInfo(outputData));
+//                        addHostList(outputData, second);
+//                    }
+//                }
+//            }
+//        });
+//        cmdManager.bindRegInfo(third, new CmdResultCallback() {
+//            @Override
+//            public void onSuccess(int status, byte[] outputData) {
+//                if ((status + 65536) == 0x9000) {
+//                    if (outputData != null) {
+//                        LogUtil.i("bindRegInfo 第三個:" + dealRegInfo(outputData));
+//                        addHostList(outputData, third);
+//                    }
+//                }
+//            }
+//        });
+//    }
+//
+//    private String dealRegInfo(byte[] outputData) {
+//
+//        if (outputData == null) return "";
+//        StringBuilder sb = new StringBuilder();
+//        int length = outputData.length;
+//        if (length > 0) {
+//            sb.append("注册状态是:");
+//            byte bindState = outputData[0];
+//            if (bindState == 0x00) {
+//                sb.append("未注册");
+//            } else if (bindState == 0x01) {
+//                sb.append("已注册");
+//            } else if (bindState == 0x02) {
+//                sb.append("已确认");
+//            }
+//        } else {
+//            return "";
 //        }
-        PublicPun.hostList.add(bean);
-    }
-
-    private String dealRegInfo(byte[] outputData) {
-
-        if (outputData == null) return "";
-        StringBuilder sb = new StringBuilder();
-        int length = outputData.length;
-        if (length > 0) {
-            sb.append("注册状态是:");
-            byte bindState = outputData[0];
-            if (bindState == 0x00) {
-                sb.append("未注册");
-            } else if (bindState == 0x01) {
-                sb.append("已注册");
-            } else if (bindState == 0x02) {
-                sb.append("已确认");
-            }
-        } else {
-            return "";
-        }
-
-        if (length > 1) {
-            byte[] desc = new byte[length - 1];
-            int descLen = desc.length;
-            for (int i = 0; i < descLen; i++) {
-                desc[i] = outputData[i + 1];
-            }
-
-            String s = new String(desc, Constant.UTF8).toString().trim();
-            sb.append(" 卡片描述是:");
-            if (s.equals("")) {
-                sb.append("空");
-            } else {
-                sb.append(s);
-            }
-        }
-
-        return sb.toString();
-    }
+//
+//        if (length > 1) {
+//            byte[] desc = new byte[length - 1];
+//            int descLen = desc.length;
+//            for (int i = 0; i < descLen; i++) {
+//                desc[i] = outputData[i + 1];
+//            }
+//
+//            String s = new String(desc, Constant.UTF8).toString().trim();
+//            sb.append(" 卡片描述是:");
+//            if (s.equals("")) {
+//                sb.append("空");
+//            } else {
+//                sb.append(s);
+//            }
+//        }
+//
+//        return sb.toString();
+//    }
 
     private BleScanCallback bleScanCallback = new BleScanCallback() {
 
@@ -748,14 +658,18 @@ public class BleActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
-
-        if (!bleManager.isOpen()) {
-            bleManager.openBluetooth();
-        } else {
+        LogUtil.d("onResume");
+        if (bleManager == null) {
+            bleManager = new BleManager(this);
+        }
+        if (bleManager.isOpen()) {
             bleManager.startScanBle(bleScanCallback);
             isScanning = true;
+        } else {
+            bleManager.openBluetooth();
         }
-        LogUtil.i("onResume");
+
+
     }
 
     @Override
@@ -764,6 +678,9 @@ public class BleActivity extends BaseActivity {
         LogUtil.i("onActivityResult");
         //不要出diconn alert
         isShowDisconnAlert = false;
+        if (bleManager == null) {
+            bleManager = new BleManager(this);
+        }
         bleManager.disConnectBle();
 
         if (!bleManager.isOpen()) {
@@ -777,7 +694,6 @@ public class BleActivity extends BaseActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        mProgress.dismiss();
     }
 
     @Override
@@ -788,6 +704,7 @@ public class BleActivity extends BaseActivity {
             mTimer.cancel();
         }
     }
+
 
     /**
      * 發送斷線廣播訊息

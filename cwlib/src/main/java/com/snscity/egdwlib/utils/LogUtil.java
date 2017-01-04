@@ -50,7 +50,7 @@ public class LogUtil {
                     sub = message.substring(index, maxLength);
                 }
                 index += maxLength;
-                Log.i(fileName, createLog(sub.trim()));
+                Log.i(fileName, createLog( sub.trim()));
             }
         }
     }
@@ -110,7 +110,7 @@ public class LogUtil {
                     sub = message.substring(index, maxLength);
                 }
                 index += maxLength;
-                Log.w(fileName, createLog(sub.trim()));
+                Log.w(fileName, createLog( sub.trim()));
             }
         }
     }
@@ -133,36 +133,22 @@ public class LogUtil {
         return builder.toString();
     }
 
-    public static String byte2HexString(byte[] bytes) {
-        if (bytes == null) return null;
+    public static String byte2HexString(byte [] bytes){
+        if(bytes == null) return null;
 
         StringBuilder sb = new StringBuilder();
-        for (byte b : bytes) {
+        for(byte b : bytes){
             sb.append(String.format("%02x ", b));
         }
 
         return sb.toString();
     }
 
-    public static String byte2DecString(byte[] bytes) {
-        if (bytes == null) return null;
+    public static String byte2HexStringNoBlank(byte [] bytes){
+        if(bytes == null) return null;
 
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < bytes.length; i++) {
-            if (i > 4) {
-                String b =String.format("%02x", bytes[i]);
-                LogUtil.i("byte2DecString " + String.valueOf(i) + "=" + b.substring(b.length()-1));
-                sb.append(b.substring(b.length()-1));
-            }
-        }
-        return sb.toString();
-    }
-
-    public static String byte2HexStringNoBlank(byte[] bytes) {
-        if (bytes == null) return null;
-
-        StringBuilder sb = new StringBuilder();
-        for (byte b : bytes) {
+        for(byte b : bytes){
             sb.append(String.format("%02x", b));
         }
 

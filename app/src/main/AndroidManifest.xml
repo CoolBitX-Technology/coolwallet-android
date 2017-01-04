@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.coolbitx.coolwallet"
-    android:versionCode="1"
-    android:versionName="1.0">
+    android:versionCode="7"
+    android:versionName="1.2.1 ">
+    <!--1.1.4-->
     <!-- Socket網路權限 -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -10,15 +12,17 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/ic_launcher_cw"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        tools:replace="android:icon">
         <!--InitialSecuritySettingActivity-->
         <!--BleActivity-->
         <activity
@@ -61,8 +65,7 @@
             android:name=".ui.Fragment.FragMainActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
-            android:theme="@style/MyMaterialTheme"
-            android:windowSoftInputMode="adjustPan"></activity>
+            android:theme="@style/MyMaterialTheme"></activity>
         <activity
             android:name=".ui.EraseActivity"
             android:screenOrientation="portrait"
@@ -75,6 +78,12 @@
             android:theme="@style/AppTheme"></activity>
         <activity
             android:name=".ui.LogOutActivity"
+            android:parentActivityName=".ui.Fragment.FragMainActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme"></activity>
+
+        <activity
+            android:name=".ui.ShareAddress"
             android:parentActivityName=".ui.Fragment.FragMainActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme"></activity>
@@ -94,12 +103,9 @@
 
         <service android:name=".Service.socketService"/>
 
-        <!--android:name=".ui.BleActivity"-->
-
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="68521535b4c532c476bc000a7304e95422ee5e99" />
-
     </application>
 
 </manifest>

@@ -831,7 +831,6 @@ public class CmdManager {
         cmdProcessor.addCmd(cmdPacket);
     }
 
-
     public void verivyResetOTP(String optCode, CmdResultCallback cmdResultCallback) {
 
         byte[] inputData = optCode.getBytes();
@@ -900,6 +899,28 @@ public class CmdManager {
         cmdProcessor.addCmd(cmdPacket);
     }
 
+    public void shareBindLogin( byte[] regresp, int hostID,
+                          CmdResultCallback cmdResultCallback) {
+
+//        StringBuilder sb = new StringBuilder();
+//        sb.append(uuid);//32
+//        sb.append(optCode);//6
+//        String info = sb.toString();//38
+//
+//        byte[] devKey = encryptSHA256(info.getBytes(Charset.forName(CHARSETNAME)));//32
+////        LogUtil.i("cmd devKey=" + LogUtil.byte2HexString(devKey));
+//        byte[] regresp = AES.getAESEncrypt(loginChallenge, devKey);//16
+
+        CmdPacket cmdPacket = new CmdPacket.Builder()
+                .setCla(CmdCla.BIND_LOGIN)
+                .setIns(CmdIns.BIND_LOGIN)
+                .setPram1(hostID)
+                .setInputData(regresp)
+                .build();
+        cmdPacket.setCmdResultListener(cmdResultCallback);
+        cmdProcessor.addCmd(cmdPacket);
+    }
+
     public void bindLogin(String uuid, String optCode, byte[] loginChallenge, byte hostID,
                           CmdResultCallback cmdResultCallback) {
 
@@ -921,7 +942,7 @@ public class CmdManager {
         cmdProcessor.addCmd(cmdPacket);
     }
 
-    public void bindLoginChlng(byte hostID, CmdResultCallback cmdResultCallback) {
+    public void bindLoginChlng(int hostID, CmdResultCallback cmdResultCallback) {
         CmdPacket cmdPacket = new CmdPacket.Builder()
                 .setCla(CmdCla.BIND_LOGIN_CHLNG)//BIND_LOGIN_CHLNG = ClaType.KEEP_MEMORY;  //0x81
                 .setIns(CmdIns.BIND_LOGIN_CHLNG)//BIND_LOGIN_CHLNG = 0xD6;
@@ -1092,15 +1113,31 @@ public class CmdManager {
         cmdProcessor.addCmd(cmdPacket);
     }
 
-    //status 1B (00 idle, 01 preparing, 02 begined, 03 opt veriried, 04 in process
-    public void trxStatus(CmdResultCallback cmdResultCallback){
-        CmdPacket cmdPacket = new CmdPacket.Builder()
-                .setCla(CmdCla.TRX_STATUS)
-                .setIns(CmdIns.TRX_STATUS)
-                .build();
-        cmdPacket.setCmdResultListener(cmdResultCallback);
-        cmdProcessor.addCmd(cmdPacket);
-    }
+//    private byte [] mergeBytes(byte [] b1, byte [] b2, byte [] b3){
+//        byte [] bytes = new byte [128];
+//
+//        int length1 = b1.length;
+//        for (int i = 0; i < length1; i++){
+//            bytes[i] = b1[i];
+//        }
+//
+//        int length2 = b2.length;
+//        for (int i = 0; i < length2; i++){
+//            bytes[i + length1] = b2[i];
+//        }
+//
+//        int length3 = b3.length;
+//        for (int i = 0; i < length3; i++){
+//            bytes[i + length1 + length2] = b3[i];
+//        }
+//
+//        return bytes;
+//    }
+//
+//    public void cwCmdHdwPrepTrxSign(byte [] macKey, int inputId, int keyChainId,
+//                                    int accountId, int keyId,
+//                                    long amount, byte [] signatureMaterial,
+//                                    CmdResultCallback cmdResultCallback){
 
     public void cwCmdHdwPrepTrxSign(byte[] macKey, int inputId, int keyChainId,
                                     int accountId, int keyId,
@@ -1178,7 +1215,7 @@ public class CmdManager {
     public void cwCmdTrxBegin(byte[] encKey, long amount, String recvAddr, CmdResultCallback cmdResultCallback) {
 
         byte[] recvAddrBytes = recvAddr.getBytes(Charset.forName(CHARSETNAME));
-
+        LogUtil.i("txsBegin addr="+recvAddr+" ;hex="+LogUtil.byte2HexString(recvAddrBytes));
         byte[] addr = new byte[48];
         int length = recvAddrBytes.length;
         if (length <= 48) {
@@ -1190,8 +1227,6 @@ public class CmdManager {
         addr = AES.getAESEncrypt(addr, encKey);
 
         byte[] amountBn = ByteUtil.intToByteBig((int) amount, 8);//转成8字节大端模式
-        LogUtil.i("txsBegin amount="+amount+" ;轉int"+(int) amount+" ;hex=" + LogUtil.byte2HexString(amountBn) +
-                " ; addr="+recvAddr+" ;hex="+LogUtil.byte2HexString(recvAddrBytes));
 
         int addLen = addr.length;
         int len = 8 + addLen;

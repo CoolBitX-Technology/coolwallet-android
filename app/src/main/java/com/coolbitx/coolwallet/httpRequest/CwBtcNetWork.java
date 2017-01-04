@@ -1,8 +1,9 @@
-package com.coolbitx.coolwallet.util;
+package com.coolbitx.coolwallet.httpRequest;
 
 import android.content.ContentValues;
 
 import com.coolbitx.coolwallet.general.BtcUrl;
+import com.crashlytics.android.Crashlytics;
 import com.snscity.egdwlib.utils.LogUtil;
 
 import java.io.BufferedReader;
@@ -17,6 +18,7 @@ import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
 /**
  * Created by wmgs_01 on 15/9/25.
  */
@@ -54,26 +56,33 @@ public class CwBtcNetWork {
     }
 
 
-
     public String doGet(ContentValues cv, String extraUrl, String params) {
         HttpURLConnection connection = null;
         InputStream inputStream = null;
-        String resultString = null;
-        String url;
+        String resultString = "";
+        String url="";
         try {
             if (extraUrl.equals(BtcUrl.URL_BLOCKR_UNSPENT)) {
                 url = BtcUrl.URL_BLOCKR_SERVER_SITE + extraUrl + cv.getAsString("addresses");
-            } else if (extraUrl.equals(BtcUrl.URL_BLOCKR_EXCHANGE_RATE)) {
-                url = BtcUrl.URL_BLOCKR_SERVER_SITE + extraUrl;
-            }else {
+//                url="http://btc.blockr.io/api/v1/address/unspent/16PGKxt3H96TzKPHSWFDSiqxWPPxm4p6G5";
+            } else if (extraUrl.equals(BtcUrl.URL_BLICKCHAIN_EXCHANGE_RATE)) {
+                url = BtcUrl.URL_BLICKCHAIN_SERVER_SITE + extraUrl;
+            } else if (extraUrl.equals(BtcUrl.RECOMMENDED_TRANSACTION_FEES)) {
+                url = extraUrl;
+            } else if (extraUrl.equals(BtcUrl.URL_BLICKCHAIN_TXS_MULTIADDR)) {
                 if (params == null) {
                     url = BtcUrl.URL_BLICKCHAIN_SERVER_SITE + extraUrl + cv.getAsString("addresses");
                 } else {
-                    url = BtcUrl.URL_BLICKCHAIN_SERVER_SITE + "multiaddr?offset="+params+"&active="+ cv.getAsString("addresses") ;
+                    url = BtcUrl.URL_BLICKCHAIN_SERVER_SITE + "multiaddr?offset=" + params + "&active=" + cv.getAsString("addresses");
                 }
+            } else {
+                //
             }
 
             LogUtil.i(extraUrl + ":URL地址 = " + url);
+            Crashlytics.log("doGet url=" + url);
+
+
             URL getUrl = new URL(url);
             connection = (HttpURLConnection) getUrl.openConnection();
             connection.setRequestMethod("GET");
@@ -88,8 +97,6 @@ public class CwBtcNetWork {
                 case 200:
                     resultString = jsonResult(connection);
                     break;
-                case 201:
-                    break;
                 case 404:
                     resultString = "{\"errorCode\": 404}";
                     break;
@@ -99,9 +106,13 @@ public class CwBtcNetWork {
                 case 500:
                     resultString = "{\"errorCode\": 500}";
                     break;
+                default:
+                    resultString = "{\"errorCode\":" + code + "}";
+                    break;
             }
         } catch (Exception e) {
             e.printStackTrace();
+            Crashlytics.logException(e);
         } finally {
             if (connection != null) {
                 connection.disconnect();
@@ -111,10 +122,11 @@ public class CwBtcNetWork {
                     inputStream.close();
                 } catch (IOException e) {
                     e.printStackTrace();
+                    Crashlytics.logException(e);
                 }
             }
         }
-        return  resultString;
+        return resultString;
     }
 
     public String jsonResult(HttpURLConnection conn) throws Exception {
@@ -131,54 +143,16 @@ public class CwBtcNetWork {
 
             return jsonResult;
         } catch (IOException e) {
-            LogUtil.i("jsonResult error="+e.getMessage());
+            LogUtil.i("jsonResult error=" + e.getMessage());
             throw e;
         }
     }
-
-//    public void doPost(String address, String extraUrl, RequestParams params, RequestCallBack callBack) {
-//        HttpURLConnection connection = null;
-//        InputStream inputStream = null;
-//        try {
-//            String url = URL_BASE + extraUrl.replace("address", address);
-//            URL getUrl = new URL(url);
-//            connection = (HttpURLConnection) getUrl.openConnection();
-//            connection.setRequestMethod("POST");
-//            connection.setConnectTimeout(this.httpTimeOut);
-//            connection.setReadTimeout(this.httpTimeOut);
-//            connection.setDoOutput(true);
-//            connection.setDoInput(true);
-//            byte[] bytes = params.getUrl().getBytes();
-//            connection.getOutputStream().write(bytes);
-//            int code = connection.getResponseCode();
-//            if (code == 200) {
-//                inputStream = connection.getInputStream();
-//                String resultString = readString(inputStream);
-//                if (callBack != null) {
-//                    callBack.Success(resultString);
-//                }
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        } finally {
-//            if (connection != null) {
-//                connection.disconnect();
-//            }
-//            if (inputStream != null) {
-//                try {
-//                    inputStream.close();
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }
-//    }
 
     public int doPost(String Url, String params) {
         String resultString;
         HttpURLConnection connection = null;
         InputStream inputStream = null;
-        int code=-1;
+        int code = -1;
         String urlParameters = "{\"hex\":\"" + params + "\"}";
         LogUtil.i("doPost para=" + urlParameters);
         try {
@@ -198,7 +172,7 @@ public class CwBtcNetWork {
             out.close();
 
             code = connection.getResponseCode();
-            LogUtil.i("doPost code:" + code);
+            LogUtil.i("doPost code:" + code + ";" + connection.getResponseMessage());
             inputStream = connection.getInputStream();
             resultString = readString(inputStream);
             LogUtil.i("do post resultString=" + resultString);
@@ -219,8 +193,9 @@ public class CwBtcNetWork {
             }
 
         } catch (Exception e) {
-            LogUtil.i("doPost error=" + e.getMessage());
+            LogUtil.i("doPost error=" + e.getMessage() + ";" + connection.getResponseMessage());
             e.printStackTrace();
+            Crashlytics.logException(e);
         } finally {
             if (connection != null) {
                 connection.disconnect();
@@ -281,6 +256,7 @@ public class CwBtcNetWork {
             }
         } catch (IOException var5) {
             var5.printStackTrace();
+//            throw  var5;
         }
 
         return rst.toString();

@@ -1,20 +1,16 @@
 package com.coolbitx.coolwallet.ui;
 
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
@@ -29,6 +25,9 @@ import com.coolbitx.coolwallet.util.BIP39;
 import com.snscity.egdwlib.CmdManager;
 import com.snscity.egdwlib.cmd.CmdResultCallback;
 import com.snscity.egdwlib.utils.LogUtil;
+import com.coolbitx.coolwallet.util.ValidationException;
+
+import java.util.Random;
 
 /**
  * Created by ShihYi on 2015/10/20.
@@ -57,10 +56,11 @@ public class InitialCreateWalletIIActivity extends BaseActivity implements SeekB
     private ProgressDialog mProgress;
     Context context;
     String hdwSeed = "";
-    private CheckBox checkWords;
+
     private LinearLayout layoutWords;
     private TextView edtHdWord2;
     private TextView edtHdWord3;
+
     public boolean[] settingOptions = new boolean[4];
     private byte CwSecurityPolicyMaskOtp = 0x01;
     private byte CwSecurityPolicyMaskBtn = 0x02;
@@ -80,94 +80,75 @@ public class InitialCreateWalletIIActivity extends BaseActivity implements SeekB
         mProgress.setCancelable(false);
         mProgress.setIndeterminate(true);
         hdwSeedLength.setProgress(0);
-        edtHdWord.setText(BIP39.getMnemonic(BIP39.getRandomString(128 / 8).getBytes()));
+
+        PublicPun.showNoticeDialog(this, "Reminder", "Please put the CoolWallet on CoolLink while setting up.");
         GetSecpo();
-    }
-
-    private void GetSecpo() {
-        cmdManager.getSecpo(new CmdResultCallback() {
-            @Override
-            public void onSuccess(int status, byte[] outputData) {
-                if ((status + 65536) == 0x9000) {
-                    if (outputData != null && outputData.length > 0) {
-                        if ((outputData[0] & CwSecurityPolicyMaskOtp) >= 1) {
-                            settingOptions[0] = true;
-                        } else {
-                            settingOptions[0] = false;
-                        }
-
-                        if ((outputData[0] & CwSecurityPolicyMaskBtn) >= 1) {
-                            settingOptions[1] = true;
-                        } else {
-                            settingOptions[1] = false;
-                        }
-
-                        if ((outputData[0] & CwSecurityPolicyMaskAddress) >= 1) {
-                            settingOptions[2] = true;
-                        } else {
-                            settingOptions[2] = false;
-                        }
-
-                        if ((outputData[0] & CwSecurityPolicyMaskWatchDog) >= 1) {
-                            settingOptions[3] = true;
-                        } else {
-                            settingOptions[3] = false;
-                        }
-
-                        LogUtil.i("get安全設置:otp=" + settingOptions[0] + ";button_up=" + settingOptions[1] +
-                                ";address" + settingOptions[2] + ";dog=" + settingOptions[3]);
-
-                    }
-                }
-            }
-        });
     }
 
     @Override
     public void onClick(View view) {
 
+        final int length = Integer.valueOf(tvHdwSeedLength.getText().toString().trim()) * 6;
+        final String name = "";
+
         if (view == btnNext) {
             // Handle clicks for btnCreateHDW
-            SetSecpo(true);
             if (isSeedOn) {//by card create seed (Numbers)
-                if (btnNext.getText().equals("Next")) {
-                    if (checkWords.isChecked()) {
-                        hdwSumLin.setVisibility(View.VISIBLE);
-                        tlCcreate.setVisibility(View.GONE);
-                    } else {
-                        PublicPun.ClickFunction(context, "", "Please backup seed and confirm.");
-                    }
-                } else {
-                    Thread thread = new Thread() {
-                        @Override
-                        public void run() {
-                            super.run();
-                                       /* Show the progress. */
-                            runOnUiThread(new Runnable() {
+                hdwSumLin.setVisibility(View.VISIBLE);
+                tlCcreate.setVisibility(View.GONE);
 
-                                @Override
-                                public void run() {
-                                    mProgress.setMessage("Generating seed...");
-                                    mProgress.show();
+                Thread thread = new Thread() {
+                    @Override
+                    public void run() {
+                        super.run();
+                                       /* Show the progress. */
+                        runOnUiThread(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                mProgress.setMessage("Generating seed...");
+                                mProgress.show();
+                            }
+                        });
+                        //處理程式寫在此
+
+                        LogUtil.i("create wallet length:" + length);
+                        cmdManager.hdwInitWalletGen(name, length, new CmdResultCallback() {
+                            @Override
+                            public void onSuccess(int status, byte[] outputData) {
+                                if ((status + 65536) == 0x9000) {
+                                    if (outputData != null) {
+                                        LogUtil.e("outputData=" + PublicPun.byte2HexString(outputData));
+                                        activeCode = new byte[4];
+                                        int len = outputData.length;
+                                        int sLen = length / 2;
+                                        if (len >= sLen + 4) {
+                                            activeCode[0] = outputData[sLen];
+                                            activeCode[1] = outputData[sLen + 1];
+                                            activeCode[2] = outputData[sLen + 2];
+                                            activeCode[3] = outputData[sLen + 3];
+                                        }
+                                    }
+                                    mProgress.dismiss();
+                                } else {
+                                    mProgress.dismiss();
+                                    PublicPun.showNoticeDialogToFinish(context, "Error Message", "Error:" + Integer.toHexString(status));
                                 }
-                            });
-                            //處理程式寫在此
-                            genSeeds();
-                        }
-                    };
-                    thread.start();
-                }
-            } else {
-                //by soft create seed (Words)
-                LogUtil.i("words");
-//                hdwSumLin.setVisibility(View.VISIBLE);
-//                tlCcreate.setVisibility(View.GONE);
-                LogUtil.i("hdwSeed=" + hdwSeed);
+                            }
+                        });
+                    }
+                };
+                thread.start();
+            } else {//by soft create seed (Words)
+                hdwSumLin.setVisibility(View.VISIBLE);
+                tlCcreate.setVisibility(View.GONE);
+                LogUtil.i("words hdwSeed=" + hdwSeed);
 
                 Intent intent = new Intent();
                 intent.setClass(context, InitialCreateWalletWords.class);
                 Bundle bundle = new Bundle();
-                bundle.putStringArray("bip39Word", BIP39.bip39Word);
+                bundle.putString("line1", BIP39.seedWprdsLine1);
+                bundle.putString("line2", BIP39.seedWprdsLine2);
                 bundle.putString("hdwSeed", hdwSeed);
                 intent.putExtras(bundle);
                 startActivity(intent);
@@ -175,115 +156,31 @@ public class InitialCreateWalletIIActivity extends BaseActivity implements SeekB
             }
 
         } else if (view == hdwConfirm) {
-            //Numbers種子
+            //種子
             mProgress.setMessage("Creating wallet...");
             mProgress.show();
             String hdwSumStr = hdwSumEt.getText().toString().trim();
+            LogUtil.d("hdwSumStr="+hdwSumStr);
             cmdManager.hdwInitWalletGenConfirm(activeCode, hdwSumStr, new CmdResultCallback() {
                 @Override
                 public void onSuccess(int status, byte[] outputData) {
                     if ((status + 65536) == 0x9000) {
-//                        PublicPun.toast(InitialCreateWalletIIActivity.this, "HDW Created");
+                        PublicPun.toast(InitialCreateWalletIIActivity.this, "HDW Created");
+
                         Intent intent = new Intent(getApplicationContext(), FragMainActivity.class);
                         intent.putExtra("Parent", InitialCreateWalletIIActivity.class.getSimpleName());
                         startActivity(intent);
-                        finish();
-                    }
-//                    else if ((status + 65536) == 0x16645) {
-//                    }
-                    else {
-                        mProgress.dismiss();
-                        ClickFunction("Incorrect checksum", "Please recalculate or regenerate seed again");
+
+                    } else if ((status + 65536) == 0x16645) {
+                        PublicPun.showNoticeDialogToFinish(context, "Checksum incorrect", "Please try again or generate seed again");
+                    } else {
+                        PublicPun.showNoticeDialogToFinish(context, "Error Message", "Error:" + Integer.toHexString(status));
                     }
                 }
             });
         }
     }
 
-    //初始化安全设置
-    private void SetSecpo(boolean setWatchDog) {
-//        settingOptions[0] = switchOtp.isChecked();
-//        settingOptions[1] = switchEnablePressButton.isChecked();
-//        settingOptions[2] = switchAddress.isChecked();
-
-        settingOptions[3] = setWatchDog;
-
-        LogUtil.i("set安全設置:otp=" + settingOptions[0] + ";button_up=" + settingOptions[1] +
-                ";address" + settingOptions[2] + ";dog=" + settingOptions[3]);
-
-        cmdManager.setSecpo(settingOptions, new CmdResultCallback() {
-            @Override
-            public void onSuccess(int status, byte[] outputData) {
-                if ((status + 65536) == 0x9000) {
-//                    PublicPun.toast(mContext, "CW Security Policy Set");
-                }
-            }
-        });
-    }
-
-    private void ClickFunction(String mTitle, String mMessage) {
-        LayoutInflater inflater = LayoutInflater.from(context);
-        View alert_view = inflater.inflate(R.layout.edit_dialog, null);//alert為另外做給alert用的layout
-        final EditText mEditText = (EditText) alert_view.findViewById(R.id.etInputLabel);
-        final TextView mDialogTitle = (TextView) alert_view.findViewById(R.id.dialog_title);
-        final TextView mDialogMessage = (TextView) alert_view.findViewById(R.id.dialog_message);
-        mEditText.setVisibility(View.INVISIBLE);
-        mDialogMessage.setText(mMessage);
-        //-----------產生輸入視窗--------
-        AlertDialog.Builder builder = new AlertDialog.Builder(context, AlertDialog.THEME_HOLO_LIGHT);
-        mDialogTitle.setText(mTitle);
-        builder.setView(alert_view);
-        builder.setPositiveButton("Try again", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-                hdwSumEt.setText("");
-            }
-        });
-        builder.setNegativeButton("Regenerate", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-//                hdwSumEt.setText("");
-//                genSeeds();
-                Intent intent = new Intent(getApplicationContext(), InitialCreateWalletIIActivity.class);
-                startActivity(intent);
-                finish();
-            }
-        });
-        builder.show();
-    }
-
-    private void genSeeds() {
-        final int length = Integer.valueOf(tvHdwSeedLength.getText().toString().trim()) * 6;
-        final String name = "";
-        cmdManager.hdwInitWalletGen(name, length, new CmdResultCallback() {
-            @Override
-            public void onSuccess(int status, byte[] outputData) {
-                if ((status + 65536) == 0x9000) {
-                    if (outputData != null) {
-                        LogUtil.e("outputData=" + PublicPun.byte2HexString(outputData));
-                        activeCode = new byte[4];
-                        int len = outputData.length;
-                        int sLen = length / 2;
-                        if (len >= sLen + 4) {
-                            activeCode[0] = outputData[sLen];
-                            activeCode[1] = outputData[sLen + 1];
-                            activeCode[2] = outputData[sLen + 2];
-                            activeCode[3] = outputData[sLen + 3];
-                        }
-                    }
-                    LogUtil.i("generated seed length:" + length);
-
-                    edtHdWord.setText(context.getResources().getString(R.string.hdw_create_word_write_down));
-                    edtHdWord.setTextColor(Color.rgb(223, 217, 214));
-                    btnNext.setText("Next");
-                    mProgress.dismiss();
-                    checkWords.setVisibility(View.VISIBLE);
-
-                } else {
-                    mProgress.dismiss();
-                    PublicPun.ClickFunctionToFinish(context, "Erro Message", "Error:" + Integer.toHexString(status));
-                }
-            }
-        });
-    }
 
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean b) {
@@ -308,6 +205,7 @@ public class InitialCreateWalletIIActivity extends BaseActivity implements SeekB
             newProgress = 0;
             hdwSeedLength.setProgress(0);
             tvHdwSeedLength.setText(isSeedOn ? "8" : "12");
+
             changeLayout(128);
 
         } else if (newProgress > 70) {
@@ -316,6 +214,7 @@ public class InitialCreateWalletIIActivity extends BaseActivity implements SeekB
             newProgress = 100;
             hdwSeedLength.setProgress(100);
             tvHdwSeedLength.setText(isSeedOn ? "16" : "24");
+
             changeLayout(256);
 
         } else {
@@ -323,6 +222,7 @@ public class InitialCreateWalletIIActivity extends BaseActivity implements SeekB
             newProgress = 50;
             hdwSeedLength.setProgress(50);
             tvHdwSeedLength.setText(isSeedOn ? "12" : "18");
+
             changeLayout(192);
 
         }
@@ -371,7 +271,15 @@ public class InitialCreateWalletIIActivity extends BaseActivity implements SeekB
     private void changeLayout(int randomInt) {
 
         if (!isSeedOn) {
-            hdwSeed = BIP39.getMnemonic(BIP39.getRandomString(randomInt / 8).getBytes()).replace(" ", "");
+//            hdwSeed = BIP39.getMnemonic(BIP39.getRandomString(randomInt / 8).getBytes()).replace(" ", "");
+//            a-z,0-9=36變化;改00~255=256種變化
+            byte[] entropy = new byte[randomInt / 8];
+            new Random().nextBytes(entropy);
+            try {
+                hdwSeed = BIP39.getMnemonic(entropy);
+            } catch (ValidationException ve) {
+                PublicPun.showNoticeDialog(this, "Error", ve.getMessage());
+            }
             edtHdWord.setVisibility(View.GONE);
             layoutWords.setVisibility(View.VISIBLE);
             layoutWords.setBackgroundColor(this.getResources().getColor(R.color.md_white_1000));
@@ -387,10 +295,50 @@ public class InitialCreateWalletIIActivity extends BaseActivity implements SeekB
         } else {
             edtHdWord.setVisibility(View.VISIBLE);
             layoutWords.setVisibility(View.GONE);
+
             edtHdWord.setText(this.getResources().getString(R.string.hdw_create_word));
             edtHdWord.setTextColor(Color.RED);
             edtHdWord.setBackgroundColor(Color.TRANSPARENT);
         }
+    }
+
+    private void GetSecpo() {
+        cmdManager.getSecpo(new CmdResultCallback() {
+            @Override
+            public void onSuccess(int status, byte[] outputData) {
+                if ((status + 65536) == 0x9000) {
+                    if (outputData != null && outputData.length > 0) {
+                        if ((outputData[0] & CwSecurityPolicyMaskOtp) >= 1) {
+                            settingOptions[0] = true;
+                        } else {
+                            settingOptions[0] = false;
+                        }
+
+                        if ((outputData[0] & CwSecurityPolicyMaskBtn) >= 1) {
+                            settingOptions[1] = true;
+                        } else {
+                            settingOptions[1] = false;
+                        }
+
+                        if ((outputData[0] & CwSecurityPolicyMaskAddress) >= 1) {
+                            settingOptions[2] = true;
+                        } else {
+                            settingOptions[2] = false;
+                        }
+
+                        if ((outputData[0] & CwSecurityPolicyMaskWatchDog) >= 1) {
+                            settingOptions[3] = true;
+                        } else {
+                            settingOptions[3] = false;
+                        }
+
+                        LogUtil.i("get安全設置:otp=" + settingOptions[0] + ";button_up=" + settingOptions[1] +
+                                ";address" + settingOptions[2] + ";dog=" + settingOptions[3]);
+
+                    }
+                }
+            }
+        });
     }
 
     private void initViews() {
@@ -404,13 +352,12 @@ public class InitialCreateWalletIIActivity extends BaseActivity implements SeekB
         tlCcreate = (TableLayout) findViewById(R.id.tl_create);
         hdwSumEt = (EditText) findViewById(R.id.hdw_sum_et);
         tvSeedType = (TextView) findViewById(R.id.tv_seed_type);
-        checkWords = (CheckBox) findViewById(R.id.checkWords);
+
         layoutWords = (LinearLayout) findViewById(R.id.layoutWords);
         edtHdWord2 = (TextView) findViewById(R.id.hdw_word2);
         edtHdWord3 = (TextView) findViewById(R.id.hdw_word3);
 
-        //android.R.layout.simple_spinner_item
-        listSeed = new ArrayAdapter<String>(InitialCreateWalletIIActivity.this, R.layout.spinner_textview, strSeed);
+        listSeed = new ArrayAdapter<String>(InitialCreateWalletIIActivity.this, android.R.layout.simple_spinner_item, strSeed);
         seedSpinner.setAdapter(listSeed);
 
         btnNext.setOnClickListener(this);
@@ -422,7 +369,14 @@ public class InitialCreateWalletIIActivity extends BaseActivity implements SeekB
         isSeedOn = true;
         hdwSeedLength.setProgress(0);
         tvHdwSeedLength.setText(isSeedOn ? "48" : "12");
-        edtHdWord.setText(BIP39.getMnemonic(BIP39.getRandomString(128 / 8).getBytes()));
+//        edtHdWord.setText(BIP39.getMnemonic(BIP39.getRandomString(128 / 8).getBytes()));
+//        byte[] entropy = new byte[128 / 8];
+//        new Random().nextBytes(entropy);
+//        try {
+//            edtHdWord.setText(BIP39.getMnemonic(entropy));
+//        } catch (ValidationException ve) {
+//            PublicPun.showNoticeDialog(this, "Error", ve.getMessage());
+//        }
     }
 
     private void initToolbar() {
@@ -431,6 +385,7 @@ public class InitialCreateWalletIIActivity extends BaseActivity implements SeekB
         setSupportActionBar(toolbar);
         // Navigation Icon設定在 setSupoortActionBar後才有作用,否則會出現 back button_up
         toolbar.setNavigationIcon(R.mipmap.menu_3x);
+
         ActionBar actionBar = getSupportActionBar();
         // 打開 up button_up
         actionBar.setDisplayHomeAsUpEnabled(true);
@@ -438,13 +393,8 @@ public class InitialCreateWalletIIActivity extends BaseActivity implements SeekB
     }
 
     @Override
-    public Intent getSupportParentActivityIntent() {
-        finish();
-        return null;
-    }
-
-    @Override
     public void onNothingSelected(AdapterView<?> parent) {
+
     }
 
     @Override
@@ -460,9 +410,6 @@ public class InitialCreateWalletIIActivity extends BaseActivity implements SeekB
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(settingOptions[3]) {
-            SetSecpo(false);
-        }
     }
 
     @Override

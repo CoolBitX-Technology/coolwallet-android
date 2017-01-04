@@ -18,8 +18,7 @@
         android:id="@+id/cw_refresh"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/imgLogo"
-        android:layout_alignBottom="@+id/txtsearchDetail">
+        android:layout_below="@+id/imgLogo">
 
         <ExpandableListView
             android:id="@+id/cw_list"
@@ -61,7 +60,7 @@
 
     <TextView
         android:layout_width="280dp"
-        android:layout_height="100dp"
+        android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="@string/strPullMsg"
         android:id="@+id/tvPullMsg"
@@ -69,9 +68,13 @@
         android:textColor="@color/md_grey_300"
         android:textSize="16sp"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_below="@+id/cw_refresh"
-        />
+        android:layout_centerHorizontal="true" />
+    <!--<ProgressBar-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:id="@+id/pBarConnecting"-->
+        <!--android:layout_below="@+id/imgLogo"-->
+        <!--android:layout_centerHorizontal="true"-->
+        <!--android:visibility="invisible"/>-->
 
 </RelativeLayout>
-

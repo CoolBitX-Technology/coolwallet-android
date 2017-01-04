@@ -73,7 +73,7 @@ public class InitialSecuritySettingActivity extends BaseActivity implements Comp
                         @Override
                         public void onSuccess(int status, byte[] outputData) {
                             if ((status + 65536) == 0x9000) {
-                                PublicPun.ClickFunction(mContext, "Security policy set","");
+                                PublicPun.showNoticeDialog(mContext, "Security policy set","");
                             }
                         }
                     });
@@ -87,7 +87,7 @@ public class InitialSecuritySettingActivity extends BaseActivity implements Comp
                                     @Override
                                     public void onSuccess(int status, byte[] outputData) {
                                         if ((status + 65536) == 0x9000) {
-                                            PublicPun.ClickFunction(mContext, "Security policy set", "");
+                                            PublicPun.showNoticeDialog(mContext, "Security policy set", "");
                                             Intent intent = new Intent(getApplicationContext(), InitialCreateWalletActivity.class);
                                             startActivity(intent);
                                         }

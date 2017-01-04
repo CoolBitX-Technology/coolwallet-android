@@ -21,10 +21,41 @@ public class InitialCreateWalletActivity extends BaseActivity implements View.On
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_init_createwallet);
+//        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+//        getSupportActionBar().setCustomView(R.layout.custom_actionbar);
+//        ImageView imgView = (ImageView) findViewById(R.id.imageSecurity);
+//        imgView.setBackground(null);
+//        TextView textView = (TextView) findViewById(R.id.mytext);
+//        textView.setText("Create Wallet");
         findViews();
         initToolbar();
         trCreate.setOnClickListener(this);
         trRecovera.setOnClickListener(this);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
     }
 
     @Override
@@ -61,26 +92,26 @@ public class InitialCreateWalletActivity extends BaseActivity implements View.On
         int id = v.getId();
         switch (id) {
             case R.id.tr_create:
-                Intent intentCreate = new Intent(getApplicationContext(), InitialCreateWalletIIActivity.class);
-                startActivity(intentCreate);
-
-//                Intent intentCreate = new Intent();
-//                intentCreate.setClass(getApplicationContext(), InitialCreateWalletIIActivity.class);
-//                intentCreate.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);//关掉所要到的界面中间的activity
+//                Intent intentCreate = new Intent(getApplicationContext(), InitialCreateWalletIIActivity.class);
 //                startActivity(intentCreate);
-//                finish();
+
+                Intent intentCreate = new Intent();
+                intentCreate.setClass(getApplicationContext(), InitialCreateWalletIIActivity.class);
+                intentCreate.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);//关掉所要到的界面中间的activity
+                startActivity(intentCreate);
+                finish();
 
                 break;
 
             case R.id.tr_recovera:
-                Intent intentRecover = new Intent(getApplicationContext(), RecovWalletActivity.class);
-                startActivity(intentRecover);
-
-//                Intent intentRecover = new Intent();
-//                intentRecover.setClass(getApplicationContext(), RecovWalletActivity.class);
-//                intentRecover.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);//关掉所要到的界面中间的activity
+//                Intent intentRecover = new Intent(getApplicationContext(), RecovWalletActivity.class);
 //                startActivity(intentRecover);
-//                finish();
+
+                Intent intentRecover = new Intent();
+                intentRecover.setClass(getApplicationContext(), RecovWalletActivity.class);
+                intentRecover.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);//关掉所要到的界面中间的activity
+                startActivity(intentRecover);
+                finish();
 
                 break;
 
@@ -88,31 +119,6 @@ public class InitialCreateWalletActivity extends BaseActivity implements View.On
                 onBackPressed();
                 break;
         }
-    }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
     }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-    }
-
 }

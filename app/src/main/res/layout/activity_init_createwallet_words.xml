@@ -51,24 +51,7 @@
             android:layout_height="wrap_content"
             android:background="@android:color/black"
             android:layout_marginTop="50dp"
-            android:orientation="vertical">
-
-            <Button
-                android:id="@+id/seedWords_previous"
-                style="@style/TextView_Black_16"
-                android:layout_width="180dp"
-                android:layout_height="40dp"
-                android:layout_gravity="center"
-                android:background="@drawable/selector_button"
-                android:text="@string/btn_previous" />
-
-
-            <android.support.v4.widget.Space
-                android:id="@+id/spacer"
-                android:layout_width="fill_parent"
-                android:layout_height="10dp"
-                android:layout_weight="1"
-                android:visibility="invisible" />
+            android:orientation="horizontal">
 
             <Button
                 android:id="@+id/seedWords_confirm"
@@ -79,9 +62,21 @@
                 android:background="@drawable/selector_button"
                 android:text="@string/btn_create_HDW" />
 
+            <android.support.v4.widget.Space
+                android:id="@+id/spacer"
+                android:layout_width="5dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:visibility="invisible" />
 
-
-
+            <Button
+                android:id="@+id/seedWords_previous"
+                style="@style/TextView_Black_16"
+                android:layout_width="180dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center"
+                android:background="@drawable/selector_button"
+                android:text="@string/btn_previous" />
 
         </LinearLayout>
 

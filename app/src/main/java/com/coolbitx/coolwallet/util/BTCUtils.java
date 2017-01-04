@@ -1,7 +1,9 @@
 package com.coolbitx.coolwallet.util;
 
+import android.content.Context;
+
 import com.coolbitx.coolwallet.entity.UnSpentTxsBean;
-import com.coolbitx.coolwallet.ui.Fragment.TabFragment;
+import com.coolbitx.coolwallet.general.AppPrefrence;
 import com.snscity.egdwlib.utils.LogUtil;
 
 import org.spongycastle.asn1.ASN1InputStream;
@@ -18,7 +20,9 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -29,11 +33,13 @@ public class BTCUtils {
 
     private static final ECDomainParameters EC_PARAMS;
     private static final char[] BASE58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz".toCharArray();
+    private final static String ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
     public static final int MAX_TX_LEN_FOR_NO_FEE = 10000;
     public static final long MIN_PRIORITY_FOR_NO_FEE = 57600000;
     public static final long MIN_MIN_OUTPUT_VALUE_FOR_NO_FEE = 10000000L;
-    public static final long MIN_FEE_PER_BTC = 10000;
-//    public static final long MAX_ALLOWED_FEE = BTCUtils.parseValue("0.1");
+    public static final long MIN_FEE_PER_TX = 10000;
+
+    //    public static final long MAX_ALLOWED_FEE = BTCUtils.parseValue("0.1");
     public static final long MAX_ALLOWED_FEE = BTCUtils.parseValue("0.0001");
 
     static {
@@ -42,82 +48,102 @@ public class BTCUtils {
     }
 
     public static long parseValue(String valueStr) throws NumberFormatException {
-        return (long) (Double.parseDouble(valueStr) * 1e8); //10的8次方
+        return (long) (Double.parseDouble(valueStr) * 1e8); //DTCO
 //        return (long) (Double.parseDouble(valueStr));
     }
 
-    public static long convertToSatoshisValue(String valueStr)throws NumberFormatException {
-        String satoshisStr =String.valueOf(SATOSHIS_PER_COIN);
-        java.math.BigDecimal x =  new java.math.BigDecimal(valueStr);
-        java.math.BigDecimal y = new java.math.BigDecimal(satoshisStr);
-        return x.multiply(y).longValue();
-    }
-
     private static final int SATOSHIS_PER_COIN = 100000000;
-    public static FeeChangeAndSelectedOutputs calcFeeChangeAndSelectOutputsToSpend(List<UnSpentTxsBean>UnSpentTxsBeanList,
-                                                                                    long amountToSend, long extraFee,
-                                                                                    final boolean isPublicKeyCompressed) {
+    private static int HALF_HOUR_PER_KB;
+    private static int HALF_HOUR_PER_BYTE;
+
+    public static FeeChangeAndSelectedOutputs calcFeeChangeAndSelectOutputsToSpend(Context mContext, List<UnSpentTxsBean> UnSpentTxsBeanList,
+                                                                                   long amountToSend, long extraFee,
+                                                                                   final boolean isPublicKeyCompressed) throws ValidationException {
         long fee = 0;//calculated below
         long change = 0;
-        long valueOfUnspentOutputs;
+        long valueOfUnspentOutputs = 0;
+        //fees per byte *1000=1kb
+        HALF_HOUR_PER_BYTE = AppPrefrence.getRecommendedHalfHourFees(mContext);
         ArrayList<UnSpentTxsBean> outputsToSpend = new ArrayList<>();
         if (amountToSend <= 0) {
             //transfer all funds from these addresses to outputAddress
             LogUtil.i("找到amountToSend<=0");
             change = 0;
-            valueOfUnspentOutputs = 0;
             for (UnSpentTxsBean outputInfo : UnSpentTxsBeanList) {
                 outputsToSpend.add(outputInfo);
-                valueOfUnspentOutputs += (long)(outputInfo.getAmount() * SATOSHIS_PER_COIN); //Satoshi
+                valueOfUnspentOutputs += (long) (outputInfo.getAmount() * SATOSHIS_PER_COIN); //Satoshi
             }
 
             final int txLen = BTCUtils.getMaximumTxSize(UnSpentTxsBeanList, 1, isPublicKeyCompressed);
-            fee =BTCUtils.calcMinimumFee(txLen, UnSpentTxsBeanList, valueOfUnspentOutputs - MIN_FEE_PER_BTC * (1 + txLen / 1000));
+
+            fee = BTCUtils.calcMinimumFee(txLen, UnSpentTxsBeanList, valueOfUnspentOutputs - MIN_FEE_PER_TX * (1 + txLen / 1000));
             amountToSend = valueOfUnspentOutputs - fee - extraFee;
         } else {
-            valueOfUnspentOutputs = 0;
 
-            for(int i=0;i<UnSpentTxsBeanList.size();i++){
+            for (int i = 0; i < UnSpentTxsBeanList.size(); i++) {
                 UnSpentTxsBean outputInfo = UnSpentTxsBeanList.get(i);
-                LogUtil.i("找到amountToSend="+String.format("%.8f",outputInfo.getAmount())+";addr=" + outputInfo.getAddress());
+                LogUtil.i("找到Unspent=" + BTCUtils.convertToSatoshisValue(new DecimalFormat("#.########").format(outputInfo.getAmount()))
+                        + ";addr=" + outputInfo.getAddress());
                 outputsToSpend.add(outputInfo);
-                valueOfUnspentOutputs += BTCUtils.convertToSatoshisValue(TabFragment.BtcFormatter.format(outputInfo.getAmount())) ;
-                long updatedFee = MIN_FEE_PER_BTC;
-                fee = updatedFee;
-//                change = valueOfUnspentOutputs - fee - extraFee - amountToSend;
-                change = valueOfUnspentOutputs - fee - amountToSend;
+                valueOfUnspentOutputs += BTCUtils.convertToSatoshisValue(new DecimalFormat("#.########").format(outputInfo.getAmount()));
 
-                LogUtil.i("計算要用來寄出的第"+i+"筆資料:"+";addr=" + outputInfo.getAddress()+",取得金額="+
-                        valueOfUnspentOutputs+",fee="+fee+" ,extra fee="+extraFee+",amountToSend="+amountToSend+",change="+change);
-//                final int txLen = BTCUtils.getMaximumTxSize(UnSpentTxsBeanList, change > 0 ? 2 : 1, isPublicKeyCompressed);
-//                updatedFee = BTCUtils.calcMinimumFee(txLen, UnSpentTxsBeanList, change > 0 ? Math.min(amountToSend, change) : amountToSend);
+                final int txOneOutputLen = BTCUtils.getMaximumTxSize(outputsToSpend, 1, isPublicKeyCompressed);
+                long updatedFee = BTCUtils.calcHalfHourFee(txOneOutputLen);
+                fee = updatedFee;
+                if(fee==0){
+                    fee= MIN_FEE_PER_TX;
+                }
+
+                change = valueOfUnspentOutputs - fee - amountToSend;
+                LogUtil.i("計算要用來寄出的第" + i + "筆資料:" + ";addr=" + outputInfo.getAddress() + ",餘額=" +
+                        valueOfUnspentOutputs + ",fee=" + fee + ",amountToSend=" + amountToSend + ",change=" + change);
+
                 if (valueOfUnspentOutputs >= amountToSend + fee) { //收集足夠金額的output
                     break;
                 }
             }
+
+            LogUtil.i("總計寄出資料=" + outputsToSpend.size() + "筆input,餘額=" +
+                    valueOfUnspentOutputs + ",fee=" + fee + ",amountToSend=" + amountToSend + ",change=" + change);
+
         }
+        //ZERO Confirmation unspent?
         if (amountToSend > valueOfUnspentOutputs - fee) {
             LogUtil.e("Not enough funds " + (valueOfUnspentOutputs - fee));
+            float output = (((float) valueOfUnspentOutputs - (float) fee-(float)amountToSend) / (float) SATOSHIS_PER_COIN);
+            throw new ValidationException("Insufficient funds: " + new DecimalFormat("#.########").format(output) + " BTC\nFees:"+ new DecimalFormat("#.########").format((float) fee / (float) SATOSHIS_PER_COIN)+" BTC");
+
         }
         if (outputsToSpend.isEmpty()) {
             LogUtil.e("No outputs to spend");
+            throw new ValidationException("No outputs to spend.");
         }
-        if (fee + extraFee > MAX_ALLOWED_FEE) {
-            LogUtil.e("Fee is too big " + fee+";MAX_ALLOWED_FEE="+MAX_ALLOWED_FEE);
-        }
+//        if (fee + extraFee > MAX_ALLOWED_FEE) {
+////            LogUtil.e("Fee is too big " + fee + ";MAX_ALLOWED_FEE=" + MAX_ALLOWED_FEE);
+//            throw new ValidationException("Fee is too big " + fee + ";MAX_ALLOWED_FEE=" + MAX_ALLOWED_FEE);
+//        }
         if (fee < 0 || extraFee < 0) {
             LogUtil.e("Incorrect fee " + fee);
+            throw new ValidationException("Incorrect fee " + fee);
         }
         if (change < 0) {
             LogUtil.e("Incorrect change " + change);
+            throw new ValidationException("Incorrect change " + change);
         }
         if (amountToSend < 0) {
             LogUtil.e("Incorrect amount to send " + amountToSend);
+            throw new ValidationException("Incorrect amount to send " + amountToSend);
         }
-        return new FeeChangeAndSelectedOutputs(fee + extraFee, change, amountToSend, outputsToSpend);
-
+        return new FeeChangeAndSelectedOutputs(fee + extraFee, change, amountToSend, outputsToSpend, valueOfUnspentOutputs);
     }
 
+
+    public static long convertToSatoshisValue(String valueStr) throws NumberFormatException {
+        String satoshisStr = String.valueOf(SATOSHIS_PER_COIN);
+        java.math.BigDecimal x = new java.math.BigDecimal(valueStr);
+        java.math.BigDecimal y = new java.math.BigDecimal(satoshisStr);
+        return x.multiply(y).longValue();
+    }
 
 
     public static boolean isZeroFeeAllowed(int txLen, Collection<UnSpentTxsBean> unspentOutputInfos, long minOutput) {
@@ -136,34 +162,43 @@ public class BTCUtils {
         return false;
     }
 
+    public static long calcHalfHourFee(int txLen) {
+        return txLen * HALF_HOUR_PER_BYTE;
+    }
+
+
     public static long calcMinimumFee(int txLen, Collection<UnSpentTxsBean> unspentOutputInfos, long minOutput) {
         if (isZeroFeeAllowed(txLen, unspentOutputInfos, minOutput)) {
             return 0;
         }
-        return MIN_FEE_PER_BTC * (1 + txLen / 1000);
+        return MIN_FEE_PER_TX * (1 + txLen / 1000);
     }
 
-    public static int getMaximumTxSize(Collection<UnSpentTxsBean> unspentOutputInfos, int outputsCount, boolean compressedPublicKey) {
+    public static int getMaximumTxSize(Collection<UnSpentTxsBean> unspentOutputInfos, int outputsCount, boolean compressedPublicKey) throws ValidationException {
         if (unspentOutputInfos == null || unspentOutputInfos.isEmpty()) {
-            LogUtil.e("No information about tx inputs provided");
+            throw new ValidationException("No information about tx inputs provided");
         }
         int maxInputScriptLen = 73 + (compressedPublicKey ? 33 : 65);
-        return 9 + unspentOutputInfos.size() * (41 + maxInputScriptLen) + outputsCount * 33;
+//        return 9 + unspentOutputInfos.size() * (41 + maxInputScriptLen) + outputsCount * 33;
+        return 10 + unspentOutputInfos.size() * (41 + maxInputScriptLen) + outputsCount * 33;
     }
 
     public static class FeeChangeAndSelectedOutputs {
-        public final long amountForRecipient, change, fee;
+        public final long amountForRecipient, change, fee, valueOfUnspentOutputs;
         public final ArrayList<UnSpentTxsBean> outputsToSpend;
 
-        public FeeChangeAndSelectedOutputs(long fee, long change, long amountForRecipient, ArrayList<UnSpentTxsBean> outputsToSpend) {
+        public FeeChangeAndSelectedOutputs(long fee, long change, long amountForRecipient, ArrayList<UnSpentTxsBean> outputsToSpend, long ValueOfUnspentOutputs) {
             this.fee = fee;
             this.change = change;
             this.amountForRecipient = amountForRecipient;
             this.outputsToSpend = outputsToSpend;
+            this.valueOfUnspentOutputs = ValueOfUnspentOutputs;
+            LogUtil.e("fee=" + fee + ";change=" + change + ";amountForRecipient=" + amountForRecipient + ";valueOfUnspentOutputs=" + valueOfUnspentOutputs);
         }
     }
 
     private static final int BASE58_CHUNK_DIGITS = 10;//how many base 58 digits fits in long
+
     private static final BigInteger BASE58_CHUNK_MOD = BigInteger.valueOf(0x5fa8624c7fba400L); //58^BASE58_CHUNK_DIGITS
     private static final byte[] BASE58_VALUES = new byte[]{-1, -1, -1, -1, -1, -1, -1, -1, -1, -2, -2, -2, -2, -2, -1, -1,
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
@@ -181,6 +216,59 @@ public class BTCUtils {
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
+
+    private static byte[] Sha256(byte[] data, int start, int len, int recursion) {
+        if (recursion == 0) return data;
+
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            md.update(Arrays.copyOfRange(data, start, start + len));
+            return Sha256(md.digest(), 0, 32, recursion - 1);
+        } catch (NoSuchAlgorithmException e) {
+            return null;
+        }
+    }
+
+    public static boolean ValidateBitcoinAddress(String addr) {
+        if (addr.length() < 26 || addr.length() > 35) {
+            LogUtil.d("ValidateBitcoinAddress--addr.length()");
+            return false;
+        }
+//        byte[] decoded = DecodeBase58(addr, 58, 25);
+        byte[] decoded = decodeBase58(addr);
+
+        if (decoded == null) {
+            LogUtil.d("ValidateBitcoinAddress--DecodeBase58");
+            return false;
+        }
+        byte[] hash = Sha256(decoded, 0, 21, 2);
+        LogUtil.d("ValidateBitcoinAddress--hash pass");
+
+        LogUtil.e(LogUtil.byte2HexString(Arrays.copyOfRange(hash, 0, 4)) + " 比對 " + LogUtil.byte2HexString(Arrays.copyOfRange(decoded, 21, 25)));
+
+        return Arrays.equals(Arrays.copyOfRange(hash, 0, 4), Arrays.copyOfRange(decoded, 21, 25));
+    }
+
+    private static byte[] DecodeBase58(String input, int base, int len) {
+        byte[] output = new byte[len];
+        for (int i = 0; i < input.length(); i++) {
+            char t = input.charAt(i);
+            LogUtil.d("跳出字元=" + t);
+            int p = ALPHABET.indexOf(t);
+            if (p == -1) return null;
+
+            for (int j = len - 1; j > 0; j--, p /= 256) {
+                p += base * (output[j] & 0xFF);
+                output[j] = (byte) (p % 256);
+                LogUtil.d("跳出字元j=" + j + ";p=" + p);
+            }
+
+            if (p != 0) return null;
+        }
+
+        return output;
+    }
+
 
     public static byte[] decodeBase58(String input) {
         if (input == null) {
@@ -253,7 +341,7 @@ public class BTCUtils {
     public static byte[] doubleSha256(byte[] bytes) {
         try {
             MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
-            LogUtil.i("doubleSha256 unSign hex="+ sha256.digest(sha256.digest(bytes)));
+            LogUtil.i("doubleSha256 unSign hex=" + sha256.digest(sha256.digest(bytes)));
             return sha256.digest(sha256.digest(bytes));
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
@@ -271,18 +359,20 @@ public class BTCUtils {
 
     /**
      * 格式化字符串为指定长度，不足长度前面补arg0
+     *
      * @param s:要格式化的字符串
      * @param arg0:补充的字符
      * @param lenth:将字符串格式化成指定长度
      * @return 格式化后的字符串
      */
-    public static String formatStr(String s, String arg0, int lenth){
-        StringBuffer str  =   new   StringBuffer(s);
-        while   (str.toString().getBytes().length   <   lenth)   {
+    public static String formatStr(String s, String arg0, int lenth) {
+        StringBuffer str = new StringBuffer(s);
+        while (str.toString().getBytes().length < lenth) {
             str.insert(0, arg0);
         }
         return str.toString();
     }
+
     public static byte[] sha256ripemd160(byte[] publicKey) {
         try {
             MessageDigest sha256 = MessageDigest.getInstance("SHA-256");

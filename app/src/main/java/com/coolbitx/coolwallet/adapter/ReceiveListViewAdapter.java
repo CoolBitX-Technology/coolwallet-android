@@ -1,6 +1,7 @@
 package com.coolbitx.coolwallet.adapter;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,7 +11,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.coolbitx.coolwallet.R;
+import com.coolbitx.coolwallet.entity.Contents;
 import com.coolbitx.coolwallet.entity.dbAddress;
+import com.coolbitx.coolwallet.general.PublicPun;
+import com.coolbitx.coolwallet.util.QRCodeEncoder;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.WriterException;
 import com.snscity.egdwlib.utils.LogUtil;
 
 import java.util.List;
@@ -33,13 +39,22 @@ public class ReceiveListViewAdapter extends BaseAdapter {
     private ImageView imgQRcode;
     private List<dbAddress> AddressList;
 
+    //    public ReceiveListViewAdapter(Context context, List<String> AddressList, ExpandableListView exvBleDevice, ImageView imgQRcode) {
     public ReceiveListViewAdapter(Context context, List<dbAddress> mAddressList, ImageView imgQRcode) {
         layoutInflater = LayoutInflater.from(context);
+//        this.exvBleDevice = exvBleDevice;
         this.mContext = context;
         this.imgQRcode = imgQRcode;
         this.AddressList = mAddressList;
 
-
+        LogUtil.i("recv adapter in=" + mAddressList.size());
+//        handler = new Handler() {
+//            @Override
+//            public void handleMessage(Message msg) {
+//                notifyDataSetChanged();
+//                super.handleMessage(msg);
+//            }
+//        };
     }
 
     @Override
@@ -78,27 +93,21 @@ public class ReceiveListViewAdapter extends BaseAdapter {
         if (AddressList != null && !AddressList.isEmpty()) {
             mAddr = AddressList.get(position).getAddress();
             mLabel = AddressList.get(position).getAddLabel();
-
+            LogUtil.i("adapter mAddr:" + position + " = " + mAddr);
             holder.item1.setText(mAddr);
 
             holder.item_lable.setText(mLabel);
-            mBCaddr = "bitcoin:" + mAddr + "?amount=0.0000";
-
-            if (mLabel == null) {
-                holder.item_num.setText(String.valueOf(position + 1));
-            } else {
-                if(mLabel.isEmpty()){
-                    holder.item_num.setText(String.valueOf(position + 1));
-                }else{
-                    holder.item_num.setText("");
-                }
+            mBCaddr ="bitcoin:"+ mAddr + "?amount=0.0000";
+            if(mLabel!=null){
+                holder.item_num.setText("");
+            }else{
+                holder.item_num.setText(String.valueOf(position));
             }
-            LogUtil.i("adapter mAddr:" + position + " = " + mAddr + " ;kid=" + String.valueOf(position + 1) + ";label="+mLabel);
             if (AddressList.get(position).getN_tx() == 0) {
                 holder.item_num.setTextColor(mContext.getResources().getColor(R.color.md_white_1000));
                 holder.item1.setTextColor(mContext.getResources().getColor(R.color.md_white_1000));
                 holder.item_lable.setTextColor(mContext.getResources().getColor(R.color.md_white_1000));
-            } else {
+            }else{
                 holder.item_num.setTextColor(mContext.getResources().getColor(R.color.dark_gray));
                 holder.item1.setTextColor(mContext.getResources().getColor(R.color.dark_gray));
                 holder.item_lable.setTextColor(mContext.getResources().getColor(R.color.dark_gray));
@@ -128,6 +137,15 @@ public class ReceiveListViewAdapter extends BaseAdapter {
         void onClick(View v, int position, String mAddr);
     }
 
+    //    public interface OnRecvEditClickListener {
+//
+//        void onClick(View v, int position);
+//    }
+//
+//    public static void registerOnRecvEditClickListenerCallback(OnRecvEditClickListener cb) {
+//        mOnRecvEditClickListener = cb;
+//    }
+//
     public static void registerOnRecvListClickListenerCallback(OnRecvListClickListener cb) {
         mOnRecvListClickListener = cb;
     }
@@ -138,4 +156,22 @@ public class ReceiveListViewAdapter extends BaseAdapter {
         TextView item_lable;
         TextView item_num;
     }
+
+    public void EncoderQRcode(String qrInputText) {
+
+        // Generate QR Code
+        QRCodeEncoder qrCodeEncoder = new QRCodeEncoder(qrInputText,
+                null,
+                Contents.Type.TEXT,
+                BarcodeFormat.QR_CODE.toString(),
+                PublicPun.FindScreenSize(mContext));
+        try {
+            Bitmap bitmap = qrCodeEncoder.encodeAsBitmap();
+            imgQRcode.setImageBitmap(bitmap);
+
+        } catch (WriterException e) {
+            e.printStackTrace();
+        }
+    }
+
 }
