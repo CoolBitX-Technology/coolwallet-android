@@ -35,6 +35,6 @@ captures/
 .DS_Store
 
 # .idea files
-/.idea/workspace.xml
-/.idea/libraries
+.idea/workspace.xml
+.idea/libraries
 
