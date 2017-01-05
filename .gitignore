@@ -38,3 +38,6 @@ captures/
 .idea/workspace.xml
 .idea/libraries
 
+# android studio backup
+projectFilesBackup
+
