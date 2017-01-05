@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/CoolWallet.iml" filepath="$PROJECT_DIR$/CoolWallet.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/coolwallet-android.iml" filepath="$PROJECT_DIR$/coolwallet-android.iml" />
       <module fileurl="file://$PROJECT_DIR$/cwlib/cwlib.iml" filepath="$PROJECT_DIR$/cwlib/cwlib.iml" />
     </modules>
   </component>
