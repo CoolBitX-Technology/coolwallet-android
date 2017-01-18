@@ -11,9 +11,9 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.coolbitx.coolwallet.DataBase.DatabaseHelper;
+import com.coolbitx.coolwallet.DataBase.DbName;
 import com.coolbitx.coolwallet.R;
 import com.coolbitx.coolwallet.general.CSVReadWrite;
-import com.coolbitx.coolwallet.general.DbName;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.coolbitx.coolwallet.ui.Fragment.FragMainActivity;
 import com.snscity.egdwlib.CmdManager;
@@ -25,24 +25,24 @@ import com.snscity.egdwlib.utils.LogUtil;
  */
 public class ConfirmOtpActivity extends BaseActivity implements View.OnClickListener {
 
+    private final static String CHARSETNAME = "UTF-8";
+    Button btnPair;
+    boolean isFirst = false;
+    String description;
+    boolean isConfirm;
+    Context context;
     private CmdManager cmdManager;
     private byte[] handle;//
     private byte[] loginChallenge;//登录的特征值
     private byte hostId = -1;//主机id
     private byte hostStatus;
-    Button btnPair;
     private String currentUuid = "";
     private String currentOptCode = "";
-    private final static String CHARSETNAME = "UTF-8";
     private EditText editotp;
     private byte[] challenge;//特征值
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
-    boolean isFirst = false;
-    String description;
-    boolean isConfirm;
     private CSVReadWrite mLoginCsv;
-    Context context;
     private ProgressDialog mProgress;
 
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,7 +56,7 @@ public class ConfirmOtpActivity extends BaseActivity implements View.OnClickList
         description = Build.DEVICE;
         initViews();
 
-        mProgress = new ProgressDialog(ConfirmOtpActivity.this);
+        mProgress = new ProgressDialog(ConfirmOtpActivity.this, ProgressDialog.THEME_HOLO_DARK);
         mProgress.setCancelable(false);
         mProgress.setIndeterminate(true);
         mProgress.setMessage("Pairing...");

@@ -22,10 +22,10 @@ import com.coolbitx.coolwallet.R;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.coolbitx.coolwallet.ui.Fragment.FragMainActivity;
 import com.coolbitx.coolwallet.util.BIP39;
+import com.coolbitx.coolwallet.util.ValidationException;
 import com.snscity.egdwlib.CmdManager;
 import com.snscity.egdwlib.cmd.CmdResultCallback;
 import com.snscity.egdwlib.utils.LogUtil;
-import com.coolbitx.coolwallet.util.ValidationException;
 
 import java.util.Random;
 
@@ -36,6 +36,9 @@ public class InitialCreateWalletIIActivity extends BaseActivity implements SeekB
         View.OnClickListener,
         AdapterView.OnItemSelectedListener {
 
+    public boolean[] settingOptions = new boolean[4];
+    Context context;
+    String hdwSeed = "";
     private SeekBar hdwSeedLength;
     private Button btnNext;
     private Spinner seedSpinner;
@@ -54,14 +57,9 @@ public class InitialCreateWalletIIActivity extends BaseActivity implements SeekB
     private int newProgress = 0;
     private TextView tvSeedType;
     private ProgressDialog mProgress;
-    Context context;
-    String hdwSeed = "";
-
     private LinearLayout layoutWords;
     private TextView edtHdWord2;
     private TextView edtHdWord3;
-
-    public boolean[] settingOptions = new boolean[4];
     private byte CwSecurityPolicyMaskOtp = 0x01;
     private byte CwSecurityPolicyMaskBtn = 0x02;
     private byte CwSecurityPolicyMaskWatchDog = 0x10;
@@ -76,7 +74,7 @@ public class InitialCreateWalletIIActivity extends BaseActivity implements SeekB
         initToolbar();
         context = this;
         cmdManager = new CmdManager();
-        mProgress = new ProgressDialog(InitialCreateWalletIIActivity.this);
+        mProgress = new ProgressDialog(InitialCreateWalletIIActivity.this, ProgressDialog.THEME_HOLO_DARK);
         mProgress.setCancelable(false);
         mProgress.setIndeterminate(true);
         hdwSeedLength.setProgress(0);
@@ -308,29 +306,13 @@ public class InitialCreateWalletIIActivity extends BaseActivity implements SeekB
             public void onSuccess(int status, byte[] outputData) {
                 if ((status + 65536) == 0x9000) {
                     if (outputData != null && outputData.length > 0) {
-                        if ((outputData[0] & CwSecurityPolicyMaskOtp) >= 1) {
-                            settingOptions[0] = true;
-                        } else {
-                            settingOptions[0] = false;
-                        }
+                        settingOptions[0] = (outputData[0] & CwSecurityPolicyMaskOtp) >= 1;
 
-                        if ((outputData[0] & CwSecurityPolicyMaskBtn) >= 1) {
-                            settingOptions[1] = true;
-                        } else {
-                            settingOptions[1] = false;
-                        }
+                        settingOptions[1] = (outputData[0] & CwSecurityPolicyMaskBtn) >= 1;
 
-                        if ((outputData[0] & CwSecurityPolicyMaskAddress) >= 1) {
-                            settingOptions[2] = true;
-                        } else {
-                            settingOptions[2] = false;
-                        }
+                        settingOptions[2] = (outputData[0] & CwSecurityPolicyMaskAddress) >= 1;
 
-                        if ((outputData[0] & CwSecurityPolicyMaskWatchDog) >= 1) {
-                            settingOptions[3] = true;
-                        } else {
-                            settingOptions[3] = false;
-                        }
+                        settingOptions[3] = (outputData[0] & CwSecurityPolicyMaskWatchDog) >= 1;
 
                         LogUtil.i("get安全設置:otp=" + settingOptions[0] + ";button_up=" + settingOptions[1] +
                                 ";address" + settingOptions[2] + ";dog=" + settingOptions[3]);

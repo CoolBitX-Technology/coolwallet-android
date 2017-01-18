@@ -31,16 +31,36 @@ import java.util.List;
  */
 public class BTCUtils {
 
-    private static final ECDomainParameters EC_PARAMS;
-    private static final char[] BASE58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz".toCharArray();
-    private final static String ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
     public static final int MAX_TX_LEN_FOR_NO_FEE = 10000;
     public static final long MIN_PRIORITY_FOR_NO_FEE = 57600000;
     public static final long MIN_MIN_OUTPUT_VALUE_FOR_NO_FEE = 10000000L;
     public static final long MIN_FEE_PER_TX = 10000;
-
     //    public static final long MAX_ALLOWED_FEE = BTCUtils.parseValue("0.1");
     public static final long MAX_ALLOWED_FEE = BTCUtils.parseValue("0.0001");
+    private static final ECDomainParameters EC_PARAMS;
+    private static final char[] BASE58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz".toCharArray();
+    private final static String ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+    private static final int SATOSHIS_PER_COIN = 100000000;
+    private static final int BASE58_CHUNK_DIGITS = 10;//how many base 58 digits fits in long
+    private static final BigInteger BASE58_CHUNK_MOD = BigInteger.valueOf(0x5fa8624c7fba400L); //58^BASE58_CHUNK_DIGITS
+    private static final byte[] BASE58_VALUES = new byte[]{-1, -1, -1, -1, -1, -1, -1, -1, -1, -2, -2, -2, -2, -2, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, -1, -1, -1, -1, -1, -1,
+            -1, 9, 10, 11, 12, 13, 14, 15, 16, -1, 17, 18, 19, 20, 21, -1,
+            22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, -1, -1, -1, -1, -1,
+            -1, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, -1, 44, 45, 46,
+            47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
+    private static int HALF_HOUR_PER_KB;
+    private static int HALF_HOUR_PER_BYTE;
 
     static {
         X9ECParameters params = SECNamedCurves.getByName("secp256k1");
@@ -51,10 +71,6 @@ public class BTCUtils {
         return (long) (Double.parseDouble(valueStr) * 1e8); //DTCO
 //        return (long) (Double.parseDouble(valueStr));
     }
-
-    private static final int SATOSHIS_PER_COIN = 100000000;
-    private static int HALF_HOUR_PER_KB;
-    private static int HALF_HOUR_PER_BYTE;
 
     public static FeeChangeAndSelectedOutputs calcFeeChangeAndSelectOutputsToSpend(Context mContext, List<UnSpentTxsBean> UnSpentTxsBeanList,
                                                                                    long amountToSend, long extraFee,
@@ -87,7 +103,8 @@ public class BTCUtils {
                 outputsToSpend.add(outputInfo);
                 valueOfUnspentOutputs += BTCUtils.convertToSatoshisValue(new DecimalFormat("#.########").format(outputInfo.getAmount()));
 
-                final int txOneOutputLen = BTCUtils.getMaximumTxSize(outputsToSpend, 1, isPublicKeyCompressed);
+                final int txOneOutputLen = BTCUtils.getMaximumTxSize(outputsToSpend, change > 0 ? 2 : 1, isPublicKeyCompressed);
+//                LogUtil.e("txOneOutputLen=")
                 long updatedFee = BTCUtils.calcHalfHourFee(txOneOutputLen);
                 fee = updatedFee;
                 if(fee==0){
@@ -137,14 +154,12 @@ public class BTCUtils {
         return new FeeChangeAndSelectedOutputs(fee + extraFee, change, amountToSend, outputsToSpend, valueOfUnspentOutputs);
     }
 
-
     public static long convertToSatoshisValue(String valueStr) throws NumberFormatException {
         String satoshisStr = String.valueOf(SATOSHIS_PER_COIN);
         java.math.BigDecimal x = new java.math.BigDecimal(valueStr);
         java.math.BigDecimal y = new java.math.BigDecimal(satoshisStr);
         return x.multiply(y).longValue();
     }
-
 
     public static boolean isZeroFeeAllowed(int txLen, Collection<UnSpentTxsBean> unspentOutputInfos, long minOutput) {
         if (txLen < MAX_TX_LEN_FOR_NO_FEE && minOutput > MIN_MIN_OUTPUT_VALUE_FOR_NO_FEE) {
@@ -163,9 +178,9 @@ public class BTCUtils {
     }
 
     public static long calcHalfHourFee(int txLen) {
+        LogUtil.e("資料長度=" + txLen + ";匯率=" + txLen * HALF_HOUR_PER_BYTE);
         return txLen * HALF_HOUR_PER_BYTE;
     }
-
 
     public static long calcMinimumFee(int txLen, Collection<UnSpentTxsBean> unspentOutputInfos, long minOutput) {
         if (isZeroFeeAllowed(txLen, unspentOutputInfos, minOutput)) {
@@ -178,44 +193,15 @@ public class BTCUtils {
         if (unspentOutputInfos == null || unspentOutputInfos.isEmpty()) {
             throw new ValidationException("No information about tx inputs provided");
         }
+        //scriptSig contains the signature along with the public key(106)
         int maxInputScriptLen = 73 + (compressedPublicKey ? 33 : 65);
 //        return 9 + unspentOutputInfos.size() * (41 + maxInputScriptLen) + outputsCount * 33;
-        return 10 + unspentOutputInfos.size() * (41 + maxInputScriptLen) + outputsCount * 33;
+        LogUtil.e("getMaximumTxSize 計算=" + unspentOutputInfos.size() + (41 + maxInputScriptLen) + outputsCount);
+        int maxSize = 10 + unspentOutputInfos.size() * (41 + maxInputScriptLen) + outputsCount * 34;
+
+        LogUtil.e("getMaximumTxSize=" + maxSize);
+        return maxSize;
     }
-
-    public static class FeeChangeAndSelectedOutputs {
-        public final long amountForRecipient, change, fee, valueOfUnspentOutputs;
-        public final ArrayList<UnSpentTxsBean> outputsToSpend;
-
-        public FeeChangeAndSelectedOutputs(long fee, long change, long amountForRecipient, ArrayList<UnSpentTxsBean> outputsToSpend, long ValueOfUnspentOutputs) {
-            this.fee = fee;
-            this.change = change;
-            this.amountForRecipient = amountForRecipient;
-            this.outputsToSpend = outputsToSpend;
-            this.valueOfUnspentOutputs = ValueOfUnspentOutputs;
-            LogUtil.e("fee=" + fee + ";change=" + change + ";amountForRecipient=" + amountForRecipient + ";valueOfUnspentOutputs=" + valueOfUnspentOutputs);
-        }
-    }
-
-    private static final int BASE58_CHUNK_DIGITS = 10;//how many base 58 digits fits in long
-
-    private static final BigInteger BASE58_CHUNK_MOD = BigInteger.valueOf(0x5fa8624c7fba400L); //58^BASE58_CHUNK_DIGITS
-    private static final byte[] BASE58_VALUES = new byte[]{-1, -1, -1, -1, -1, -1, -1, -1, -1, -2, -2, -2, -2, -2, -1, -1,
-            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-            -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-            -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, -1, -1, -1, -1, -1, -1,
-            -1, 9, 10, 11, 12, 13, 14, 15, 16, -1, 17, 18, 19, 20, 21, -1,
-            22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, -1, -1, -1, -1, -1,
-            -1, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, -1, 44, 45, 46,
-            47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, -1, -1, -1, -1, -1,
-            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
 
     private static byte[] Sha256(byte[] data, int start, int len, int recursion) {
         if (recursion == 0) return data;
@@ -268,7 +254,6 @@ public class BTCUtils {
 
         return output;
     }
-
 
     public static byte[] decodeBase58(String input) {
         if (input == null) {
@@ -341,7 +326,7 @@ public class BTCUtils {
     public static byte[] doubleSha256(byte[] bytes) {
         try {
             MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
-            LogUtil.i("doubleSha256 unSign hex=" + sha256.digest(sha256.digest(bytes)));
+            LogUtil.i("doubleSha256 unSign hex=" + LogUtil.byte2HexStringNoBlank(sha256.digest(sha256.digest(bytes))));
             return sha256.digest(sha256.digest(bytes));
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
@@ -355,7 +340,6 @@ public class BTCUtils {
         }
         return result;
     }
-
 
     /**
      * 格式化字符串为指定长度，不足长度前面补arg0
@@ -408,6 +392,20 @@ public class BTCUtils {
                 throw new RuntimeException();
             }
             return valid;
+        }
+    }
+
+    public static class FeeChangeAndSelectedOutputs {
+        public final long amountForRecipient, change, fee, valueOfUnspentOutputs;
+        public final ArrayList<UnSpentTxsBean> outputsToSpend;
+
+        public FeeChangeAndSelectedOutputs(long fee, long change, long amountForRecipient, ArrayList<UnSpentTxsBean> outputsToSpend, long ValueOfUnspentOutputs) {
+            this.fee = fee;
+            this.change = change;
+            this.amountForRecipient = amountForRecipient;
+            this.outputsToSpend = outputsToSpend;
+            this.valueOfUnspentOutputs = ValueOfUnspentOutputs;
+            LogUtil.e("fee=" + fee + ";change=" + change + ";amountForRecipient=" + amountForRecipient + ";valueOfUnspentOutputs=" + valueOfUnspentOutputs);
         }
     }
 }

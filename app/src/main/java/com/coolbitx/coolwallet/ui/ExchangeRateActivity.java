@@ -43,7 +43,7 @@ public class ExchangeRateActivity extends BaseActivity implements AdapterView.On
         layoutInflater = getLayoutInflater();
         initToolbar();
 
-        mProgress = new ProgressDialog(ExchangeRateActivity.this);
+        mProgress = new ProgressDialog(ExchangeRateActivity.this, ProgressDialog.THEME_HOLO_DARK);
         mProgress.setCancelable(false);
         mProgress.setIndeterminate(true);
 

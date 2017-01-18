@@ -49,7 +49,7 @@ public class HostDeviceActivity extends BaseActivity implements AdapterView.OnIt
         layoutInflater = getLayoutInflater();
         initToolbar();
 
-        mProgress = new ProgressDialog(HostDeviceActivity.this);
+        mProgress = new ProgressDialog(HostDeviceActivity.this, ProgressDialog.THEME_HOLO_DARK);
         mProgress.setCancelable(false);
         mProgress.setIndeterminate(true);
 

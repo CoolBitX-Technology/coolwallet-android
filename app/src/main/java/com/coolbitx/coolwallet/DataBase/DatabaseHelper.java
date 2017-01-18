@@ -9,7 +9,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 import com.coolbitx.coolwallet.R;
 import com.coolbitx.coolwallet.entity.CwBtcTxs;
 import com.coolbitx.coolwallet.entity.dbAddress;
-import com.coolbitx.coolwallet.general.DbName;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.crashlytics.android.Crashlytics;
 import com.snscity.egdwlib.utils.LogUtil;
@@ -25,16 +24,16 @@ import java.util.Locale;
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "com.coolbitx.coolwallet.db";
     private static final int DATABASE_VERSION = 3; //version must be >=1
-    private Context mContext;
     private static String sql = "";
-    SQLiteDatabase db;
     private static String wid;
     private static boolean isUpgrade = false;
     private static DatabaseHelper mInstance;
+    SQLiteDatabase db;
+    private Context mContext;
 
     public DatabaseHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
         super(context, name, factory, version);
-        this.wid = PublicPun.card.getCardId();
+        wid = PublicPun.card.getCardId();
         this.mContext = context;
     }
 
@@ -51,48 +50,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             mInstance = new DatabaseHelper(context);
         }
         return mInstance;
-    }
-
-    @Override
-    public void onCreate(SQLiteDatabase db) {
-        String tableName = "";
-        try {
-            LogUtil.i("Create Table start");
-            String[] table_array = mContext.getResources().getStringArray(R.array.db_table_name);
-            for (int i = 0; i < table_array.length; i++) {
-                int indentify = mContext.getResources().getIdentifier(table_array[i], "array",
-                        mContext.getPackageName());
-                String[] col_array = mContext.getResources().getStringArray(indentify);
-
-                tableName = table_array[i];
-                //更新時不變動login file
-                if (isUpgrade) {
-                    if (!tableName.equals(DbName.DATA_BASE_LOGIN)) {
-                        sql = "DROP TABLE  IF  EXISTS " + tableName;
-                        db.execSQL(sql);
-                    }
-                } else {
-                    sql = "DROP TABLE  IF  EXISTS " + tableName;
-                    db.execSQL(sql);
-                }
-                sql = "CREATE TABLE IF NOT EXISTS " + tableName + "(";
-                for (int j = 0; j < col_array.length; j++) {
-                    sql = sql + col_array[j] + ",";
-                }
-                sql = sql.substring(0, sql.length() - 1) + ")";
-                db.execSQL(sql);
-                LogUtil.i("Table " + tableName + " has been created ok");
-            }
-        } catch (Exception e) {
-            LogUtil.i("Create Table FAILED:" + tableName + " error=" + e.toString());
-        }
-    }
-
-    @Override
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        LogUtil.i("onUpgrade Ver: " + newVersion);
-        isUpgrade = true;
-        onCreate(db);
     }
 
     public static boolean insertCurrent(Context context, String country, double rates) {
@@ -114,11 +71,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 //                mResult = false;
                 updateResultID = mDatabase.update(DbName.DATA_BASE_CURRENT, values, "WID='" + wid + "' AND " + " COUNTRY='" + country + "'", null);
                 LogUtil.d("update CURRENT: " + updateResultID + " ,COUNTRY:" + country + " ,RATES:" + rates);
-                if (updateResultID == -1) {
-                    mResult = false;
-                } else {
-                    mResult = true;
-                }
+                mResult = updateResultID != -1;
             } else {
                 LogUtil.d("insert CURRENT: " + resultID + " ,COUNTRY:" + country + " ,RATES:" + rates);
                 mResult = true;
@@ -133,7 +86,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         }
     }
-
 
     public static ArrayList<String> queryLogin(Context context) {
         ArrayList<String> arraylist = new ArrayList<String>();
@@ -243,11 +195,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 updateResultID = mDatabase.update(DbName.DATA_BASE_LOGIN, values1, "WID='" + wid + "'", null);
                 LogUtil.i("sql update " + DbName.DATA_BASE_LOGIN + " :" + resultID + " ,WID:" + wid + " ,DATE:" + saveTempDtString + " ,UUID:" +
                         uuid + " ,OTP:" + otp);
-                if (updateResultID == -1) {
-                    mResult = false;
-                } else {
-                    mResult = true;
-                }
+                mResult = updateResultID != -1;
             } else {
                 mResult = true;
             }
@@ -260,7 +208,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
         return mResult;
     }
-
 
     /***
      * update all addresses balance & n_tx
@@ -283,11 +230,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             LogUtil.i("sql update " + DbName.DATA_BASE_ADDR + " :" + updateResultID + " ,WID=" + wid +
                     "' AND ACCOUNT_ID=" + accountID + " ,ADDR=" + addr + " ,n_tx=" + address_N_tx + " ,ADDRESS_BALANCE=" + mBalance);
 
-            if (updateResultID == -1) {
-                mResult = false;
-            } else {
-                mResult = true;
-            }
+            mResult = updateResultID != -1;
         } catch (Exception e) {
             mResult = false;
         } finally {
@@ -314,11 +257,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             updateResultID = mDatabase.update(DbName.DATA_BASE_ADDR, values, "WID='" + wid + "' AND ADDRESS='" + addr + "'", null);
             LogUtil.i("sql update " + DbName.DATA_BASE_ADDR + " :" + updateResultID + " ,WID=" + wid + " ,ADDR=" + addr + " ,label=" + mLabel);
 
-            if (updateResultID == -1) {
-                mResult = false;
-            } else {
-                mResult = true;
-            }
+            mResult = updateResultID != -1;
         } catch (Exception e) {
             mResult = false;
         } finally {
@@ -352,11 +291,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             updateResultID = mDatabase.update(DbName.DATA_BASE_ADDR, values, "WID='" + wid + "' AND ADDRESS='" + addr + "'", null);
             LogUtil.i("sql update " + DbName.DATA_BASE_ADDR + " :" + updateResultID + " ,WID=" + wid + " ,ADDR=" + addr);
 
-            if (updateResultID == -1) {
-                mResult = false;
-            } else {
-                mResult = true;
-            }
+            mResult = updateResultID != -1;
         } catch (Exception e) {
             mResult = false;
         } finally {
@@ -386,11 +321,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             values.put("ADDRESS_BALANCE", balance);
 
             resultID = mDatabase.insert(DbName.DATA_BASE_ADDR, nullColumnHack, values);
-            if (resultID == -1) {
-                mResult = false;
-            } else {
-                mResult = true;
-            }
+            mResult = resultID != -1;
             LogUtil.i("sql insert: " + resultID + " ,WID:" + wid + " ,ACCOUNT_ID:" + accountID + " ,ADDRESS:" +
                     addr + " ,KCID:" + kcid + " ,KID:" + kid + " ,N_TX:" + n_tx + " ,ADDRESS_BALANCE:" + balance);
 
@@ -427,11 +358,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             values.put("TX_CONFIRMATION", mCwBtcTxs.getTxs_Confirmation());
 
             resultID = mDatabase.insert(DbName.DATA_BASE_TXS, nullColumnHack, values);
-            if (resultID == -1) {
-                mResult = false;
-            } else {
-                mResult = true;
-            }
+            mResult = resultID != -1;
             LogUtil.i("sql insert " + DbName.DATA_BASE_TXS + "第" + resultID + "筆: " + " ,WID:" + mCwBtcTxs.getWID()
                     + " ,ACCOUNT_ID:" + mCwBtcTxs.getAccount_ID()
                     + " ,ADDRESS:" + mCwBtcTxs.getAddress()
@@ -573,69 +500,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
-//
-//    public static ArrayList<dbAddress> queryUnspend(Context context, int accountIndex, int pointer) {
-//        //accountIndex -1 代表只抓ext addr
-//        //accountIndex -2 代表只抓int addr
-//        ArrayList<dbAddress> listResult = new ArrayList<dbAddress>();
-//        int mCount = 0;
-//        DatabaseHelper mOpenHelper = new DatabaseHelper(context);
-//        // 取得唯讀模式資料庫
-//        SQLiteDatabase db = mOpenHelper.getReadableDatabase();
-//        // 透過query來查詢資料
-//        Cursor c = null;
-//        try {
-//            if (pointer == 0 || pointer == 1) {
-//                LogUtil.i("queryAddress: wid=" + wid + " ;" + accountIndex + " AND POINTER=" + pointer);
-//                c = db.query("ADDR",                                 // 資料表名字
-//                        new String[]{"WID", "ACCOUNT_ID", "ADDRESS", "KCID", "KID", "N_TX", "ADDRESS_BALANCE", "ADDRESS_LABEL"},  // 要取出的欄位資料
-//                        "WID='" + wid + "' AND ACCOUNT_ID=" + accountIndex + " and KCID=" + pointer,                                              // 查詢條件式
-//                        null,                                              // 查詢條件值字串陣列
-//                        null,                                              // Group By字串語法
-//                        null,                                              // Having字串法
-//                        "ADDRESS_BALANCE DESC",                        // Order By字串語法(排序)
-//                        null);                                             // Limit字串語法
-//            } else {
-//                LogUtil.i("queryAddress: wid" + wid + " ;" + accountIndex + " AND POINTER all");
-//                c = db.query("ADDR",                                 // 資料表名字
-//                        new String[]{"WID", "ACCOUNT_ID", "ADDRESS", "KCID", "KID", "N_TX", "ADDRESS_BALANCE", "ADDRESS_LABEL"},  // 要取出的欄位資料
-//                        "WID='" + wid + "' AND ACCOUNT_ID=" + accountIndex,                                                            // 查詢條件式
-//                        null,                                              // 查詢條件值字串陣列
-//                        null,                                              // Group By字串語法
-//                        null,                                              // Having字串法
-//                        "ADDRESS_BALANCE DESC",                        // Order By字串語法(排序)
-//                        null);                                             // Limit字串語法
-//            }
-//
-//            while (c.moveToNext()) {
-//                mCount++;
-//                dbAddress d = new dbAddress();
-//                d.setWid(c.getString(0));
-//                d.setAccountID(c.getInt(1));
-//                d.setAddress(c.getString(2));
-//                d.setKcid(c.getInt(3));
-//                d.setKid(c.getInt(4));
-//                d.setN_tx(c.getInt(5));
-//                d.setBalance(c.getLong(6));
-//                d.setAddLabel(c.getString(7));
-//                LogUtil.i("query record:" + mCount + "=" + c.getString(0) + ",AccountID=" + c.getInt(1) + ",kcID=" + c.getInt(3) + ",KID=" + c.getInt(4)
-//                        + ",ADDR=" + c.getString(2)
-//                        + ",N_tx=" + c.getInt(5)
-//                        + "," + c.getLong(6));
-//
-//                listResult.add(d);
-//            }
-//        } catch (Exception e) {
-//
-//        } finally {
-//            // 釋放資源
-//            c.close();
-//            db.close();
-//
-//            return listResult;
-//        }
-//    }
-
     public static ArrayList<String> queryExchangeRate(Context context) {
         ArrayList<String> arraylist = new ArrayList<String>();
         int mCount = 0;
@@ -704,6 +568,119 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
+//
+//    public static ArrayList<dbAddress> queryUnspend(Context context, int accountIndex, int pointer) {
+//        //accountIndex -1 代表只抓ext addr
+//        //accountIndex -2 代表只抓int addr
+//        ArrayList<dbAddress> listResult = new ArrayList<dbAddress>();
+//        int mCount = 0;
+//        DatabaseHelper mOpenHelper = new DatabaseHelper(context);
+//        // 取得唯讀模式資料庫
+//        SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+//        // 透過query來查詢資料
+//        Cursor c = null;
+//        try {
+//            if (pointer == 0 || pointer == 1) {
+//                LogUtil.i("queryAddress: wid=" + wid + " ;" + accountIndex + " AND POINTER=" + pointer);
+//                c = db.query("ADDR",                                 // 資料表名字
+//                        new String[]{"WID", "ACCOUNT_ID", "ADDRESS", "KCID", "KID", "N_TX", "ADDRESS_BALANCE", "ADDRESS_LABEL"},  // 要取出的欄位資料
+//                        "WID='" + wid + "' AND ACCOUNT_ID=" + accountIndex + " and KCID=" + pointer,                                              // 查詢條件式
+//                        null,                                              // 查詢條件值字串陣列
+//                        null,                                              // Group By字串語法
+//                        null,                                              // Having字串法
+//                        "ADDRESS_BALANCE DESC",                        // Order By字串語法(排序)
+//                        null);                                             // Limit字串語法
+//            } else {
+//                LogUtil.i("queryAddress: wid" + wid + " ;" + accountIndex + " AND POINTER all");
+//                c = db.query("ADDR",                                 // 資料表名字
+//                        new String[]{"WID", "ACCOUNT_ID", "ADDRESS", "KCID", "KID", "N_TX", "ADDRESS_BALANCE", "ADDRESS_LABEL"},  // 要取出的欄位資料
+//                        "WID='" + wid + "' AND ACCOUNT_ID=" + accountIndex,                                                            // 查詢條件式
+//                        null,                                              // 查詢條件值字串陣列
+//                        null,                                              // Group By字串語法
+//                        null,                                              // Having字串法
+//                        "ADDRESS_BALANCE DESC",                        // Order By字串語法(排序)
+//                        null);                                             // Limit字串語法
+//            }
+//
+//            while (c.moveToNext()) {
+//                mCount++;
+//                dbAddress d = new dbAddress();
+//                d.setWid(c.getString(0));
+//                d.setAccountID(c.getInt(1));
+//                d.setAddress(c.getString(2));
+//                d.setKcid(c.getInt(3));
+//                d.setKid(c.getInt(4));
+//                d.setN_tx(c.getInt(5));
+//                d.setBalance(c.getLong(6));
+//                d.setAddLabel(c.getString(7));
+//                LogUtil.i("query record:" + mCount + "=" + c.getString(0) + ",AccountID=" + c.getInt(1) + ",kcID=" + c.getInt(3) + ",KID=" + c.getInt(4)
+//                        + ",ADDR=" + c.getString(2)
+//                        + ",N_tx=" + c.getInt(5)
+//                        + "," + c.getLong(6));
+//
+//                listResult.add(d);
+//            }
+//        } catch (Exception e) {
+//
+//        } finally {
+//            // 釋放資源
+//            c.close();
+//            db.close();
+//
+//            return listResult;
+//        }
+//    }
+
+    public static double queryCurrent(Context context, String country) {
+        double rate = 0;
+        DatabaseHelper mOpenHelper = new DatabaseHelper(context);
+        // 取得唯讀模式資料庫
+        SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+        // 透過query來查詢資料
+        Cursor c = null;
+        LogUtil.d("queryCurrency country=" + country);
+        try {
+            c = db.query("CURRENT",                                 // 資料表名字
+                    new String[]{"RATES"},  // 要取出的欄位資料
+                    "WID='" + wid + "' and COUNTRY='" + country + "'",                                              // 查詢條件式
+                    null,                                              // 查詢條件值字串陣列
+                    null,                                              // Group By字串語法
+                    null,                                              // Having字串法
+                    "COUNTRY",                                         // Order By字串語法(排序)
+                    null);                                             // Limit字串語法
+
+            while (c.moveToNext()) {
+                rate = c.getDouble(0);
+
+            }
+            LogUtil.d("queryCurrency =" + rate);
+            // 釋放資源
+        } catch (Exception e) {
+            LogUtil.e("queryCurrency failed=" + e.getMessage());
+        } finally {
+            c.close();
+            db.close();
+            return rate;
+        }
+    }
+
+    public static int deleteTableByAccountAndKcid(Context context, String table_name, int account, int kcid) {
+
+        DatabaseHelper mOpenHelper = new DatabaseHelper(context);
+        SQLiteDatabase mDatabase = mOpenHelper.getReadableDatabase();
+
+        int result = -99;
+        try {
+            result = mDatabase.delete(table_name, "WID='" + wid + "' AND ACCOUNT_ID=" + account + " and KCID=" + kcid, null);
+            LogUtil.i("delete " + table_name + "=" + result);
+        } catch (Exception e) {
+            LogUtil.i("delete Error: " + e.toString());
+        } finally {
+            mDatabase.close();
+        }
+        return result;
+    }
+
 //    public static double queryCurrent(Context context, String country) {
 //        double BtcRates = 0;
 //        double ChooseRate = 0;
@@ -747,55 +724,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 //        }
 //    }
 
-    public static double queryCurrent(Context context, String country) {
-        double rate = 0;
-        DatabaseHelper mOpenHelper = new DatabaseHelper(context);
-        // 取得唯讀模式資料庫
-        SQLiteDatabase db = mOpenHelper.getReadableDatabase();
-        // 透過query來查詢資料
-        Cursor c = null;
-        try {
-            c = db.query("CURRENT",                                 // 資料表名字
-                    new String[]{"COUNTRY", "RATES"},  // 要取出的欄位資料
-                    "WID='" + wid + "' and COUNTRY='" + country + "'",                                              // 查詢條件式
-                    null,                                              // 查詢條件值字串陣列
-                    null,                                              // Group By字串語法
-                    null,                                              // Having字串法
-                    "COUNTRY",                        // Order By字串語法(排序)
-                    null);                                             // Limit字串語法
-
-            while (c.moveToNext()) {
-                rate = c.getDouble(1);
-
-            }
-            LogUtil.d("query rate " + c.getString(0) + "=" + rate);
-            // 釋放資源
-        } catch (Exception e) {
-
-        } finally {
-            c.close();
-            db.close();
-            return rate;
-        }
-    }
-
-    public static int deleteTableByAccountAndKcid(Context context, String table_name, int account, int kcid) {
-
-        DatabaseHelper mOpenHelper = new DatabaseHelper(context);
-        SQLiteDatabase mDatabase = mOpenHelper.getReadableDatabase();
-
-        int result = -99;
-        try {
-            result = mDatabase.delete(table_name, "WID='" + wid + "' AND ACCOUNT_ID=" + account + " and KCID=" + kcid, null);
-            LogUtil.i("delete " + table_name + "=" + result);
-        } catch (Exception e) {
-            LogUtil.i("delete Error: " + e.toString());
-        } finally {
-            mDatabase.close();
-        }
-        return result;
-    }
-
     public static int deleteTableByAccount(Context context, String table_name, int account) {
 
         DatabaseHelper mOpenHelper = new DatabaseHelper(context);
@@ -829,6 +757,48 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             mDatabase.close();
         }
         return result;
+    }
+
+    @Override
+    public void onCreate(SQLiteDatabase db) {
+        String tableName = "";
+        try {
+            LogUtil.i("Create Table start");
+            String[] table_array = mContext.getResources().getStringArray(R.array.db_table_name);
+            for (int i = 0; i < table_array.length; i++) {
+                int indentify = mContext.getResources().getIdentifier(table_array[i], "array",
+                        mContext.getPackageName());
+                String[] col_array = mContext.getResources().getStringArray(indentify);
+
+                tableName = table_array[i];
+                //更新時不變動login file
+                if (isUpgrade) {
+                    if (!tableName.equals(DbName.DATA_BASE_LOGIN)) {
+                        sql = "DROP TABLE  IF  EXISTS " + tableName;
+                        db.execSQL(sql);
+                    }
+                } else {
+                    sql = "DROP TABLE  IF  EXISTS " + tableName;
+                    db.execSQL(sql);
+                }
+                sql = "CREATE TABLE IF NOT EXISTS " + tableName + "(";
+                for (int j = 0; j < col_array.length; j++) {
+                    sql = sql + col_array[j] + ",";
+                }
+                sql = sql.substring(0, sql.length() - 1) + ")";
+                db.execSQL(sql);
+                LogUtil.i("Table " + tableName + " has been created ok");
+            }
+        } catch (Exception e) {
+            LogUtil.i("Create Table FAILED:" + tableName + " error=" + e.toString());
+        }
+    }
+
+    @Override
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        LogUtil.i("onUpgrade Ver: " + newVersion);
+        isUpgrade = true;
+        onCreate(db);
     }
 
     @Override

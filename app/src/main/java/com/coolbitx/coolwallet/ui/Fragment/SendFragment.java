@@ -71,6 +71,37 @@ import java.util.TimerTask;
 // the tag "error" means that dora remarks the code because the APP crush.
 public class SendFragment extends BaseFragment implements View.OnClickListener {
 
+    private static final int HANDLER_SEND_BTC_FINISH = 9527;
+    private static final int HANDLER_SEND_BTC_ERROR = 9521;
+    private static final String DATA_NAME = "name";
+    private static final String DATA_ID = "id";
+    //    100,000,000 Satoshi = 1.00000000 ฿
+    private static final int SATOSHIS_PER_COIN = 100000000;
+    //the card response of waiting button_up is:01 06 54 52 58 2d 4f 4b ( fix value: TRX-OK )
+    final byte[] successBtnPressesData = {0x54, 0x52, 0x58, 0x2d};
+    CwBtcNetWork netWork = new CwBtcNetWork();
+    UnSpentTxsAsyncTask unSpentTxsAsyncTask;
+    Transaction.Input[] signedInputs;
+    Transaction.Output[] outputs;
+    UnSpentTxsBean outputToSpend = new UnSpentTxsBean();
+    String InAddress = "";
+    String currUnsignedTx;
+    CwBtcNetWork cwBtcNetWork;
+    int currentAccount = -1;
+    int errorCnt;
+    BTCUtils.FeeChangeAndSelectedOutputs processedTxData;
+    List<Address> inputAddressList;
+    String recvAddress;
+    String spendAmountStr;
+    double spendAmount;
+    Timer mTimer = null;
+    int doTrxSignSuccessCnt;
+    List<byte[]> scriptSigs;
+    // for Listener used only
+    String strEditBtc;
+    String strEditCurrency;
+    AlertDialog btnTxBuilder;
+    AlertDialog.Builder builder;
     private TextView tvSendTitle;
     private TextView tvSendSubtitle;
     private TextView tvSendSubtitle_country;
@@ -82,39 +113,80 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
     private Button btnSend;
     //    private Context mContext;
     private CmdManager cmdManager;
-    CwBtcNetWork netWork = new CwBtcNetWork();
-    UnSpentTxsAsyncTask unSpentTxsAsyncTask;
     private List<UnSpentTxsBean> unSpentTxsBeanList;
     private List<Account> cwAccountList = new ArrayList<>();
     private CWAccount cwAccount;
     private int trxStatus;
     private String otpCode;
-    Transaction.Input[] signedInputs;
-    Transaction.Output[] outputs;
-    UnSpentTxsBean outputToSpend = new UnSpentTxsBean();
-    String InAddress = "";
-    private static final int HANDLER_SEND_BTC_FINISH = 9527;
-    private static final int HANDLER_SEND_BTC_ERROR = 9521;
     private ProgressDialog mProgress;
-    String currUnsignedTx;
     private ArrayList<dbAddress> lisCwBtcAdd = new ArrayList<dbAddress>();
-    CwBtcNetWork cwBtcNetWork;
-    int currentAccount = -1;
-    int errorCnt;
     //modify
     private String title = "";
     private String value = "";
-    private static final String DATA_NAME = "name";
     private int id;
-    private static final String DATA_ID = "id";
-    BTCUtils.FeeChangeAndSelectedOutputs processedTxData;
     private float editBtc;
     private boolean isTrxSuccess;
     private byte CwSecurityPolicyMaskOtp = 0x01;
     private byte CwSecurityPolicyMaskBtn = 0x02;
     private byte CwSecurityPolicyMaskWatchDog = 0x10;
     private byte CwSecurityPolicyMaskAddress = 0x20;
-    List<Address> inputAddressList;
+    private Handler mHandler = new Handler() {
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what) {
+                case HANDLER_SEND_BTC_FINISH:
+//                    final String recvAddress = editSendAddress.getText().toString().trim();
+//                    final String amountStr = editSendBtc.getText().toString().trim();
+
+                    FunTrxFinish();
+                    isTrxSuccess = true;
+                    if (mTimer != null) {
+                        mTimer.cancel();
+                        mTimer = null;
+                    }
+                    PublicPun.showNoticeDialog(mContext, "Sent", "Sent " + spendAmountStr + "btc to " + recvAddress);
+                    //clear trx data
+                    editSendAddress.setText("");
+                    editSendBtc.setText("");
+                    editSendUsd.setText("");
+
+                    if (mProgress != null) {
+                        mProgress.dismiss();
+                    }
+
+                    break;
+                case HANDLER_SEND_BTC_ERROR:
+                    if (mProgress != null) {
+                        mProgress.dismiss();
+                    }
+                    PublicPun.showNoticeDialog(mContext, "Notification", "Send BTC to BLOCKCHAIN failed!");
+                    break;
+            }
+        }
+    };
+    Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+            // TODO: http request.
+            int postDecodeResult = -1;
+            int postPushResult = -1;
+            int hadlerMsg = 0;
+
+            postDecodeResult = netWork.doPost(BtcUrl.URL_BLOCKR_SERVER_SITE + BtcUrl.URL_BLICKR_DECODE, currUnsignedTx);
+            if (postDecodeResult == 200) {
+                postPushResult = netWork.doPost(BtcUrl.URL_BLOCKR_SERVER_SITE + BtcUrl.URL_BLICKR_PUSH, currUnsignedTx);
+                if (postPushResult == 200) {
+                    hadlerMsg = HANDLER_SEND_BTC_FINISH;
+                } else {
+                    hadlerMsg = HANDLER_SEND_BTC_ERROR;
+                }
+            } else {
+                hadlerMsg = HANDLER_SEND_BTC_ERROR;
+            }
+
+            mHandler.sendMessage(mHandler.obtainMessage(hadlerMsg));
+        }
+    };
 
     public static SendFragment newInstance(String title, int indicatorColor, int dividerColor, int iconResId, int accountId) {
         SendFragment f = new SendFragment();
@@ -156,7 +228,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
         cwAccount = new CWAccount();
         cmdManager = new CmdManager();
 
-        mProgress = new ProgressDialog(getActivity());
+        mProgress = new ProgressDialog(getActivity(), ProgressDialog.THEME_HOLO_DARK);
         mProgress.setCancelable(false);
         mProgress.setIndeterminate(true);
         mProgress.setMessage("Sending Bitcoin...");
@@ -172,11 +244,6 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
 
         return view;
     }
-
-    String recvAddress;
-    String spendAmountStr;
-    double spendAmount;
-    Timer mTimer = null;
 
     @Override
     public void onClick(View v) {
@@ -267,28 +334,6 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
         unSpentTxsAsyncTask.execute(InAddress);
     }
 
-    private class UnSpentTxsAsyncTask extends AsyncTask<String, Void, List<UnSpentTxsBean>> {
-        @Override
-        protected List<UnSpentTxsBean> doInBackground(String... strings) {
-            LogUtil.i("doInBackground!!!!");
-            unSpentTxsBeanList = getUnspentTxsByAddr(strings[0]);
-            return unSpentTxsBeanList;
-        }
-
-        @Override
-        protected void onPostExecute(List<UnSpentTxsBean> UnSpentTxsBeans) {
-
-            if (UnSpentTxsBeans.size() == 0) {
-                PublicPun.showNoticeDialog(mContext, "Notification", getString(R.string.note_unspent));
-                mProgress.dismiss();
-            } else {
-                LogUtil.d("UnSpentTxsBeans 取得完成有 " + UnSpentTxsBeans.size() + " 筆");
-                genChangeAddress(Constant.CwAddressKeyChainInternal);
-            }
-            super.onPostExecute(UnSpentTxsBeans);
-        }
-    }
-
     public List<UnSpentTxsBean> getUnspentTxsByAddr(String mAddr) {
 
         List<UnSpentTxsBean> UnSpentTxsBeanList = null;
@@ -311,7 +356,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
                     getActivity().runOnUiThread(new Runnable() {
                         public void run() {
                             //failed 3 times,failed.
-                            if(mProgress.isShowing()){
+                            if (mProgress.isShowing()) {
                                 mProgress.dismiss();
                             }
                             PublicPun.showNoticeDialog(mContext, getString(R.string.send_notification_unable_to_send), getString(R.string.send_call_unspent_failed) + result);
@@ -326,7 +371,6 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
         }
         return UnSpentTxsBeanList;
     }
-
 
     //產生收零地址(of output)
     public void genChangeAddress(final int keyChainId) {
@@ -348,7 +392,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
         if (changeAddressStr != null) {
             //new 對方接收地址, 自己的找零地址, 發送的金額
             LogUtil.e("自己的找零地址=" + changeAddressStr);
-            PreviousPrepareTransaction(recvAddress, changeAddressStr,BTCUtils.convertToSatoshisValue(spendAmountStr));
+            PreviousPrepareTransaction(recvAddress, changeAddressStr, BTCUtils.convertToSatoshisValue(spendAmountStr));
         } else {
             cmdManager.hdwGetNextAddress(keyChainId, accountId, new CmdResultCallback() {
                 @Override
@@ -392,16 +436,13 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
         }
     }
 
-    //    100,000,000 Satoshi = 1.00000000 ฿
-    private static final int SATOSHIS_PER_COIN = 100000000;
-
-    private void PreviousPrepareTransaction(final String outputAddress,final String changeAddress,final long amountToSend) {
+    private void PreviousPrepareTransaction(final String outputAddress, final String changeAddress, final long amountToSend) {
         trxStatus = Constant.TrxStatusBegin;
 
         //its legal that Change address equals to recipient's address
         if (outputAddress.equals(changeAddress)) {
             cancelTrx();
-            PublicPun.showNoticeDialog(mContext, "Notification",getString(R.string.send_notification_unable_to_send_with_change_error));
+            PublicPun.showNoticeDialog(mContext, "Notification", getString(R.string.send_notification_unable_to_send_with_change_error));
         }
 
 
@@ -416,11 +457,11 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
         TxsConfirm mTxsConfirm = null;
         try {
             processedTxData =
-                    BTCUtils.calcFeeChangeAndSelectOutputsToSpend(mContext,unSpentTxsBeanList, amountToSend, extraFee, false);
+                    BTCUtils.calcFeeChangeAndSelectOutputsToSpend(mContext, unSpentTxsBeanList, amountToSend, extraFee, false);
 
-            if(processedTxData==null){
+            if (processedTxData == null) {
                 cancelTrx();
-                PublicPun.showNoticeDialog(mContext, "Unable to send:","Can't find the unspent output.");
+                PublicPun.showNoticeDialog(mContext, "Unable to send:", "Can't find the unspent output.");
             }
 
             if (processedTxData.change == 0) {
@@ -440,8 +481,8 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
                 };
             }
             LogUtil.e("outputs length=" + outputs.length);
-            mTxsConfirm = new TxsConfirm(outputAddress,processedTxData.amountForRecipient,processedTxData.fee,
-                    processedTxData.outputsToSpend.size(),processedTxData.valueOfUnspentOutputs,changeAddress,processedTxData.change);
+            mTxsConfirm = new TxsConfirm(outputAddress, processedTxData.amountForRecipient, processedTxData.fee,
+                    processedTxData.outputsToSpend.size(), processedTxData.valueOfUnspentOutputs, changeAddress, processedTxData.change);
         } catch (ValidationException ve) {
             cancelTrx();
             PublicPun.showNoticeDialog(mContext, "Unable to send:", ve.getMessage());
@@ -455,20 +496,20 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
             cancelTrx();
             PublicPun.showNoticeDialog(mContext, "Unable to send:", e.getMessage());
             Crashlytics.log(e.getCause().toString() + "\n" + e.getMessage());
-            LogUtil.e("錯誤="+e.getMessage());
+            LogUtil.e("錯誤=" + e.getMessage());
         }
 
-           if(mTxsConfirm==null){
-               return;
-           }
+        if (mTxsConfirm == null) {
+            return;
+        }
 
         // Ask if ready to send.
-        new TransactionConfirmDialog(mContext,mTxsConfirm, new TransactionConfirmCallback() {
+        new TransactionConfirmDialog(mContext, mTxsConfirm, new TransactionConfirmCallback() {
             @Override
             public void TransactionConfirm() {
                 mProgress.show();
                 TimeOutCheck();
-                prepareTransaction(outputAddress,changeAddress,amountToSend);
+                prepareTransaction(outputAddress, changeAddress, amountToSend);
             }
 
             @Override
@@ -497,8 +538,9 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
 
         try {
             //計算出了手續費和找零後的 UnspentInputList未花费的交易,input=要拿來發送$的地址
+            LogUtil.e(" processedTxData.outputsToSpend.size():" + processedTxData.outputsToSpend.size());
             signedInputs = new Transaction.Input[processedTxData.outputsToSpend.size()];//
-            LogUtil.i("要拿來發送$的地址length:" + signedInputs.length);
+            LogUtil.e("要拿來發送$的地址length:" + signedInputs.length);
 
             inputAddressList = new ArrayList<>();
 
@@ -509,11 +551,11 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
                 for (int j = 0; j < unsignedInputs.length; j++) { //有幾個input
                     outputToSpend = processedTxData.outputsToSpend.get(j);
                     //dora modify
-
+                    LogUtil.e("跑hash " + i + "-" + j + "次");
                     byte[] byteTx = PublicPun.hexStringToByteArray(outputToSpend.getTx());//outputToSpend.getTx().getBytes()
 
                     //my send addr
-                    LogUtil.i(outputToSpend.getAddress() + "的HEX=" + LogUtil.byte2HexString((byteTx)));
+                    LogUtil.i("Transaction.OutPoint:" + outputToSpend.getAddress() + "的HEX=" + LogUtil.byte2HexString(byteTx) + ";outputToSpend.getN()=" + outputToSpend.getN());
 
                     Transaction.OutPoint outPoint = new Transaction.OutPoint(byteTx, outputToSpend.getN());//outputToSpend.getN
 
@@ -543,9 +585,9 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
                 final int finalI = i;
                 LogUtil.i("inputId=" + String.valueOf(finalI));
                 dbAddress d = DatabaseHelper.querySendAddress(mContext, processedTxData.outputsToSpend.get(i).getAddress());
-                if(d==null){
+                if (d == null) {
                     cancelTrx();
-                    PublicPun.showNoticeDialog(mContext,getString(R.string.send_notification_unable_to_send),"Can't find Unspent addresses.");
+                    PublicPun.showNoticeDialog(mContext, getString(R.string.send_notification_unable_to_send), "Can't find Unspent addresses.");
                 }
 
                 final int dbKid = d.getKid();
@@ -591,6 +633,9 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
                                         LogUtil.i("run " + finalI + ": getAddressInfo=" + processedTxData.outputsToSpend.get(finalI).getAddress() +
                                                 " ;publicKey=" + LogUtil.byte2HexString(address.getPublickey()));
                                         inputAddressList.add(address);
+
+                                        LogUtil.e("prepare trx getMacKey=" + LogUtil.byte2HexStringNoBlank(PublicPun.user.getMacKey()) + ";input id=" + finalI + ";" + ";KeyChainExternal=" + (int) CwAddressKeyChainExternal +
+                                                ";account=" + currentAccount + ";dbKid=" + dbKid + ";dbBalance=" + dbBalance + ";hash=" + LogUtil.byte2HexStringNoBlank(hash));
 
                                         //         big endian  ex:("0000000000002710");
                                         cmdManager.cwCmdHdwPrepTrxSign(PublicPun.user.getMacKey(),
@@ -667,29 +712,13 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
             public void onSuccess(int status, byte[] outputData) {
                 if ((status + 65536) == 0x9000) {
                     if (outputData != null && outputData.length > 0) {
-                        if ((outputData[0] & CwSecurityPolicyMaskOtp) >= 1) {
-                            InitialSecuritySettingActivity.settingOptions[0] = true;
-                        } else {
-                            InitialSecuritySettingActivity.settingOptions[0] = false;
-                        }
+                        InitialSecuritySettingActivity.settingOptions[0] = (outputData[0] & CwSecurityPolicyMaskOtp) >= 1;
 
-                        if ((outputData[0] & CwSecurityPolicyMaskBtn) >= 1) {
-                            InitialSecuritySettingActivity.settingOptions[1] = true;
-                        } else {
-                            InitialSecuritySettingActivity.settingOptions[1] = false;
-                        }
+                        InitialSecuritySettingActivity.settingOptions[1] = (outputData[0] & CwSecurityPolicyMaskBtn) >= 1;
 
-                        if ((outputData[0] & CwSecurityPolicyMaskAddress) >= 1) {
-                            InitialSecuritySettingActivity.settingOptions[2] = true;
-                        } else {
-                            InitialSecuritySettingActivity.settingOptions[2] = false;
-                        }
+                        InitialSecuritySettingActivity.settingOptions[2] = (outputData[0] & CwSecurityPolicyMaskAddress) >= 1;
 
-                        if ((outputData[0] & CwSecurityPolicyMaskWatchDog) >= 1) {
-                            InitialSecuritySettingActivity.settingOptions[3] = true;
-                        } else {
-                            InitialSecuritySettingActivity.settingOptions[3] = false;
-                        }
+                        InitialSecuritySettingActivity.settingOptions[3] = (outputData[0] & CwSecurityPolicyMaskWatchDog) >= 1;
                         LogUtil.i("安全設置:otp=" + InitialSecuritySettingActivity.settingOptions[0] +
                                 ";button_up=" + InitialSecuritySettingActivity.settingOptions[1] +
                                 ";address" + InitialSecuritySettingActivity.settingOptions[2] +
@@ -700,7 +729,6 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
             }
         });
     }
-
 
     private void doTrxSign() {
         try {
@@ -717,15 +745,14 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
         }
     }
 
-    //the card response of waiting button_up is:01 06 54 52 58 2d 4f 4b ( fix value: TRX-OK )
-    final byte[] successBtnPressesData = {0x54, 0x52, 0x58, 0x2d};
-
     private void didPrepareTransaction(String outputAddress) {
 
         if (!InitialSecuritySettingActivity.settingOptions[0] && InitialSecuritySettingActivity.settingOptions[1]) {
             didGetButton();
         }
 //        cmdManager.getCmdProcessor().setButtonA006(); taptap otp
+        LogUtil.e("prepare trx getEncKey=" + LogUtil.byte2HexStringNoBlank(PublicPun.user.getEncKey()) + ";amountForRecipient=" + processedTxData.amountForRecipient + ";" + ";outputAddress=" + outputAddress);
+
         cmdManager.cwCmdTrxBegin(PublicPun.user.getEncKey(),
                 processedTxData.amountForRecipient,
                 outputAddress,
@@ -735,7 +762,6 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
                         if (!InitialSecuritySettingActivity.settingOptions[0] && InitialSecuritySettingActivity.settingOptions[1]) {
                             if (outputData != null) {
                                 if (Arrays.equals(outputData, successBtnPressesData)) {
-
                                     trxStatus = Constant.TrxStatusGetBtn;
                                     LogUtil.i("case1.button_up pressed!!!!!!");
                                     if (btnTxBuilder.isShowing()) btnTxBuilder.dismiss();
@@ -785,9 +811,6 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
         }
         ClickFunction(mContext, "Send", "Please press Button On the Card");
     }
-
-    int doTrxSignSuccessCnt;
-
 
     private void didVerifyOtp() {
 //        verify OTP
@@ -853,8 +876,6 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
 
     }
 
-    List<byte[]> scriptSigs;
-
     private void doTrxSign(final int inputID, byte[] publicKey) {
         final byte[] addPublicKey = publicKey;
         LogUtil.i("doTrxSign.inputID=" + inputID);
@@ -880,7 +901,8 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
 
                                     if (doTrxSignSuccessCnt == signedInputs.length) {
                                         currUnsignedTx = genRawTxData(scriptSigs);
-                                        LogUtil.i("取得 currUnsignedTx=" + currUnsignedTx);
+                                        LogUtil.e("取得 currUnsignedTx=" + currUnsignedTx + ";length=" + currUnsignedTx.length());
+                                        LogUtil.e("byte長度=" + PublicPun.hexStringToByteArray(currUnsignedTx).length);
                                         PublishToNetwork(currUnsignedTx);
                                     }
                                 }
@@ -906,6 +928,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
     private String genRawTxData(List<byte[]> scriptSigs) {
 
         APITx.Tx ctx = new APITx.Tx();
+
 
         ctx.setVersion(1);
         ctx.setTxinCnt(signedInputs.length);
@@ -1111,65 +1134,6 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
         new Thread(runnable).start();
     }
 
-    Runnable runnable = new Runnable() {
-        @Override
-        public void run() {
-            // TODO: http request.
-            int postDecodeResult = -1;
-            int postPushResult = -1;
-            int hadlerMsg = 0;
-
-            postDecodeResult = netWork.doPost(BtcUrl.URL_BLOCKR_SERVER_SITE + BtcUrl.URL_BLICKR_DECODE, currUnsignedTx);
-            if (postDecodeResult == 200) {
-                postPushResult = netWork.doPost(BtcUrl.URL_BLOCKR_SERVER_SITE + BtcUrl.URL_BLICKR_PUSH, currUnsignedTx);
-                if (postPushResult == 200) {
-                    hadlerMsg = HANDLER_SEND_BTC_FINISH;
-                } else {
-                    hadlerMsg = HANDLER_SEND_BTC_ERROR;
-                }
-            } else {
-                hadlerMsg = HANDLER_SEND_BTC_ERROR;
-            }
-
-            mHandler.sendMessage(mHandler.obtainMessage(hadlerMsg));
-        }
-    };
-
-    private Handler mHandler = new Handler() {
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            switch (msg.what) {
-                case HANDLER_SEND_BTC_FINISH:
-//                    final String recvAddress = editSendAddress.getText().toString().trim();
-//                    final String amountStr = editSendBtc.getText().toString().trim();
-
-                    FunTrxFinish();
-                    isTrxSuccess = true;
-                    if (mTimer != null) {
-                        mTimer.cancel();
-                        mTimer = null;
-                    }
-                    PublicPun.showNoticeDialog(mContext, "Sent", "Sent " + spendAmountStr + "btc to " + recvAddress);
-                    //clear trx data
-                    editSendAddress.setText("");
-                    editSendBtc.setText("");
-                    editSendUsd.setText("");
-
-                    if (mProgress != null) {
-                        mProgress.dismiss();
-                    }
-
-                    break;
-                case HANDLER_SEND_BTC_ERROR:
-                    if (mProgress != null) {
-                        mProgress.dismiss();
-                    }
-                    PublicPun.showNoticeDialog(mContext, "Notification", "Send BTC to BLOCKCHAIN failed!");
-                    break;
-            }
-        }
-    };
-
     public void onQRcodeResult() {
         try {
             String scanContent = "";
@@ -1237,11 +1201,6 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
         imagScan.setOnClickListener(this);
     }
 
-    // for Listener used only
-    String strEditBtc;
-    String strEditCurrency;
-
-
     private void setListener() {
 
         editSendBtc.setOnFocusChangeListener(new View.OnFocusChangeListener() {
@@ -1282,7 +1241,6 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
                     public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                         if (actionId == EditorInfo.IME_ACTION_DONE) {
                             strEditBtc = editSendBtc.getText().toString().trim().replace(",", ".");
-                            ;
                             if (!TextUtils.isEmpty(strEditBtc)) {
                                 editBtc = Float.valueOf(strEditBtc);
                                 if (editBtc > 0) {
@@ -1313,9 +1271,6 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
                 }
         );
     }
-
-    AlertDialog btnTxBuilder;
-    AlertDialog.Builder builder;
 
     private void ClickFunction(Context mContext, String mTitle, String mMessage) {
         LayoutInflater inflater = LayoutInflater.from(mContext);
@@ -1365,6 +1320,28 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
 
         // QR code result
         onQRcodeResult();
+    }
+
+    private class UnSpentTxsAsyncTask extends AsyncTask<String, Void, List<UnSpentTxsBean>> {
+        @Override
+        protected List<UnSpentTxsBean> doInBackground(String... strings) {
+            LogUtil.i("doInBackground!!!!");
+            unSpentTxsBeanList = getUnspentTxsByAddr(strings[0]);
+            return unSpentTxsBeanList;
+        }
+
+        @Override
+        protected void onPostExecute(List<UnSpentTxsBean> UnSpentTxsBeans) {
+
+            if (UnSpentTxsBeans.size() == 0) {
+                PublicPun.showNoticeDialog(mContext, "Notification", getString(R.string.note_unspent));
+                mProgress.dismiss();
+            } else {
+                LogUtil.d("UnSpentTxsBeans 取得完成有 " + UnSpentTxsBeans.size() + " 筆");
+                genChangeAddress(Constant.CwAddressKeyChainInternal);
+            }
+            super.onPostExecute(UnSpentTxsBeans);
+        }
     }
 
 }

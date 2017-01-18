@@ -44,17 +44,22 @@ import java.util.Locale;
  * Created by ShihYi on 2015/12/7.
  */
 public class ReceiveFragment extends BaseFragment implements View.OnClickListener {
+    private static final String[] STRING_OK = new String[]{"OK", "確定"};
+    private static final String[] STRING_ALERT_TITLE = new String[]{"Request Payment", "欲收款金額"};
+    private static final String DATA_NAME = "name";
+    private static final String DATA_ID = "id";
+    public static byte[] hdwAccountPointer;
+    private static int genKid = 0;
+    // -----類別變數-----
+    private static boolean chinese = isChinese();
     private ListView listView;
     private ReceiveListViewAdapter adapter;
     private Button btnGenAddress;
     private ImageView imgQRcode;
     private CmdManager cmdManager;
     private List<Address> intputAddressList;
-    private static final String[] STRING_OK = new String[]{"OK", "確定"};
-    private static final String[] STRING_ALERT_TITLE = new String[]{"Request Payment", "欲收款金額"};
     private int trxStatus;
     private int getWalltePointer = 0x02;
-    public static byte[] hdwAccountPointer;
     private int accountId = -1;
     private Address address;
     private List<Account> cwAccountList = new ArrayList<>();
@@ -64,15 +69,12 @@ public class ReceiveFragment extends BaseFragment implements View.OnClickListene
     private int mPosition = -1;
     private TextView vEditLable;
     private TextView vClickLabel;
-    private static int genKid = 0;
     private ReceiveListViewAdapter.OnRecvListClickListener mOnRecvListClickListener = null;
 //    private Context mContext;
     //for Bundle
     private String value = "";
     private String title = "";
-    private static final String DATA_NAME = "name";
     private int id;
-    private static final String DATA_ID = "id";
     private ProgressDialog mProgress;
 
     public static ReceiveFragment newInstance(String title, int indicatorColor, int dividerColor, int iconResId, int accountId) {
@@ -93,6 +95,20 @@ public class ReceiveFragment extends BaseFragment implements View.OnClickListene
         return f;
     }
 
+    // -----類別方法-----
+    private static boolean isChinese() {
+        final Locale locale = Locale.getDefault();
+        return locale.equals(Locale.CHINESE) || locale.equals(Locale.SIMPLIFIED_CHINESE) || locale.equals(Locale.TRADITIONAL_CHINESE);
+    }
+
+    private static String getString(final String[] string) {
+        int index = chinese ? 1 : 0;
+        if (index >= string.length) {
+            index = 0;
+        }
+        return string[index];
+    }
+
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
@@ -107,8 +123,6 @@ public class ReceiveFragment extends BaseFragment implements View.OnClickListene
         id = getArguments().getInt(DATA_ID);
         value = ((FragMainActivity) mContext).getAccountFrag(id);
     }
-
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -230,7 +244,6 @@ public class ReceiveFragment extends BaseFragment implements View.OnClickListene
         });
     }
 
-
     private void getAccounts(final int accountId) {
         byte cwHdwAccountInfoExtKeyPtr = 0x02;
         LogUtil.e("getAccounts accountId=" + accountId);
@@ -346,7 +359,7 @@ public class ReceiveFragment extends BaseFragment implements View.OnClickListene
         item_btn_copy.setOnClickListener(this);
         btnGenAddress.setOnClickListener(this);
 
-        mProgress = new ProgressDialog(mContext);
+        mProgress = new ProgressDialog(mContext, ProgressDialog.THEME_HOLO_DARK);
         mProgress.setCancelable(false);
         mProgress.setIndeterminate(true);
     }
@@ -404,23 +417,6 @@ public class ReceiveFragment extends BaseFragment implements View.OnClickListene
                     break;
             }
         }
-    }
-
-    // -----類別變數-----
-    private static boolean chinese = isChinese();
-
-    // -----類別方法-----
-    private static boolean isChinese() {
-        final Locale locale = Locale.getDefault();
-        return locale.equals(Locale.CHINESE) || locale.equals(Locale.SIMPLIFIED_CHINESE) || locale.equals(Locale.TRADITIONAL_CHINESE);
-    }
-
-    private static String getString(final String[] string) {
-        int index = chinese ? 1 : 0;
-        if (index >= string.length) {
-            index = 0;
-        }
-        return string[index];
     }
 
     public void genChangeAddress(final int keyChainId) {
@@ -498,7 +494,7 @@ public class ReceiveFragment extends BaseFragment implements View.OnClickListene
                 vClickLabel.setText(TabFragment.lisCwBtcAdd.get(position).getAddress().toString());
             }
         };
-        adapter.registerOnRecvListClickListenerCallback(mOnRecvListClickListener);
+        ReceiveListViewAdapter.registerOnRecvListClickListenerCallback(mOnRecvListClickListener);
 
         adapter = new ReceiveListViewAdapter(mContext, TabFragment.lisCwBtcAdd, imgQRcode);
         listView.setAdapter(adapter);

@@ -7,13 +7,14 @@ import android.os.Handler;
 import android.os.Message;
 
 import com.coolbitx.coolwallet.DataBase.DatabaseHelper;
+import com.coolbitx.coolwallet.DataBase.DbName;
 import com.coolbitx.coolwallet.callback.RefreshCallback;
 import com.coolbitx.coolwallet.entity.Account;
 import com.coolbitx.coolwallet.entity.Constant;
 import com.coolbitx.coolwallet.entity.dbAddress;
+import com.coolbitx.coolwallet.httpRequest.CwBtcNetWork;
 import com.coolbitx.coolwallet.ui.Fragment.FragMainActivity;
 import com.coolbitx.coolwallet.util.BTCUtils;
-import com.coolbitx.coolwallet.httpRequest.CwBtcNetWork;
 import com.coolbitx.coolwallet.util.ExtendedKey;
 import com.crashlytics.android.Crashlytics;
 import com.snscity.egdwlib.cmd.CmdResultCallback;
@@ -31,13 +32,51 @@ public class RefreshBlockChainInfo {
     final Context mContext;
     CwBtcNetWork cwBtcNetWork;
     boolean mResult;
-    private RefreshCallback cmdResultCallback;
-
     int IntExtKey;
     int IntIntKey;
     boolean isPointerSame;
     int needToRefreshCnt;
     int addrAuccess;
+    private RefreshCallback cmdResultCallback;
+    Handler BIP32Handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            Bundle data = msg.getData();
+            String result = data.getString("resultMsg");
+            switch (msg.what) {
+                case 1:
+                    addrAuccess++;
+                    LogUtil.i("BIP32 handler addrAuccess=" + addrAuccess + " & needToRefreshCnt=" + needToRefreshCnt);
+                    if (addrAuccess == needToRefreshCnt) {
+                        LogUtil.i("BIP32 handler RUN callTxsRunnable");
+                        cmdResultCallback.success();
+
+                    }
+                    break;
+                case 0:
+                    cmdResultCallback.fail(result);
+                    break;
+            }
+        }
+    };
+    Handler txsHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            Bundle data = msg.getData();
+            int mAccountID = data.getInt("accountID");
+            switch (msg.what) {
+                case 1:
+                    cmdResultCallback.success();
+                    break;
+                case -1:
+                    cmdResultCallback.fail("Account:" + (mAccountID + 1) + " get transaction data from BLOCKCHAIN failed, Please do again later.");
+//                    showNoticeDialog("Erro Message", "Get Txs data from BLOCKCHAIN failed!");
+                    break;
+            }
+        }
+    };
 
     public RefreshBlockChainInfo(Context mContext, int accountID) {
         this.accountID = accountID;
@@ -255,6 +294,79 @@ public class RefreshBlockChainInfo {
                 });
     }
 
+    public void callTxsRunnable(RefreshCallback cmdResultCallback) {
+        this.cmdResultCallback = cmdResultCallback;
+        ContentValues cv = new ContentValues();
+        cv.put("ACCOUNT_ID", accountID);
+
+        new Thread(new GetTxsRunnable(txsHandler, cv, 0, 0)).start();
+    }
+
+    private void getTxsFromBlockchain(final int mAccount) {
+        LogUtil.i("refresh跑account:" + mAccount);
+        //分5個account跑addr的txs.
+        ArrayList<dbAddress> listAddress = new ArrayList<dbAddress>();
+
+        String mTxsAddresses = "";
+        listAddress = DatabaseHelper.queryAddress(mContext, mAccount, -1);//ext+int
+        for (int j = 0; j < listAddress.size(); j++) {
+            mTxsAddresses += listAddress.get(j).getAddress() + '|';
+        }
+        final ContentValues cv = new ContentValues();
+        cv.put("addresses", mTxsAddresses);
+
+        String result = null;
+        int msgResult = -1;
+        try {
+            result = cwBtcNetWork.doGet(cv, BtcUrl.URL_BLICKCHAIN_TXS_MULTIADDR, null);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            msgResult = -1;
+            e.printStackTrace();
+            cmdResultCallback.fail("Account:" + mAccount + " get transaction data from BLOCKCHAIN failed, Please do again later.");
+        }
+
+        //使用Handler和Message把資料丟給主UI去後續處理
+        Message msg = txsHandler.obtainMessage();
+
+        if (result != null && !result.contains("errorCode")) {
+            LogUtil.i("return 200");
+            DatabaseHelper.deleteTableByAccount(mContext, DbName.DATA_BASE_TXS, mAccount);
+//            int mWalletTxsN = PublicPun.jsonParserRecoveryTxs(mContext, result, PublicPun.card.getCardId(), mAccount);
+            int mWalletTxsN = PublicPun.jsonParserRefresh(mContext, result, mAccount, true);
+            if (mWalletTxsN > 50) {
+                int mRunTxsCnt = (int) Math.round((mWalletTxsN / 50) + 0.5);
+                LogUtil.i("refresh超過50筆,要跑幾次=" + mRunTxsCnt);
+                for (int i = 1; i < mRunTxsCnt; i++) {
+                    int param = i * 50 + 1;
+                    try {
+                        //https://blockchain.info/multiaddr?offset=51&active=
+                        LogUtil.i("refresh超過50筆,跑param=" + param);
+                        result = cwBtcNetWork.doGet(cv, BtcUrl.URL_BLICKCHAIN_TXS_MULTIADDR, String.valueOf(param));
+                        PublicPun.jsonParserRefresh(mContext, result, mAccount, false);
+
+                    } catch (Exception e) {
+                        // TODO Auto-generated catch block
+                        msgResult = -1;
+                        e.printStackTrace();
+                        Crashlytics.logException(e);
+                    }
+                }
+            }
+            msgResult = 1;
+        } else {
+            LogUtil.e("return 非 200");
+            msgResult = -1;
+        }
+        Bundle data = new Bundle();
+        data.putInt("accountID", mAccount);
+        data.putString("msg", result);
+        msg.setData(data);
+        msg.what = msgResult;
+        txsHandler.sendMessage(msg);
+
+    }
+
     private class BIP32Runnable implements Runnable {
         ContentValues cv;
         int what = -1;
@@ -327,37 +439,6 @@ public class RefreshBlockChainInfo {
         }
     }
 
-    Handler BIP32Handler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            Bundle data = msg.getData();
-            String result = data.getString("resultMsg");
-            switch (msg.what) {
-                case 1:
-                    addrAuccess++;
-                    LogUtil.i("BIP32 handler addrAuccess=" + addrAuccess + " & needToRefreshCnt=" + needToRefreshCnt);
-                    if (addrAuccess == needToRefreshCnt) {
-                        LogUtil.i("BIP32 handler RUN callTxsRunnable");
-                        cmdResultCallback.success();
-
-                    }
-                    break;
-                case 0:
-                    cmdResultCallback.fail(result);
-                    break;
-            }
-        }
-    };
-
-    public void callTxsRunnable(RefreshCallback cmdResultCallback) {
-        this.cmdResultCallback = cmdResultCallback;
-        ContentValues cv = new ContentValues();
-        cv.put("ACCOUNT_ID", accountID);
-
-        new Thread(new GetTxsRunnable(txsHandler, cv, 0, 0)).start();
-    }
-
     private class GetTxsRunnable implements Runnable {
 
         ContentValues cv;
@@ -373,87 +454,4 @@ public class RefreshBlockChainInfo {
             getTxsFromBlockchain(AccountID);
         }
     }
-
-    private void getTxsFromBlockchain(final int mAccount) {
-        LogUtil.i("refresh跑account:" + mAccount);
-        //分5個account跑addr的txs.
-        ArrayList<dbAddress> listAddress = new ArrayList<dbAddress>();
-
-        String mTxsAddresses = "";
-        listAddress = DatabaseHelper.queryAddress(mContext, mAccount, -1);//ext+int
-        for (int j = 0; j < listAddress.size(); j++) {
-            mTxsAddresses += listAddress.get(j).getAddress() + '|';
-        }
-        final ContentValues cv = new ContentValues();
-        cv.put("addresses", mTxsAddresses);
-
-        String result = null;
-        int msgResult = -1;
-        try {
-            result = cwBtcNetWork.doGet(cv, BtcUrl.URL_BLICKCHAIN_TXS_MULTIADDR, null);
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            msgResult = -1;
-            e.printStackTrace();
-            cmdResultCallback.fail( "Account:"+mAccount+" get transaction data from BLOCKCHAIN failed, Please do again later.");
-        }
-
-        //使用Handler和Message把資料丟給主UI去後續處理
-        Message msg = txsHandler.obtainMessage();
-
-        if (result != null && !result.contains("errorCode")) {
-            LogUtil.i("return 200");
-            DatabaseHelper.deleteTableByAccount(mContext, DbName.DATA_BASE_TXS, mAccount);
-//            int mWalletTxsN = PublicPun.jsonParserRecoveryTxs(mContext, result, PublicPun.card.getCardId(), mAccount);
-            int mWalletTxsN = PublicPun.jsonParserRefresh(mContext, result, mAccount, true);
-            if (mWalletTxsN > 50) {
-                int mRunTxsCnt = (int) Math.round((mWalletTxsN / 50) + 0.5);
-                LogUtil.i("refresh超過50筆,要跑幾次=" + mRunTxsCnt);
-                for (int i = 1; i < mRunTxsCnt; i++) {
-                    int param = i * 50 + 1;
-                    try {
-                        //https://blockchain.info/multiaddr?offset=51&active=
-                        LogUtil.i("refresh超過50筆,跑param=" + param);
-                        result = cwBtcNetWork.doGet(cv, BtcUrl.URL_BLICKCHAIN_TXS_MULTIADDR, String.valueOf(param));
-                        PublicPun.jsonParserRefresh(mContext, result, mAccount, false);
-
-                    } catch (Exception e) {
-                        // TODO Auto-generated catch block
-                        msgResult = -1;
-                        e.printStackTrace();
-                        Crashlytics.logException(e);
-                    }
-                }
-            }
-            msgResult = 1;
-        } else {
-            LogUtil.e("return 非 200");
-            msgResult = -1;
-        }
-        Bundle data = new Bundle();
-        data.putInt("accountID", mAccount);
-        data.putString("msg",result);
-        msg.setData(data);
-        msg.what = msgResult;
-        txsHandler.sendMessage(msg);
-
-    }
-
-    Handler txsHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            Bundle data = msg.getData();
-            int mAccountID = data.getInt("accountID");
-            switch (msg.what) {
-                case 1:
-                    cmdResultCallback.success();
-                    break;
-                case -1:
-                    cmdResultCallback.fail( "Account:"+(mAccountID+1)+" get transaction data from BLOCKCHAIN failed, Please do again later.");
-//                    showNoticeDialog("Erro Message", "Get Txs data from BLOCKCHAIN failed!");
-                    break;
-            }
-        }
-    };
 }

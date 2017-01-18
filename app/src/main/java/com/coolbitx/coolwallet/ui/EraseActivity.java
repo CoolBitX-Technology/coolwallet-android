@@ -9,9 +9,9 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.coolbitx.coolwallet.DataBase.DatabaseHelper;
+import com.coolbitx.coolwallet.DataBase.DbName;
 import com.coolbitx.coolwallet.R;
 import com.coolbitx.coolwallet.general.CSVReadWrite;
-import com.coolbitx.coolwallet.general.DbName;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.snscity.egdwlib.CmdManager;
 import com.snscity.egdwlib.cmd.CmdResultCallback;
@@ -22,11 +22,11 @@ import com.snscity.egdwlib.utils.LogUtil;
  */
 public class EraseActivity extends BaseActivity implements View.OnClickListener {
 
+    boolean isNewCard;
     private Context context;
     private EditText editOTP;
     private Button btnErase;
     private Button btnCancel;
-
     private CmdManager cmdManager;
     private byte[] pinChllenge;
     private byte currentHostId = 0x01;//当前手机设备uuid对应的hostid
@@ -34,7 +34,6 @@ public class EraseActivity extends BaseActivity implements View.OnClickListener 
     private SharedPreferences sharedPreferences;
     private ProgressDialog mProgress;
     private CSVReadWrite mLoginCsv;
-    boolean isNewCard;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +43,7 @@ public class EraseActivity extends BaseActivity implements View.OnClickListener 
 
         cmdManager = new CmdManager();
         mLoginCsv = new CSVReadWrite(EraseActivity.this);
-        mProgress = new ProgressDialog(EraseActivity.this);
+        mProgress = new ProgressDialog(EraseActivity.this, ProgressDialog.THEME_HOLO_DARK);
         mProgress.setCancelable(false);
         mProgress.setIndeterminate(true);
         //睡毫秒
@@ -86,6 +85,13 @@ public class EraseActivity extends BaseActivity implements View.OnClickListener 
         btnCancel.setOnClickListener(this);
     }
 
+    private void cleanData() {
+        DatabaseHelper.deleteTable(EraseActivity.this, DbName.DATA_BASE_TXS);
+        DatabaseHelper.deleteTable(EraseActivity.this, DbName.DATA_BASE_ADDR);
+        DatabaseHelper.deleteTable(EraseActivity.this, DbName.DATA_BASE_CURRENT);
+        DatabaseHelper.deleteTable(context, DbName.DATA_BASE_LOGIN);
+    }
+
     @Override
     public void onClick(View v) {
         //工程版使用
@@ -96,13 +102,9 @@ public class EraseActivity extends BaseActivity implements View.OnClickListener 
         } else if (v == btnErase) {
             //clear txs data;
 
-            DatabaseHelper.deleteTable(EraseActivity.this, DbName.DATA_BASE_TXS);
-            DatabaseHelper.deleteTable(EraseActivity.this, DbName.DATA_BASE_ADDR);
-            DatabaseHelper.deleteTable(EraseActivity.this, DbName.DATA_BASE_CURRENT);
-            DatabaseHelper.deleteTable(context, DbName.DATA_BASE_LOGIN);
-
             LogUtil.i("Erase mode=" + PublicPun.card.getMode());
             if (PublicPun.card.getMode().equals("NOHOST")) {
+                cleanData();
                 PublicPun.toast(context, "Initial Success");
                 BleActivity.bleManager.disConnectBle();
                 finish();
@@ -169,6 +171,7 @@ public class EraseActivity extends BaseActivity implements View.OnClickListener 
                                     public void onSuccess(int status, byte[] outputData) {
                                         if ((status + 65536) == 0x9000) {
                                             mProgress.dismiss();
+                                            cleanData();
                                             PublicPun.toast(context, " Initial Success");
                                             setResult(RESULT_OK);
                                             finish();

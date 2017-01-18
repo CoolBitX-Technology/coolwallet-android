@@ -44,11 +44,12 @@ import java.util.TimerTask;
 import io.fabric.sdk.android.Fabric;
 
 public class BleActivity extends BaseActivity {
+    public static BleManager bleManager;
+    boolean isConnected = false;
     private SwipeRefreshLayout swipeRefreshLayout;
     private ExpandableListView listView;
     private ListViewAdapter adapter;
     private List<MyDevice> myDeviceList;
-    public static BleManager bleManager;
     private BluetoothStateListener listener;
     private boolean isScanning;
     private ImageView imgSearch;
@@ -69,155 +70,58 @@ public class BleActivity extends BaseActivity {
     private String address;
     private CSVReadWrite mLoginCsv;
     private boolean isNewUser = false;
-    boolean isConnected = false;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        Fabric.with(this, new Crashlytics());
-        setContentView(R.layout.activity_ble);
-        LogUtil.d("BleActivity onCreate");
-        bleManager = new BleManager(this);
-        cmdManager = new CmdManager();
-        IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
-        listener = new BluetoothStateListener();
-        registerReceiver(listener, filter);
-        sharedPreferences = getSharedPreferences("card", Context.MODE_PRIVATE);
-        editor = sharedPreferences.edit();
-        initView();
-    }
-
     private Timer mTimer;
-
-    private void initView() {
-        swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.cw_refresh);
-        listView = (ExpandableListView) findViewById(R.id.cw_list);
-        imgSearch = (ImageView) findViewById(R.id.imgsearch);
-        txtSearch = (TextView) findViewById(R.id.txtsearch);
-        txtSearchDetail = (TextView) findViewById(R.id.txtsearchDetail);
-        tvPullMsg = (TextView) findViewById(R.id.tvPullMsg);
-//        pbarBleConnecting=(ProgressBar) findViewById(R.id.pBarConnecting);
-              /* Initialize the progress dialog */
-        mProgress = new ProgressDialog(mContext);
-        mProgress.setCancelable(false);
-        mProgress.setIndeterminate(true);
-
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                LogUtil.i("swipeRefresh");
-                bleManager.stopScanBle();
-                isScanning = false;
-                swipeRefreshLayout.setRefreshing(false);
-                if (!isScanning) {
-                    bleManager.openBluetooth();
-                    isScanning = bleManager.startScanBle(bleScanCallback);
-                    isScanning = true;
-                }
-                myDeviceList.clear();
-                adapter.refresh();
-            }
-        });
-        myDeviceList = new ArrayList<>();
-        adapter = new ListViewAdapter(getApplicationContext(), myDeviceList, listView);
-        listView.setAdapter(adapter);
-
-
-        ListViewAdapter.OnBleConnClickListener mOnBleConnClickListener = new ListViewAdapter.OnBleConnClickListener() {
-            @Override
-            public void onClick(View v, int position) {
-//                int id = v.getId();
-//                switch (id) {
-//                    case R.id.btn_connect:
-                isReset = false;
-                bleManager.stopScanBle();
-                isScanning = false;
-                MyDevice device = myDeviceList.get(position);
-                address = device.getAddress();
-                if (!address.isEmpty()) {
-                    LogUtil.i("卡片連線=" + address + "---" + device.getName());
-                    Thread thread = new Thread() {
-                        @Override
-                        public void run() {
-                            super.run();
-                                       /* Show the progress. */
-                            runOnUiThread(new Runnable() {
-
-                                @Override
-                                public void run() {
-                                    mProgress.setMessage("Connecting...");
-                                    mProgress.show();
-                                }
-                            });
-
-                            //處理程式寫在此
-                            final boolean isConnectBle = bleManager.connectBle(address, bleStateCallback);
-                            LogUtil.i("Connect 正在連接:" + address + "; is connectBle=" + isConnectBle);
-
-                            mTimer = new Timer();
-                            mTimer.schedule(new TimerTask() {
-                                @Override
-                                public void run() {
-                                    if (!isConnected) {
-                                        mProgress.dismiss();
-                                    }
-                                    mTimer.cancel();
-                                }
-                            }, 5000);
-
-                            handler.post(runnable);
-                        }
-                    };
-                    thread.start();
-                }
-            }
-        };
-        adapter.registerOnBleConnClickListenerCallback(mOnBleConnClickListener);
-
-        ListViewAdapter.OnCWResetClickListener mCWResetClickListener = new ListViewAdapter.OnCWResetClickListener() {
-            @Override
-            public void onClick(View v, int position) {
-                isReset = true;
-                bleManager.stopScanBle();
-                isScanning = false;
-                MyDevice device = myDeviceList.get(position);
-                address = device.getAddress();
-
-                if (!address.isEmpty()) {
-                    Thread thread = new Thread() {
-                        @Override
-                        public void run() {
-                            super.run();
-                                       /* Show the progress. */
-                            runOnUiThread(new Runnable() {
-
-                                @Override
-                                public void run() {
-                                    mProgress.setMessage("Connecting...");
-                                    mProgress.show();
-                                }
-                            });
-                            //處理程式寫在此
-                            bleManager.connectBle(address, bleStateCallback);
-//                            handler.post(runnable);
-                        }
-                    };
-                    thread.start();
-
-                    LogUtil.i("Reset 正在連接:" + address);
-
-                }
-            }
-        };
-        adapter.registerOnCWResetClickListenerCallback(mCWResetClickListener);
-    }
-
-
     private Handler handler = new Handler();
     private Runnable runnable = new Runnable() {
         @Override
         public void run() {
 //            progressDialog.dismiss();
+        }
+    };
+    private Handler Disconnhandler = new Handler();
+    private Runnable Disconnrunnable = new Runnable() {
+        @Override
+        public void run() {
+            LogUtil.i("xxx Disconnrunnable=" + getPackageName());
+            isConnected = false;
+            disconnBroadCast();
+        }
+    };
+    private BleScanCallback bleScanCallback = new BleScanCallback() {
+
+        @Override
+        public void onBleDeviceDiscovered(BluetoothDevice device, int rssi, byte[] scanRecord) {
+            String address = device.getAddress();
+//            Log.e(TAG, "BleScanCallback address:" + address);
+            if (!TextUtils.isEmpty(address)) {
+                if (!contains(address)) {
+                    imgSearch.setVisibility(View.INVISIBLE);
+                    txtSearch.setVisibility(View.INVISIBLE);
+                    txtSearchDetail.setVisibility(View.INVISIBLE);
+
+                    String name = device.getName();
+                    if (name == null || !name.startsWith("CoolWallet")) {
+                        return;
+                    }
+
+                    //列表中没有该蓝牙设备，添加设备到列表中
+                    MyDevice myDevice = new MyDevice();
+                    myDevice.setName(name == null ? "unknown device" : name);
+                    myDevice.setAddress(address == null ? "unknown address" : address);
+                    myDevice.setRssi(String.valueOf(rssi));
+                    myDeviceList.add(myDevice);
+                    adapter.refresh();
+                    try {
+                        listView.expandGroup(adapter.getGroupCount() - 1);
+                    } catch (Exception e) {
+
+                    }
+                }
+            } else {
+                imgSearch.setVisibility(View.VISIBLE);
+                txtSearch.setVisibility(View.VISIBLE);
+                txtSearchDetail.setVisibility(View.VISIBLE);
+            }
         }
     };
     private BleStateCallback bleStateCallback = new BleStateCallback() {
@@ -279,11 +183,7 @@ public class BleActivity extends BaseActivity {
 //                                    isNewLgoin = mLoginCsv.readFromCSV(address);
                                 ArrayList<String> arrayLoginList = new ArrayList<String>();
                                 arrayLoginList = DatabaseHelper.queryLogin(mContext);
-                                if (arrayLoginList.size() > 0) {
-                                    isNewUser = false;
-                                } else {
-                                    isNewUser = true;
-                                }
+                                isNewUser = arrayLoginList.size() <= 0;
 
                                 if (isNewUser) {
                                     //generate uuid
@@ -364,15 +264,145 @@ public class BleActivity extends BaseActivity {
             Disconnhandler.post(Disconnrunnable);
         }
     };
-    private Handler Disconnhandler = new Handler();
-    private Runnable Disconnrunnable = new Runnable() {
-        @Override
-        public void run() {
-            LogUtil.i("xxx Disconnrunnable=" + getPackageName());
-            isConnected = false;
-            disconnBroadCast();
-        }
-    };
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Fabric.with(this, new Crashlytics());
+        setContentView(R.layout.activity_ble);
+        LogUtil.d("BleActivity onCreate");
+        bleManager = new BleManager(this);
+        cmdManager = new CmdManager();
+        IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
+        listener = new BluetoothStateListener();
+        registerReceiver(listener, filter);
+        sharedPreferences = getSharedPreferences("card", Context.MODE_PRIVATE);
+        editor = sharedPreferences.edit();
+        initView();
+    }
+
+    private void initView() {
+        swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.cw_refresh);
+        listView = (ExpandableListView) findViewById(R.id.cw_list);
+        imgSearch = (ImageView) findViewById(R.id.imgsearch);
+        txtSearch = (TextView) findViewById(R.id.txtsearch);
+        txtSearchDetail = (TextView) findViewById(R.id.txtsearchDetail);
+        tvPullMsg = (TextView) findViewById(R.id.tvPullMsg);
+//        pbarBleConnecting=(ProgressBar) findViewById(R.id.pBarConnecting);
+              /* Initialize the progress dialog */
+        mProgress = new ProgressDialog(mContext, ProgressDialog.THEME_HOLO_DARK);
+        mProgress.setCancelable(false);
+        mProgress.setIndeterminate(true);
+
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                LogUtil.i("swipeRefresh");
+                bleManager.stopScanBle();
+                isScanning = false;
+                swipeRefreshLayout.setRefreshing(false);
+                if (!isScanning) {
+                    bleManager.openBluetooth();
+                    isScanning = bleManager.startScanBle(bleScanCallback);
+                    isScanning = true;
+                }
+                myDeviceList.clear();
+                adapter.refresh();
+            }
+        });
+        myDeviceList = new ArrayList<>();
+        adapter = new ListViewAdapter(getApplicationContext(), myDeviceList, listView);
+        listView.setAdapter(adapter);
+
+
+        ListViewAdapter.OnBleConnClickListener mOnBleConnClickListener = new ListViewAdapter.OnBleConnClickListener() {
+            @Override
+            public void onClick(View v, int position) {
+//                int id = v.getId();
+//                switch (id) {
+//                    case R.id.btn_connect:
+                isReset = false;
+                bleManager.stopScanBle();
+                isScanning = false;
+                MyDevice device = myDeviceList.get(position);
+                address = device.getAddress();
+                if (!address.isEmpty()) {
+                    LogUtil.i("卡片連線=" + address + "---" + device.getName());
+                    Thread thread = new Thread() {
+                        @Override
+                        public void run() {
+                            super.run();
+                                       /* Show the progress. */
+                            runOnUiThread(new Runnable() {
+
+                                @Override
+                                public void run() {
+                                    mProgress.setMessage("Connecting...");
+                                    mProgress.show();
+                                }
+                            });
+
+                            //處理程式寫在此
+                            final boolean isConnectBle = bleManager.connectBle(address, bleStateCallback);
+                            LogUtil.i("Connect 正在連接:" + address + "; is connectBle=" + isConnectBle);
+
+                            mTimer = new Timer();
+                            mTimer.schedule(new TimerTask() {
+                                @Override
+                                public void run() {
+                                    if (!isConnected) {
+                                        mProgress.dismiss();
+                                    }
+                                    mTimer.cancel();
+                                }
+                            }, 5000);
+
+                            handler.post(runnable);
+                        }
+                    };
+                    thread.start();
+                }
+            }
+        };
+        ListViewAdapter.registerOnBleConnClickListenerCallback(mOnBleConnClickListener);
+
+        ListViewAdapter.OnCWResetClickListener mCWResetClickListener = new ListViewAdapter.OnCWResetClickListener() {
+            @Override
+            public void onClick(View v, int position) {
+                isReset = true;
+                bleManager.stopScanBle();
+                isScanning = false;
+                MyDevice device = myDeviceList.get(position);
+                address = device.getAddress();
+
+                if (!address.isEmpty()) {
+                    Thread thread = new Thread() {
+                        @Override
+                        public void run() {
+                            super.run();
+                                       /* Show the progress. */
+                            runOnUiThread(new Runnable() {
+
+                                @Override
+                                public void run() {
+                                    mProgress.setMessage("Connecting...");
+                                    mProgress.show();
+                                }
+                            });
+                            //處理程式寫在此
+                            bleManager.connectBle(address, bleStateCallback);
+//                            handler.post(runnable);
+                        }
+                    };
+                    thread.start();
+
+                    LogUtil.i("Reset 正在連接:" + address);
+
+                }
+            }
+        };
+        ListViewAdapter.registerOnCWResetClickListenerCallback(mCWResetClickListener);
+    }
 
     private void BindLogin() {
         cmdManager.bindLoginChlng(hostId, new CmdResultCallback() {
@@ -426,9 +456,8 @@ public class BleActivity extends BaseActivity {
                                                 PublicPun.modeState = PublicPun.selectMode(PublicPun.byte2HexString(outputData[0]));
 //                                                PublicPun.toast(getApplicationContext(), "Connected..\nMode=" + PublicPun.modeState + "\nState=" + outputData[1]);
                                                 LogUtil.i("BLE Login  ModeState:" + "\nMode=" + PublicPun.modeState + "\nState=" + outputData[1]);
-
 //                                                getRegInfo();
-                                                getHosts();
+//                                                getHosts();
                                                 if (PublicPun.modeState.equals("PERSO")) {
 //                                                    Intent intent = new Intent(getApplicationContext(), InitialSecuritySettingActivity.class);
 //                                                    startActivity(intent);
@@ -476,9 +505,6 @@ public class BleActivity extends BaseActivity {
         });
     }
 
-
-
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -495,23 +521,6 @@ public class BleActivity extends BaseActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
-    }
-
-    private boolean contains(String address) {
-        boolean flag = false;
-        if (myDeviceList != null) {
-            for (MyDevice d : myDeviceList) {
-                if (d != null) {
-                    String address1 = d.getAddress();
-                    if (!TextUtils.isEmpty(address1) && !TextUtils.isEmpty(address)) {
-                        if (address1.equals(address)) {
-                            flag = true;
-                        }
-                    }
-                }
-            }
-        }
-        return flag;
     }
 
 //    private void getRegInfo() {
@@ -593,66 +602,21 @@ public class BleActivity extends BaseActivity {
 //        return sb.toString();
 //    }
 
-    private BleScanCallback bleScanCallback = new BleScanCallback() {
-
-        @Override
-        public void onBleDeviceDiscovered(BluetoothDevice device, int rssi, byte[] scanRecord) {
-            String address = device.getAddress();
-//            Log.e(TAG, "BleScanCallback address:" + address);
-            if (!TextUtils.isEmpty(address)) {
-                if (!contains(address)) {
-                    imgSearch.setVisibility(View.INVISIBLE);
-                    txtSearch.setVisibility(View.INVISIBLE);
-                    txtSearchDetail.setVisibility(View.INVISIBLE);
-
-                    String name = device.getName();
-                    if (name == null || !name.startsWith("CoolWallet")) {
-                        return;
-                    }
-
-                    //列表中没有该蓝牙设备，添加设备到列表中
-                    MyDevice myDevice = new MyDevice();
-                    myDevice.setName(name == null ? "unknown device" : name);
-                    myDevice.setAddress(address == null ? "unknown address" : address);
-                    myDevice.setRssi(String.valueOf(rssi));
-                    myDeviceList.add(myDevice);
-                    adapter.refresh();
-                    try {
-                        listView.expandGroup(adapter.getGroupCount() - 1);
-                    } catch (Exception e) {
-
+    private boolean contains(String address) {
+        boolean flag = false;
+        if (myDeviceList != null) {
+            for (MyDevice d : myDeviceList) {
+                if (d != null) {
+                    String address1 = d.getAddress();
+                    if (!TextUtils.isEmpty(address1) && !TextUtils.isEmpty(address)) {
+                        if (address1.equals(address)) {
+                            flag = true;
+                        }
                     }
                 }
-            } else {
-                imgSearch.setVisibility(View.VISIBLE);
-                txtSearch.setVisibility(View.VISIBLE);
-                txtSearchDetail.setVisibility(View.VISIBLE);
             }
         }
-    };
-
-    private class BluetoothStateListener extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-
-            int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1);
-            LogUtil.i("BluetoothStateListener=" + String.valueOf(state));
-            switch (state) {
-                case BluetoothAdapter.STATE_TURNING_ON:
-                    break;
-                case BluetoothAdapter.STATE_ON:
-                    bleManager.startScanBle(bleScanCallback);
-                    isScanning = true;
-                    break;
-                case BluetoothAdapter.STATE_TURNING_OFF:
-                    break;
-                case BluetoothAdapter.STATE_OFF:
-                    bleManager.openBluetooth();
-                    bleManager.startScanBle(bleScanCallback);
-                    isScanning = true;
-                    break;
-            }
-        }
+        return flag;
     }
 
     @Override
@@ -705,7 +669,6 @@ public class BleActivity extends BaseActivity {
         }
     }
 
-
     /**
      * 發送斷線廣播訊息
      */
@@ -713,6 +676,30 @@ public class BleActivity extends BaseActivity {
         Intent SocketIntent = new Intent(BTConfig.DISCONN_NOTIFICATION);
         LogUtil.i("DISCONN_NOTIFICATION");
         mContext.sendBroadcast(SocketIntent);
+    }
+
+    private class BluetoothStateListener extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1);
+            LogUtil.i("BluetoothStateListener=" + String.valueOf(state));
+            switch (state) {
+                case BluetoothAdapter.STATE_TURNING_ON:
+                    break;
+                case BluetoothAdapter.STATE_ON:
+                    bleManager.startScanBle(bleScanCallback);
+                    isScanning = true;
+                    break;
+                case BluetoothAdapter.STATE_TURNING_OFF:
+                    break;
+                case BluetoothAdapter.STATE_OFF:
+                    bleManager.openBluetooth();
+                    bleManager.startScanBle(bleScanCallback);
+                    isScanning = true;
+                    break;
+            }
+        }
     }
 
 }

@@ -21,6 +21,7 @@ import com.snscity.egdwlib.utils.LogUtil;
  * Created by ShihYi on 2015/10/20.
  */
 public class InitialSecuritySettingActivity extends BaseActivity implements CompoundButton.OnCheckedChangeListener {
+    public static boolean[] settingOptions = new boolean[4];
     private Switch switchOtp;
     private Switch switchEnablePressButton;
     private Switch switchDog;
@@ -30,8 +31,6 @@ public class InitialSecuritySettingActivity extends BaseActivity implements Comp
     //    private AppPrefrence mAppPrefrence = null;
     private Context mContext = null;
     private CmdManager cmdManager;
-
-    public static boolean[] settingOptions = new boolean[4];
     private byte CwSecurityPolicyMaskOtp = 0x01;
     private byte CwSecurityPolicyMaskBtn = 0x02;
     private byte CwSecurityPolicyMaskWatchDog = 0x10;
@@ -88,7 +87,7 @@ public class InitialSecuritySettingActivity extends BaseActivity implements Comp
                                     public void onSuccess(int status, byte[] outputData) {
                                         if ((status + 65536) == 0x9000) {
                                             PublicPun.showNoticeDialog(mContext, "Security policy set", "");
-                                            Intent intent = new Intent(getApplicationContext(), InitialCreateWalletActivity.class);
+                                            Intent intent = new Intent(InitialSecuritySettingActivity.this, InitialCreateWalletActivity.class);
                                             startActivity(intent);
                                         }
                                     }
@@ -162,29 +161,13 @@ public class InitialSecuritySettingActivity extends BaseActivity implements Comp
                 public void onSuccess(int status, byte[] outputData) {
                     if ((status + 65536) == 0x9000) {
                         if (outputData != null && outputData.length > 0) {
-                            if ((outputData[0] & CwSecurityPolicyMaskOtp) >= 1) {
-                                settingOptions[0] = true;
-                            } else {
-                                settingOptions[0] = false;
-                            }
+                            settingOptions[0] = (outputData[0] & CwSecurityPolicyMaskOtp) >= 1;
 
-                            if ((outputData[0] & CwSecurityPolicyMaskBtn) >= 1) {
-                                settingOptions[1] = true;
-                            } else {
-                                settingOptions[1] = false;
-                            }
+                            settingOptions[1] = (outputData[0] & CwSecurityPolicyMaskBtn) >= 1;
 
-                            if ((outputData[0] & CwSecurityPolicyMaskAddress) >= 1) {
-                                settingOptions[2] = true;
-                            } else {
-                                settingOptions[2] = false;
-                            }
+                            settingOptions[2] = (outputData[0] & CwSecurityPolicyMaskAddress) >= 1;
 
-                            if ((outputData[0] & CwSecurityPolicyMaskWatchDog) >= 1) {
-                                settingOptions[3] = true;
-                            } else {
-                                settingOptions[3] = false;
-                            }
+                            settingOptions[3] = (outputData[0] & CwSecurityPolicyMaskWatchDog) >= 1;
 
                             LogUtil.i("安全設置:otp="+settingOptions[0]+";button_up="+settingOptions[1]+";address"+settingOptions[2]+";dog="+settingOptions[3]);
                             //初始化安全设置

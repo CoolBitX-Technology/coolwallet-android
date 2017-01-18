@@ -1,9 +1,7 @@
 package com.coolbitx.coolwallet.ui;
 
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -22,9 +20,9 @@ import com.snscity.egdwlib.utils.LogUtil;
  */
 public class InitialPairSuccessfulActivity extends BaseActivity implements View.OnClickListener {
 
+    Button btnPair;
     private Context context;
     private CmdManager cmdManager;
-    Button btnPair;
     private byte[] loginChallenge;//登录的特征值
     private byte hostId;//主机id
     private String currentUuid = "";
@@ -93,7 +91,7 @@ public class InitialPairSuccessfulActivity extends BaseActivity implements View.
         currentUuid = sharedPreferences.getString("uuid", "");
         currentOptCode = sharedPreferences.getString("optCode", "");
         LogUtil.i("uuid:" + currentUuid + ",optCode:" + currentOptCode);
-        mProgress = new ProgressDialog(InitialPairSuccessfulActivity.this);
+        mProgress = new ProgressDialog(InitialPairSuccessfulActivity.this, ProgressDialog.THEME_HOLO_DARK);
         mProgress.setCancelable(false);
         mProgress.setIndeterminate(true);
     }
@@ -132,8 +130,7 @@ public class InitialPairSuccessfulActivity extends BaseActivity implements View.
                                         PublicPun.user.setUuid(currentUuid);
                                         PublicPun.user.setOtpCode(currentOptCode);
                                         PublicPun.user.setEncKey(encKey);
-                                        PublicPun.
-                                                user.setMacKey(macKey);
+                                        PublicPun.user.setMacKey(macKey);
 
 //                        LogUtil.e(PublicPun.printBytes(PublicPun.BIND_SENCK) + "长度=" + PublicPun.BIND_SENCK.length);
 //                        LogUtil.e(PublicPun.printBytes(PublicPun.BIND_SMACK) + "长度=" + PublicPun.BIND_SMACK.length);
@@ -145,22 +142,6 @@ public class InitialPairSuccessfulActivity extends BaseActivity implements View.
                                             @Override
                                             public void onSuccess(int status, byte[] outputData) {
                                                 if ((status + 65536) == 0x9000) {//-28672//36864
-
-                                                    PublicPun.card.setMode(PublicPun.selectMode(PublicPun.byte2HexString(outputData[0])));
-                                                    PublicPun.card.setState(String.valueOf(outputData[1]));
-
-                                                    AlertDialog.Builder builder = new AlertDialog.Builder(InitialPairSuccessfulActivity.this);
-                                                    builder.setMessage("Get Mode status...")
-                                                            .setTitle(getString(R.string.connetc_status))
-                                                            .setPositiveButton(R.string.ok,
-                                                                    new DialogInterface.OnClickListener() {
-
-                                                                        @Override
-                                                                        public void onClick(DialogInterface dialog,
-                                                                                            int which) {
-                                                                            dialog.dismiss();
-                                                                        }
-                                                                    });
 
                                                     PublicPun.card.setMode(PublicPun.selectMode(PublicPun.byte2HexString(outputData[0])));
                                                     PublicPun.card.setState(String.valueOf(outputData[1]));

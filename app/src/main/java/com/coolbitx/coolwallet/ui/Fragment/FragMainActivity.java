@@ -28,6 +28,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.coolbitx.coolwallet.DataBase.DatabaseHelper;
+import com.coolbitx.coolwallet.DataBase.DbName;
 import com.coolbitx.coolwallet.R;
 import com.coolbitx.coolwallet.Service.BTConfig;
 import com.coolbitx.coolwallet.Service.BlockSocketHandler;
@@ -41,7 +42,6 @@ import com.coolbitx.coolwallet.entity.socketByAddress;
 import com.coolbitx.coolwallet.general.AppPrefrence;
 import com.coolbitx.coolwallet.general.BtcUrl;
 import com.coolbitx.coolwallet.general.CSVReadWrite;
-import com.coolbitx.coolwallet.general.DbName;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.coolbitx.coolwallet.general.RefreshBlockChainInfo;
 import com.coolbitx.coolwallet.httpRequest.CwBtcNetWork;
@@ -63,6 +63,8 @@ import com.snscity.egdwlib.cmd.CmdResultCallback;
 import com.snscity.egdwlib.utils.ByteUtil;
 import com.snscity.egdwlib.utils.LogUtil;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -76,27 +78,6 @@ import java.util.TimerTask;
 //        FragmentActivity
 public class FragMainActivity extends BaseActivity {//implements CompoundButton.OnCheckedChangeListener
 
-    private SwipeRefreshLayout swipeRefreshLayout;
-    private DrawerLayout mDrawerLayout;
-    private ActionBarDrawerToggle mActionBarDrawerToggle;
-    private LinearLayout mLlvDrawerContent;
-    private ListView mLsvDrawerMenu;
-    private List<HashMap<String, Object>> mHashMaps;
-    private HashMap<String, Object> map;
-    public static int ACCOUNT_CNT = 0;//這裡要改為抓qryWalletInfo的
-    int addrAuccess = 0;
-    private RadioButton rbReceive;
-    private RadioButton rbSend;
-    private RadioButton rbHome;
-    public static boolean refreshFlag = false;
-    private int getWallteName = 0x01;
-    private int getWalltePointer = 0x02;
-    Bundle mSavedInstanceState;
-    private List<Account> cwAccountList = new ArrayList<>();
-    private int getWallteStatus = 0x03;
-    private Address address;
-
-    private SimpleAdapter mAdapter;
     // 左側選單圖片
     private static final int[] MENU_ITEMS_PIC = new int[]
             {R.mipmap.host, R.mipmap.cwcard, R.mipmap.security, R.mipmap.settings, R.mipmap.ic_feedback_white_24dp, R.mipmap.logout, R.mipmap.ic_share_white_24dp};
@@ -104,27 +85,135 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
     private static final String[] MENU_ITEMS = new String[]{
             "Host devices", "CoolWallet card", "Security", "Settings", "Issue Feedback", "Logout", "Share address\n(beta)"
     };
+    public static int ACCOUNT_CNT = 0;//這裡要改為抓qryWalletInfo的
+    public static boolean refreshFlag = false;
     public static CmdManager cmdManager;
-    private CSVReadWrite mLoginCsv;
+    public static DecimalFormat BtcFormatter = new DecimalFormat("#.########");
+    public static BlockSocketHandler socketHandler;
+    public static IntentResult scanningResult;
     private static OnResumeFromBackCallBack mOnResumeFromBackCallBack = null;
+    private static Boolean isExit = false;
+    private static Boolean hasTask = false;
+    int addrAuccess = 0;
+    Bundle mSavedInstanceState;
     CwBtcNetWork cwBtcNetWork;
-    private ProgressDialog mProgress;
     Context mContext;
     StringBuilder sbAdd = new StringBuilder();
     int msgSetAccInfoExcute;
     boolean isFromRecovery;
     boolean isNewUser = false;
-    private String mParentActivityName = null;
     boolean isPointerSame;
     int needToRefreshCnt;
     int IntExtKey = 0;
     int IntIntKey = 0;
+    TabFragment tabFragment;
+    Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            Bundle data = msg.getData();
+            String identify = data.getString("identify");
+            String val = data.getString("result");
+            try {
+                if (val != null) {
+                    if (identify.equals(BtcUrl.URL_BLICKCHAIN_EXCHANGE_RATE)) {
+                        //使用 Float.floatToRawIntBits 先转成与 int 值相同位结构的 int 类型值，再根据 Big-Endian 或者是 Little-Endian 转成 byte 数组。
+//                        int currRate = Float.floatToIntBits(AppPrefrence.getCurrentRate(mContext));
+//                        float currRate = AppPrefrence.getCurrentRate(mContext)*100;
+                        // byte[] BigcurrData = ByteUtil.intToByteBig(currRate, 4);
+
+                        int currRate = (int) (AppPrefrence.getCurrentRate(mContext) * 100);
+                        byte[] BigcurrData = ByteBuffer.allocate(4).putInt(currRate).order(ByteOrder.BIG_ENDIAN).array();
+
+                        byte[] currData = new byte[5];
+                        currData[0] = 0;
+                        for (int i = 0; i < BigcurrData.length; i++) {
+                            currData[i + 1] = BigcurrData[i];
+                        }
+                        cmdManager.SetCurrencyRate(currData, new CmdResultCallback() {
+                                    @Override
+                                    public void onSuccess(int status, byte[] outputData) {
+                                        if ((status + 65536) == 0x9000) {
+                                            LogUtil.i("SetCurrencyRate !!!");
+                                        }
+                                    }
+                                }
+                        );
+
+                        //card is not keep the setting.
+                        if (AppPrefrence.getCurrency(mContext)) {
+                            cmdManager.turnCurrency(AppPrefrence.getCurrency(mContext), new CmdResultCallback() {
+                                @Override
+                                public void onSuccess(int status, byte[] outputData) {
+                                    if ((status + 65536) == 0x9000) {
+
+                                    }
+                                }
+                            });
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                Crashlytics.logException(e);
+            }
+        }
+    };
+    int issueCnt;
+    private SwipeRefreshLayout swipeRefreshLayout;
+    private DrawerLayout mDrawerLayout;
+    private ActionBarDrawerToggle mActionBarDrawerToggle;
+    private LinearLayout mLlvDrawerContent;
+    private ListView mLsvDrawerMenu;
+    private List<HashMap<String, Object>> mHashMaps;
+    private HashMap<String, Object> map;
+    private RadioButton rbReceive;
+    private RadioButton rbSend;
+    private RadioButton rbHome;
+    private int getWallteName = 0x01;
+    private int getWalltePointer = 0x02;
+    private List<Account> cwAccountList = new ArrayList<>();
+    private int getWallteStatus = 0x03;
+    private Address address;
+    private SimpleAdapter mAdapter;
+    private CSVReadWrite mLoginCsv;
+    private ProgressDialog mProgress;
+    private String mParentActivityName = null;
     private socketService mSocketService = null;
     private Timer mTimer;
-    public static DecimalFormat BtcFormatter = new DecimalFormat("#.########");
     private socketNotificationReceiver socketSNR;
-    public static BlockSocketHandler socketHandler;
+    private Handler socketMsgHandler = new Handler() {
 
+        @Override
+        public void handleMessage(Message msg) {
+            // TODO Auto-generated method stub
+
+            switch (msg.what) {
+                case BSConfig.HANDLER_SOCKET:
+                    socketByAddress socket = (socketByAddress) msg.obj;
+                    final int mAccount = DatabaseHelper.queryAccountByAddress(mContext, socket.getAddress());
+                    if (socket.getTx_type().equals("Received") && socket.getConfirmations() <= 1) {
+                        String socketTitle = "BitCoin Received";
+                        String socketMsg = "Account " + (mAccount + 1) + "\n"
+                                + "Address:" + "\n"
+                                + socket.getAddress() + "\n"
+                                + socket.getTx_type() + " Amount:" + TabFragment.BtcFormatter.format(socket.getBtc_amount()) + " BTC" + "\n"
+                                + "Confirmations: " + socket.getConfirmations();
+                        PublicPun.showNoticeDialog(mContext, socketTitle, socketMsg);
+                    }
+                    break;
+                case BSConfig.HANDLER_DISCONN:
+                    String title = "CoolWallet Disconnected";
+                    String noteMsg = PublicPun.card.getCardName() + " Disconnected";
+                    PublicPun.showNoticeDialogToFinish(mContext, title, noteMsg);
+                    break;
+            }
+            super.handleMessage(msg);
+        }
+    };
+
+    public static void registerOnResumeFromBackCallBack(OnResumeFromBackCallBack cb) {
+        mOnResumeFromBackCallBack = cb;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -138,11 +227,7 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
         if (intent != null) {
             mParentActivityName = intent.getStringExtra("Parent");
             LogUtil.i("getSimpleName=" + RecovWalletActivity.class.getSimpleName());
-            if (mParentActivityName.equals(RecovWalletActivity.class.getSimpleName())) {
-                isFromRecovery = true;
-            } else {
-                isFromRecovery = false;
-            }
+            isFromRecovery = mParentActivityName.equals(RecovWalletActivity.class.getSimpleName());
         }
 
         //LogUtil.e("class name = " + mParentActivityName);
@@ -197,63 +282,15 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
         }
     }
 
-    //建立廣播接收socket訊息
-    public class socketNotificationReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            // TODO Auto-generated method stub
-            String action = intent.getAction();
-            LogUtil.d("webSocket broadcast recv!");
-            if (action.equals(BTConfig.SOCKET_ADDRESS_MSG)) {
-                socketMsgHandler.sendMessage(socketMsgHandler.obtainMessage(BSConfig.HANDLER_SOCKET,
-                        intent.getExtras().getSerializable("socketAddrMsg")));
-            }else if (action.equals(BTConfig.DISCONN_NOTIFICATION)) {
-                socketMsgHandler.sendMessage(socketMsgHandler.obtainMessage(BSConfig.HANDLER_DISCONN));
-            }
-        }
-    }
-
-    private Handler socketMsgHandler = new Handler() {
-
-        @Override
-        public void handleMessage(Message msg) {
-            // TODO Auto-generated method stub
-
-            switch (msg.what) {
-                case BSConfig.HANDLER_SOCKET:
-                    socketByAddress socket = (socketByAddress) msg.obj;
-                    final int mAccount = DatabaseHelper.queryAccountByAddress(mContext, socket.getAddress());
-                    if (socket.getTx_type().equals("Received") && socket.getConfirmations() <= 1) {
-                        String socketTitle = "BitCoin Received";
-                        String socketMsg = "Account " + (mAccount + 1) + "\n"
-                                + "Address:" + "\n"
-                                + socket.getAddress() + "\n"
-                                + socket.getTx_type() + " Amount:" + TabFragment.BtcFormatter.format(socket.getBtc_amount()) + " BTC" + "\n"
-                                + "Confirmations: " + socket.getConfirmations();
-                        PublicPun.showNoticeDialog(mContext, socketTitle, socketMsg);
-                    }
-                    break;
-                case BSConfig.HANDLER_DISCONN:
-                    String title = "CoolWallet Disconnected";
-                    String noteMsg = PublicPun.card.getCardName() + " Disconnected";
-                    PublicPun.showNoticeDialogToFinish(mContext, title, noteMsg);
-                    break;
-            }
-            super.handleMessage(msg);
-        }
-    };
-
     private void initView() {
 
         swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.cw_refresh);
 
         //can't use mContext,but Activity.this.
-        mProgress = new ProgressDialog(FragMainActivity.this);
+        mProgress = new ProgressDialog(FragMainActivity.this, ProgressDialog.THEME_HOLO_DARK);
         mProgress.setCancelable(false);
         mProgress.setIndeterminate(true);
     }
-
-    TabFragment tabFragment;
 
     private void initTabFragment(Bundle savedInstanceState) {
         try {
@@ -302,9 +339,6 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
         setDrawerMenu();
 
     }
-
-    private static Boolean isExit = false;
-    private static Boolean hasTask = false;
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -643,42 +677,9 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
     private void getCurrRate() {
         DatabaseHelper.deleteTable(mContext, DbName.DATA_BASE_CURRENT);
         ContentValues cv = new ContentValues();
-        new Thread(new MyRunnable(mHandler, cv, BtcUrl.URL_BLICKCHAIN_EXCHANGE_RATE, 0, 60000* 30 , 0, cwBtcNetWork)).start();//1hr updated
-        new Thread(new MyRunnable(mHandler, cv, BtcUrl.RECOMMENDED_TRANSACTION_FEES, 0, 60000* 30 , 0, cwBtcNetWork)).start();//1hr updated
+        new Thread(new MyRunnable(mHandler, cv, BtcUrl.URL_BLICKCHAIN_EXCHANGE_RATE, 0, 60000 * 30, 0, cwBtcNetWork)).start();//1hr updated
+        new Thread(new MyRunnable(mHandler, cv, BtcUrl.RECOMMENDED_TRANSACTION_FEES, 0, 60000 * 30, 0, cwBtcNetWork)).start();//1hr updated
     }
-
-    Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            Bundle data = msg.getData();
-            String identify = data.getString("identify");
-            String val = data.getString("result");
-            try {
-                if (val != null) {
-//                    使用 Float.floatToRawIntBits 先转成与 int 值相同位结构的 int 类型值，再根据 Big-Endian 或者是 Little-Endian 转成 byte 数组。
-                    int currRate = Float.floatToIntBits(AppPrefrence.getCurrentRate(mContext));
-                    byte[] BigcurrData = ByteUtil.intToByteBig(currRate, 4);
-                    byte[] currData = new byte[5];
-                    currData[0] = 0;
-                    for (int i = 0; i < BigcurrData.length; i++) {
-                        currData[i + 1] = BigcurrData[i];
-                    }
-                    cmdManager.SetCurrencyRate(currData, new CmdResultCallback() {
-                                @Override
-                                public void onSuccess(int status, byte[] outputData) {
-                                    if ((status + 65536) == 0x9000) {
-                                        LogUtil.i("SetCurrencyRate !!!");
-                                    }
-                                }
-                            }
-                    );
-                }
-            } catch (Exception e) {
-                Crashlytics.logException(e);
-            }
-        }
-    };
 
     private void setDrawerMenu() {
         // 定義新宣告的兩個物件：選項清單的 ListView 以及 Drawer內容的 LinearLayou
@@ -703,8 +704,6 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
         );
         mLsvDrawerMenu.setAdapter(mAdapter);
     }
-
-    int issueCnt;
 
     private void selectMenuItem(int position) {
         // 將選單的子物件設定為被選擇的狀態
@@ -863,8 +862,6 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
         return mHashMaps;
     }
 
-    public static IntentResult scanningResult;
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
@@ -884,11 +881,6 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
         mOnResumeFromBackCallBack.onRefresh();
     }
 
-    public interface OnResumeFromBackCallBack {
-        void onRefresh();
-
-    }
-
     @Override
     protected void onResume() {
         LogUtil.e("onResume");
@@ -902,10 +894,6 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
         }
         registerReceiver(socketSNR, new IntentFilter(BTConfig.SOCKET_ADDRESS_MSG));
         registerReceiver(socketSNR, new IntentFilter(BTConfig.DISCONN_NOTIFICATION));
-    }
-
-    public static void registerOnResumeFromBackCallBack(OnResumeFromBackCallBack cb) {
-        mOnResumeFromBackCallBack = cb;
     }
 
     @Override
@@ -932,5 +920,26 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
 
     public String getAccountFrag(int id) {
         return "Account" + id;
+    }
+
+    public interface OnResumeFromBackCallBack {
+        void onRefresh();
+
+    }
+
+    //建立廣播接收socket訊息
+    public class socketNotificationReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // TODO Auto-generated method stub
+            String action = intent.getAction();
+            LogUtil.d("webSocket broadcast recv!");
+            if (action.equals(BTConfig.SOCKET_ADDRESS_MSG)) {
+                socketMsgHandler.sendMessage(socketMsgHandler.obtainMessage(BSConfig.HANDLER_SOCKET,
+                        intent.getExtras().getSerializable("socketAddrMsg")));
+            } else if (action.equals(BTConfig.DISCONN_NOTIFICATION)) {
+                socketMsgHandler.sendMessage(socketMsgHandler.obtainMessage(BSConfig.HANDLER_DISCONN));
+            }
+        }
     }
 }

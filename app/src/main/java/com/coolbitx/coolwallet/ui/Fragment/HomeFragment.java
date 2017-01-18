@@ -22,8 +22,8 @@ import com.coolbitx.coolwallet.entity.dbAddress;
 import com.coolbitx.coolwallet.general.AppPrefrence;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.coolbitx.coolwallet.general.RefreshBlockChainInfo;
-import com.coolbitx.coolwallet.ui.TxsActivity;
 import com.coolbitx.coolwallet.httpRequest.CwBtcNetWork;
+import com.coolbitx.coolwallet.ui.TxsActivity;
 import com.snscity.egdwlib.CmdManager;
 import com.snscity.egdwlib.cmd.CmdResultCallback;
 import com.snscity.egdwlib.utils.ByteUtil;
@@ -36,27 +36,27 @@ import java.util.ArrayList;
  */
 public class HomeFragment extends BaseFragment implements AdapterView.OnItemClickListener {
 
-    private String value = "";
-    private String title = "";
     private static final String DATA_NAME = "name";
-    //    private Context mContext;
-    TextView txtTitle;
-    TextView txtSubTiltle;
-    TextView txtSubTitl_country;
-    ListView lsvInfo;
-    private SwipeRefreshLayout swipeRefreshLayout;
-    private CmdManager cmdManager;
-    CwBtcNetWork cwBtcNetWork;
-    private ProgressDialog mProgress;
+    private static final String DATA_ID = "id";
     //modify by kunming
     //move the json function to TabFragment
 //    public static ArrayList<CwBtcTxs> lisCwBtcTxs = new ArrayList<CwBtcTxs>();
 //    public static ArrayList<ExchangeRate> lisExchangeRate = new ArrayList<ExchangeRate>();
 //    public static ArrayList<ParsingAddress> lisCwBtcAdd = new ArrayList<ParsingAddress>();
     public static double CURRENT_RATE = 1;
+    //    private Context mContext;
+    TextView txtTitle;
+    TextView txtSubTiltle;
+    TextView txtSubTitl_country;
+    ListView lsvInfo;
+    CwBtcNetWork cwBtcNetWork;
+    private String value = "";
+    private String title = "";
+    private SwipeRefreshLayout swipeRefreshLayout;
+    private CmdManager cmdManager;
+    private ProgressDialog mProgress;
     //modify
     private int id;
-    private static final String DATA_ID = "id";
 
     public static HomeFragment newInstance(String title, int indicatorColor, int dividerColor, int iconResId, int accountId) {
         LogUtil.i("FragAccount" + accountId + " - newInstance accountId :" + accountId);
@@ -113,7 +113,7 @@ public class HomeFragment extends BaseFragment implements AdapterView.OnItemClic
         lsvInfo.setOnItemClickListener(this);
         cwBtcNetWork = new CwBtcNetWork();
         //can't use mContext,but Activity.this.
-        mProgress = new ProgressDialog(getActivity());
+        mProgress = new ProgressDialog(getActivity(), ProgressDialog.THEME_HOLO_DARK);
         mProgress.setCancelable(false);
         mProgress.setIndeterminate(true);
 //        refresh();

@@ -1,6 +1,7 @@
 # Built application files
 *.apk
 *.ap_
+*.iml
 
 # Files for the Dalvik VM
 *.dex
@@ -14,7 +15,8 @@ gen/
 
 # Gradle files
 .gradle/
-build/
+/build/
+.externalNativeBuild
 
 # Local configuration file (sdk path, etc)
 local.properties
@@ -29,4 +31,4 @@ proguard/
 .navigation/
 
 # Android Studio captures folder
-captures/
+/captures/

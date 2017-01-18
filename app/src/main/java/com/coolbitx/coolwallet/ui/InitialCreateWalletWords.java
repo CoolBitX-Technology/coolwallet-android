@@ -46,7 +46,7 @@ public class InitialCreateWalletWords extends AppCompatActivity implements View.
         initToolbar();
         context = this;
         cmdManager = new CmdManager();
-        mProgress = new ProgressDialog(InitialCreateWalletWords.this);
+        mProgress = new ProgressDialog(InitialCreateWalletWords.this, ProgressDialog.THEME_HOLO_DARK);
         mProgress.setCancelable(false);
         mProgress.setIndeterminate(true);
 
@@ -99,6 +99,7 @@ public class InitialCreateWalletWords extends AppCompatActivity implements View.
                         });
                         final String name = "";
                         //處理程式寫在此
+                        LogUtil.d("hdwSeed=" + hdwSeed);
                         cmdManager.hdwInitWallet(name, hdwSeed, PublicPun.user.getEncKey(), PublicPun.user.getMacKey(), new CmdResultCallback() {
                             @Override
                             public void onSuccess(int status, byte[] outputData) {
@@ -112,7 +113,7 @@ public class InitialCreateWalletWords extends AppCompatActivity implements View.
 
                                 } else {
                                     mProgress.dismiss();
-                                    PublicPun.showNoticeDialogToFinish(context, "Erro Message", "Error:" + Integer.toHexString(status));
+                                    PublicPun.showNoticeDialogToFinish(context, "Error Message", "Error:" + Integer.toHexString(status));
                                 }
                             }
                         });

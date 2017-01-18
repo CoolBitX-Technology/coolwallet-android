@@ -41,16 +41,21 @@ import java.util.TimerTask;
  */
 public class TabFragment extends Fragment {
 
+    public static ArrayList<CwBtcTxs> lisCwBtcTxs = new ArrayList<CwBtcTxs>();
+    //    public static ArrayList<ExchangeRate> lisExchangeRate = new ArrayList<ExchangeRate>();
+    public static double ExchangeRate = 0.00;
+    public static ArrayList<dbAddress> lisCwBtcAdd = new ArrayList<dbAddress>();
+    public static DecimalFormat currentFormatter = new DecimalFormat("#.##");
+    public static DecimalFormat BtcFormatter = new DecimalFormat("#.########");
+    public final int HOME_PAGE = 0;
+    public final int SEND_PAGE = 1;
+    public final int RECEIVE_PAGE = 2;
     private SlidingTabLayout tabs;
     private ViewPager pager;
     private TabFragmentPagerAdapter adapter;
     private LinkedList<BaseFragment> fragments = null;
     private int indicatorColor = Color.BLACK;
     private int dividerColor = Color.TRANSPARENT;
-    public static ArrayList<CwBtcTxs> lisCwBtcTxs = new ArrayList<CwBtcTxs>();
-    //    public static ArrayList<ExchangeRate> lisExchangeRate = new ArrayList<ExchangeRate>();
-    public static double ExchangeRate = 0.00;
-    public static ArrayList<dbAddress> lisCwBtcAdd = new ArrayList<dbAddress>();
     private int id = 0;
     private FragMainActivity.OnResumeFromBackCallBack mOnResumeFromBackCallBack = null;
     private MyPageChangeListener myPageChangeListener = null;
@@ -61,12 +66,7 @@ public class TabFragment extends Fragment {
     private MyCheckedChanged myCheckedChanged = null;
     private int mPageType = 0;
     private Boolean isAddFrag = false;
-    public final int HOME_PAGE = 0;
-    public final int SEND_PAGE = 1;
-    public final int RECEIVE_PAGE = 2;
     private ProgressDialog mProgress;
-    public static DecimalFormat currentFormatter = new DecimalFormat("#.##");
-    public static DecimalFormat BtcFormatter = new DecimalFormat("#.########");
     private Timer mTimer;
     public static Fragment newInstance() {
         TabFragment f = new TabFragment();
@@ -83,10 +83,9 @@ public class TabFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         //adapter
         //fragments = getFragments();
-        mProgress = new ProgressDialog(getActivity());
+        mProgress = new ProgressDialog(getActivity(), ProgressDialog.THEME_HOLO_DARK);
         mProgress.setCancelable(false);
         mProgress.setIndeterminate(true);
-
 
         isAddFrag = false;
         mPageType = HOME_PAGE;
@@ -273,93 +272,6 @@ public class TabFragment extends Fragment {
 
     }
 
-    class MyPageChangeListener implements ViewPager.OnPageChangeListener {
-
-        @Override
-        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
-        }
-
-        @Override
-        public void onPageSelected(int position) {
-            //如果所點的位置是最後一個時，且又是＋。則
-            // 1.New Account
-            // 2.進行增加list的動作
-
-            final int accountID = position;
-            LogUtil.i("切換標籤account=" + accountID);
-            if (fragments.get(position).getTitle().equals("+")) {
-                mProgress.setMessage("Creating Account...");
-                mProgress.show();
-                CreateNewAccount(accountID);
-                addFragmentToList(mPageType);
-            } else {
-                //當切換位置
-                if (!PublicPun.accountRefresh[accountID]) {
-                    mProgress.setMessage("Synchronizing data...");
-                    mProgress.show();
-                    mTimer = new Timer();
-                    mTimer.schedule(new TimerTask() {
-                        @Override
-                        public void run() {
-                            getActivity().runOnUiThread(new Runnable(){
-                                @Override
-                                public void run() {
-                                    if (mProgress.isShowing()) {
-                                        mProgress.dismiss();
-                                    }
-                                }
-                            });
-                            mTimer.cancel();
-                        }
-                    }, 15000);////15s沒成功就自動cacel
-                    final RefreshBlockChainInfo refreshBlockChainInfo = new RefreshBlockChainInfo(getActivity(), accountID);
-                    refreshBlockChainInfo.FunQueryAccountInfo(new RefreshCallback() {
-                        @Override
-                        public void success() {
-                            refreshBlockChainInfo.callTxsRunnable(new RefreshCallback() {
-                                @Override
-                                public void success() {
-                                    mProgress.dismiss();
-                                    FunhdwSetAccInfo(accountID);
-                                }
-                                @Override
-                                public void fail(String msg) {
-                                    PublicPun.showNoticeDialog(getActivity(), "Unstable internet connection", msg);
-                                    mProgress.dismiss();
-                                }
-                            });
-                        }
-                        @Override
-                        public void fail(String msg) {
-                            PublicPun.showNoticeDialog(getActivity(), "Error Message", msg);
-                            mProgress.dismiss();
-                        }
-                    });
-                    PublicPun.accountRefresh[accountID] = true;
-                }
-                //1.進行refresh
-                AccountRefresh(accountID);
-                //2.change card display
-                byte ByteAccId = (byte) accountID;
-                FragMainActivity.cmdManager.McuSetAccountState(ByteAccId, new CmdResultCallback() {
-                            @Override
-                            public void onSuccess(int status, byte[] outputData) {
-                                if ((status + 65536) == 0x9000) {
-                                    LogUtil.i("McuSetAccountState to: account" + accountID);
-                                }
-                            }
-                        }
-                );
-            }
-        }
-
-        @Override
-        public void onPageScrollStateChanged(int state) {
-        }
-    }
-
-
     private void FunhdwSetAccInfo(final int account) {
 
         LogUtil.e("這是Main FunhdwSetAccInfo=" + account);
@@ -474,63 +386,6 @@ public class TabFragment extends Fragment {
                         }
                     }
             );
-        }
-    }
-
-    class MyCheckedChanged implements RadioButton.OnCheckedChangeListener {
-        @Override
-        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-            try {
-
-                if (!isAddFrag) {
-                    if (buttonView == rbSend) {
-                        if (isChecked) {
-                            rbSend.setBackgroundResource(R.mipmap.send);
-                            rbHome.setBackgroundResource(R.mipmap.home_grey);
-                            rbReceive.setBackgroundResource(R.mipmap.receive_grey);
-
-                            mPageType = SEND_PAGE;
-                        }
-                    } else if (buttonView == rbHome) {
-                        if (isChecked) {
-
-                            rbHome.setBackgroundResource(R.mipmap.home);
-                            rbSend.setBackgroundResource(R.mipmap.send_grey);
-                            rbReceive.setBackgroundResource(R.mipmap.receive_grey);
-                            mPageType = HOME_PAGE;
-                        }
-                    } else if (buttonView == rbReceive) {
-                        if (isChecked) {
-                            rbHome.setBackgroundResource(R.mipmap.home_grey);
-                            rbSend.setBackgroundResource(R.mipmap.send_grey);
-                            rbReceive.setBackgroundResource(R.mipmap.receive);
-                            mPageType = RECEIVE_PAGE;
-
-                        }
-                    }
-
-                    if (isChecked) {
-                        mPageCurItem = pager.getCurrentItem();
-                        getFragments(mPageType);
-                        tabs.setOnPageChangeListener(null);
-                        adapter = new TabFragmentPagerAdapter(getFragmentManager(), fragments);
-                        pager.setAdapter(adapter);
-                        tabs.setViewPager(pager);
-                        pager.setCurrentItem(mPageCurItem);
-                        tabs.setOnPageChangeListener(myPageChangeListener);
-                        tabs.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                AccountRefresh(pager.getCurrentItem());
-                            }
-                        });
-                    }
-                }
-
-            } catch (Exception e) {
-                LogUtil.i("切換頁面錯誤=" + e.getMessage());
-                e.printStackTrace();
-            }
         }
     }
 
@@ -667,6 +522,151 @@ public class TabFragment extends Fragment {
                     lisCwBtcAdd = DatabaseHelper.queryAddress(getActivity(), position, 0);// 0 = display ext addr only
                     ((ReceiveFragment) fragments.get(position)).refresh(false);
                 }
+            }
+        }
+    }
+
+    class MyPageChangeListener implements ViewPager.OnPageChangeListener {
+
+        @Override
+        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+        }
+
+        @Override
+        public void onPageSelected(int position) {
+            //如果所點的位置是最後一個時，且又是＋。則
+            // 1.New Account
+            // 2.進行增加list的動作
+
+            final int accountID = position;
+            LogUtil.i("切換標籤account=" + accountID);
+            if (fragments.get(position).getTitle().equals("+")) {
+                mProgress.setMessage("Creating Account...");
+                mProgress.show();
+                CreateNewAccount(accountID);
+                addFragmentToList(mPageType);
+            } else {
+                //當切換位置
+                if (!PublicPun.accountRefresh[accountID]) {
+                    mProgress.setMessage("Synchronizing data...");
+                    mProgress.show();
+                    mTimer = new Timer();
+                    mTimer.schedule(new TimerTask() {
+                        @Override
+                        public void run() {
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (mProgress.isShowing()) {
+                                        mProgress.dismiss();
+                                    }
+                                }
+                            });
+                            mTimer.cancel();
+                        }
+                    }, 15000);////15s沒成功就自動cacel
+                    final RefreshBlockChainInfo refreshBlockChainInfo = new RefreshBlockChainInfo(getActivity(), accountID);
+                    refreshBlockChainInfo.FunQueryAccountInfo(new RefreshCallback() {
+                        @Override
+                        public void success() {
+                            refreshBlockChainInfo.callTxsRunnable(new RefreshCallback() {
+                                @Override
+                                public void success() {
+                                    mProgress.dismiss();
+                                    FunhdwSetAccInfo(accountID);
+                                }
+
+                                @Override
+                                public void fail(String msg) {
+                                    PublicPun.showNoticeDialog(getActivity(), "Unstable internet connection", msg);
+                                    mProgress.dismiss();
+                                }
+                            });
+                        }
+
+                        @Override
+                        public void fail(String msg) {
+                            PublicPun.showNoticeDialog(getActivity(), "Error Message", msg);
+                            mProgress.dismiss();
+                        }
+                    });
+                    PublicPun.accountRefresh[accountID] = true;
+                }
+                //1.進行refresh
+                AccountRefresh(accountID);
+                //2.change card display
+                byte ByteAccId = (byte) accountID;
+                FragMainActivity.cmdManager.McuSetAccountState(ByteAccId, new CmdResultCallback() {
+                            @Override
+                            public void onSuccess(int status, byte[] outputData) {
+                                if ((status + 65536) == 0x9000) {
+                                    LogUtil.i("McuSetAccountState to: account" + accountID);
+                                }
+                            }
+                        }
+                );
+            }
+        }
+
+        @Override
+        public void onPageScrollStateChanged(int state) {
+        }
+    }
+
+    class MyCheckedChanged implements RadioButton.OnCheckedChangeListener {
+        @Override
+        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+            try {
+
+                if (!isAddFrag) {
+                    if (buttonView == rbSend) {
+                        if (isChecked) {
+                            rbSend.setBackgroundResource(R.mipmap.send);
+                            rbHome.setBackgroundResource(R.mipmap.home_grey);
+                            rbReceive.setBackgroundResource(R.mipmap.receive_grey);
+
+                            mPageType = SEND_PAGE;
+                        }
+                    } else if (buttonView == rbHome) {
+                        if (isChecked) {
+
+                            rbHome.setBackgroundResource(R.mipmap.home);
+                            rbSend.setBackgroundResource(R.mipmap.send_grey);
+                            rbReceive.setBackgroundResource(R.mipmap.receive_grey);
+                            mPageType = HOME_PAGE;
+                        }
+                    } else if (buttonView == rbReceive) {
+                        if (isChecked) {
+                            rbHome.setBackgroundResource(R.mipmap.home_grey);
+                            rbSend.setBackgroundResource(R.mipmap.send_grey);
+                            rbReceive.setBackgroundResource(R.mipmap.receive);
+                            mPageType = RECEIVE_PAGE;
+
+                        }
+                    }
+
+                    if (isChecked) {
+                        mPageCurItem = pager.getCurrentItem();
+                        getFragments(mPageType);
+                        tabs.setOnPageChangeListener(null);
+                        adapter = new TabFragmentPagerAdapter(getFragmentManager(), fragments);
+                        pager.setAdapter(adapter);
+                        tabs.setViewPager(pager);
+                        pager.setCurrentItem(mPageCurItem);
+                        tabs.setOnPageChangeListener(myPageChangeListener);
+                        tabs.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                AccountRefresh(pager.getCurrentItem());
+                            }
+                        });
+                    }
+                }
+
+            } catch (Exception e) {
+                LogUtil.i("切換頁面錯誤=" + e.getMessage());
+                e.printStackTrace();
             }
         }
     }

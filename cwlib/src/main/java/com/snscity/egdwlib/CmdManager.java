@@ -24,19 +24,6 @@ public class CmdManager {
 
     private final static String CHARSETNAME = "UTF-8";
     private final static String TAG = "coolwallet";
-    private CmdProcessor cmdProcessor;
-
-    private byte CwSecurityPolicyMaskOtp = 0x01;
-    private byte CwSecurityPolicyMaskBtn = 0x02;
-    private byte CwSecurityPolicyMaskWatchDog = 0x10;
-    private byte CwSecurityPolicyMaskAddress = 0x20;
-
-    private final byte CwHdwAccountInfoName = 0x00;
-    private final byte CwHdwAccountInfoBalance = 0x01;
-    private final byte CwHdwAccountInfoExtKeyPtr = 0x02;
-    private final byte CwHdwAccountInfoIntKeyPtr = 0x03;
-    private final byte CwHdwAccountInfoBlockAmount = 0x04;
-
     //******************************************************
     //Default Init data (set by init tool)
     //******************************************************
@@ -48,7 +35,6 @@ public class CmdManager {
             0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x3a, 0x3b, 0x3c, 0x3d, 0x3e, 0x3f};
     private final static byte[] TEST_XCHSSMK = {0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4a, 0x4b, 0x4c, 0x4d, 0x4e, 0x4f,
             0x50, 0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58, 0x59, 0x5a, 0x5b, 0x5c, 0x5d, 0x5e, 0x5f};
-
     //******************************************************
     //Default VMK
     //******************************************************
@@ -118,6 +104,16 @@ public class CmdManager {
             0x18, (byte) 0xF3, (byte) 0xFB, 0x2D, 0x6D, 0x06, (byte) 0xA6, 0x21, (byte) 0xD3, (byte) 0xAA, 0x54, (byte) 0xE1,
             0x54, (byte) 0x89, (byte) 0xB6, 0x66, (byte) 0xE8, 0x01, (byte) 0xD4, 0x1C, (byte) 0xB7, 0x62, 0x65, (byte) 0xE7,
             (byte) 0xFA, 0x49, (byte) 0xBE, 0x51, 0x7E, 0x17, 0x64, (byte) 0xD0};
+    private final byte CwHdwAccountInfoName = 0x00;
+    private final byte CwHdwAccountInfoBalance = 0x01;
+    private final byte CwHdwAccountInfoExtKeyPtr = 0x02;
+    private final byte CwHdwAccountInfoIntKeyPtr = 0x03;
+    private final byte CwHdwAccountInfoBlockAmount = 0x04;
+    private CmdProcessor cmdProcessor;
+    private byte CwSecurityPolicyMaskOtp = 0x01;
+    private byte CwSecurityPolicyMaskBtn = 0x02;
+    private byte CwSecurityPolicyMaskWatchDog = 0x10;
+    private byte CwSecurityPolicyMaskAddress = 0x20;
 
     public CmdManager() {
         cmdProcessor = CmdProcessor.getInstance();
@@ -1067,78 +1063,6 @@ public class CmdManager {
         cmdProcessor.addCmd(cmdPacket);
     }
 
-    /**
-     * 拿到uuid和描述，通过sha256计算hash值，把他们合并到一个byte[]中返回
-     *
-     * @param uuid
-     * @param description
-     * @return
-     */
-    public void bindRegInit(String uuid, String description, CmdResultCallback cmdResultCallback) {
-        byte[] uuidByte = transformBytes(uuid.getBytes(Charset.forName(CHARSETNAME)), 32);
-        byte[] descByte = transformBytes(description.getBytes(Charset.forName(CHARSETNAME)), 64);
-
-        byte[] uuidBytes = uuid.getBytes(Charset.forName(CHARSETNAME));
-        byte[] descriptionBytes = description.getBytes(Charset.forName(CHARSETNAME));
-
-        byte[] info = new byte[96];
-
-        int length = info.length;
-        for (int i = 0; i < length; i++) {
-            info[i] = 0x00;
-        }
-
-        int count = 0;
-        for (byte b : uuidBytes) {
-            info[count] = b;
-            count++;
-        }
-
-        for (byte b : descriptionBytes) {
-            info[count] = b;
-            count++;
-        }
-
-        byte[] hashByte = encryptSHA256(info);
-
-        byte[] inputData = mergeBytes(uuidByte, descByte, hashByte);
-
-        CmdPacket cmdPacket = new CmdPacket.Builder()
-                .setCla(CmdCla.BIND_REG_INIT)
-                .setIns(CmdIns.BIND_REG_INIT)
-                .setPram1(0x00)//首次
-                .setInputData(inputData)
-                .build();
-        cmdPacket.setCmdResultListener(cmdResultCallback);
-        cmdProcessor.addCmd(cmdPacket);
-    }
-
-//    private byte [] mergeBytes(byte [] b1, byte [] b2, byte [] b3){
-//        byte [] bytes = new byte [128];
-//
-//        int length1 = b1.length;
-//        for (int i = 0; i < length1; i++){
-//            bytes[i] = b1[i];
-//        }
-//
-//        int length2 = b2.length;
-//        for (int i = 0; i < length2; i++){
-//            bytes[i + length1] = b2[i];
-//        }
-//
-//        int length3 = b3.length;
-//        for (int i = 0; i < length3; i++){
-//            bytes[i + length1 + length2] = b3[i];
-//        }
-//
-//        return bytes;
-//    }
-//
-//    public void cwCmdHdwPrepTrxSign(byte [] macKey, int inputId, int keyChainId,
-//                                    int accountId, int keyId,
-//                                    long amount, byte [] signatureMaterial,
-//                                    CmdResultCallback cmdResultCallback){
-
     public void cwCmdHdwPrepTrxSign(byte[] macKey, int inputId, int keyChainId,
                                     int accountId, int keyId,
                                     long amount, byte[] signatureMaterial,
@@ -1311,6 +1235,13 @@ public class CmdManager {
         cmdProcessor.addCmd(cmdPacket);
     }
 
+    /**
+     * 拿到uuid和描述，通过sha256计算hash值，把他们合并到一个byte[]中返回
+     *
+     * @param uuid
+     * @param description
+     * @return
+     */
     public void bindRegInit(String uuid, String description, int first, CmdResultCallback cmdResultCallback) {
         LogUtil.i("RegInit:" + first);
 //        first=0x00;
@@ -1347,6 +1278,45 @@ public class CmdManager {
                 .setCla(CmdCla.BIND_REG_INIT)
                 .setIns(CmdIns.BIND_REG_INIT)
                 .setPram1(first)//0x01首次 其余0x00
+                .setInputData(inputData)
+                .build();
+        cmdPacket.setCmdResultListener(cmdResultCallback);
+        cmdProcessor.addCmd(cmdPacket);
+    }
+
+    public void bindRegInit(String uuid, String description, CmdResultCallback cmdResultCallback) {
+        byte[] uuidByte = transformBytes(uuid.getBytes(Charset.forName(CHARSETNAME)), 32);
+        byte[] descByte = transformBytes(description.getBytes(Charset.forName(CHARSETNAME)), 64);
+
+        byte[] uuidBytes = uuid.getBytes(Charset.forName(CHARSETNAME));
+        byte[] descriptionBytes = description.getBytes(Charset.forName(CHARSETNAME));
+
+        byte[] info = new byte[96];
+
+        int length = info.length;
+        for (int i = 0; i < length; i++) {
+            info[i] = 0x00;
+        }
+
+        int count = 0;
+        for (byte b : uuidBytes) {
+            info[count] = b;
+            count++;
+        }
+
+        for (byte b : descriptionBytes) {
+            info[count] = b;
+            count++;
+        }
+
+        byte[] hashByte = encryptSHA256(info);
+
+        byte[] inputData = mergeBytes(uuidByte, descByte, hashByte);
+
+        CmdPacket cmdPacket = new CmdPacket.Builder()
+                .setCla(CmdCla.BIND_REG_INIT)
+                .setIns(CmdIns.BIND_REG_INIT)
+                .setPram1(0x00)//首次
                 .setInputData(inputData)
                 .build();
         cmdPacket.setCmdResultListener(cmdResultCallback);

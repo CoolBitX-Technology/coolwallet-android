@@ -45,11 +45,84 @@ import java.util.ArrayList;
  * for disconn 廣播
  */
 public class BaseActivity extends AppCompatActivity {
-    Context mContext;
     public static disconnNotificationReceiver brocastNR = null;
     public static CmdManager cmdManager;
     public boolean isShowDisconnAlert = true;
+    Context mContext;
     LocalBroadcastManager mLocalBroadcastManager = null;
+    //for Exchange test.
+    BroadcastReceiver ExchangeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String message = intent.getStringExtra("ExchangeMessage");
+            String data = intent.getStringExtra("ExchangeData");
+            if (message != null) {
+                //Receive message from Exchange site
+                LogUtil.d("ExchangeMessage=" + message);
+
+                if (data.contains("matchOrder")) {
+                    PublicPun.showNoticeDialog(mContext, "Exchange Message",
+                            "Congrats!! Your sell order has a match. Please connect with CoolWallet CW000522 to complete the trade.");
+                } else {
+                    PublicPun.showNoticeDialog(mContext, "Exchange Message",
+                            "You placed a sell order on CoolBitX. Please connect with CoolWallet <cwid>, look at the OTP on card, type it in the app to confirm the order.");
+                }
+                //complete order 尚未完成
+            }
+        }
+    };
+    private Handler brocastMsgHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            // TODO Auto-generated method stub
+            switch (msg.what) {
+                case BSConfig.HANDLER_SOCKET:
+                    final socketByAddress socket = (socketByAddress) msg.obj;
+                    final int mAccount = DatabaseHelper.queryAccountByAddress(mContext, socket.getAddress());
+                    if (socket.getTx_type().equals("Received") && socket.getConfirmations() == 1) {//
+                        // do your work right here
+                        String socketTitle = "BitCoin Received";
+                        String socketMsg = "Account " + (mAccount + 1) + "\n"
+                                + "Address:" + "\n"
+                                + socket.getAddress() + "\n"
+                                + socket.getTx_type() + " Amount:" + TabFragment.BtcFormatter.format(socket.getBtc_amount()) + " BTC" + "\n"
+                                + "Confirmations: " + socket.getConfirmations();
+//                        PublicPun.showNoticeDialog(mContext, socketTitle, socketMsg);
+                        systemNotificationBTC(socket, mAccount);
+                    }
+
+                    //refresh the transaction data when balance updated.
+                    if (mAccount >= 0) {
+                        RefreshBlockChainInfo refreshBlockChainInfo = new RefreshBlockChainInfo(mContext, mAccount);
+                        refreshBlockChainInfo.callTxsRunnable(new RefreshCallback() {
+                            @Override
+                            public void success() {
+                                RefreshSetAccInfo(mAccount);
+                            }
+
+                            @Override
+                            public void fail(String msg) {
+                                Toast.makeText(mContext, "Unstable internet connection", Toast.LENGTH_LONG);
+                            }
+                        });
+                    }
+                    break;
+                case BSConfig.HANDLER_DISCONN:
+                    LogUtil.i("BaseActivity HANDLER_DISCONN");
+                    String title = "CoolWallet Disconnected";
+
+                    String noteMsg;
+                    if (PublicPun.card.getCardName() == null) {
+                        noteMsg = "CoolWallet Disconnected";
+                    } else {
+                        noteMsg = PublicPun.card.getCardName() + " Disconnected";
+                    }
+                    systemNotification(title, noteMsg);
+                    break;
+            }
+            super.handleMessage(msg);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +130,12 @@ public class BaseActivity extends AppCompatActivity {
 
         mContext = this;
         LogUtil.d("BaseActivity onCreate");
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
         //註冊監聽
         if (brocastNR == null) {
             brocastNR = new disconnNotificationReceiver();
@@ -75,13 +154,6 @@ public class BaseActivity extends AppCompatActivity {
             cmdManager = new CmdManager();
         }
     }
-
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-    }
-
 
     @Override
     protected void onPause() {
@@ -262,100 +334,6 @@ public class BaseActivity extends AppCompatActivity {
         });
     }
 
-    //建立廣播接收socket訊息
-    public class disconnNotificationReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            // TODO Auto-generated method stub
-            String action = intent.getAction();
-
-            if (action.equals(BTConfig.SOCKET_ADDRESS_MSG)) {
-                LogUtil.i("webSocket BaseActivity broadcast recv!");
-                brocastMsgHandler.sendMessage(brocastMsgHandler.obtainMessage(BSConfig.HANDLER_SOCKET,
-                        intent.getExtras().getSerializable("socketAddrMsg")));
-            } else if (action.equals(BTConfig.DISCONN_NOTIFICATION)) {
-                if (isShowDisconnAlert) {
-                    brocastMsgHandler.sendMessage(brocastMsgHandler.obtainMessage(BSConfig.HANDLER_DISCONN));
-                }
-            }
-        }
-    }
-
-    private Handler brocastMsgHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            // TODO Auto-generated method stub
-            switch (msg.what) {
-                case BSConfig.HANDLER_SOCKET:
-                    final socketByAddress socket = (socketByAddress) msg.obj;
-                    final int mAccount = DatabaseHelper.queryAccountByAddress(mContext, socket.getAddress());
-                    if (socket.getTx_type().equals("Received") && socket.getConfirmations() == 1) {//
-                        // do your work right here
-                        String socketTitle = "BitCoin Received";
-                        String socketMsg = "Account " + (mAccount + 1) + "\n"
-                                + "Address:" + "\n"
-                                + socket.getAddress() + "\n"
-                                + socket.getTx_type() + " Amount:" + TabFragment.BtcFormatter.format(socket.getBtc_amount()) + " BTC" + "\n"
-                                + "Confirmations: " + socket.getConfirmations();
-//                        PublicPun.showNoticeDialog(mContext, socketTitle, socketMsg);
-                        systemNotificationBTC(socket, mAccount);
-                    }
-
-                    //refresh the transaction data when balance updated.
-                    if (mAccount >= 0) {
-                        RefreshBlockChainInfo refreshBlockChainInfo = new RefreshBlockChainInfo(mContext, mAccount);
-                        refreshBlockChainInfo.callTxsRunnable(new RefreshCallback() {
-                            @Override
-                            public void success() {
-                                RefreshSetAccInfo(mAccount);
-                            }
-
-                            @Override
-                            public void fail(String msg) {
-                                Toast.makeText(mContext, "Unstable internet connection", Toast.LENGTH_LONG);
-                            }
-                        });
-                    }
-                    break;
-                case BSConfig.HANDLER_DISCONN:
-                    LogUtil.i("BaseActivity HANDLER_DISCONN");
-                    String title = "CoolWallet Disconnected";
-
-                    String noteMsg;
-                    if (PublicPun.card.getCardName() == null) {
-                        noteMsg = "CoolWallet Disconnected";
-                    } else {
-                        noteMsg = PublicPun.card.getCardName() + " Disconnected";
-                    }
-                    systemNotification(title, noteMsg);
-                    break;
-            }
-            super.handleMessage(msg);
-        }
-    };
-
-    //for Exchange test.
-    BroadcastReceiver ExchangeReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String message = intent.getStringExtra("ExchangeMessage");
-            String data = intent.getStringExtra("ExchangeData");
-            if (message != null) {
-                //Receive message from Exchange site
-                LogUtil.d("ExchangeMessage=" + message);
-
-                if (data.contains("matchOrder")) {
-                    PublicPun.showNoticeDialog(mContext, "Exchange Message",
-                            "Congrats!! Your sell order has a match. Please connect with CoolWallet CW000522 to complete the trade.");
-                } else {
-                    PublicPun.showNoticeDialog(mContext, "Exchange Message",
-                            "You placed a sell order on CoolBitX. Please connect with CoolWallet <cwid>, look at the OTP on card, type it in the app to confirm the order.");
-                }
-                //complete order 尚未完成
-            }
-        }
-    };
-
     /**
      * show on Status Bar
      * foe btc recv
@@ -391,75 +369,6 @@ public class BaseActivity extends AppCompatActivity {
                 .setContentText(msg) // 建立通知
                 .setContentIntent(PendingIntent.getActivity(getApplicationContext(), notifyID, new Intent(getApplicationContext(), BleActivity.class), PendingIntent.FLAG_UPDATE_CURRENT)).build();
         notificationManager.notify(notifyID, notification); // 發送通知
-    }
-
-    /**
-     * used to refresh rate by interval
-     */
-    public class MyRunnable implements Runnable {
-        ContentValues cv;
-        int what;
-        Handler handler;
-        int interval;
-        int identify;
-        String extraUrl;
-        CwBtcNetWork cwBtcNetWork;
-
-        public MyRunnable(Handler handler, ContentValues cv, String extraUrl, int what, int interval, int identify, CwBtcNetWork cwBtcNetWork) {
-            this.cv = cv;
-            this.what = what;
-            this.handler = handler;
-            this.interval = interval;
-            this.identify = identify;
-            this.extraUrl = extraUrl;
-            this.cwBtcNetWork = cwBtcNetWork;
-        }
-
-        @Override
-        public void run() {
-            String result = "";
-            try {
-                result = cwBtcNetWork.doGet(cv, extraUrl, null);
-                if (extraUrl.equals(BtcUrl.RECOMMENDED_TRANSACTION_FEES)) {
-                    //feesRate
-                    if (result != null) {
-                        PublicPun.jsonParsingFeeaRate(mContext, result);
-                    }
-                } else {
-                    //exchangeRate
-                    if (result != null) {
-                        PublicPun.jsonParserBlockChainRate(mContext, result);
-                    }
-                }
-            } catch (NetworkOnMainThreadException e) {
-                LogUtil.i("doGet 錯誤:" + e.toString());
-                Crashlytics.logException(e);
-            }
-
-//            if (ex) {
-//                Message msg = new Message();
-//                msg.what = what;
-//                Bundle data = new Bundle();
-//                data.putString("identify", extraUrl);
-//                data.putString("result", result);
-//                msg.setData(data);
-//                handler.sendMessage(msg);
-//            }
-
-            if (interval > 0) {
-//                下面這段會造成NetWorkOnMainThreadException:
-//                handler.postDelayed(this, interval);
-//                Handler.postDelayed() executes the Runnable in the Thread in which the Handler was created.
-//                In your case you create it in your Activity on the UI Thread. So the first time,
-//                the Runnable gets executed in a separate Thread, but the second time in the UI Thread.
-                handler.postDelayed(new Runnable() {
-                    public void run() {
-//                        new Thread(new MyRunnable(mHandler, cv, BtcUrl.URL_BLOCKR_EXCHANGE_RATE, 0, 60000 * 60, 0)).start();//1hr
-                        new Thread(new MyRunnable(handler, cv, extraUrl, what, interval, identify, cwBtcNetWork)).start();
-                    }
-                }, interval);
-            }
-        }
     }
 
     public void RefreshSetAccInfo(int account) {
@@ -553,6 +462,92 @@ public class BaseActivity extends AppCompatActivity {
                         }
                     }
             );
+        }
+    }
+
+    //建立廣播接收socket訊息
+    public class disconnNotificationReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // TODO Auto-generated method stub
+            String action = intent.getAction();
+
+            if (action.equals(BTConfig.SOCKET_ADDRESS_MSG)) {
+                LogUtil.i("webSocket BaseActivity broadcast recv!");
+                brocastMsgHandler.sendMessage(brocastMsgHandler.obtainMessage(BSConfig.HANDLER_SOCKET,
+                        intent.getExtras().getSerializable("socketAddrMsg")));
+            } else if (action.equals(BTConfig.DISCONN_NOTIFICATION)) {
+                if (isShowDisconnAlert) {
+                    brocastMsgHandler.sendMessage(brocastMsgHandler.obtainMessage(BSConfig.HANDLER_DISCONN));
+                }
+            }
+        }
+    }
+
+    /**
+     * used to refresh rate by interval
+     */
+    public class MyRunnable implements Runnable {
+        ContentValues cv;
+        int what;
+        Handler handler;
+        int interval;
+        int identify;
+        String extraUrl;
+        CwBtcNetWork cwBtcNetWork;
+
+        public MyRunnable(Handler handler, ContentValues cv, String extraUrl, int what, int interval, int identify, CwBtcNetWork cwBtcNetWork) {
+            this.cv = cv;
+            this.what = what;
+            this.handler = handler;
+            this.interval = interval;
+            this.identify = identify;
+            this.extraUrl = extraUrl;
+            this.cwBtcNetWork = cwBtcNetWork;
+        }
+
+        @Override
+        public void run() {
+            String result = "";
+            try {
+                result = cwBtcNetWork.doGet(cv, extraUrl, null);
+                if (extraUrl.equals(BtcUrl.RECOMMENDED_TRANSACTION_FEES)) {
+                    //feesRate
+                    if (result != null) {
+                        PublicPun.jsonParsingFeeaRate(mContext, result);
+                    }
+                } else {
+                    //exchangeRate
+                    if (result != null) {
+                        PublicPun.jsonParserBlockChainRate(mContext, result);
+                    }
+                }
+                Message msg = new Message();
+                msg.what = what;
+                Bundle data = new Bundle();
+                data.putString("identify", extraUrl);
+                data.putString("result", result);
+                msg.setData(data);
+                handler.sendMessage(msg);
+            } catch (NetworkOnMainThreadException e) {
+                LogUtil.i("doGet 錯誤:" + e.toString());
+                Crashlytics.logException(e);
+            }
+
+
+            if (interval > 0) {
+//                下面這段會造成NetWorkOnMainThreadException:
+//                handler.postDelayed(this, interval);
+//                Handler.postDelayed() executes the Runnable in the Thread in which the Handler was created.
+//                In your case you create it in your Activity on the UI Thread. So the first time,
+//                the Runnable gets executed in a separate Thread, but the second time in the UI Thread.
+                handler.postDelayed(new Runnable() {
+                    public void run() {
+//                        new Thread(new MyRunnable(mHandler, cv, BtcUrl.URL_BLOCKR_EXCHANGE_RATE, 0, 60000 * 60, 0)).start();//1hr
+                        new Thread(new MyRunnable(handler, cv, extraUrl, what, interval, identify, cwBtcNetWork)).start();
+                    }
+                }, interval);
+            }
         }
     }
 }

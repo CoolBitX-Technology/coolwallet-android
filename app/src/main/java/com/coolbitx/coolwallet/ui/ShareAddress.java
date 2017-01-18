@@ -47,7 +47,7 @@ public class ShareAddress extends BaseActivity implements View.OnClickListener {
         cmdManager = new CmdManager();
         mAddressSharingAPI = new AddressSharingAPI(this, cmdManager);
                    /* Initialize the progress dialog */
-        mProgress = new ProgressDialog(mContext);
+        mProgress = new ProgressDialog(mContext, ProgressDialog.THEME_HOLO_DARK);
         mProgress.setCancelable(false);
         mProgress.setIndeterminate(true);
         mProgress.setMessage("Start to Share address...");
