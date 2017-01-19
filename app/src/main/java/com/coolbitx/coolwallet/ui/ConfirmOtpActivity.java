@@ -149,7 +149,8 @@ public class ConfirmOtpActivity extends BaseActivity implements View.OnClickList
                         }
                     });
                 }
-                if ((int) hostId >= 0) {
+                //if ((int) hostId >= 0) {
+                if (!isFirst) {
                     LogUtil.i("已綁定 hostId >= 0");
                 } else {
                     LogUtil.i("No hostId");
