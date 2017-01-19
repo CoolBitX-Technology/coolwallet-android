@@ -103,6 +103,9 @@
 
         <service android:name=".Service.socketService"/>
 
+	<meta-data
+             android:name="io.fabric.ApiKey"
+             android:value="68521535b4c532c476bc000a7304e95422ee5e99" />
     </application>
 
 </manifest>
