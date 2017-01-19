@@ -576,7 +576,6 @@ public class TabFragment extends Fragment {
                                     mProgress.dismiss();
                                     FunhdwSetAccInfo(accountID);
                                 }
-
                                 @Override
                                 public void fail(String msg) {
                                     PublicPun.showNoticeDialog(getActivity(), "Unstable internet connection", msg);
@@ -584,7 +583,6 @@ public class TabFragment extends Fragment {
                                 }
                             });
                         }
-
                         @Override
                         public void fail(String msg) {
                             PublicPun.showNoticeDialog(getActivity(), "Error Message", msg);
