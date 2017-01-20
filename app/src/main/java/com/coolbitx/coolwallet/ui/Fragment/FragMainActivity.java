@@ -63,8 +63,6 @@ import com.snscity.egdwlib.cmd.CmdResultCallback;
 import com.snscity.egdwlib.utils.ByteUtil;
 import com.snscity.egdwlib.utils.LogUtil;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -122,24 +120,24 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
 //                        float currRate = AppPrefrence.getCurrentRate(mContext)*100;
                         // byte[] BigcurrData = ByteUtil.intToByteBig(currRate, 4);
 
-                        int currRate = (int) (AppPrefrence.getCurrentRate(mContext) * 100);
-                        byte[] BigcurrData = ByteBuffer.allocate(4).putInt(currRate).order(ByteOrder.BIG_ENDIAN).array();
-
-                        byte[] currData = new byte[5];
-                        currData[0] = 0;
-                        for (int i = 0; i < BigcurrData.length; i++) {
-                            currData[i + 1] = BigcurrData[i];
-                        }
-                        cmdManager.SetCurrencyRate(currData, new CmdResultCallback() {
-                                    @Override
-                                    public void onSuccess(int status, byte[] outputData) {
-                                        if ((status + 65536) == 0x9000) {
-                                            LogUtil.i("SetCurrencyRate !!!");
-                                        }
-                                    }
-                                }
-                        );
-
+//                        int currRate = (int) (AppPrefrence.getCurrentRate(mContext) * 100);
+//                        byte[] BigcurrData = ByteBuffer.allocate(4).putInt(currRate).order(ByteOrder.BIG_ENDIAN).array();
+//
+//                        byte[] currData = new byte[5];
+//                        currData[0] = 0;
+//                        for (int i = 0; i < BigcurrData.length; i++) {
+//                            currData[i + 1] = BigcurrData[i];
+//                        }
+//                        cmdManager.SetCurrencyRate(currData, new CmdResultCallback() {
+//                                    @Override
+//                                    public void onSuccess(int status, byte[] outputData) {
+//                                        if ((status + 65536) == 0x9000) {
+//                                            LogUtil.i("SetCurrencyRate !!!");
+//                                        }
+//                                    }
+//                                }
+//                        );
+                        SetCurrencyRate(mContext);
                         //card is not keep the setting.
                         if (AppPrefrence.getCurrency(mContext)) {
                             cmdManager.turnCurrency(AppPrefrence.getCurrency(mContext), new CmdResultCallback() {

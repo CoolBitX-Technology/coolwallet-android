@@ -73,8 +73,8 @@ public class CoolWalletCardActivity extends BaseActivity implements View.OnClick
     @Override
     public void onClick(View v) {
         if (v == btnUpdateCardName) {
+
             final String cardNameStr = edtCardName.getText().toString().trim();
-//            edtCardName.setText("");
             if (!TextUtils.isEmpty(cardNameStr)) {
                 cmdManager.setCardName(cardNameStr, new CmdResultCallback() {
                     @Override
@@ -82,7 +82,7 @@ public class CoolWalletCardActivity extends BaseActivity implements View.OnClick
                         if ((status + 65536) == 0x9000) {
                             PublicPun.card.setCardName(cardNameStr);
                             AppPrefrence.saveCardName(mContext, cardNameStr);
-                            PublicPun.showNoticeDialog(mContext, "Updated!","");
+                            PublicPun.showNoticeDialog(mContext, "Updated!", "");
 
                             cmdManager.turnCurrency(isturnCurrency, new CmdResultCallback() {
                                 @Override

@@ -79,11 +79,13 @@ public class BTCUtils {
         long change = 0;
         long valueOfUnspentOutputs = 0;
         //fees per byte *1000=1kb
+        int txOneOutputLen = 0;
+        long updatedFee = 0;
         HALF_HOUR_PER_BYTE = AppPrefrence.getRecommendedHalfHourFees(mContext);
         ArrayList<UnSpentTxsBean> outputsToSpend = new ArrayList<>();
-        if (amountToSend <= 0) {
+        if (amountToSend <= 0) {    //No this situation,already rule out by uone instruction.
             //transfer all funds from these addresses to outputAddress
-            LogUtil.i("找到amountToSend<=0");
+            LogUtil.e("找到amountToSend<=0");
             change = 0;
             for (UnSpentTxsBean outputInfo : UnSpentTxsBeanList) {
                 outputsToSpend.add(outputInfo);
@@ -98,22 +100,21 @@ public class BTCUtils {
 
             for (int i = 0; i < UnSpentTxsBeanList.size(); i++) {
                 UnSpentTxsBean outputInfo = UnSpentTxsBeanList.get(i);
-                LogUtil.i("找到Unspent=" + BTCUtils.convertToSatoshisValue(new DecimalFormat("#.########").format(outputInfo.getAmount()))
+                LogUtil.i("找到Unspent第" + i + "筆=" + BTCUtils.convertToSatoshisValue(new DecimalFormat("#.########").format(outputInfo.getAmount()))
                         + ";addr=" + outputInfo.getAddress());
                 outputsToSpend.add(outputInfo);
                 valueOfUnspentOutputs += BTCUtils.convertToSatoshisValue(new DecimalFormat("#.########").format(outputInfo.getAmount()));
 
-                final int txOneOutputLen = BTCUtils.getMaximumTxSize(outputsToSpend, change > 0 ? 2 : 1, isPublicKeyCompressed);
-//                LogUtil.e("txOneOutputLen=")
-                long updatedFee = BTCUtils.calcHalfHourFee(txOneOutputLen);
-                fee = updatedFee;
-                if(fee==0){
-                    fee= MIN_FEE_PER_TX;
+
+                for (int j = 0; j < 2; j++) {
+                    txOneOutputLen = BTCUtils.getMaximumTxSize(outputsToSpend, change > 0 ? 2 : 1, isPublicKeyCompressed);
+                    updatedFee = BTCUtils.calcHalfHourFee(txOneOutputLen);
+                    fee = updatedFee;
+                    change = valueOfUnspentOutputs - fee - amountToSend;
                 }
 
-                change = valueOfUnspentOutputs - fee - amountToSend;
-                LogUtil.i("計算要用來寄出的第" + i + "筆資料:" + ";addr=" + outputInfo.getAddress() + ",餘額=" +
-                        valueOfUnspentOutputs + ",fee=" + fee + ",amountToSend=" + amountToSend + ",change=" + change);
+                LogUtil.d("計算要用來寄出的第" + i + "筆資料:" + ";addr=" + outputInfo.getAddress() + ",餘額=" +
+                        valueOfUnspentOutputs + ",amountToSend=" + amountToSend + ",fee=" + fee + ",change=" + change);
 
                 if (valueOfUnspentOutputs >= amountToSend + fee) { //收集足夠金額的output
                     break;
@@ -127,8 +128,8 @@ public class BTCUtils {
         //ZERO Confirmation unspent?
         if (amountToSend > valueOfUnspentOutputs - fee) {
             LogUtil.e("Not enough funds " + (valueOfUnspentOutputs - fee));
-            float output = (((float) valueOfUnspentOutputs - (float) fee-(float)amountToSend) / (float) SATOSHIS_PER_COIN);
-            throw new ValidationException("Insufficient funds: " + new DecimalFormat("#.########").format(output) + " BTC\nFees:"+ new DecimalFormat("#.########").format((float) fee / (float) SATOSHIS_PER_COIN)+" BTC");
+            float output = (((float) valueOfUnspentOutputs - (float) fee - (float) amountToSend) / (float) SATOSHIS_PER_COIN);
+            throw new ValidationException("Insufficient funds: " + new DecimalFormat("#.########").format(output) + " BTC\nFees:" + new DecimalFormat("#.########").format((float) fee / (float) SATOSHIS_PER_COIN) + " BTC");
 
         }
         if (outputsToSpend.isEmpty()) {
@@ -178,8 +179,8 @@ public class BTCUtils {
     }
 
     public static long calcHalfHourFee(int txLen) {
-        LogUtil.e("資料長度=" + txLen + ";匯率=" + txLen * HALF_HOUR_PER_BYTE);
-        return txLen * HALF_HOUR_PER_BYTE;
+        LogUtil.e("資料長度=" + txLen + ";fee=" + txLen * HALF_HOUR_PER_BYTE);//);
+        return txLen * HALF_HOUR_PER_BYTE;//;
     }
 
     public static long calcMinimumFee(int txLen, Collection<UnSpentTxsBean> unspentOutputInfos, long minOutput) {
@@ -196,7 +197,8 @@ public class BTCUtils {
         //scriptSig contains the signature along with the public key(106)
         int maxInputScriptLen = 73 + (compressedPublicKey ? 33 : 65);
 //        return 9 + unspentOutputInfos.size() * (41 + maxInputScriptLen) + outputsCount * 33;
-        LogUtil.e("getMaximumTxSize 計算=" + unspentOutputInfos.size() + (41 + maxInputScriptLen) + outputsCount);
+        LogUtil.e("getMaximumTxSize 計算:INPUT=" + unspentOutputInfos.size() +
+                ";maxInputScriptLen=" + (41 + maxInputScriptLen) + ";OUTPUT=" + outputsCount);
         int maxSize = 10 + unspentOutputInfos.size() * (41 + maxInputScriptLen) + outputsCount * 34;
 
         LogUtil.e("getMaximumTxSize=" + maxSize);

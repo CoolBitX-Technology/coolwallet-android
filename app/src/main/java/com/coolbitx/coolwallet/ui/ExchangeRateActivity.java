@@ -59,6 +59,7 @@ public class ExchangeRateActivity extends BaseActivity implements AdapterView.On
             AppPrefrence.saveCurrentCountry(context, rateData.get(position));
             TabFragment.ExchangeRate = DatabaseHelper.queryCurrent(context, AppPrefrence.getCurrentCountry(context));
             AppPrefrence.saveCurrentRate(context,  (float)TabFragment.ExchangeRate);
+            SetCurrencyRate(mContext);
             finish();
         }
     }

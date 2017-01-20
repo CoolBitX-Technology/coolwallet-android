@@ -457,7 +457,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
         TxsConfirm mTxsConfirm = null;
         try {
             processedTxData =
-                    BTCUtils.calcFeeChangeAndSelectOutputsToSpend(mContext, unSpentTxsBeanList, amountToSend, extraFee, false);
+                    BTCUtils.calcFeeChangeAndSelectOutputsToSpend(mContext, unSpentTxsBeanList, amountToSend, extraFee, true);
 
             if (processedTxData == null) {
                 cancelTrx();

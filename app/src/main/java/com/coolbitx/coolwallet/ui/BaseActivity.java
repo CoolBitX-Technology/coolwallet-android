@@ -37,6 +37,8 @@ import com.snscity.egdwlib.cmd.CmdResultCallback;
 import com.snscity.egdwlib.utils.ByteUtil;
 import com.snscity.egdwlib.utils.LogUtil;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 
 /**
@@ -216,6 +218,28 @@ public class BaseActivity extends AppCompatActivity {
             }
         });
     }
+
+
+    public void SetCurrencyRate(Context mContext) {
+        int currRate = (int) (AppPrefrence.getCurrentRate(mContext) * 100);
+        byte[] BigcurrData = ByteBuffer.allocate(4).putInt(currRate).order(ByteOrder.BIG_ENDIAN).array();
+
+        byte[] currData = new byte[5];
+        currData[0] = 0;
+        for (int i = 0; i < BigcurrData.length; i++) {
+            currData[i + 1] = BigcurrData[i];
+        }
+        cmdManager.SetCurrencyRate(currData, new CmdResultCallback() {
+                    @Override
+                    public void onSuccess(int status, byte[] outputData) {
+                        if ((status + 65536) == 0x9000) {
+                            LogUtil.d("Set CurrencyRate success.");
+                        }
+                    }
+                }
+        );
+    }
+
 
     public void getHosts() {
         if (!PublicPun.hostList.isEmpty()) {
