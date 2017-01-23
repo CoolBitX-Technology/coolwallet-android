@@ -25,7 +25,6 @@ import com.snscity.egdwlib.utils.LogUtil;
  */
 public class ConfirmOtpActivity extends BaseActivity implements View.OnClickListener {
 
-    private final static String CHARSETNAME = "UTF-8";
     Button btnPair;
     boolean isFirst = false;
     String description;
@@ -60,27 +59,19 @@ public class ConfirmOtpActivity extends BaseActivity implements View.OnClickList
         mProgress.setCancelable(false);
         mProgress.setIndeterminate(true);
         mProgress.setMessage("Pairing...");
-        //睡300毫秒
-//        try {
-//            Thread.sleep(3000);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
-//        getRegInfo();
+
 
         //通過當前狀態 判断是否是第一次注册
         isFirst = true;
-
         if (PublicPun.card.getMode().equals("NOHOST")) {
             isFirst = true;
         } else if (PublicPun.card.getMode().equals("DISCONN")) {
             isFirst = false;
-
         }
-        LogUtil.i("是否第一次註冊:" + isFirst);
-
-
         boolean isRegistered = getIntent().getBooleanExtra("isRegistered", false);
+        hostId = (byte) getIntent().getIntExtra("hostID", -1);
+        LogUtil.i("是否曾註冊過卡片:" + isRegistered);
+
 
         if (isRegistered) {
             DatabaseHelper.deleteTable(getApplicationContext(), DbName.DATA_BASE_ADDR);
@@ -104,7 +95,7 @@ public class ConfirmOtpActivity extends BaseActivity implements View.OnClickList
                             bs[i] = outputData[i];
                         }
                         handle = bs;
-                        LogUtil.i("bindRegInit 9000 = " + LogUtil.byte2HexString(bs));
+                        LogUtil.d("bindRegInit 9000 = " + LogUtil.byte2HexString(bs));
                     }
                     //16進制的9000在10進制是36864;6645是26181;status=91717
                 } else if ((status + 65536) == 0x16645) {
@@ -149,98 +140,90 @@ public class ConfirmOtpActivity extends BaseActivity implements View.OnClickList
                         }
                     });
                 }
-                //if ((int) hostId >= 0) {
-                if (!isFirst) {
-                    LogUtil.i("已綁定 hostId >= 0");
-                } else {
-                    LogUtil.i("No hostId");
 
-                    if (editotp.getText().length() != 0) {
-                        currentOptCode = editotp.getText().toString().trim();
+//                if((int) hostId >= 0){
+//                    LogUtil.d("已綁定hostId ="+hostId);
+//                } else {
+//                LogUtil.d("No hostId");
 
-                        LogUtil.i("OTP:" + currentOptCode);
+                if (editotp.getText().length() != 0) {
+                    currentOptCode = editotp.getText().toString().trim();
 
-                        cmdManager.bindRegChlng(handle, new CmdResultCallback() {
-                            @Override
-                            public void onSuccess(int status, byte[] outputData) {
-                                if ((status + 65536) == 0x9000) { //36864,status=-28672
-                                    if (outputData != null) {
-                                        challenge = outputData;
-                                        LogUtil.i("bindRegChlng success");
+                    LogUtil.d("OTP:" + currentOptCode);
 
-                                        cmdManager.bindRegFinish(handle, currentUuid, currentOptCode, challenge, new CmdResultCallback() {
-                                            @Override
-                                            public void onSuccess(int status, byte[] outputData) {
-                                                if ((status + 65536) == 0x9000) {
-                                                    if (outputData != null && outputData.length == 2) {
-                                                        LogUtil.i("PAIR成功");
-                                                        mProgress.dismiss();
-                                                        //注册成功
-                                                        //登录按钮变为可用状态
+                    cmdManager.bindRegChlng(handle, new CmdResultCallback() {
+                        @Override
+                        public void onSuccess(int status, byte[] outputData) {
+                            if ((status + 65536) == 0x9000) { //36864,status=-28672
+                                if (outputData != null) {
+                                    challenge = outputData;
+                                    LogUtil.i("bindRegChlng success");
 
-                                                        //取得当前注册设备的hostId
-                                                        hostId = outputData[0];
-                                                        LogUtil.e(PublicPun.byte2HexString(hostId));
+                                    cmdManager.bindRegFinish(handle, currentUuid, currentOptCode, challenge, new CmdResultCallback() {
+                                        @Override
+                                        public void onSuccess(int status, byte[] outputData) {
+                                            if ((status + 65536) == 0x9000) {
+                                                if (outputData != null && outputData.length == 2) {
+                                                    LogUtil.i("PAIR成功");
+                                                    mProgress.dismiss();
+                                                    //註冊成功
+                                                    //取得當前註冊設備的hostID
+                                                    hostId = outputData[0];
+                                                    LogUtil.e(PublicPun.byte2HexString(hostId));
 
-                                                        //取得认证状态
+                                                    //取得認證狀態
+                                                    isConfirm = false;
+                                                    if (outputData[1] == 0x00) {
+                                                        isConfirm = true;
+                                                    } else if (outputData[1] == 0x01) {
                                                         isConfirm = false;
-                                                        if (outputData[1] == 0x00) {
-                                                            isConfirm = true;
-                                                        } else if (outputData[1] == 0x01) {
-                                                            isConfirm = false;
-                                                        }
-
-                                                        LogUtil.i("bindRegFinish isConfirm:" + isConfirm + ", uuid:" + currentUuid + ",hostId" + hostId);
-
-                                                        editor.putString("uuid", currentUuid);
-                                                        editor.putString("optCode", currentOptCode);
-                                                        editor.commit();
-
-                                                        PublicPun.user.setUuid(currentUuid);
-                                                        PublicPun.user.setOtpCode(currentOptCode);
-//                                                        try {
-//                                                            mLoginCsv.setSaveFileName(PublicPun.csvFilename, true);
-//                                                            mLoginCsv.saveLoginToCSV(PublicPun.user);
-                                                        DatabaseHelper.insertLogin(ConfirmOtpActivity.this, currentUuid, currentOptCode);
-//                                                        } catch (IOException e) {
-//                                                            LogUtil.i("saveLoginToCSV錯誤:" + e.getMessage());
-//                                                            e.printStackTrace();
-//                                                        }
-
-                                                        if (isConfirm) {
-                                                            Intent intent = new Intent(getApplicationContext(), InitialPairSuccessfulActivity.class);
-                                                            Bundle mBundle = new Bundle();
-                                                            mBundle.putByte("hostId", hostId);
-                                                            intent.putExtras(mBundle);
-                                                            startActivity(intent);
-                                                        } else {
-                                                            //show alert 等授權
-                                                            LogUtil.i("bindRegFinish2 isConfirm:" + isConfirm + ", uuid:" + currentUuid + ",hostId" + hostId);
-                                                            DatabaseHelper.deleteTable(getApplicationContext(), DbName.DATA_BASE_ADDR);
-                                                            DatabaseHelper.deleteTable(getApplicationContext(), DbName.DATA_BASE_TXS);
-                                                            PublicPun.showNoticeDialogToFinish(context, "Waiting for authorization from paired device", "");
-                                                        }
                                                     }
-                                                } else if ((status + 65536) == 0x16648) {
-                                                    mProgress.dismiss();
-                                                    PublicPun.showNoticeDialog(context, "Unable to pair", "Incorrect OTP, Please try again.");
-                                                    editotp.setText("");
-                                                    genOTP();
-                                                } else {
-                                                    mProgress.dismiss();
-                                                    PublicPun.showNoticeDialogToFinish(context, "Unable to pair", "Error:" + Integer.toHexString(status));
+
+                                                    LogUtil.i("bindRegFinish isConfirm:" + isConfirm + ", uuid:" + currentUuid + ",hostId" + hostId);
+
+                                                    editor.putString("uuid", currentUuid);
+                                                    editor.putString("optCode", currentOptCode);
+                                                    editor.commit();
+
+                                                    PublicPun.user.setUuid(currentUuid);
+                                                    PublicPun.user.setOtpCode(currentOptCode);
+
+                                                    DatabaseHelper.insertLogin(ConfirmOtpActivity.this, currentUuid, currentOptCode);
+
+                                                    if (isConfirm) {
+                                                        Intent intent = new Intent(getApplicationContext(), InitialPairSuccessfulActivity.class);
+                                                        Bundle mBundle = new Bundle();
+                                                        mBundle.putByte("hostId", hostId);
+                                                        intent.putExtras(mBundle);
+                                                        startActivity(intent);
+                                                    } else {
+                                                        //show alert 等授權
+                                                        LogUtil.i("bindRegFinish2 isConfirm:" + isConfirm + ", uuid:" + currentUuid + ",hostId" + hostId);
+                                                        DatabaseHelper.deleteTable(getApplicationContext(), DbName.DATA_BASE_ADDR);
+                                                        DatabaseHelper.deleteTable(getApplicationContext(), DbName.DATA_BASE_TXS);
+                                                        PublicPun.showNoticeDialogToFinish(context, "Waiting for authorization from paired device", "");
+                                                    }
                                                 }
+                                            } else if ((status + 65536) == 0x16648) {
+                                                mProgress.dismiss();
+                                                PublicPun.showNoticeDialog(context, "Unable to pair", "Incorrect OTP, Please try again.");
+                                                editotp.setText("");
+                                                genOTP();
+                                            } else {
+                                                mProgress.dismiss();
+                                                PublicPun.showNoticeDialogToFinish(context, "Unable to pair", "Error:" + Integer.toHexString(status));
                                             }
-                                        });
-                                    }
+                                        }
+                                    });
                                 }
                             }
-                        });
-                    } else {
-                        mProgress.dismiss();
-                        PublicPun.showNoticeDialog(ConfirmOtpActivity.this, "Unable to pair error", "Please entry OTP");
-                    }
+                        }
+                    });
+                } else {
+                    mProgress.dismiss();
+                    PublicPun.showNoticeDialog(ConfirmOtpActivity.this, "Unable to pair error", "Please entry OTP");
                 }
+//                }
                 break;
         }
     }
@@ -315,7 +298,7 @@ public class ConfirmOtpActivity extends BaseActivity implements View.OnClickList
 
         currentUuid = sharedPreferences.getString("uuid", "");
         currentOptCode = sharedPreferences.getString("optCode", "");
-        LogUtil.i("uuid=" + currentUuid + ";optCode=" + currentOptCode);
+        LogUtil.d("uuid=" + currentUuid + ";optCode=" + currentOptCode);
         btnPair.setOnClickListener(this);
 
         Button cancelButton = (Button) findViewById(R.id.btn_cancel);

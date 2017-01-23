@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.coolbitx.coolwallet"
-    android:versionCode="8"
-    android:versionName="1.2.2 ">
+    android:versionCode="12"
+    android:versionName="1.2.4">
     <!--1.1.4-->
     <!-- Socket網路權限 -->
     <uses-permission android:name="android.permission.INTERNET" />
@@ -89,6 +89,11 @@
             android:theme="@style/AppTheme"></activity>
         <activity
             android:name=".ui.HostDeviceActivity"
+            android:parentActivityName=".ui.Fragment.FragMainActivity"
+            android:screenOrientation="portrait"></activity>
+
+        <activity
+            android:name=".ui.SettingActivity"
             android:parentActivityName=".ui.Fragment.FragMainActivity"
             android:screenOrientation="portrait"></activity>
         <activity

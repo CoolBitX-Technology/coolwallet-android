@@ -47,12 +47,12 @@ import com.coolbitx.coolwallet.general.RefreshBlockChainInfo;
 import com.coolbitx.coolwallet.httpRequest.CwBtcNetWork;
 import com.coolbitx.coolwallet.ui.BaseActivity;
 import com.coolbitx.coolwallet.ui.CoolWalletCardActivity;
-import com.coolbitx.coolwallet.ui.ExchangeRateActivity;
 import com.coolbitx.coolwallet.ui.HostDeviceActivity;
 import com.coolbitx.coolwallet.ui.InitialCreateWalletIIActivity;
 import com.coolbitx.coolwallet.ui.InitialSecuritySettingActivity;
 import com.coolbitx.coolwallet.ui.LogOutActivity;
 import com.coolbitx.coolwallet.ui.RecovWalletActivity;
+import com.coolbitx.coolwallet.ui.SettingActivity;
 import com.coolbitx.coolwallet.ui.ShareAddress;
 import com.coolbitx.coolwallet.util.Base58;
 import com.crashlytics.android.Crashlytics;
@@ -722,7 +722,7 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
                 startActivityForResult(intent, 0);
                 break;
             case 3:
-                intent = new Intent(getApplicationContext(), ExchangeRateActivity.class);
+                intent = new Intent(getApplicationContext(), SettingActivity.class);
                 startActivityForResult(intent, 0);
                 break;
             case 4:
