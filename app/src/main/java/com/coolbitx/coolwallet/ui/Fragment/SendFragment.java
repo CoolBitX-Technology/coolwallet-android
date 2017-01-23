@@ -555,7 +555,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
                     byte[] byteTx = PublicPun.hexStringToByteArray(outputToSpend.getTx());//outputToSpend.getTx().getBytes()
 
                     //my send addr
-                    LogUtil.i("Transaction.OutPoint:" + outputToSpend.getAddress() + "的HEX=" + LogUtil.byte2HexString(byteTx) + ";outputToSpend.getN()=" + outputToSpend.getN());
+                    LogUtil.d("Transaction.OutPoint:" + outputToSpend.getAddress() + "的HEX=" + LogUtil.byte2HexString(byteTx) + ";outputToSpend.getN()=" + outputToSpend.getN());
 
                     Transaction.OutPoint outPoint = new Transaction.OutPoint(byteTx, outputToSpend.getN());//outputToSpend.getN
 
@@ -592,7 +592,8 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
 
                 final int dbKid = d.getKid();
                 final int dbKcid = d.getKcid();
-                final long dbBalance = d.getBalance();
+                final long unspentBalance = BTCUtils.convertToSatoshisValue(new DecimalFormat("#.########").format(processedTxData.outputsToSpend.get(i).getAmount()));
+
                 final byte CwAddressKeyChainExternal;
                 if (dbKcid == 0) {
                     CwAddressKeyChainExternal = 0x00;
@@ -630,12 +631,12 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
                                         address.setAddress(processedTxData.outputsToSpend.get(finalI).getAddress()); //account 0 的 internal地址之一
                                         address.setKeyId(dbKid);
                                         address.setPublickey(publicKeyBytes);
-                                        LogUtil.i("run " + finalI + ": getAddressInfo=" + processedTxData.outputsToSpend.get(finalI).getAddress() +
+                                        LogUtil.d("run " + finalI + ": getAddressInfo=" + processedTxData.outputsToSpend.get(finalI).getAddress() +
                                                 " ;publicKey=" + LogUtil.byte2HexString(address.getPublickey()));
                                         inputAddressList.add(address);
 
                                         LogUtil.e("prepare trx getMacKey=" + LogUtil.byte2HexStringNoBlank(PublicPun.user.getMacKey()) + ";input id=" + finalI + ";" + ";KeyChainExternal=" + (int) CwAddressKeyChainExternal +
-                                                ";account=" + currentAccount + ";dbKid=" + dbKid + ";dbBalance=" + dbBalance + ";hash=" + LogUtil.byte2HexStringNoBlank(hash));
+                                                ";account=" + currentAccount + ";dbKid=" + dbKid + ";dbBalance=" + unspentBalance + ";hash=" + LogUtil.byte2HexStringNoBlank(hash));
 
                                         //         big endian  ex:("0000000000002710");
                                         cmdManager.cwCmdHdwPrepTrxSign(PublicPun.user.getMacKey(),
@@ -643,7 +644,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
                                                 CwAddressKeyChainExternal,
                                                 currentAccount,
                                                 dbKid,
-                                                dbBalance,
+                                                unspentBalance,
                                                 hash,
                                                 new CmdResultCallback() {
                                                     @Override
@@ -652,7 +653,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
 
                                                             LogUtil.i("cwCmdHdwPrepTrxSign 成功!");
                                                             LogUtil.i("Address=" + processedTxData.outputsToSpend.get(finalI).getAddress());
-                                                            LogUtil.i("balance=" + String.valueOf(dbBalance));
+                                                            LogUtil.i("balance=" + String.valueOf(unspentBalance));
 
                                                             prepRsult[finalI] = true;
                                                             boolean isdidPrepareTransaction = false;
@@ -667,7 +668,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
                                                             LogUtil.i("length=" + prepRsult.length + " check prep=" + isdidPrepareTransaction);
 
                                                             if (isdidPrepareTransaction) {
-                                                                didPrepareTransaction(outputAddress);
+                                                                didTrxBegin(outputAddress);
                                                             }
                                                         }
                                                     }
@@ -745,7 +746,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
         }
     }
 
-    private void didPrepareTransaction(String outputAddress) {
+    private void didTrxBegin(String outputAddress) {
 
         if (!InitialSecuritySettingActivity.settingOptions[0] && InitialSecuritySettingActivity.settingOptions[1]) {
             didGetButton();
@@ -897,7 +898,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
                                     doTrxSignSuccessCnt++;
 //                                    LogUtil.i("xxxxxxxxxx :addr " + inputID + inputAddressList.get(inputID).getAddress() +
 //                                            ";punlickey =" + LogUtil.byte2HexString(BTCUtils.reverse(inputAddressList.get(inputID).getPublickey())));
-                                    scriptSigs.add(genScriptSig(signOfTx, inputAddressList.get(inputID).getPublickey()));
+                                    scriptSigs.add(genScriptSig(signOfTx,inputAddressList.get(inputID).getPublickey()));
 
                                     if (doTrxSignSuccessCnt == signedInputs.length) {
                                         currUnsignedTx = genRawTxData(scriptSigs);

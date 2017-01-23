@@ -71,6 +71,7 @@ public class LogOutActivity extends BaseActivity implements View.OnClickListener
     public void onClick(View v) {
         if (v == btnLogout) {
             mProgress.setMessage("Logout...");
+            mProgress.show();
 //            cmdManager.hdwQryWaInfo(getWallteStatus, new CmdResultCallback() {
 //                @Override
 //                public void onSuccess(int status, byte[] outputData) {

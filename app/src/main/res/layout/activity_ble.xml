@@ -1,5 +1,4 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/col_black">
@@ -52,29 +51,41 @@
         style="@style/TextView_White_18"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignStart="@+id/txtsearch"
         android:layout_gravity="center"
-        android:text="@string/strSearchDetail"
-        android:layout_alignParentBottom="true"
         android:layout_marginBottom="45dp"
-        android:layout_alignStart="@+id/txtsearch" />
+        android:text="@string/strSearchDetail" />
 
-    <TextView
-        android:layout_width="280dp"
+    <LinearLayout
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="@string/strPullMsg"
-        android:id="@+id/tvPullMsg"
-        android:gravity="center"
-        android:textColor="@color/md_grey_300"
-        android:textSize="16sp"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true" />
-    <!--<ProgressBar-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:id="@+id/pBarConnecting"-->
-        <!--android:layout_below="@+id/imgLogo"-->
-        <!--android:layout_centerHorizontal="true"-->
-        <!--android:visibility="invisible"/>-->
+        android:layout_centerHorizontal="true"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tvPullMsg"
+            android:layout_width="280dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/strPullMsg"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@color/md_grey_300"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/tvVer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:hint="V x.x.x"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@color/md_grey_500"
+            android:textSize="14sp" />
+
+    </LinearLayout>
+
 
 </RelativeLayout>

@@ -8,6 +8,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -54,6 +56,7 @@ public class BleActivity extends BaseActivity {
     private boolean isScanning;
     private ImageView imgSearch;
     private TextView tvPullMsg;
+    private TextView tvVer;
     private TextView txtSearch;
     private TextView txtSearchDetail;
     private CmdManager cmdManager;
@@ -279,6 +282,8 @@ public class BleActivity extends BaseActivity {
         sharedPreferences = getSharedPreferences("card", Context.MODE_PRIVATE);
         editor = sharedPreferences.edit();
         initView();
+
+
     }
 
     private void initView() {
@@ -288,6 +293,16 @@ public class BleActivity extends BaseActivity {
         txtSearch = (TextView) findViewById(R.id.txtsearch);
         txtSearchDetail = (TextView) findViewById(R.id.txtsearchDetail);
         tvPullMsg = (TextView) findViewById(R.id.tvPullMsg);
+        tvVer = (TextView) findViewById(R.id.tvVer);
+
+        PackageManager manager = this.getPackageManager();
+        try {
+            PackageInfo info = manager.getPackageInfo(this.getPackageName(), 0);
+            tvVer.setText("V" + info.versionName);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+
 //        pbarBleConnecting=(ProgressBar) findViewById(R.id.pBarConnecting);
               /* Initialize the progress dialog */
         mProgress = new ProgressDialog(mContext, ProgressDialog.THEME_HOLO_DARK);
@@ -623,6 +638,7 @@ public class BleActivity extends BaseActivity {
     protected void onResume() {
         super.onResume();
         LogUtil.d("onResume");
+
         if (bleManager == null) {
             bleManager = new BleManager(this);
         }
