@@ -42,6 +42,8 @@ import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -247,6 +249,21 @@ public class PublicPun {
             LogUtil.e("JSONException:" + e.toString());
             e.printStackTrace();
         } finally {
+//            for (UnSpentTxsBean mUnSpentTxsBean : lisUnSpentTxs) {
+//                LogUtil.e("排序前:" + mUnSpentTxsBean.getAddress() + "=" +new DecimalFormat("#.########").format( mUnSpentTxsBean.getAmount()));
+//            }
+            //put the amount in descending order
+            Collections.sort(lisUnSpentTxs, new Comparator<UnSpentTxsBean>() {
+                @Override
+                public int compare(UnSpentTxsBean lhs, UnSpentTxsBean rhs) {
+//                    return (int)(lhs.getAmount()*100000000)-(int)(rhs.getAmount()*100000000);//ASC order
+                    return ((int) (lhs.getAmount() * 100000000) < (int) (rhs.getAmount() * 100000000) ? 1 :
+                            ((int) (lhs.getAmount() * 100000000) == (int) (rhs.getAmount() * 100000000) ? 0 : -1));
+                }
+            });
+//            for (UnSpentTxsBean mUnSpentTxsBean : lisUnSpentTxs) {
+//                LogUtil.e("排序後:" + mUnSpentTxsBean.getAddress() + "=" + new DecimalFormat("#.########").format(mUnSpentTxsBean.getAmount()));
+//            }
             return lisUnSpentTxs;
         }
     }
@@ -315,11 +332,11 @@ public class PublicPun {
     public static boolean jsonParsingFeeaRate(Context mContext, String jsonString) {
         boolean mResult = false;
         try {
-            LogUtil.d("jsonParsingFeeaRate="+jsonString);
+            LogUtil.d("jsonParsingFeeaRate=" + jsonString);
             JSONObject jsonObjectFeesRate = new JSONObject(jsonString);
             int halfHourFee = jsonObjectFeesRate.getInt("halfHourFee");
-            LogUtil.d("halfHourFee="+halfHourFee);
-            AppPrefrence.saveRecommendedHalfHourFees(mContext,halfHourFee);
+            LogUtil.d("halfHourFee=" + halfHourFee);
+            AppPrefrence.saveRecommendedHalfHourFees(mContext, halfHourFee);
 
             mResult = true;
         } catch (Exception e) {
@@ -429,18 +446,20 @@ public class PublicPun {
                 }
                 if (mResult > 0) {
                     //RECV BTC
+
 //                    for(int j = 0 ; j <lisTxs.get(i).getInputs().length ; j++)
 //                    { LogUtil.i("txs AAddr=" + lisTxs.get(i).getInputs()[j].getPrev_out().getAddr());}
                     //取第一筆
                     mTxAddr = lisTxs.get(i).getInputs()[0].getPrev_out().getAddr();
 //                    tx_value = lisTxs.get(i).getInputs()[0].getPrev_out().getValue();
-                    tx_value = mResult;
+//                    tx_value = mResult;
                 } else {
                     //SEND BTC
 //                    for (int j = 0; j < lisTxs.get(i).getOut().length; j++) {
                     //取第一筆
                     mTxAddr = lisTxs.get(i).getOut()[0].getAddr();
-                    tx_value = (10000 + lisTxs.get(i).getOut()[0].getValue()) * -1; //要加fees,先寫死,後面改浮動fees
+//                    tx_value = (10000 + lisTxs.get(i).getOut()[0].getValue()) * -1; //要加fees,先寫死,後面改浮動fees
+//                    tx_value = mResult ;
 //                    }
                 }
 //                LogUtil.i("account=" + accountID + " ;txAddr=" + mTxAddr + " ;mDate=" + mDate + " ;tx_value=" + tx_value);
@@ -451,7 +470,7 @@ public class PublicPun {
                 mCwBtcTxs.setTxs_TransationID(mTransationID);
                 mCwBtcTxs.setTxs_Address(mTxAddr);
                 mCwBtcTxs.setTxs_Date(mDate);
-                mCwBtcTxs.setTxs_Result(tx_value);
+                mCwBtcTxs.setTxs_Result(mResult);
                 mCwBtcTxs.setTxs_TransationID(mTransationID);
                 mCwBtcTxs.setTxs_Confirmation(confirmations);
 
