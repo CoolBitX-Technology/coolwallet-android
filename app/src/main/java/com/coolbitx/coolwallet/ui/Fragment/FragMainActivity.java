@@ -745,6 +745,7 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
     private void IssueFeedBack() {
         //show Notification
         issueCnt = 0;
+        getAccounts();
         LayoutInflater inflater = LayoutInflater.from(mContext);
         View alert_view = inflater.inflate(R.layout.edit_dialog, null);//alert為另外做給alert用的layout
         final TextView mDialogTitle = (TextView) alert_view.findViewById(R.id.dialog_title);
@@ -752,19 +753,27 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
         mDialogTitle.setText(getString(R.string.issue_feedback_title));
         mDialogMessage.setText(getString(R.string.issue_feedback_message));
         //-----------產生輸入視窗--------
+
         new AlertDialog.Builder(mContext, AlertDialog.THEME_DEVICE_DEFAULT_LIGHT)
                 .setView(alert_view)
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                .setPositiveButton("OK", null)
+                .setNegativeButton(">>POLICY", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        getAccounts();
+                        LayoutInflater inflater = LayoutInflater.from(mContext);
+                        View alert_view = inflater.inflate(R.layout.edit_dialog, null);//alert為另外做給alert用的layout
+                        final TextView mDialogTitle = (TextView) alert_view.findViewById(R.id.dialog_title);
+                        final TextView mDialogMessage = (TextView) alert_view.findViewById(R.id.dialog_message);
+                        mDialogTitle.setText(getString(R.string.issue_feedback_policy_title));
+                        mDialogMessage.setText(getString(R.string.issue_feedback_policy));
+                        //-----------產生輸入視窗--------
+                        new AlertDialog.Builder(mContext, AlertDialog.THEME_DEVICE_DEFAULT_LIGHT)
+                                .setView(alert_view)
+                                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int whichButton) {
+                                    }
+                                }).show();
                     }
-                })
-                .setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-
-                    }
-                })
-                .show();
+                }).show();
     }
 
     private void getAccounts() {
@@ -827,8 +836,9 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
                                     LogUtil.d("account=" + accountId + " ;kcid=" + kcId + " ;kid=" + kid + " ;建地址的public key=" + LogUtil.byte2HexString(extendPub) + ";chainCodeBytes=" + LogUtil.byte2HexString(chainCodeBytes));
                                     Crashlytics.log("account=" + accountId + " ; kcid=" + kcId
                                             + " ; public key=" + LogUtil.byte2HexStringNoBlank(extendPub) + " ; ChainCodeBytes=" + LogUtil.byte2HexStringNoBlank(chainCodeBytes));
-
+                                    issueCnt++;
                                     if (issueCnt == ACCOUNT_CNT * 2) {//external/internal
+                                        LogUtil.d("forceCrash");
                                         forceCrash();
                                     }
                                 }
@@ -842,7 +852,7 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
         try {
             throw new Exception("IssueFeedBack");
         } catch (Exception e) {
-            LogUtil.d("寄issueFeedBack");
+            LogUtil.d("sent issueFeedBack");
             e.getStackTrace();
             Crashlytics.logException(e);
         }

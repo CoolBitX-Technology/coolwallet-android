@@ -431,7 +431,7 @@ public class TabFragment extends Fragment {
                     });
                 } else {
                     mProgress.dismiss();
-                    PublicPun.showNoticeDialog(getActivity(), "Erro Message", "CreateNewAccount Error:" + Integer.toHexString(status));
+                    PublicPun.showNoticeDialog(getActivity(), "Error Message", "CreateNewAccount Error:" + Integer.toHexString(status));
                 }
             }
         });

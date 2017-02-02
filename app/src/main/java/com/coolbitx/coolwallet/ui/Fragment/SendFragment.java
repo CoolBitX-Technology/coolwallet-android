@@ -818,7 +818,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
         if (trxStatus == Constant.TrxStatusWaitOtp) {
             trxStatus = Constant.TrxStatusGetOtp;
         }
-        AlertDialog.Builder otp_dialog = new AlertDialog.Builder(getActivity());
+        AlertDialog.Builder otp_dialog = new AlertDialog.Builder(getActivity(),ProgressDialog.THEME_HOLO_LIGHT);
         final View item = LayoutInflater.from(getActivity()).inflate(R.layout.alert_dialog_otp_input, null);
         otp_dialog.setCancelable(false);
         otp_dialog.setView(item)

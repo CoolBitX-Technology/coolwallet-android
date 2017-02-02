@@ -131,7 +131,7 @@ public class BleActivity extends BaseActivity {
         @Override
         public void onBleConnected() {
 
-            LogUtil.i("連線address:" + address);
+            LogUtil.d("連線address:" + address);
             PublicPun.user.settMacID(address);
             isConnected = true;
             mProgress.dismiss();

@@ -35,7 +35,9 @@
 
     <!--ISSUEFEEDBACK-->
     <string name="issue_feedback_title">Issue FeedBack</string>
-    <string name="issue_feedback_message">This issue feedback is used to diagnose problems and improve CoolWallet.
+    <string name="issue_feedback_policy_title">Policy</string>
+    <string name="issue_feedback_message">The current status/log of this app has been sent to CoolBitX. Please email <![CDATA[info@coolbitx.com]]> to follow up the issue.</string>
+    <string name="issue_feedback_policy">This issue feedback is used to diagnose problems and improve CoolWallet.
         No sensitive data or private key will be shared. Any personal information you submit whether explicitly or incidentally
         will be protected in accordance with our privacy policies. By submitting this feedback, you agree that
         CoolBitX may use feedback that you provide to improve any CoolBitX product or service.</string>

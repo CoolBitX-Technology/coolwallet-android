@@ -470,7 +470,7 @@ public class PublicPun {
                 mCwBtcTxs.setTxs_TransationID(mTransationID);
                 mCwBtcTxs.setTxs_Address(mTxAddr);
                 mCwBtcTxs.setTxs_Date(mDate);
-                mCwBtcTxs.setTxs_Result(mResult);
+                mCwBtcTxs.setTxs_Result(mResult);//tx_value
                 mCwBtcTxs.setTxs_TransationID(mTransationID);
                 mCwBtcTxs.setTxs_Confirmation(confirmations);
 
@@ -596,7 +596,7 @@ public class PublicPun {
         mDialogTitle.setText(mTitle);
         mDialogMessage.setText(mMessage);
         //-----------產生輸入視窗--------
-        new AlertDialog.Builder(mContext, AlertDialog.THEME_DEVICE_DEFAULT_LIGHT)
+        new AlertDialog.Builder(mContext, AlertDialog.THEME_DEVICE_DEFAULT_LIGHT)//
                 .setView(alert_view)
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
@@ -613,7 +613,7 @@ public class PublicPun {
         final TextView mDialogTitle = (TextView) alert_view.findViewById(R.id.dialog_title);
         final TextView mDialogMessage = (TextView) alert_view.findViewById(R.id.dialog_message);
 //        mEditText.setVisibility(View.INVISIBLE);
-        //-----------產生輸入視窗--------
+        //-----------產生輸入視窗--------ProgressDialog.THEME_DEVICE_DEFAULT_LIGHT
         AlertDialog.Builder builder = new AlertDialog.Builder(mContext, AlertDialog.THEME_DEVICE_DEFAULT_LIGHT);
         builder.setCancelable(false);
         mDialogTitle.setText(mTitle);
