@@ -197,7 +197,7 @@ public class InitialCreateWalletIIActivity extends BaseActivity implements SeekB
 
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
-        LogUtil.i("seekBar 移動");
+        LogUtil.d("停止拖拉進度條");
         if (newProgress < 30) {
             lastProgress = 0;
             newProgress = 0;

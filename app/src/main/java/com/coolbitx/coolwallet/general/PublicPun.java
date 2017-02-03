@@ -332,11 +332,16 @@ public class PublicPun {
     public static boolean jsonParsingFeeaRate(Context mContext, String jsonString) {
         boolean mResult = false;
         try {
-            LogUtil.d("jsonParsingFeeaRate=" + jsonString);
+            LogUtil.d("jsonParsingFeeRate=" + jsonString);
             JSONObject jsonObjectFeesRate = new JSONObject(jsonString);
-            int halfHourFee = jsonObjectFeesRate.getInt("halfHourFee");
-            LogUtil.d("halfHourFee=" + halfHourFee);
-            AppPrefrence.saveRecommendedHalfHourFees(mContext, halfHourFee);
+
+            AppPrefrence.saveRecommendedFastestFee(mContext, jsonObjectFeesRate.getInt("fastestFee"));
+            AppPrefrence.saveRecommendedHalfHourFees(mContext, jsonObjectFeesRate.getInt("halfHourFee"));
+            AppPrefrence.saveRecommendedHourFee(mContext, jsonObjectFeesRate.getInt("hourFee"));
+
+            LogUtil.d("fastestFee=" + AppPrefrence.getRecommendedFastestFee(mContext) + ";halfHourFee=" +
+                    AppPrefrence.getRecommendedHalfHourFees(mContext) + ";hourFee=" +
+                    AppPrefrence.getRecommendedHourFee(mContext));
 
             mResult = true;
         } catch (Exception e) {

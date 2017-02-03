@@ -19,7 +19,6 @@
     <string name="BLOCKR_ADDRESS_INFO_API">http://btc.blockr.io/api/v1/address/info/</string>
 
 
-
     <!--Preference-->
     <string name="pref_title_security_otp">Enable One Time Password\n(OTP) on transactions</string>
     <string name="pref_title_security_crad_transaction">Enable press the button on the\ncard to complete transactions</string>
@@ -76,6 +75,15 @@
         1111111+123456+234434+.....
     </string>
 
+
+    <!--txsFee-->
+    <!--<string name="str_estimated_fee_title">Estimated transaction fee:</string>-->
+    <string name="str_estimated_fee_content">Estimated transaction fee:\nMedian transaction size 226 bytes x %1$d (in satoshis per byte)\n= %2$d satoshi\n= %3$f BTC</string>
+    <string name="str_recommended_desc">
+        <!--fastestFee:The lowest fee &#040;in satoshis per byte&#041; that will currently result in the fastest transaction confirmations &#040;usually 0 to 1 block delay&#041;.\n\n-->
+        <!--halfHourFee: The lowest fee &#040;in satoshis per byte&#041; that will confirm transactions within half an hour &#040;with 90% probability&#041;.\n\n-->
+        <!--hourFee: The lowest fee &#040;in satoshis per byte&#041; that will confirm transactions within an hour &#040;with 90% probability&#041;.-->
+    </string>
 
     <string name="str_seedWords_confirm">
         Plese double check the words you\n
@@ -138,6 +146,7 @@
     <string name="send_confirm_str_total">Total</string>
     <string name="send_confirm_str_payment">PAYMENT</string>
     <string name="send_confirm_str_change">Change</string>
+    <string name="notice_fee_alert">Your fee is below average and may take longer than 30 minutes to confirm.</string>
 
     <!--txs-->
     <string name="btn_str_view_blockchain">View at Blockchain.info</string>

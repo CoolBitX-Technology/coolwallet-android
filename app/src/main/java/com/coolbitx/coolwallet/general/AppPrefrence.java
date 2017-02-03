@@ -89,8 +89,18 @@ public class AppPrefrence {
      * hourFee: The lowest fee (in satoshis per byte) that will confirm transactions within an hour (with 90% probability).
      *
      * @param context
-     * @param halfHourFee 80 is the default
      */
+
+    public static void saveRecommendedFastestFee(Context context, int fastestFee) {
+        SharedPreferences mSP = PreferenceManager.getDefaultSharedPreferences(context);
+        mSP.edit().putInt("FastestFee", fastestFee).commit();
+    }
+
+    public static int getRecommendedFastestFee(Context context) {
+        SharedPreferences mSP = PreferenceManager.getDefaultSharedPreferences(context);
+        return mSP.getInt("FastestFee", 90);
+    }
+
     public static void saveRecommendedHalfHourFees(Context context, int halfHourFee) {
         SharedPreferences mSP = PreferenceManager.getDefaultSharedPreferences(context);
         mSP.edit().putInt("HalfHourFees", halfHourFee).commit();
@@ -99,6 +109,47 @@ public class AppPrefrence {
     public static int getRecommendedHalfHourFees(Context context) {
         SharedPreferences mSP = PreferenceManager.getDefaultSharedPreferences(context);
         return mSP.getInt("HalfHourFees", 80);
+    }
+
+    public static void saveRecommendedHourFee(Context context, int hourFee) {
+        SharedPreferences mSP = PreferenceManager.getDefaultSharedPreferences(context);
+        mSP.edit().putInt("HourFee", hourFee).commit();
+    }
+
+    public static int getRecommendedHourFee(Context context) {
+        SharedPreferences mSP = PreferenceManager.getDefaultSharedPreferences(context);
+        return mSP.getInt("HourFee", 70);
+    }
+
+    public static void saveRecommendedDefaultFee(Context context, long defaultFee) {
+        SharedPreferences mSP = PreferenceManager.getDefaultSharedPreferences(context);
+        mSP.edit().putLong("DefaultFee", defaultFee).commit();
+    }
+
+    public static long getRecommendedDefaultFee(Context context) {
+        SharedPreferences mSP = PreferenceManager.getDefaultSharedPreferences(context);
+        return mSP.getLong("DefaultFee", getRecommendedHalfHourFees(context));
+    }
+
+    public static void saveAutoFeeCheckBox(Context context, boolean autoFee) {
+        SharedPreferences mSP = PreferenceManager.getDefaultSharedPreferences(context);
+        mSP.edit().putBoolean("AutoFee", autoFee).commit();
+    }
+
+    public static boolean getAutoFeeCheckBox(Context context) {
+        SharedPreferences mSP = PreferenceManager.getDefaultSharedPreferences(context);
+        return mSP.getBoolean("AutoFee", true);
+    }
+
+
+    public static void saveManual(Context context, float manualFee) {
+        SharedPreferences mSP = PreferenceManager.getDefaultSharedPreferences(context);
+        mSP.edit().putFloat("ManualFee", manualFee).commit();
+    }
+
+    public static float getManualFee(Context context) {
+        SharedPreferences mSP = PreferenceManager.getDefaultSharedPreferences(context);
+        return mSP.getFloat("ManualFee", 0.0002f);
     }
 
 }

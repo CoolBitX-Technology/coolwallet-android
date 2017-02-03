@@ -52,7 +52,7 @@ public class SettingActivity extends BaseActivity implements AdapterView.OnItemC
     @Override
     protected void onResume() {
         super.onResume();
-        String[] item = new String[]{"Exchange Rate"};//, "Transaction Fee"
+        String[] item = new String[]{"Exchange Rate","Transaction Fees"};
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_expandable_list_item_1, item);
         lvSetting.setAdapter(adapter);
         lvSetting.setOnItemClickListener(this);
@@ -81,8 +81,10 @@ public class SettingActivity extends BaseActivity implements AdapterView.OnItemC
                 intent = new Intent(this, ExchangeRateActivity.class);
                 startActivity(intent);
                 break;
-//            case 1:
-//                break;
+            case 1:
+                intent = new Intent(this, TransactionFeeActivity.class);
+                startActivity(intent);
+                break;
 
         }
 

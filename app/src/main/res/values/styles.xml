@@ -64,6 +64,12 @@
         <item name="android:textSize">12sp</item>
     </style>
 
+
+    <style name="TextView_Red_12">
+        <item name="android:textColor">@android:color/holo_red_dark</item>
+        <item name="android:textSize">12sp</item>
+    </style>
+
     <style name="TextView_Gray_20">
         <item name="android:textColor">@android:color/darker_gray</item>
         <item name="android:textSize">20sp</item>
@@ -150,4 +156,9 @@
         <item name="android:backgroundDimAmount">0.6</item><!-- 灰度 -->
         <!--<item name="android:windowFullscreen">true</item>-->
     </style>
+
+    <!-- A seek bar with tick marks at each progress value. -->
+    <!--<style name="Base.Widget.AppCompat.SeekBar.Discrete">-->
+        <!--<item name="tickMark">@drawable/abc_seekbar_tick_mark_material</item>-->
+    <!--</style>-->
 </resources>

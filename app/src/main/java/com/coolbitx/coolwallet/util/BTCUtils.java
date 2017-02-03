@@ -59,8 +59,8 @@ public class BTCUtils {
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
-    private static int HALF_HOUR_PER_KB;
-    private static int HALF_HOUR_PER_BYTE;
+
+    private static int RECOMMENDED_FEE_PER_BYTE;
 
     static {
         X9ECParameters params = SECNamedCurves.getByName("secp256k1");
@@ -81,7 +81,7 @@ public class BTCUtils {
         //fees per byte *1000=1kb
         int txOneOutputLen = 0;
         long updatedFee = 0;
-        HALF_HOUR_PER_BYTE = AppPrefrence.getRecommendedHalfHourFees(mContext);
+        RECOMMENDED_FEE_PER_BYTE = AppPrefrence.getRecommendedFastestFee(mContext);
         ArrayList<UnSpentTxsBean> outputsToSpend = new ArrayList<>();
         if (amountToSend <= 0) {    //No this situation,already rule out by uone instruction.
             //transfer all funds from these addresses to outputAddress
@@ -105,11 +105,17 @@ public class BTCUtils {
                 outputsToSpend.add(outputInfo);
                 valueOfUnspentOutputs += BTCUtils.convertToSatoshisValue(new DecimalFormat("#.########").format(outputInfo.getAmount()));
 
-
                 for (int j = 0; j < 2; j++) {
                     txOneOutputLen = BTCUtils.getMaximumTxSize(outputsToSpend, change > 0 ? 2 : 1, isPublicKeyCompressed);
-                    updatedFee = BTCUtils.calcHalfHourFee(txOneOutputLen);
-                    fee = updatedFee;
+                    updatedFee = calcRecommendedFee(txOneOutputLen);
+                    AppPrefrence.saveRecommendedDefaultFee(mContext,updatedFee);
+
+                    if (AppPrefrence.getAutoFeeCheckBox(mContext)) {
+                        fee = updatedFee;
+                    } else {
+                        fee = convertToSatoshisValue(new DecimalFormat("#.########").format(AppPrefrence.getManualFee(mContext)));
+                    }
+
                     change = valueOfUnspentOutputs - fee - amountToSend;
                 }
 
@@ -162,6 +168,13 @@ public class BTCUtils {
         return x.multiply(y).longValue();
     }
 
+//    public static long convertToBTC(String valueStr) throws NumberFormatException {
+//        String satoshisStr = String.valueOf(SATOSHIS_PER_COIN);
+//        java.math.BigDecimal x = new java.math.BigDecimal(valueStr);
+//        java.math.BigDecimal y = new java.math.BigDecimal(satoshisStr);
+//        return x.multiply(y).longValue();
+//    }
+
     public static boolean isZeroFeeAllowed(int txLen, Collection<UnSpentTxsBean> unspentOutputInfos, long minOutput) {
         if (txLen < MAX_TX_LEN_FOR_NO_FEE && minOutput > MIN_MIN_OUTPUT_VALUE_FOR_NO_FEE) {
             long priority = 0;
@@ -178,9 +191,9 @@ public class BTCUtils {
         return false;
     }
 
-    public static long calcHalfHourFee(int txLen) {
-        LogUtil.e("資料長度=" + txLen + ";fee=" + txLen * HALF_HOUR_PER_BYTE);//);
-        return txLen * HALF_HOUR_PER_BYTE;//;
+    private static long calcRecommendedFee(int txLen) {
+        LogUtil.e("資料長度=" + txLen + ";fee=" + txLen * RECOMMENDED_FEE_PER_BYTE);//);
+        return txLen * RECOMMENDED_FEE_PER_BYTE;//;
     }
 
     public static long calcMinimumFee(int txLen, Collection<UnSpentTxsBean> unspentOutputInfos, long minOutput) {

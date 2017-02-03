@@ -11,6 +11,7 @@ import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.coolbitx.coolwallet.R;
@@ -18,6 +19,7 @@ import com.coolbitx.coolwallet.callback.TransactionConfirmCallback;
 import com.coolbitx.coolwallet.entity.TxsConfirm;
 import com.coolbitx.coolwallet.general.AppPrefrence;
 import com.coolbitx.coolwallet.general.PublicPun;
+import com.snscity.egdwlib.utils.LogUtil;
 
 import java.text.DecimalFormat;
 
@@ -34,7 +36,9 @@ public class TransactionConfirmDialog extends AlertDialog implements View.OnClic
     private TxsConfirm mTxsConfirm;
     private Context mContext;
     private AppCompatActivity activity;
-
+    private ImageView imgAlert;
+    private TextView tvFeeAlert;
+    private boolean isClick = true;
     public TransactionConfirmDialog(Context context, TxsConfirm mTxsConfirm, TransactionConfirmCallback mConfirmListener) {
         super(context, android.R.style.Theme);
         setOwnerActivity((Activity) context);
@@ -55,6 +59,15 @@ public class TransactionConfirmDialog extends AlertDialog implements View.OnClic
         findViews();
         initToolbar();
         DiasplayValue();
+
+
+        if(!AppPrefrence.getAutoFeeCheckBox(mContext)){
+            if (mTxsConfirm.getFees() < AppPrefrence.getRecommendedDefaultFee(mContext)) {
+                imgAlert.setVisibility(View.VISIBLE);
+            } else {
+                imgAlert.setVisibility(View.GONE);
+            }
+        }
     }
 
     private void setDialogView() {
@@ -100,17 +113,35 @@ public class TransactionConfirmDialog extends AlertDialog implements View.OnClic
 
     @Override
     public void onClick(View v) {
-        if (v.getId() == R.id.btn_confirm) {
-            //confirm to send
-            if (mConfirmListener != null) {
-                mConfirmListener.TransactionConfirm();
-            }
-        } else {
-            //cancel
-            mConfirmListener.TransactionCancel();
+
+        int id = v.getId();
+
+        switch (id) {
+            case R.id.btn_confirm:
+                //confirm to send
+                if (mConfirmListener != null) {
+                    mConfirmListener.TransactionConfirm();
+                }
+                dismiss();
+                break;
+            case R.id.btn_cancel:
+                //transaction cancel
+                mConfirmListener.TransactionCancel();
+                dismiss();
+                break;
+            case R.id.img_alert:
+                LogUtil.e("click alert!");
+                if(isClick){
+                    tvFeeAlert.setVisibility(View.VISIBLE);
+                }else{
+                    tvFeeAlert.setVisibility(View.GONE);
+                }
+                isClick=!isClick;
+                break;
         }
-        dismiss();
     }
+
+
 
     private void initToolbar() {
 
@@ -140,8 +171,10 @@ public class TransactionConfirmDialog extends AlertDialog implements View.OnClic
         tvChangeAmount = (TextView) findViewById(R.id.tvChangeAmount);
         btnConfrim = (Button) findViewById(R.id.btn_confirm);
         btnCancel = (Button) findViewById(R.id.btn_cancel);
-
+        imgAlert = (ImageView) findViewById(R.id.img_alert);
+        tvFeeAlert = (TextView)findViewById(R.id.notice_fee_alert);
         btnConfrim.setOnClickListener(this);
         btnCancel.setOnClickListener(this);
+        imgAlert.setOnClickListener(this);
     }
 }

@@ -280,12 +280,14 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
                 return;
             }
 
-            double totalAmount = Double.valueOf(tvSendTitle.getText().toString());
-            if ((totalAmount - spendAmount - 0.0001 < 0) || spendAmount <= 0) {
-                PublicPun.showNoticeDialog(mContext, "Unable to send", "Amount is lower than balance");
-//                Transaction fee: 0.0001 BTC
-                return;
-            }
+            //modify to check in calcFeeChangeAndSelectOutputsToSpend();
+//            double totalAmount = Double.valueOf(tvSendTitle.getText().toString());
+//            if ((totalAmount - spendAmount - 0.0001 < 0) || spendAmount <= 0) {
+//                PublicPun.showNoticeDialog(mContext, "Unable to send", "Amount is lower than balance");
+////                Transaction fee: 0.0001 BTC
+//                return;
+
+//            }
 
             getSecpo();
             FunGetUnspentAddresses(currentAccount);
@@ -443,6 +445,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
         if (outputAddress.equals(changeAddress)) {
             cancelTrx();
             PublicPun.showNoticeDialog(mContext, "Notification", getString(R.string.send_notification_unable_to_send_with_change_error));
+        return;
         }
 
 
@@ -462,6 +465,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
             if (processedTxData == null) {
                 cancelTrx();
                 PublicPun.showNoticeDialog(mContext, "Unable to send:", "Can't find the unspent output.");
+                return;
             }
 
             if (processedTxData.change == 0) {

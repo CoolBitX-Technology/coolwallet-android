@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.coolbitx.coolwallet"
-    android:versionCode="16"
-    android:versionName="1.2.7">
+    package="com.coolbitx.coolwallet">
     <!--1.1.4-->
     <!-- Socket網路權限 -->
     <uses-permission android:name="android.permission.INTERNET" />
@@ -106,11 +104,16 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme"></activity>
 
-        <service android:name=".Service.socketService"/>
+        <activity
+            android:name=".ui.TransactionFeeActivity"
+            android:parentActivityName=".ui.Fragment.FragMainActivity"
+            android:screenOrientation="portrait"></activity>
 
-	<meta-data
-             android:name="io.fabric.ApiKey"
-             android:value="68521535b4c532c476bc000a7304e95422ee5e99" />
+        <service android:name=".Service.socketService" />
+
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="68521535b4c532c476bc000a7304e95422ee5e99" />
     </application>
 
 </manifest>
