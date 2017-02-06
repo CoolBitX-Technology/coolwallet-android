@@ -33,7 +33,7 @@ public class PasingWallet {
         return total_received;
     }
 
-    public void setTotal_received(int total_received) {
+    public void setTotal_received(long total_received) {
         this.total_received = total_received;
     }
 
@@ -41,7 +41,7 @@ public class PasingWallet {
         return total_sent;
     }
 
-    public void setTotal_sent(int total_sent) {
+    public void setTotal_sent(long total_sent) {
         this.total_sent = total_sent;
     }
 

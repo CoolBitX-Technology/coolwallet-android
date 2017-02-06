@@ -63,6 +63,8 @@ import com.snscity.egdwlib.cmd.CmdResultCallback;
 import com.snscity.egdwlib.utils.ByteUtil;
 import com.snscity.egdwlib.utils.LogUtil;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -519,7 +521,7 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
         final byte cwHdwAccountInfoIntKeyPtr = 0x03;
 
         byte[] accountInfo = new byte[32];
-        int TotalBalance = 0;
+        long TotalBalance = 0;
         int extKey = 0;
         int intKey = 0;
         ArrayList<dbAddress> listAddress = new ArrayList<dbAddress>();
@@ -566,7 +568,9 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
                 case cwHdwAccountInfoBalance:
                     accountInfo = new byte[8];
                     //204E000000000000
-                    byte[] newBalanceBytes = ByteUtil.intToByteLittle(TotalBalance, 8);
+//                    byte[] newBalanceBytes = ByteUtil.intToByteLittle(TotalBalance, 8);
+                    byte[] newBalanceBytes =
+                            ByteBuffer.allocate(8).putLong(TotalBalance).order(ByteOrder.BIG_ENDIAN).array();
                     accountInfo = newBalanceBytes;
                     break;
 
@@ -726,6 +730,7 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
                 startActivityForResult(intent, 0);
                 break;
             case 4:
+
                 IssueFeedBack();
                 break;
             case 5:
@@ -774,6 +779,8 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
                                 }).show();
                     }
                 }).show();
+        mProgress.setMessage("Processing...");
+        mProgress.show();
     }
 
     private void getAccounts() {
@@ -839,6 +846,7 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
                                     issueCnt++;
                                     if (issueCnt == ACCOUNT_CNT * 2) {//external/internal
                                         LogUtil.d("forceCrash");
+                                        mProgress.dismiss();
                                         forceCrash();
                                     }
                                 }

@@ -418,7 +418,7 @@ public class BaseActivity extends AppCompatActivity {
         final byte cwHdwAccountInfoIntKeyPtr = 0x03;
 
         byte[] accountInfo = new byte[32];
-        int TotalBalance = 0;
+        long TotalBalance = 0;
         int extKey = 0;
         int intKey = 0;
         ArrayList<dbAddress> listAddress = new ArrayList<dbAddress>();
@@ -453,7 +453,9 @@ public class BaseActivity extends AppCompatActivity {
                 case cwHdwAccountInfoBalance:
                     accountInfo = new byte[8];
                     //204E000000000000
-                    byte[] newBalanceBytes = ByteUtil.intToByteLittle(TotalBalance, 8);
+//                    byte[] newBalanceBytes = ByteUtil.intToByteLittle(TotalBalance, 8);
+                    byte[] newBalanceBytes =
+                            ByteBuffer.allocate(8).order(ByteOrder.BIG_ENDIAN).putLong(TotalBalance).array();
                     accountInfo = newBalanceBytes;
                     break;
 

@@ -210,7 +210,6 @@ public class CmdManager {
                               CmdResultCallback cmdResultCallback) {
         byte[] accInfo = new byte[accountInfo.length];
         int accInfoLen = 0;
-//        LogUtil.i("cmd hdwSetAccInfo:accID="+accountId+"; infoID="+infoId+"; accountInfo="+ LogUtil.byte2HexString(accountInfo));
         int accountInfoLen = accountInfo.length;
         if (accountInfoLen <= 32) {
             for (int i = 0; i < accountInfoLen; i++) {
@@ -228,9 +227,10 @@ public class CmdManager {
 
                 //reverse位置
                 accInfoLen = 8;
-                for (int i = 0; i < accInfoLen; i++) {
-                    accInfo[i] = accountInfo[accInfoLen - i - 1];
-                }
+//                for (int i = 0; i < accInfoLen; i++) {
+//                    accInfo[i] = accountInfo[accInfoLen - i - 1];
+//                }
+                accInfo= accountInfo;
                 break;
             case CwHdwAccountInfoExtKeyPtr:
                 accInfoLen = 4;
@@ -250,7 +250,7 @@ public class CmdManager {
         int length = accIdLen + accInfoLen + mac.length;
 
         byte[] inputData = new byte[length];
-        LogUtil.i("hdwSetAccInfo inputData length=" + inputData.length+" ;accIdLen="+accIdLen+" ;accInfoLen="+accInfoLen);
+        LogUtil.d("hdwSetAccInfo inputData length=" + inputData.length+" ;accIdLen="+accIdLen+" ;accInfoLen="+accInfoLen);
 
         // accIdLen=4
         for (int i = 0; i < accIdLen; i++) {

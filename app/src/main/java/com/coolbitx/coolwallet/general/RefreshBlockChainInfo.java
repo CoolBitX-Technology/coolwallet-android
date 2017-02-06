@@ -105,7 +105,7 @@ public class RefreshBlockChainInfo {
 
         final boolean[] flag = new boolean[5];
 
-        int dbTotalBalance = 0;
+        long dbTotalBalance = 0;
         int dbExtKey = 0;
         int dbIntKey = 0;
         ArrayList<dbAddress> listAddress = new ArrayList<dbAddress>();
@@ -148,13 +148,15 @@ public class RefreshBlockChainInfo {
                                     break;
                                 case cwHdwAccountInfoBalance:
 
-                                    String strbalance = PublicPun.byte2HexString(outputData).replace(" ", "");
-                                    long balance = Long.valueOf(strbalance, 16);
-                                    double TotalBalance = balance * PublicPun.SATOSHI_RATE;
-                                    LogUtil.e("balance hex=" + strbalance);
-                                    LogUtil.i("balance long=" + balance);
-                                    LogUtil.i("balance double=" + TotalBalance);
-                                    account.setTotalBalance(TotalBalance);
+//                                    String strbalance = PublicPun.byte2HexString(outputData).replace(" ", "");
+//                                    long balance = Long.valueOf(strbalance, 16);
+//
+//                                    double TotalBalance = balance * PublicPun.SATOSHI_RATE;
+//
+//                                    LogUtil.e("balance hex=" + strbalance);
+//                                    LogUtil.i("balance long=" + balance);
+//                                    LogUtil.i("balance double=" + TotalBalance);
+//                                    account.setTotalBalance(TotalBalance);
                                     flag[1] = true;
                                     break;
 
@@ -298,7 +300,6 @@ public class RefreshBlockChainInfo {
         this.cmdResultCallback = cmdResultCallback;
         ContentValues cv = new ContentValues();
         cv.put("ACCOUNT_ID", accountID);
-
         new Thread(new GetTxsRunnable(txsHandler, cv, 0, 0)).start();
     }
 

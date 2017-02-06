@@ -439,8 +439,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public static ArrayList<dbAddress> queryAddress(Context context, int accountIndex, int pointer) {
-        //accountIndex -1 代表只抓ext addr
-        //accountIndex -2 代表只抓int addr
+        //accountIndex 0 代表只抓ext addr
+        //accountIndex 1 代表只抓int addr
         ArrayList<dbAddress> listResult = new ArrayList<dbAddress>();
         int mCount = 0;
         DatabaseHelper mOpenHelper = new DatabaseHelper(context);

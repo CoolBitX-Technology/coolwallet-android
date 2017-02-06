@@ -26,9 +26,10 @@ import com.coolbitx.coolwallet.httpRequest.CwBtcNetWork;
 import com.coolbitx.coolwallet.ui.TxsActivity;
 import com.snscity.egdwlib.CmdManager;
 import com.snscity.egdwlib.cmd.CmdResultCallback;
-import com.snscity.egdwlib.utils.ByteUtil;
 import com.snscity.egdwlib.utils.LogUtil;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 
 /**
@@ -225,7 +226,7 @@ public class HomeFragment extends BaseFragment implements AdapterView.OnItemClic
         //set CW Card
         final byte cwHdwAccountInfoBalance = 0x01;
         byte[] accountInfo = new byte[32];
-        int dbTotalBalance = 0;
+        long dbTotalBalance = 0;
         ArrayList<dbAddress> listAddress = new ArrayList<dbAddress>();
         listAddress = DatabaseHelper.queryAddress(mContext, account, -1);
         for (int i = 0; i < listAddress.size(); i++) {
@@ -233,7 +234,11 @@ public class HomeFragment extends BaseFragment implements AdapterView.OnItemClic
         }
         accountInfo = new byte[8];
         //204E000000000000
-        byte[] newBalanceBytes = ByteUtil.intToByteLittle(dbTotalBalance, 8);
+//        byte[] newBalanceBytestest = ByteUtil.intToByteLittle(53150, 4);//user reverse in CmdManager
+
+        byte[] newBalanceBytes =
+                ByteBuffer.allocate(8).order(ByteOrder.BIG_ENDIAN).putLong(dbTotalBalance).array();
+
         accountInfo = newBalanceBytes;
         final int accountID = account;
         cmdManager.hdwSetAccInfo(PublicPun.user.getMacKey(), cwHdwAccountInfoBalance, account, accountInfo,
@@ -247,7 +252,7 @@ public class HomeFragment extends BaseFragment implements AdapterView.OnItemClic
                             TabFragment.ExchangeRate = DatabaseHelper.queryCurrent(getActivity(), AppPrefrence.getCurrentCountry(getActivity()));
                             refresh();
                         } else {
-                            LogUtil.i("setAccountInfo failed.");
+                            LogUtil.e("setAccountInfo failed.");
                             PublicPun.toast(mContext, "setAccountInfo failed!");
                             mProgress.dismiss();
                         }
@@ -258,7 +263,7 @@ public class HomeFragment extends BaseFragment implements AdapterView.OnItemClic
 
     public void refresh() {
 
-        int final_balance = 0;
+        long final_balance = 0;
 
         LogUtil.i("TabFragment.lisCwBtcTxs.size()=" + String.valueOf(TabFragment.lisCwBtcTxs.size()));
 

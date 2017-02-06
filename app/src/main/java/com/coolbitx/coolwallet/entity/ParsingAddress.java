@@ -18,7 +18,7 @@ public class ParsingAddress implements Serializable {
     @SerializedName("total_sent")
     public long total_sent;
     @SerializedName("final_balance")
-    public int final_balance;
+    public long final_balance;
 
     public String getAddress() {
         return address;
@@ -40,7 +40,7 @@ public class ParsingAddress implements Serializable {
         return total_received;
     }
 
-    public void setTotal_received(int total_received) {
+    public void setTotal_received(long total_received) {
         this.total_received = total_received;
     }
 
@@ -48,15 +48,15 @@ public class ParsingAddress implements Serializable {
         return total_sent;
     }
 
-    public void setTotal_sent(int total_sent) {
+    public void setTotal_sent(long total_sent) {
         this.total_sent = total_sent;
     }
 
-    public int getFinal_balance() {
+    public long getFinal_balance() {
         return final_balance;
     }
 
-    public void setFinal_balance(int final_balance) {
+    public void setFinal_balance(long final_balance) {
         this.final_balance = final_balance;
     }
 }

@@ -48,6 +48,8 @@ import com.snscity.egdwlib.cmd.CmdResultCallback;
 import com.snscity.egdwlib.utils.ByteUtil;
 import com.snscity.egdwlib.utils.LogUtil;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -460,13 +462,13 @@ public class RecovWalletActivity extends BaseActivity implements View.OnClickLis
 
                                 case cwHdwAccountInfoBalance:
 
-                                    String strbalance = PublicPun.byte2HexString(outputData).replace(" ", "");
-                                    long balance = Long.valueOf(strbalance, 16);
-                                    double TotalBalance = balance * PublicPun.SATOSHI_RATE;
-                                    LogUtil.e("balance hex=" + strbalance);
-                                    LogUtil.i("balance long=" + balance);
-                                    LogUtil.i("balance double=" + TotalBalance);
-                                    account.setTotalBalance(TotalBalance);
+//                                    String strbalance = PublicPun.byte2HexString(outputData).replace(" ", "");
+//                                    long balance = Long.valueOf(strbalance, 16);
+//                                    double TotalBalance = balance * PublicPun.SATOSHI_RATE;
+//                                    LogUtil.e("balance hex=" + strbalance);
+//                                    LogUtil.i("balance long=" + balance);
+//                                    LogUtil.i("balance double=" + TotalBalance);
+//                                    account.setTotalBalance(TotalBalance);
                                     flag[1] = true;
                                     break;
 
@@ -590,7 +592,7 @@ public class RecovWalletActivity extends BaseActivity implements View.OnClickLis
         final byte cwHdwAccountInfoIntKeyPtr = 0x03;
 
         byte[] accountInfo = new byte[32];
-        int TotalBalance = 0;
+        long TotalBalance = 0;
         int extKey = 0;
         int intKey = 0;
         ArrayList<dbAddress> listAddress = new ArrayList<dbAddress>();
@@ -624,7 +626,9 @@ public class RecovWalletActivity extends BaseActivity implements View.OnClickLis
                 case cwHdwAccountInfoBalance:
                     accountInfo = new byte[8];
                     //204E000000000000
-                    byte[] newBalanceBytes = ByteUtil.intToByteLittle(TotalBalance, 8);
+//                    byte[] newBalanceBytes = ByteUtil.intToByteLittle(TotalBalance, 8);
+                    byte[] newBalanceBytes =
+                            ByteBuffer.allocate(8).putLong(TotalBalance).order(ByteOrder.BIG_ENDIAN).array();
                     accountInfo = newBalanceBytes;
                     break;
 

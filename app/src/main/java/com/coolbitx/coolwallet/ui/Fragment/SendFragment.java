@@ -1311,7 +1311,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
 
     public void refresh(int account, IntentResult scanningResult) {
         currentAccount = account;
-        int final_balance = 0;
+        long final_balance = 0;
         double btcAmt = 0;
         for (int i = 0; i < TabFragment.lisCwBtcAdd.size(); i++) {
             final_balance += TabFragment.lisCwBtcAdd.get(i).getBalance();

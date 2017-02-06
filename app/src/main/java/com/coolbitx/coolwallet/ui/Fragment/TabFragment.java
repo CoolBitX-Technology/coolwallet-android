@@ -28,6 +28,8 @@ import com.snscity.egdwlib.cmd.CmdResultCallback;
 import com.snscity.egdwlib.utils.ByteUtil;
 import com.snscity.egdwlib.utils.LogUtil;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -293,7 +295,7 @@ public class TabFragment extends Fragment {
         final byte cwHdwAccountInfoIntKeyPtr = 0x03;
 
         byte[] accountInfo = new byte[32];
-        int TotalBalance = 0;
+        long TotalBalance = 0;
         int extKey = 0;
         int intKey = 0;
         ArrayList<dbAddress> listAddress = new ArrayList<dbAddress>();
@@ -341,7 +343,9 @@ public class TabFragment extends Fragment {
                 case cwHdwAccountInfoBalance:
                     accountInfo = new byte[8];
                     //204E000000000000
-                    byte[] newBalanceBytes = ByteUtil.intToByteLittle(TotalBalance, 8);
+//                    byte[] newBalanceBytes = ByteUtil.intToByteLittle(TotalBalance, 8);
+                    byte[] newBalanceBytes =
+                            ByteBuffer.allocate(8).putLong(TotalBalance).order(ByteOrder.BIG_ENDIAN).array();
                     accountInfo = newBalanceBytes;
                     break;
 
@@ -366,7 +370,7 @@ public class TabFragment extends Fragment {
 
                                 if (flag[0] && flag[1] && flag[2] && flag[3]) {
 
-                                    FragMainActivity.cmdManager.McuSetAccountState((byte) 0, new CmdResultCallback() {
+                                    FragMainActivity.cmdManager.McuSetAccountState((byte)account, new CmdResultCallback() {
                                                 @Override
                                                 public void onSuccess(int status, byte[] outputData) {
 
