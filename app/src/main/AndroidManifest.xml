@@ -98,6 +98,20 @@
             android:name=".ui.ExchangeRateActivity"
             android:parentActivityName=".ui.Fragment.FragMainActivity"
             android:screenOrientation="portrait"></activity>
+
+        <!--<activity-->
+            <!--android:name=".ui.ExchangeVerificationActivity"-->
+            <!--android:parentActivityName=".ui.Fragment.FragMainActivity"-->
+            <!--android:screenOrientation="portrait" />-->
+        <activity
+            android:name=".ui.ExchangeActivity"
+            android:parentActivityName=".ui.Fragment.FragMainActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.ExchangeOrderActivity"
+            android:parentActivityName=".ui.Fragment.FragMainActivity"
+            android:screenOrientation="portrait" />
+
         <activity
             android:name=".ui.TxsActivity"
             android:parentActivityName=".ui.Fragment.FragMainActivity"
@@ -114,6 +128,39 @@
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="68521535b4c532c476bc000a7304e95422ee5e99" />
+        <!-- for google cloud message -->
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+
+        <!-- for firbase cloud message -->
+        <service
+            android:name=".Service.CwFirebaseMessagingService"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+        <!-- is used to obtain registration tokens using Google's Instance ID API -->
+        <service
+            android:name=".Service.CwFirebaseInstanceIDService"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
+            </intent-filter>
+        </service>
+
+        <receiver
+            android:name="com.microsoft.windowsazure.notifications.NotificationsBroadcastReceiver"
+            android:permission="com.google.android.c2dm.permission.SEND">
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+
+                <category android:name="com.coolbitx.coolwallet" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

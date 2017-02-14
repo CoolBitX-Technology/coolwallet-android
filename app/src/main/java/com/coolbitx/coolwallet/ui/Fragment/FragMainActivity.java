@@ -47,6 +47,7 @@ import com.coolbitx.coolwallet.general.RefreshBlockChainInfo;
 import com.coolbitx.coolwallet.httpRequest.CwBtcNetWork;
 import com.coolbitx.coolwallet.ui.BaseActivity;
 import com.coolbitx.coolwallet.ui.CoolWalletCardActivity;
+import com.coolbitx.coolwallet.ui.ExchangeActivity;
 import com.coolbitx.coolwallet.ui.HostDeviceActivity;
 import com.coolbitx.coolwallet.ui.InitialCreateWalletIIActivity;
 import com.coolbitx.coolwallet.ui.InitialSecuritySettingActivity;
@@ -80,10 +81,10 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
 
     // 左側選單圖片
     private static final int[] MENU_ITEMS_PIC = new int[]
-            {R.mipmap.host, R.mipmap.cwcard, R.mipmap.security, R.mipmap.settings, R.mipmap.ic_feedback_white_24dp, R.mipmap.logout, R.mipmap.ic_share_white_24dp};
+            {R.mipmap.host, R.mipmap.cwcard, R.mipmap.security, R.mipmap.settings, R.drawable.exchange, R.drawable.exchange, R.mipmap.ic_feedback_white_24dp, R.mipmap.logout, R.mipmap.ic_share_white_24dp};
     // 左側選單文字項目
     private static final String[] MENU_ITEMS = new String[]{
-            "Host devices", "CoolWallet card", "Security", "Settings", "Issue Feedback", "Logout", "Share address\n(beta)"
+            "Host devices", "CoolWallet card", "Security", "Settings", "Exchange", "Exchange Login", "Issue Feedback", "Logout", "Share address\n(beta)"
     };
     public static int ACCOUNT_CNT = 0;//這裡要改為抓qryWalletInfo的
     public static boolean refreshFlag = false;
@@ -714,30 +715,54 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
         Intent intent;
         switch (position) {
             case 0:
+                //host device
                 intent = new Intent(getApplicationContext(), HostDeviceActivity.class);
                 startActivityForResult(intent, 0);
                 break;
             case 1:
+                //CollWallet card
                 intent = new Intent(getApplicationContext(), CoolWalletCardActivity.class);
                 startActivityForResult(intent, 0);
                 break;
             case 2:
+                //Security
                 intent = new Intent(getApplicationContext(), InitialSecuritySettingActivity.class);
                 startActivityForResult(intent, 0);
                 break;
             case 3:
+                //Setting(Exchange Rate and Transaction Fees)
                 intent = new Intent(getApplicationContext(), SettingActivity.class);
                 startActivityForResult(intent, 0);
                 break;
             case 4:
+                intent = new Intent(getApplicationContext(), ExchangeActivity.class);
+                startActivityForResult(intent, 0);
+                break;
+
+            case 5:
+                int infoid = 0;
+                cmdManager.XchsGetOtp(infoid, new CmdResultCallback() {
+                    @Override
+                    public void onSuccess(int status, byte[] outputData) {
+                        if ((status + 65536) == 0x9000) {//-28672//36864
+                            LogUtil.d("XchsGetOtp ok= " + outputData);
+                        } else {
+                            LogUtil.d("XchsGetOtp fail= " + outputData);
+
+                        }
+                    }
+                });
+                break;
+
+            case 6:
 
                 IssueFeedBack();
                 break;
-            case 5:
+            case 7:
                 intent = new Intent(getApplicationContext(), LogOutActivity.class);
                 startActivityForResult(intent, 0);
                 break;
-            case 6:
+            case 8:
                 //Share address service
                 intent = new Intent(getApplicationContext(), ShareAddress.class);
                 startActivityForResult(intent, 0);
@@ -746,7 +771,6 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
         // 關掉 Drawer
         mDrawerLayout.closeDrawer(mLlvDrawerContent);
     }
-
     private void IssueFeedBack() {
         //show Notification
         issueCnt = 0;

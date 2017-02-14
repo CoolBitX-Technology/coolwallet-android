@@ -105,6 +105,18 @@
         <item name="android:textSize">18sp</item>
     </style>
 
+    <style name="TextView_Brown_18">
+        <item name="android:textColor">@color/Strong_yellow</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+    <style name="TextView_White_16">
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+    <style name="TextView_White_14">
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textSize">14sp</item>
+    </style>
     <style name="TextView_Black_14">
         <item name="android:textColor">@android:color/black</item>
         <item name="android:textSize">14sp</item>
@@ -114,7 +126,10 @@
         <item name="android:textColor">@android:color/black</item>
         <item name="android:textSize">12sp</item>
     </style>
-
+    <style name="TextView_Gray_12">
+        <item name="android:textColor">@android:color/darker_gray</item>
+        <item name="android:textSize">12sp</item>
+    </style>
     <style name="RadioButton">
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_height">wrap_content</item>

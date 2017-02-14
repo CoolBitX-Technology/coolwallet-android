@@ -19,6 +19,7 @@ import com.coolbitx.coolwallet.entity.Account;
 import com.coolbitx.coolwallet.entity.Card;
 import com.coolbitx.coolwallet.entity.Constant;
 import com.coolbitx.coolwallet.entity.CwBtcTxs;
+import com.coolbitx.coolwallet.entity.ExchangeOrder;
 import com.coolbitx.coolwallet.entity.ExchangeRate;
 import com.coolbitx.coolwallet.entity.Host;
 import com.coolbitx.coolwallet.entity.Info;
@@ -172,22 +173,35 @@ public class PublicPun {
         return mResult;
     }
 
-    public static ArrayList<UnSpentTxsBean> jsonParserUnspentII(String jsonString) {
+    public static ArrayList<ExchangeOrder> jsonParserExchange(String jsonString, String mType) {
 
-        ArrayList<UnSpentTxsBean> lisUnSpentTxs = new ArrayList<UnSpentTxsBean>();
-        String UnSpentTxsAddr = null;
+        ArrayList<ExchangeOrder> listExchangeOrder = new ArrayList<>();
         try {
             JSONObject jsonObject = new JSONObject(jsonString);
             Gson gson = new Gson();
-            JSONArray jsonArrayData = jsonObject.getJSONArray("data");
+
+            JSONArray jsonArrayOrder = jsonObject.getJSONArray(mType);
+
+            for (int i = 0; i < jsonArrayOrder.length(); i++) {
+                JSONObject jsonObjectSellData = jsonArrayOrder.getJSONObject(i);
+                ExchangeOrder exchangeOrder = gson.fromJson(jsonObjectSellData.toString(), ExchangeOrder.class);
+
+                LogUtil.i("exchangeOrder" + String.valueOf(i) + " 筆= " +
+                        exchangeOrder.getOrderId() + " , " + exchangeOrder.getAddr() + " , " +
+                        exchangeOrder.getAmount() + " , " + exchangeOrder.getAccount() + " , " +
+                        exchangeOrder.getPrice() + " , " + exchangeOrder.getExpiration());
+                // 15847930 , null , 50 , 3 , 234.56 , null
+
+                listExchangeOrder.add(exchangeOrder);
+            }
         } catch (Exception e) {
-            LogUtil.e("Unspent JSON Parsing error:" + e.toString());
+            LogUtil.e("JSONException:" + e.toString());
             e.printStackTrace();
         } finally {
-            return lisUnSpentTxs;
+
+            return listExchangeOrder;
         }
     }
-
     public static ArrayList<UnSpentTxsBean> jsonParserUnspent(String jsonString) {
 
 //      JSONObject  json = RestManager.getJSONfromURL(myuri); // retrieve the entire json stream

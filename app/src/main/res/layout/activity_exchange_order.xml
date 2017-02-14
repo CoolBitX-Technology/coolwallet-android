@@ -1,0 +1,263 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/md_grey_900"
+    android:orientation="vertical">
+
+    <include layout="@layout/toolbar_main" />
+
+
+    <!--第一行-->
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:background="@drawable/exchange_textview_border"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/order_strAddr"
+            style="@style/TextView_White_Bold_18"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="10dp"
+            android:text="Buyer's address" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_marginTop="5dp"
+            android:background="@drawable/dash_line"
+            android:layerType="software" />
+
+        <TextView
+            android:id="@+id/order_tvAddress"
+            style="@style/TextView_White_Bold_18"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="20dp"
+            android:hint="address"
+            android:singleLine="true" />
+    </LinearLayout>
+
+
+    <!--第二行-->
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:background="@drawable/exchange_textview_border"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/order_strAnount"
+                style="@style/TextView_White_Bold_18"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="5"
+                android:gravity="center"
+                android:text="Amount" />
+
+            <TextView
+                android:id="@+id/order_strPrice"
+                style="@style/TextView_White_Bold_18"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="5"
+                android:gravity="center"
+                android:text="Price" />
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_marginTop="5dp"
+            android:background="@drawable/dash_line"
+            android:layerType="software" />
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/order_tvAnount"
+                style="@style/TextView_White_Bold_18"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_weight="4"
+                android:hint="0.10100001 BTC" />
+
+            <TextView
+                android:id="@+id/order_tvFormate"
+                style="@style/TextView_White_Bold_18"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_weight="2"
+                android:hint=" @ " />
+
+            <TextView
+                android:id="@+id/order_tvPrice"
+                style="@style/TextView_White_Bold_18"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_weight="3"
+                android:hint="$450.53" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!--第三行-->
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_weight="5"
+            android:background="@drawable/exchange_textview_border"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/order_strNum"
+                style="@style/TextView_White_Bold_18"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="5dp"
+                android:text="Order number" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:layout_marginTop="5dp"
+                android:background="@drawable/dash_line"
+                android:layerType="software" />
+
+            <TextView
+                android:id="@+id/order_tvNum"
+                style="@style/TextView_White_Bold_18"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="5dp"
+                android:hint="584793" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="10dp"
+            android:layout_weight="5"
+            android:background="@drawable/exchange_textview_border"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/order_strAccount"
+                style="@style/TextView_White_Bold_18"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="5dp"
+                android:text="Account" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:layout_marginTop="5dp"
+                android:background="@drawable/dash_line"
+                android:layerType="software" />
+
+            <TextView
+                android:id="@+id/order_tvAccount"
+                style="@style/TextView_White_Bold_18"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="5dp"
+                android:hint="2"
+                android:singleLine="true" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!--第四行-->
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:background="@drawable/exchange_textview_border"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/order_strExpiration"
+            style="@style/TextView_White_Bold_18"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="10dp"
+            android:text="Expiration time" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_marginTop="5dp"
+            android:background="@drawable/dash_line"
+            android:layerType="software" />
+
+        <TextView
+            android:id="@+id/order_tvExpiration"
+            style="@style/TextView_White_Bold_18"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="20dp"
+            android:hint="19 Jan 2016 07:12 PM"
+            android:singleLine="true" />
+    </LinearLayout>
+
+
+    <TextView
+        android:id="@+id/order_strNotice"
+        style="@style/TextView_Gray_12"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:gravity="center"
+        android:text="@string/tv_order_notice_str" />
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:gravity="bottom|center_horizontal"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/btn_complete_order"
+            style="@style/TextView_Brown_18"
+            android:layout_width="200dp"
+            android:layout_height="50dp"
+            android:layout_marginBottom="20dp"
+            android:background="@drawable/selector_button"
+            android:text="@string/btn_complete_order_str" />
+    </LinearLayout>
+
+</LinearLayout>

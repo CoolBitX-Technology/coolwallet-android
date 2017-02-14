@@ -9,7 +9,6 @@ buildscript {
 }
 
 apply plugin: 'com.android.application'
-
 repositories {
     maven { url 'https://maven.fabric.io/public' }
 }
@@ -31,8 +30,8 @@ android {
         minSdkVersion 18
         targetSdkVersion 22
         versionCode 18
-        versionName "1.3.2"
-//        multiDexEnabled = true
+        versionName "1.3.2(TEST)"
+        multiDexEnabled = true
     }
 //    compileOptions {
 //        sourceCompatibility JavaVersion.VERSION_1_6
@@ -68,6 +67,14 @@ dependencies {
         transitive = true;
     }
     compile 'org.java-websocket:Java-WebSocket:1.3.0'
-//    compile 'com.loopj.android:android-async-http:1.4.5'
-//    compile 'com.android.support:multidex:1.0.1'
+
+    // For firebase cloud message(google provided)
+//    compile 'com.google.firebase:firebase-messaging:10.0.1' //crush caused in this version
+    compile 'com.google.firebase:firebase-messaging:9.0.2'
+    //for azure notification
+    compile 'com.microsoft.azure:azure-notifications-handler:1.0.1@aar'
+    // Enabling multidex support.
+    compile 'com.android.support:multidex:1.0.0'
 }
+
+apply plugin: 'com.google.gms.google-services'

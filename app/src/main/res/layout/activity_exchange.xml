@@ -1,0 +1,187 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black"
+    android:gravity="center_horizontal"
+    android:orientation="vertical">
+
+    <include layout="@layout/toolbar" />
+
+    <TextView
+        android:id="@+id/tv_order_verification"
+        style="@style/TextView_White_Bold_18"
+        android:layout_width="fill_parent"
+        android:layout_height="40dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/selector_textview"
+        android:gravity="right|center_vertical"
+        android:text="Sell order verification                                 》" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="10dp"
+        android:gravity="center_horizontal"
+        android:text="@string/tv_exchange_sell_str"
+        android:textColor="@color/bottomtab_normal"
+        android:textSize="20dp" />
+
+
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:background="@color/col_black">
+
+        <TableRow
+            android:id="@+id/tr_create_sell"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/exchange_textview_border">
+
+            <TextView
+                style="@style/TextView_White_16"
+                android:layout_width="0dp"
+                android:layout_height="30dp"
+                android:layout_column="0"
+                android:layout_marginLeft="10dp"
+                android:layout_weight="5"
+                android:gravity="center|left"
+                android:text="Amount (BTC)"
+                android:textColor="@color/bottomtab_normal" />
+
+            <TextView
+                style="@style/TextView_White_16"
+                android:layout_width="0dp"
+                android:layout_height="30dp"
+                android:layout_column="1"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="3"
+                android:gravity="center"
+                android:text="Price"
+                android:textColor="@color/bottomtab_normal" />
+
+            <TextView
+                style="@style/TextView_White_16"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:layout_column="2"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="2"
+                android:gravity="center"
+                android:text="Expiration time"
+                android:textColor="@color/bottomtab_normal" />
+
+        </TableRow>
+
+    </TableLayout>
+
+    <ListView
+        android:id="@+id/grid_sell"
+        android:layout_width="fill_parent"
+        android:layout_height="148dp"
+        android:layout_gravity="center"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:background="@drawable/exchange_textview_border"
+        android:columnWidth="50pt"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:gravity="center"
+        android:horizontalSpacing="3dp"
+        android:stretchMode="columnWidth"
+        android:verticalSpacing="3dp"
+        android:divider="@color/md_grey_600"
+        android:dividerHeight="1dp"
+        android:listSelector="@color/md_orange_300"
+        />
+        <!--android:numColumns="auto_fit"-->
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="10dp"
+        android:gravity="center_horizontal"
+        android:text="@string/tv_exchange_buy_str"
+        android:textColor="@color/bottomtab_normal"
+        android:textSize="20dp" />
+
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:background="@color/col_black">
+
+        <TableRow
+            android:id="@+id/tr_create_but"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/exchange_textview_border">
+
+            <TextView
+                style="@style/TextView_White_16"
+                android:layout_width="0dp"
+                android:layout_height="30dp"
+                android:layout_column="0"
+                android:layout_marginLeft="10dp"
+                android:layout_weight="5"
+                android:gravity="center"
+                android:text="Amount (BTC)"
+                android:textColor="@color/bottomtab_normal" />
+
+            <TextView
+                style="@style/TextView_White_16"
+                android:layout_width="0dp"
+                android:layout_height="30dp"
+                android:layout_column="1"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="3"
+                android:gravity="center"
+                android:text="Price"
+                android:textColor="@color/bottomtab_normal" />
+
+            <TextView
+                style="@style/TextView_White_16"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:layout_column="2"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="2"
+                android:gravity="center"
+                android:text="Expiration time"
+                android:textColor="@color/bottomtab_normal" />
+        </TableRow>
+    </TableLayout>
+
+    <ListView
+        android:id="@+id/grid_buy"
+        android:layout_width="fill_parent"
+        android:layout_height="148dp"
+        android:layout_gravity="center"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:background="@drawable/exchange_textview_border"
+        android:columnWidth="50pt"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:gravity="center"
+        android:horizontalSpacing="3dp"
+        android:stretchMode="columnWidth"
+        android:verticalSpacing="3dp"
+        android:divider="@color/md_grey_600"
+        android:dividerHeight="1dp"
+        android:listSelector="@color/md_orange_300"/>
+    <!--android:numColumns="3"-->
+</LinearLayout>

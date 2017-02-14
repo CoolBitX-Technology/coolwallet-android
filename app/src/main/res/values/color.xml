@@ -220,7 +220,7 @@ http://www.google.com/design/spec/style/color.html#color-ui-color-palette -->
     <color name="md_yellow_A200">#FFFF00</color>
     <color name="md_yellow_A400">#FFEA00</color>
     <color name="md_yellow_A700">#FFD600</color>
-
+    <color name="Strong_yellow">#D5B416</color>
     <!--amber-->
     <color name="md_amber_50">#FFF8E1</color>
     <color name="md_amber_100">#FFECB3</color>

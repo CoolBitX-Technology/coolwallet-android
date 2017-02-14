@@ -124,6 +124,80 @@ public class CmdManager {
         return cmdProcessor;
     }
 
+
+
+
+    //Exchange Site
+    public void XchsGetOtp(int infoId,CmdResultCallback cmdResultCallback) {
+        CmdPacket cmdPacket = new CmdPacket.Builder()
+                .setCla(CmdCla.EX_GET_OTP)
+                .setIns(CmdIns.EX_GET_OTP)
+                .setPram1(infoId)
+                .build();
+        cmdPacket.setCmdResultListener(cmdResultCallback);
+        cmdProcessor.addCmd(cmdPacket);
+    }
+
+    public void XchsCancelBlock(byte[] cancelInfo,CmdResultCallback cmdResultCallback) {
+        CmdPacket cmdPacket = new CmdPacket.Builder()
+                .setCla(CmdCla.EX_BLOCK_CANCEL)
+                .setIns(CmdIns.EX_BLOCK_CANCEL)
+                .setInputData(cancelInfo)
+                .build();
+        cmdPacket.setCmdResultListener(cmdResultCallback);
+        cmdProcessor.addCmd(cmdPacket);
+    }
+    public void XchsSessionInit(byte[] svrChlng, CmdResultCallback cmdResultCallback) {
+        CmdPacket cmdPacket = new CmdPacket.Builder()
+                .setCla(CmdCla.EX_SESSION_INIT)
+                .setIns(CmdIns.EX_SESSION_INIT)
+                .setInputData(svrChlng)
+                .build();
+        cmdPacket.setCmdResultListener(cmdResultCallback);
+        cmdProcessor.addCmd(cmdPacket);
+    }
+
+    public void XchsSessionEstablish(byte[] svrResp,CmdResultCallback cmdResultCallback) {
+        CmdPacket cmdPacket = new CmdPacket.Builder()
+                .setCla(CmdCla.EX_SESSION_ESTAB)
+                .setIns(CmdIns.EX_SESSION_ESTAB)
+                .setInputData(svrResp)
+                .build();
+        cmdPacket.setCmdResultListener(cmdResultCallback);
+        cmdProcessor.addCmd(cmdPacket);
+    }
+
+    public void XchsTrxsignLogin(byte[] loginBlk,CmdResultCallback cmdResultCallback) {
+        CmdPacket cmdPacket = new CmdPacket.Builder()
+                .setCla(CmdCla.EX_TRX_SIGN_LOGIN)
+                .setIns(CmdIns.EX_TRX_SIGN_LOGIN)
+                .setInputData(loginBlk)
+                .build();
+        cmdPacket.setCmdResultListener(cmdResultCallback);
+        cmdProcessor.addCmd(cmdPacket);
+    }
+
+
+    public void XchsTrxsignPrepare(byte[] svrResp,CmdResultCallback cmdResultCallback) {
+        CmdPacket cmdPacket = new CmdPacket.Builder()
+                .setCla(CmdCla.EX_TRX_SIGN_PREPARE)
+                .setIns(CmdIns.EX_TRX_SIGN_PREPARE)
+                .setInputData(svrResp)
+                .build();
+        cmdPacket.setCmdResultListener(cmdResultCallback);
+        cmdProcessor.addCmd(cmdPacket);
+    }
+
+    public void XchsTrxsignLogout(byte[] svrResp,CmdResultCallback cmdResultCallback) {
+        CmdPacket cmdPacket = new CmdPacket.Builder()
+                .setCla(CmdCla.EX_TRX_SIGN_LOGOUT)
+                .setIns(CmdIns.EX_TRX_SIGN_LOGOUT)
+                .setInputData(svrResp)
+                .build();
+        cmdPacket.setCmdResultListener(cmdResultCallback);
+        cmdProcessor.addCmd(cmdPacket);
+    }
+
     public void hdwQryWaInfo(int infoId, CmdResultCallback cmdResultCallback) {
         //P1: infoId 1B (=00 status, 01 name, 02 accountPointer)
         //output:
@@ -896,7 +970,7 @@ public class CmdManager {
     }
 
     public void shareBindLogin( byte[] regresp, int hostID,
-                          CmdResultCallback cmdResultCallback) {
+                                CmdResultCallback cmdResultCallback) {
 
 //        StringBuilder sb = new StringBuilder();
 //        sb.append(uuid);//32
@@ -1139,7 +1213,7 @@ public class CmdManager {
     public void cwCmdTrxBegin(byte[] encKey, long amount, String recvAddr, CmdResultCallback cmdResultCallback) {
 
         byte[] recvAddrBytes = recvAddr.getBytes(Charset.forName(CHARSETNAME));
-        LogUtil.i("txsBegin addr="+recvAddr+" ;hex="+LogUtil.byte2HexString(recvAddrBytes));
+        LogUtil.d("txsBegin addr="+recvAddr+" ;hex="+LogUtil.byte2HexString(recvAddrBytes));
         byte[] addr = new byte[48];
         int length = recvAddrBytes.length;
         if (length <= 48) {
@@ -1149,6 +1223,8 @@ public class CmdManager {
         }
 
         addr = AES.getAESEncrypt(addr, encKey);
+
+        LogUtil.d("txsBegin AES addr="+addr);
 
         byte[] amountBn = ByteUtil.intToByteBig((int) amount, 8);//转成8字节大端模式
 
