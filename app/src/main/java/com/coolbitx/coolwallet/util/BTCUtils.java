@@ -100,20 +100,20 @@ public class BTCUtils {
 
             for (int i = 0; i < UnSpentTxsBeanList.size(); i++) {
                 UnSpentTxsBean outputInfo = UnSpentTxsBeanList.get(i);
-                LogUtil.i("找到Unspent第" + i + "筆=" + BTCUtils.convertToSatoshisValue(new DecimalFormat("#.########").format(outputInfo.getAmount()))
+                LogUtil.d("找到Unspent第" + i + "筆=" + String.valueOf(BTCUtils.BTCconvertToSatoshisValue(outputInfo.getAmount()))
                         + ";addr=" + outputInfo.getAddress());
                 outputsToSpend.add(outputInfo);
-                valueOfUnspentOutputs += BTCUtils.convertToSatoshisValue(new DecimalFormat("#.########").format(outputInfo.getAmount()));
+                valueOfUnspentOutputs += BTCUtils.BTCconvertToSatoshisValue(outputInfo.getAmount());
 
                 for (int j = 0; j < 2; j++) {
                     txOneOutputLen = BTCUtils.getMaximumTxSize(outputsToSpend, change > 0 ? 2 : 1, isPublicKeyCompressed);
                     updatedFee = calcRecommendedFee(txOneOutputLen);
-                    AppPrefrence.saveRecommendedDefaultFee(mContext,updatedFee);
+                    AppPrefrence.saveRecommendedDefaultFee(mContext, updatedFee);
 
                     if (AppPrefrence.getAutoFeeCheckBox(mContext)) {
                         fee = updatedFee;
                     } else {
-                        fee = convertToSatoshisValue(new DecimalFormat("#.########").format(AppPrefrence.getManualFee(mContext)));
+                        fee = BTCconvertToSatoshisValue(AppPrefrence.getManualFee(mContext));
                     }
 
                     change = valueOfUnspentOutputs - fee - amountToSend;
@@ -161,11 +161,22 @@ public class BTCUtils {
         return new FeeChangeAndSelectedOutputs(fee + extraFee, change, amountToSend, outputsToSpend, valueOfUnspentOutputs);
     }
 
-    public static long convertToSatoshisValue(String valueStr) throws NumberFormatException {
+    /**
+     * @param valueStr
+     * @return
+     * @throws NumberFormatException
+     */
+    public static long convertToSatoshisValueForDIsplay(String valueStr) throws NumberFormatException {
         String satoshisStr = String.valueOf(SATOSHIS_PER_COIN);
         java.math.BigDecimal x = new java.math.BigDecimal(valueStr);
         java.math.BigDecimal y = new java.math.BigDecimal(satoshisStr);
         return x.multiply(y).longValue();
+    }
+
+    public static long BTCconvertToSatoshisValue(double value) throws NumberFormatException {
+        double result = value * SATOSHIS_PER_COIN;
+
+        return Math.round(result);
     }
 
 //    public static long convertToBTC(String valueStr) throws NumberFormatException {

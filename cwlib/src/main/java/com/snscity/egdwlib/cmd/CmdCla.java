@@ -12,6 +12,8 @@ public class CmdCla {
         private static final int KEEP_MEMORY = 0x81;
         private static final int KEEP_FLASH = 0x82;
         private static final int KEEP_NONE = 0x83;
+        private static final int KEEP_XCHS_INI = 0x84;
+        private static final int KEEP_XCHS_ESTAB = 0x85;
     }
 
     //SE Commands
@@ -89,8 +91,8 @@ public class CmdCla {
     //Exchange Site Commands
     public static final int EX_REG_STATUS = ClaType.KEEP_MEMORY;
     public static final int EX_GET_OTP = ClaType.KEEP_MEMORY;
-    public static final int EX_SESSION_INIT = ClaType.KEEP_FLASH; //?
-    public static final int EX_SESSION_ESTAB = ClaType.KEEP_FLASH; //?
+    public static final int EX_SESSION_INIT = ClaType.KEEP_XCHS_INI; //?
+    public static final int EX_SESSION_ESTAB = ClaType.KEEP_XCHS_ESTAB; //?
     public static final int EX_SESSION_LOGOUT = ClaType.KEEP_FLASH; //?
     public static final int EX_BLOCK_INFO = ClaType.KEEP_FLASH; //?
     public static final int EX_BLOCK_BTC = ClaType.KEEP_FLASH; //?

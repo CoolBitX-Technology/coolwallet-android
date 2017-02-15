@@ -9,7 +9,7 @@ import com.coolbitx.coolwallet.entity.Constant;
 import com.coolbitx.coolwallet.entity.XchsSync;
 import com.coolbitx.coolwallet.entity.dbAddress;
 import com.coolbitx.coolwallet.general.PublicPun;
-import com.coolbitx.coolwallet.httpRequest.XchsAPI;
+import com.coolbitx.coolwallet.httpRequest.XchsNetWork;
 import com.coolbitx.coolwallet.ui.Fragment.FragMainActivity;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.snscity.egdwlib.CmdManager;
@@ -87,19 +87,24 @@ public class ExchangeAPI {
                                         public void onSuccess(int status, byte[] outputData) {
                                             //collect api sync data
                                             if ((status + 65536) == 0x9000) {
-                                                getExchangeSync(CWID, createSyncJson(exchangeToken), new APIResultCallback() {
-                                                    @Override
-                                                    public void success(String[] msg) {
-                                                        LogUtil.d("getExchangeSync ok " + msg[0]);
-                                                        initResult = true;
-                                                    }
+                                                ArrayList<XchsSync> lisXchsSync = querySyncData();
+                                                if (lisXchsSync.size() != 0) {
+                                                    getExchangeSync(CWID, createSyncJson(lisXchsSync, exchangeToken), new APIResultCallback() {
+                                                        @Override
+                                                        public void success(String[] msg) {
+                                                            LogUtil.d("getExchangeSync ok " + msg[0]);
+                                                            initResult = true;
+                                                        }
 
-                                                    @Override
-                                                    public void fail(String msg) {
-                                                        LogUtil.d("getExchangeSync failed:" + msg);
-                                                        //exchangeSite Logout()
-                                                    }
-                                                });
+                                                        @Override
+                                                        public void fail(String msg) {
+                                                            LogUtil.d("getExchangeSync failed:" + msg);
+                                                            //exchangeSite Logout()
+                                                        }
+                                                    });
+                                                } else {
+                                                    LogUtil.e("lisXchsSync no data found:");
+                                                }
                                             }
                                         }
                                     });
@@ -109,6 +114,13 @@ public class ExchangeAPI {
                                 public void fail(String msg) {
                                     LogUtil.d("getSessionEstablish failed:" + msg);
                                     //exchangeSite Logout()
+                                }
+                            });
+                        } else {
+                            cmdManager.getError(new CmdResultCallback() {
+                                @Override
+                                public void onSuccess(int status, byte[] outputData) {
+                                    LogUtil.e("getError :" + PublicPun.byte2HexString(outputData));
                                 }
                             });
                         }
@@ -125,19 +137,18 @@ public class ExchangeAPI {
         return initResult;
     }
 
+
     /**
      * 生成json
      */
     boolean[] isNotAccountReady;
     boolean[] isNotKeyReady;
     ArrayList<dbAddress> listAddress;
-    int accountId = -1;
-    int kcid = -1;
     final byte[] cwHdwAccountInfo =
             new byte[]{Constant.CwAddressKeyChainExternal, Constant.CwAddressKeyChainInternal};
 
 
-    public String createSyncJson(String exchangeToken) {
+    public ArrayList<XchsSync> querySyncData() {
         // TODO Auto-generated method stub
         //final int accountId, final int kid, final byte kcId
 //        querySyncData
@@ -148,19 +159,22 @@ public class ExchangeAPI {
         final ArrayList<XchsSync> listXchsSync = new ArrayList<XchsSync>();
 
         int i = 0;
-
         while (i < FragMainActivity.ACCOUNT_CNT && !isNotAccountReady[i]) {
-            LogUtil.d("XCHS i=" + String.valueOf(i) + "; acc cnt=" + FragMainActivity.ACCOUNT_CNT + ";isReady=" + isNotAccountReady[i]);//+"
-            accountId = i;
+            LogUtil.d("XCHS acc=" + String.valueOf(i));
+            final int accountId = i;
             isNotAccountReady[i] = true;
             listAddress = new ArrayList<dbAddress>();
             int j = 0;
             while (j <= 1 && !isNotKeyReady[j]) {// && !isNotKeyReady[j]
-                kcid = j;
+                final int kcid = j;
                 isNotKeyReady[j] = true;
                 listAddress = DatabaseHelper.queryAddress(mContext, i, j);
-                LogUtil.d("XCHS acc=" + String.valueOf(i) + "; kcid=" + kcid);//+"
-                FragMainActivity.cmdManager.hdwQueryAccountKeyInfo(Constant.CwHdwAccountKeyInfoPubKeyAndChainCd,
+//                LogUtil.d("XCHS acc=" + String.valueOf(i) + ";kcid=" + kcid);//+"
+                LogUtil.d("XCHS kcid=" + kcid);//+"
+
+
+
+                cmdManager.hdwQueryAccountKeyInfo(Constant.CwHdwAccountKeyInfoPubKeyAndChainCd,
                         j,
                         i,
                         0,
@@ -202,31 +216,28 @@ public class ExchangeAPI {
                                             mXchsSync.setAccChain(LogUtil.byte2HexStringNoBlank(chainCodeBytes));
                                             mXchsSync.setAddNum(listAddress.size());
 
-                                            LogUtil.d("XCHS account=" + accountId + " ;kcid=" + kcid + " ;num=" + listAddress.size() + " ;建地址的public key=" + LogUtil.byte2HexString(publicKeyBytes)
+                                            LogUtil.d("XCHS account=" + accountId + " ;kcid=" + kcid + " ;num=" + listAddress.size()
+                                                    + " ;建地址的public key=" + LogUtil.byte2HexString(publicKeyBytes)
                                                     + " ;建地址的chainCodeBytes=" + LogUtil.byte2HexString(chainCodeBytes));
-                                            isNotKeyReady[0] = false;
                                             listXchsSync.add(mXchsSync);
 
-                                            LogUtil.d("交易所Sync 數量 =" + listXchsSync.size());
+                                            isNotAccountReady[accountId] = false;
+                                            isNotKeyReady[kcid] = false;
                                         }
                                     }
                                 } else {
                                 }
                             }
                         });
-                j++;
-                if (j <= 1) {
-                    isNotKeyReady[1] = false;
-                }
-            }
-            LogUtil.d("xchs isNotKeyReady 0=" + isNotKeyReady[0] + ";isNotKeyReady[1]=" + isNotKeyReady[1]);
-//            if (!isNotKeyReady[0] && !isNotKeyReady[1]&& i<FragMainActivity.ACCOUNT_CNT) {
 
-            if (i < FragMainActivity.ACCOUNT_CNT - 1) {//index 0,1,2,3,4
-                i++;
-                isNotAccountReady[i] = false;
             }
+
         }
+        LogUtil.d("交易所Sync 數量 =" + listXchsSync.size());
+        return listXchsSync;
+    }
+
+    public String createSyncJson(ArrayList<XchsSync> listXchsSync, String exchangeToken) {
 
         JSONStringer jsonStringer = new JSONStringer();
 
@@ -275,6 +286,40 @@ public class ExchangeAPI {
         return jsonStringer.toString();
     }
 
+    public void exchangeLogOut(final APIResultCallback apiResultCallback) {
+        this.apiResultCallback = apiResultCallback;
+        this.mResponse = new String[1];//challenge
+        final String failedlMsg = "Card init session fail.";
+        String httpData = null;
+        new AsyncTask<String, Integer, JSONObject>() {
+
+            @Override
+            protected JSONObject doInBackground(String... param) {
+                String url = "http://xsm.coolbitx.com:8080/api/res/cw/session/logout/";
+                LogUtil.d("exchangeLogOut url=" + url);
+                XchsNetWork mXchsNetWork = new XchsNetWork();
+                return mXchsNetWork.makeHttpRequestLogout(url);
+            }
+
+            @Override
+            protected void onPostExecute(JSONObject result) {
+
+                if (result != null) {
+                    try {
+                        String rsp = result.getString("response");
+                        mResponse[0] = rsp;
+                        apiResultCallback.success(mResponse);
+
+                    } catch (JSONException e) {
+                        apiResultCallback.fail(failedlMsg + ":" + e.toString());
+                    }
+                } else {
+                    apiResultCallback.fail(failedlMsg);
+                }
+            }
+        }.execute();
+    }
+
     public void getSrvInitSession(final APIResultCallback apiResultCallback) {
         this.apiResultCallback = apiResultCallback;
         this.mResponse = new String[1];//challenge
@@ -287,7 +332,7 @@ public class ExchangeAPI {
             protected JSONObject doInBackground(String... param) {
                 String url = "http://xsm.coolbitx.com:8080/api/res/cw/session/" + CWID;
                 LogUtil.d("getSrvInitSession url=" + url);
-                XchsAPI jParser = new XchsAPI();
+                XchsNetWork jParser = new XchsNetWork();
                 return jParser.makeHttpRequestInit(url, param[0]);
             }
 
@@ -321,7 +366,7 @@ public class ExchangeAPI {
             @Override
             protected JSONObject doInBackground(String... param) {
                 String url = "http://xsm.coolbitx.com:8080/api/res/cw/session/" + CWID;
-                XchsAPI jParser = new XchsAPI();
+                XchsNetWork jParser = new XchsNetWork();
                 return jParser.makeHttpRequestPost(url, param[0]);
             }
 
@@ -353,7 +398,7 @@ public class ExchangeAPI {
             @Override
             protected JSONObject doInBackground(String... param) {
                 String url = "http://xsm.coolbitx.com:8080/api/res/cw/" + CWID;
-                XchsAPI jParser = new XchsAPI();
+                XchsNetWork jParser = new XchsNetWork();
                 return jParser.makeHttpRequestPost(url, param[0]);
             }
 
@@ -385,7 +430,7 @@ public class ExchangeAPI {
             @Override
             protected JSONObject doInBackground(String... param) {
                 String url = "http://xsm.coolbitx.com:8080/api/res/cw/pending/" + CWID;
-                XchsAPI jParser = new XchsAPI();
+                XchsNetWork jParser = new XchsNetWork();
                 return jParser.makeHttpRequestGet(url, param[0]);
             }
 
@@ -419,7 +464,7 @@ public class ExchangeAPI {
             @Override
             protected JSONObject doInBackground(String... param) {
                 String url = "http://xsm.coolbitx.com:8080/api/res/cw/unclarify/" + CWID;
-                XchsAPI jParser = new XchsAPI();
+                XchsNetWork jParser = new XchsNetWork();
                 return jParser.makeHttpRequestGet(url, param[0]);
             }
 
@@ -453,7 +498,7 @@ public class ExchangeAPI {
             @Override
             protected JSONObject doInBackground(String... param) {
                 String url = "http://xsm.coolbitx.com:8080/api/res/cw/order/" + hexOrder + "/" + blockOtp;
-                XchsAPI jParser = new XchsAPI();
+                XchsNetWork jParser = new XchsNetWork();
                 return jParser.makeHttpRequestGet(url, param[0]);
             }
 
@@ -488,7 +533,7 @@ public class ExchangeAPI {
             @Override
             protected JSONObject doInBackground(String... param) {
                 String url = "http://xsm.coolbitx.com:8080/api/res/cw/oktoken/" + hexOrder;
-                XchsAPI jParser = new XchsAPI();
+                XchsNetWork jParser = new XchsNetWork();
                 return jParser.makeHttpRequestPost(url, param[0]);
             }
 
@@ -522,7 +567,7 @@ public class ExchangeAPI {
             @Override
             protected JSONObject doInBackground(String... param) {
                 String url = "http://xsm.coolbitx.com:8080/api/res/cw/unblock/" + orderId;
-                XchsAPI jParser = new XchsAPI();
+                XchsNetWork jParser = new XchsNetWork();
                 return jParser.makeHttpRequestGet(url, param[0]);
             }
 
@@ -564,7 +609,7 @@ public class ExchangeAPI {
             @Override
             protected JSONObject doInBackground(String... param) {
                 String url = "http://xsm.coolbitx.com:8080/api/res/cw/order/" + orderId;
-                XchsAPI jParser = new XchsAPI();
+                XchsNetWork jParser = new XchsNetWork();
                 return jParser.makeHttpDelete(url);
             }
 
@@ -598,7 +643,7 @@ public class ExchangeAPI {
             protected JSONObject doInBackground(String... param) {
                 LogUtil.d("doExGetTrxInfo order ID=" + orderId);
                 String url = "http://xsm.coolbitx.com:8080/api/res/cw/trxinfo/" + orderId;
-                XchsAPI jParser = new XchsAPI();
+                XchsNetWork jParser = new XchsNetWork();
                 return jParser.makeHttpRequestGet(url, param[0]);
             }
 
@@ -632,7 +677,7 @@ public class ExchangeAPI {
             @Override
             protected JSONObject doInBackground(String... param) {
                 String url = "http://xsm.coolbitx.com:8080/api/res/cw/trxblks/" + orderID;
-                XchsAPI jParser = new XchsAPI();
+                XchsNetWork jParser = new XchsNetWork();
                 return jParser.makeHttpRequestPost(url, param[0]);
             }
 
@@ -654,4 +699,5 @@ public class ExchangeAPI {
             }
         }.execute(postData);
     }
+
 }

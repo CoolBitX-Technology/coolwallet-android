@@ -20,12 +20,12 @@ import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
 
-public class XchsAPI {
+public class XchsNetWork {
 
     public static final String COOKIES_HEADER = "Set-Cookie";
     public static java.net.CookieManager mCookieManager = new java.net.CookieManager();
 
-    public XchsAPI() {
+    public XchsNetWork() {
     }
 
     public JSONObject makeHttpRequestInit(String temp_url, String data) {
@@ -63,13 +63,14 @@ public class XchsAPI {
                     response += line;
                 }
             } else {
-                String errString = "";
-                String line;
-                BufferedReader br = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
-                while ((line = br.readLine()) != null) {
-                    errString += line;
-                }
-                LogUtil.d("getSrvInitSession JSON Parser errString: " + errString);
+//                String errString = "";
+//                String line;
+//                BufferedReader br = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
+//                while ((line = br.readLine()) != null) {
+//                    errString += line;
+//                }
+                response = "{\"response\":" + conn.getResponseMessage() + "}";
+                LogUtil.d("makeHttpRequestGet JSON Parser errString: " + response);
             }
         } catch (Exception e) {
             LogUtil.d("getSrvInitSession JSON Parser makeHttpRequest Error: " + e.toString());
@@ -132,13 +133,14 @@ public class XchsAPI {
                     response = "{\"response\":\"" + "ok" + "\"}";
                 }
             } else {
-                String errString = "";
-                String line;
-                BufferedReader br = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
-                while ((line = br.readLine()) != null) {
-                    errString += line;
-                }
-                LogUtil.d("JSON Parser errString: " + errString);
+//                String errString = "";
+//                String line;
+//                BufferedReader br = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
+//                while ((line = br.readLine()) != null) {
+//                    errString += line;
+//                }
+                response = "{\"response\":" + conn.getResponseMessage() + "}";
+                LogUtil.d("makeHttpRequestGet JSON Parser errString: " + response);
             }
             LogUtil.d("makeHttpRequestPost: " + response);
         } catch (Exception e) {
@@ -154,6 +156,64 @@ public class XchsAPI {
             jObj = new JSONObject(response);
         } catch (JSONException e) {
             LogUtil.d("JSON Parser getJSONFromUrl Error parsing data " + e.toString());
+        }
+        // return JSON String
+        return jObj;
+    }
+
+    public JSONObject makeHttpRequestLogout(String temp_url) {
+        String response = "";
+        HttpURLConnection conn = null;
+        try {
+            URL url = new URL(temp_url);
+            conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setDoInput(true);
+            conn.setDoOutput(false);
+            conn.setReadTimeout(10000);
+            conn.setConnectTimeout(30000);
+            LogUtil.i("makeHttpRequestGet-----cookie: " + mCookieManager.getCookieStore().getCookies());
+            conn.setRequestProperty("Cookie",
+                    TextUtils.join(";", mCookieManager.getCookieStore().getCookies()));
+
+            int responseCode = conn.getResponseCode();
+
+            LogUtil.d("makeHttpRequestGet responseCode=" + String.valueOf(responseCode));
+
+            if (responseCode == HttpsURLConnection.HTTP_OK) {
+
+                Map<String, List<String>> headerFields = conn.getHeaderFields();
+                List<String> cookiesHeader = headerFields.get(COOKIES_HEADER);
+
+                LogUtil.d("makeHttpRequestGet cookiesHeader=" + cookiesHeader);
+
+                String line;
+                BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                while ((line = br.readLine()) != null) {
+                    response += line;
+                }
+                if (!jsonObjectType(response)) {
+                    LogUtil.d("jSon object轉jSon array");
+                    //return jSon array
+                    response = "{\"response\":success}";
+                }
+
+            } else {
+                response = "{\"response\":" + conn.getResponseMessage() + "}";
+            }
+        } catch (Exception e) {
+            LogUtil.d("makeHttpRequestGet JSON Parser makeHttpRequest Error: " + e.toString());
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
+        }
+        // try parse the string to a JSON object
+        JSONObject jObj = null;
+        try {
+            jObj = new JSONObject(response);
+        } catch (JSONException e) {
+            LogUtil.d("makeHttpRequestGet JSON Parser getJSONFromUrl Error parsing data " + e.toString());
         }
         // return JSON String
         return jObj;
@@ -197,13 +257,16 @@ public class XchsAPI {
                 }
 
             } else {
-                String errString = "";
-                String line;
-                BufferedReader br = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
-                while ((line = br.readLine()) != null) {
-                    errString += line;
-                }
-                LogUtil.d("makeHttpRequestGet JSON Parser errString: " + errString);
+//                String errString = "";
+//                String line;
+//                BufferedReader br = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
+//                while ((line = br.readLine()) != null) {
+//                    errString += line;
+//                }
+
+                response = "{\"response\":" + conn.getResponseMessage() + "}";
+
+                LogUtil.d("makeHttpRequestGet JSON Parser errString: " + conn.getResponseMessage());
             }
         } catch (Exception e) {
             LogUtil.d("makeHttpRequestGet JSON Parser makeHttpRequest Error: " + e.toString());
@@ -234,7 +297,7 @@ public class XchsAPI {
             conn.setDoOutput(false);
             conn.setReadTimeout(10000);
             conn.setConnectTimeout(30000);
-            LogUtil.i("makeHttpRequestGet-----cookie: " + mCookieManager.getCookieStore().getCookies());
+            LogUtil.i("makeHttpDelete-----cookie: " + mCookieManager.getCookieStore().getCookies());
             conn.setRequestProperty("Cookie",
                     TextUtils.join(";", mCookieManager.getCookieStore().getCookies()));
 
@@ -263,13 +326,14 @@ public class XchsAPI {
                 }
 
             } else {
-                String errString = "";
-                String line;
-                BufferedReader br = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
-                while ((line = br.readLine()) != null) {
-                    errString += line;
-                }
-                LogUtil.d("makeHttpRequestGet JSON Parser errString: " + errString);
+//                String errString = "";
+//                String line;
+//                BufferedReader br = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
+//                while ((line = br.readLine()) != null) {
+//                    errString += line;
+//                }
+                response = "{\"response\":" + conn.getResponseMessage() + "}";
+                LogUtil.d("makeHttpRequestGet JSON Parser errString: " + response);
             }
         } catch (Exception e) {
             LogUtil.d("makeHttpRequestGet JSON Parser makeHttpRequest Error: " + e.toString());

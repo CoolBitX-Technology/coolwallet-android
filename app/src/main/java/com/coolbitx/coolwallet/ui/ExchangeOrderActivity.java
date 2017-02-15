@@ -366,7 +366,7 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
         if (addressStr != null) {
             //new 對方接收地址, 自己的找零地址, 發送的金額
             LogUtil.i("對方接收地址=" + recvAddress + ";DB的找零地址=" + addressStr + ";發送的金額=" +
-                    amountStr + ";轉型=" + BTCUtils.convertToSatoshisValue(amountStr));
+                    amountStr + ";轉型=" + BTCUtils.convertToSatoshisValueForDIsplay(amountStr));
 
 //            prepareTransaction(recvAddress, addressStr, BTCUtils.convertToSatoshisValue(amountStr));
         } else {

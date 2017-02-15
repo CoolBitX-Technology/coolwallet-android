@@ -61,8 +61,6 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-//import com.google.zxing.integration.android.IntentIntegrator;
-//import com.google.zxing.integration.android.IntentResult;
 
 /**
  * Created by ShihYi on 2015/12/30.
@@ -349,7 +347,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
                 if (errorCnt <= 3) {
                     //cacel old task
                     unSpentTxsAsyncTask.cancel(true);
-                    //run new task
+                    //rerun new task
                     unSpentTxsAsyncTask = new UnSpentTxsAsyncTask();
                     unSpentTxsAsyncTask.execute(InAddress);
                 } else {
@@ -394,7 +392,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
         if (changeAddressStr != null) {
             //new 對方接收地址, 自己的找零地址, 發送的金額
             LogUtil.e("自己的找零地址=" + changeAddressStr);
-            PreviousPrepareTransaction(recvAddress, changeAddressStr, BTCUtils.convertToSatoshisValue(spendAmountStr));
+            PreviousPrepareTransaction(recvAddress, changeAddressStr, BTCUtils.convertToSatoshisValueForDIsplay(spendAmountStr));
         } else {
             cmdManager.hdwGetNextAddress(keyChainId, accountId, new CmdResultCallback() {
                 @Override
@@ -430,7 +428,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
                             DatabaseHelper.insertAddress(mContext, accountId, addressStr, 0, keyId, 0, 0);
                             LogUtil.e("產生的找零地址=" + addressStr);
                             //new 對方接收地址, 自己的找零地址, 發送的金額
-                            PreviousPrepareTransaction(recvAddress, addressStr, BTCUtils.convertToSatoshisValue(spendAmountStr));
+                            PreviousPrepareTransaction(recvAddress, addressStr, BTCUtils.convertToSatoshisValueForDIsplay(spendAmountStr));
                         }
                     }
                 }
@@ -452,7 +450,10 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
         long availableAmount = 0;
         for (UnSpentTxsBean unSpentTxsBean : unSpentTxsBeanList) {
 //            availableAmount += (long) (unSpentTxsBean.getAmount() * SATOSHIS_PER_COIN);
-            availableAmount += BTCUtils.convertToSatoshisValue(new DecimalFormat("#.########").format(unSpentTxsBean.getAmount()));
+            /**
+             *  DecimalFormat  can format a number in a customized format for a particular locale,ex. 0.5=>0,5(Europe).
+             */
+            availableAmount += BTCUtils.BTCconvertToSatoshisValue(unSpentTxsBean.getAmount());
         }
         long extraFee = BTCUtils.parseValue("0.0");
         LogUtil.e("帳戶 " + currentAccount + " 地址下有的餘額=" + availableAmount);
@@ -596,7 +597,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
 
                 final int dbKid = d.getKid();
                 final int dbKcid = d.getKcid();
-                final long unspentBalance = BTCUtils.convertToSatoshisValue(new DecimalFormat("#.########").format(processedTxData.outputsToSpend.get(i).getAmount()));
+                final long unspentBalance = BTCUtils.BTCconvertToSatoshisValue(processedTxData.outputsToSpend.get(i).getAmount());
 
                 final byte CwAddressKeyChainExternal;
                 if (dbKcid == 0) {
@@ -1298,15 +1299,13 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
 
     private void changeRate(Context context, EditText toEditText, float amount, String format) {
         float mChangeAmt = 0;
-        DecimalFormat mFormatter = null;
         if (toEditText.getId() == editSendBtc.getId()) {
             mChangeAmt = (amount / AppPrefrence.getCurrentRate(context));
         } else {
             mChangeAmt = (amount * AppPrefrence.getCurrentRate(context));
         }
-        mFormatter = new DecimalFormat(format);
-        LogUtil.e("mChangeAmt : " + mChangeAmt);
-        toEditText.setText(mFormatter.format(mChangeAmt));
+        LogUtil.d("rate changed amt : " + mChangeAmt);
+        toEditText.setText(new DecimalFormat(format).format(mChangeAmt));
     }
 
     public void refresh(int account, IntentResult scanningResult) {

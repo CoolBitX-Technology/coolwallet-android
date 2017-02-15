@@ -51,19 +51,31 @@ public class ExchangeActivity extends BaseActivity implements View.OnClickListen
 
         mExchangeAPI = new ExchangeAPI(mContext, cmdManager);
 
-        mExchangeAPI.exchangeLogin(new APIResultCallback() {
+        mExchangeAPI.exchangeLogOut(new APIResultCallback() {
             @Override
             public void success(String[] msg) {
-                LogUtil.e("Exchange Login success");
-                GetPendingOrder();
+                LogUtil.e("Exchange Logout success");
+                mExchangeAPI.exchangeLogin(new APIResultCallback() {
+                    @Override
+                    public void success(String[] msg) {
+                        LogUtil.e("Exchange Login success");
+                        GetPendingOrder();
+                    }
+
+                    @Override
+                    public void fail(String msg) {
+                        PublicPun.showNoticeDialog(mContext,"Notification","Exchange Login failed.");
+                        ExchangeLogout();
+                    }
+                });
             }
 
             @Override
             public void fail(String msg) {
                 PublicPun.showNoticeDialog(mContext,"Notification","Exchange Login failed.");
+                ExchangeLogout();
             }
         });
-
     }
 
     private void GetPendingOrder() {
@@ -180,6 +192,7 @@ public class ExchangeActivity extends BaseActivity implements View.OnClickListen
                                         @Override
                                         public void fail(String msg) {
                                             LogUtil.d("delExBlock  failed = " + msg);
+                                            ExchangeLogout();
                                         }
                                     });
                                 } else {
@@ -200,7 +213,7 @@ public class ExchangeActivity extends BaseActivity implements View.OnClickListen
                     public void fail(String msg) {
                         LogUtil.d("getExRequestOrderBlock failed:" + msg);
                         //exchangeSite Logout()
-
+                        ExchangeLogout();
                     }
                 });
 
@@ -208,6 +221,20 @@ public class ExchangeActivity extends BaseActivity implements View.OnClickListen
         });
         otp_dialog.show();
         return true;
+    }
+
+    private void ExchangeLogout(){
+        mExchangeAPI.exchangeLogOut(new APIResultCallback() {
+            @Override
+            public void success(String[] msg) {
+                LogUtil.d("Logout success.");
+            }
+
+            @Override
+            public void fail(String msg) {
+
+            }
+        });
     }
 
     private void initViews() {
