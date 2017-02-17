@@ -24,6 +24,8 @@
     <string name="tv_exchange_verification_str">Verify OTP to place your sell orders</string>
     <string name="tv_order_notice_str">Your order will be cancelled automatically after this time</string>
     <string name="btn_complete_order_str">Complete order</string>
+    <string name="btn_str_login">Sign up now</string>
+    <string name="str_login_title">Trade wih other CoolWallet holders\non CoolBitx Exchange</string>
 
     <!--Preference-->
     <string name="pref_title_security_otp">Enable One Time Password\n(OTP) on transactions</string>

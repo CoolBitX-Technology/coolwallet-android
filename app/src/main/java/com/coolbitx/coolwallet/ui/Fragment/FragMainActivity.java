@@ -47,7 +47,7 @@ import com.coolbitx.coolwallet.general.RefreshBlockChainInfo;
 import com.coolbitx.coolwallet.httpRequest.CwBtcNetWork;
 import com.coolbitx.coolwallet.ui.BaseActivity;
 import com.coolbitx.coolwallet.ui.CoolWalletCardActivity;
-import com.coolbitx.coolwallet.ui.ExchangeActivity;
+import com.coolbitx.coolwallet.ui.ExchangeLogin;
 import com.coolbitx.coolwallet.ui.HostDeviceActivity;
 import com.coolbitx.coolwallet.ui.InitialCreateWalletIIActivity;
 import com.coolbitx.coolwallet.ui.InitialSecuritySettingActivity;
@@ -79,13 +79,23 @@ import java.util.TimerTask;
 //        FragmentActivity
 public class FragMainActivity extends BaseActivity {//implements CompoundButton.OnCheckedChangeListener
 
-    // 左側選單圖片
+    //左側選單圖片
     private static final int[] MENU_ITEMS_PIC = new int[]
             {R.mipmap.host, R.mipmap.cwcard, R.mipmap.security, R.mipmap.settings, R.drawable.exchange, R.drawable.exchange, R.mipmap.ic_feedback_white_24dp, R.mipmap.logout, R.mipmap.ic_share_white_24dp};
     // 左側選單文字項目
     private static final String[] MENU_ITEMS = new String[]{
             "Host devices", "CoolWallet card", "Security", "Settings", "Exchange", "Exchange Login", "Issue Feedback", "Logout", "Share address\n(beta)"
     };
+
+//    private static final int[] MENU_ITEMS_PIC = new int[]
+//            {R.mipmap.host, R.mipmap.cwcard, R.mipmap.security, R.mipmap.settings,
+//                    R.mipmap.ic_feedback_white_24dp, R.mipmap.logout, R.mipmap.ic_share_white_24dp};
+//    // 左側選單文字項目
+//    private static final String[] MENU_ITEMS = new String[]{
+//            "Host devices", "CoolWallet card", "Security", "Settings",
+//             "Issue Feedback", "Logout", "Share address\n(beta)"
+//    };
+
     public static int ACCOUNT_CNT = 0;//這裡要改為抓qryWalletInfo的
     public static boolean refreshFlag = false;
     public static CmdManager cmdManager;
@@ -735,7 +745,7 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
                 startActivityForResult(intent, 0);
                 break;
             case 4:
-                intent = new Intent(getApplicationContext(), ExchangeActivity.class);
+                intent = new Intent(getApplicationContext(), ExchangeLogin.class);
                 startActivityForResult(intent, 0);
                 break;
 
@@ -753,9 +763,7 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
                     }
                 });
                 break;
-
             case 6:
-
                 IssueFeedBack();
                 break;
             case 7:
@@ -829,7 +837,7 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
     }
 
     private void getAccountKeyInfo(final int kinfoid, final int kcId, final int accountId, final int kid) {
-        FragMainActivity.cmdManager.hdwQueryAccountKeyInfo(kinfoid,
+        cmdManager.hdwQueryAccountKeyInfo(kinfoid,
                 kcId,
                 accountId,
                 kid,

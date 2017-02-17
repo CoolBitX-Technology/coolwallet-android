@@ -181,6 +181,7 @@ public class BaseActivity extends AppCompatActivity {
         }
     }
 
+
     public void getUniqueId() {
         cmdManager.getUniqueId(new CmdResultCallback() {
             @Override

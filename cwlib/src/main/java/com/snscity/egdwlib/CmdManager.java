@@ -138,6 +138,17 @@ public class CmdManager {
         cmdProcessor.addCmd(cmdPacket);
     }
 
+    //trxID,byte[]accID,byte[] Acount,byte[] mac, byte[]nonce,
+    public void XchsBlockBtc(byte[] svrResp, CmdResultCallback cmdResultCallback) {
+        CmdPacket cmdPacket = new CmdPacket.Builder()
+                .setCla(CmdCla.EX_BLOCK_BTC)
+                .setIns(CmdIns.EX_BLOCK_BTC)
+                .setInputData(svrResp)
+                .build();
+        cmdPacket.setCmdResultListener(cmdResultCallback);
+        cmdProcessor.addCmd(cmdPacket);
+    }
+
     public void XchsCancelBlock(byte[] cancelInfo,CmdResultCallback cmdResultCallback) {
         CmdPacket cmdPacket = new CmdPacket.Builder()
                 .setCla(CmdCla.EX_BLOCK_CANCEL)

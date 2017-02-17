@@ -99,16 +99,22 @@
             android:parentActivityName=".ui.Fragment.FragMainActivity"
             android:screenOrientation="portrait"></activity>
 
-        <!--<activity-->
-            <!--android:name=".ui.ExchangeVerificationActivity"-->
-            <!--android:parentActivityName=".ui.Fragment.FragMainActivity"-->
-            <!--android:screenOrientation="portrait" />-->
+        <activity
+            android:name=".ui.ExchangeVerificationActivity"
+            android:parentActivityName=".ui.Fragment.FragMainActivity"
+            android:screenOrientation="portrait" />
+
         <activity
             android:name=".ui.ExchangeActivity"
             android:parentActivityName=".ui.Fragment.FragMainActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".ui.ExchangeOrderActivity"
+            android:parentActivityName=".ui.Fragment.FragMainActivity"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".ui.ExchangeLogin"
             android:parentActivityName=".ui.Fragment.FragMainActivity"
             android:screenOrientation="portrait" />
 

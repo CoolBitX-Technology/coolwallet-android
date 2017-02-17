@@ -603,6 +603,30 @@ public class PublicPun {
 //        builder.show();
 //    }
 
+
+    public static AlertDialog.Builder CustomNoticeDialog(Context mContext, String mTitle, String mMessage) {
+
+        LayoutInflater inflater = LayoutInflater.from(mContext);
+        View alert_view = inflater.inflate(R.layout.edit_dialog, null);//alert為另外做給alert用的layout
+        final TextView mDialogTitle = (TextView) alert_view.findViewById(R.id.dialog_title);
+        final TextView mDialogMessage = (TextView) alert_view.findViewById(R.id.dialog_message);
+        mDialogTitle.setText(mTitle);
+        mDialogMessage.setText(mMessage);
+        //-----------產生輸入視窗--------
+
+
+        return new AlertDialog.Builder(mContext, AlertDialog.THEME_DEVICE_DEFAULT_LIGHT)
+                .setView(alert_view);
+//                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+//                    public void onClick(DialogInterface dialog, int whichButton) {
+//
+//                    }
+//                }).show();
+
+
+    }
+
+
     /**
      * show Dialog Messahe
      **/

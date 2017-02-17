@@ -96,9 +96,9 @@
                 style="@style/TextView_White_Bold_18"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
+                android:gravity="center"
                 android:layout_weight="4"
-                android:hint="0.10100001 BTC" />
+                android:hint="0.1010 BTC" />
 
             <TextView
                 android:id="@+id/order_tvFormate"

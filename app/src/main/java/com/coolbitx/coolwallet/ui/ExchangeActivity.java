@@ -1,6 +1,7 @@
 package com.coolbitx.coolwallet.ui;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -38,6 +39,8 @@ public class ExchangeActivity extends BaseActivity implements View.OnClickListen
     ArrayList<ExchangeOrder> listExchangeSellOrder;
     ArrayList<ExchangeOrder> listExchangeBuyOrder;
     private String orderId = "";
+    private ProgressDialog mProgress;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,46 +51,24 @@ public class ExchangeActivity extends BaseActivity implements View.OnClickListen
         initValues();
         initToolbar();
         cmdManager = new CmdManager();
-
         mExchangeAPI = new ExchangeAPI(mContext, cmdManager);
 
-        mExchangeAPI.exchangeLogOut(new APIResultCallback() {
-            @Override
-            public void success(String[] msg) {
-                LogUtil.e("Exchange Logout success");
-                mExchangeAPI.exchangeLogin(new APIResultCallback() {
-                    @Override
-                    public void success(String[] msg) {
-                        LogUtil.e("Exchange Login success");
-                        GetPendingOrder();
-                    }
+        GetPendingOrder();
 
-                    @Override
-                    public void fail(String msg) {
-                        PublicPun.showNoticeDialog(mContext,"Notification","Exchange Login failed.");
-                        ExchangeLogout();
-                    }
-                });
-            }
 
-            @Override
-            public void fail(String msg) {
-                PublicPun.showNoticeDialog(mContext,"Notification","Exchange Login failed.");
-                ExchangeLogout();
-            }
-        });
     }
 
     private void GetPendingOrder() {
+        mProgress.show();
         listExchangeSellOrder = new ArrayList<>();
         listExchangeBuyOrder = new ArrayList<>();
 
-        mExchangeAPI.getPendingOrder( new APIResultCallback() {
+        mExchangeAPI.getPendingOrder(new APIResultCallback() {
             @Override
             public void success(String[] msg) {
                 LogUtil.d("GetPendingOrder ok " + msg[0]);
                 String[] mString = new String[]{"sell", "buy"};
-
+                mProgress.dismiss();
                 for (int i = 0; i < mString.length; i++) {
                     if (i == 0) {
                         listExchangeSellOrder = PublicPun.jsonParserExchange(msg[0], mString[i]);
@@ -119,7 +100,6 @@ public class ExchangeActivity extends BaseActivity implements View.OnClickListen
         switch (clickId) {
             case R.id.grid_sell:
                 exchngeOrder = listExchangeSellOrder.get(position);
-
                 break;
             case R.id.grid_buy:
                 exchngeOrder = listExchangeBuyOrder.get(position);
@@ -130,20 +110,25 @@ public class ExchangeActivity extends BaseActivity implements View.OnClickListen
         Intent intent = new Intent();
         intent.setClass(mContext, ExchangeOrderActivity.class);
         Bundle bundle = new Bundle();
+        LogUtil.i("exchangeOrder click" +
+                exchngeOrder.getOrderId() + " , " + exchngeOrder.getAddr() + " , " +
+                exchngeOrder.getAmount() + " , " + exchngeOrder.getAccount() + " , " +
+                exchngeOrder.getPrice() + " , " + exchngeOrder.getExpiration());
 
         bundle.putSerializable("ExchangeOrder", exchngeOrder);
         intent.putExtras(bundle);
-        startActivity(intent);
+        startActivityForResult(intent, 0);
 
     }
 
     byte[] cancelBlkInfo = new byte[72];
     String orderID;
+
     @Override
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
         int clickId = parent.getId();
         ExchangeOrder exchngeOrder = new ExchangeOrder();
-        orderID= null;
+        orderID = null;
         switch (clickId) {
             case R.id.grid_sell:
                 exchngeOrder = listExchangeSellOrder.get(position);
@@ -172,6 +157,7 @@ public class ExchangeActivity extends BaseActivity implements View.OnClickListen
 
 //                        {"orderId":"15847930","okToken":"abc123","unblockTkn":"abc123",
 //                                "mac":"dbe57d18f1c176606f40361a11c755ed655804a319d7b7120cdb1e729786d5dd"}
+
                         cancelBlkInfo = PublicPun.hexStringToByteArray(msg[0] + msg[1] + msg[2] + msg[3] + msg[4]);
 
                         cmdManager.XchsCancelBlock(cancelBlkInfo, new CmdResultCallback() {
@@ -201,7 +187,8 @@ public class ExchangeActivity extends BaseActivity implements View.OnClickListen
                                     cmdManager.getError(new CmdResultCallback() {
                                         @Override
                                         public void onSuccess(int status, byte[] outputData) {
-                                            LogUtil.d("Login failed = " + (status + 65536) + ";" + outputData);
+                                            PublicPun.showNoticeDialog(mContext, "Unable to Cancel Block", "Error:" + Integer.toHexString(status)
+                                                    +"-"+PublicPun.byte2HexString(outputData));
                                         }
                                     });
                                 }
@@ -223,7 +210,7 @@ public class ExchangeActivity extends BaseActivity implements View.OnClickListen
         return true;
     }
 
-    private void ExchangeLogout(){
+    private void ExchangeLogout() {
         mExchangeAPI.exchangeLogOut(new APIResultCallback() {
             @Override
             public void success(String[] msg) {
@@ -253,11 +240,15 @@ public class ExchangeActivity extends BaseActivity implements View.OnClickListen
     }
 
     private void initValues() {
-
+        mProgress = new ProgressDialog(this);
+        mProgress.setCancelable(false);
+        mProgress.setIndeterminate(true);
+        mProgress.setMessage("");
     }
 
     private void initToolbar() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setLogo(getResources().getDrawable(R.drawable.exchange));
         toolbar.setTitle("Exchange");
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
@@ -276,9 +267,9 @@ public class ExchangeActivity extends BaseActivity implements View.OnClickListen
     @Override
     public void onClick(View v) {
         if (v == sellVerification) {
-//            Intent intent;
-//            intent = new Intent(getApplicationContext(), ExchangeVerificationActivity.class);
-//            startActivityForResult(intent, 0);
+            Intent intent;
+            intent = new Intent(getApplicationContext(), ExchangeVerificationActivity.class);
+            startActivityForResult(intent, 0);
         }
     }
 

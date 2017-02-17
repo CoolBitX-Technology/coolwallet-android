@@ -5,49 +5,97 @@ package com.coolbitx.coolwallet.entity;
  */
 public class XchsSync {
 
-    private int accID;
-    private int keyPointer;
-    private int addNum;
-    private String accPub;
-    private String accChain;
+    private int accID_ext;
+    private int keyPointer_ext;
+    private int addNum_ext;
+    private String accPub_ext;
+    private String accChain_ext;
 
-    public int getAddNum() {
-        return addNum;
+
+    private int accID_int;
+    private int keyPointer_int;
+    private int addNum_int;
+    private String accPub_int;
+    private String accChain_int;
+
+
+    public int getAddNum_ext() {
+        return addNum_ext;
     }
 
-    public void setAddNum(int addNum) {
-        this.addNum = addNum;
+    public void setAddNum_ext(int addNum_ext) {
+        this.addNum_ext = addNum_ext;
     }
 
-    public int getAccID() {
-        return accID;
+    public int getAccID_ext() {
+        return accID_ext;
     }
 
-    public void setAccID(int accID) {
-        this.accID = accID;
+    public void setAccID_ext(int accID_ext) {
+        this.accID_ext = accID_ext;
     }
 
-    public int getKeyPointer() {
-        return keyPointer;
+    public int getKeyPointer_ext() {
+        return keyPointer_ext;
     }
 
-    public void setKeyPointer(int keyPointer) {
-        this.keyPointer = keyPointer;
+    public void setKeyPointer_ext(int keyPointer_ext) {
+        this.keyPointer_ext = keyPointer_ext;
     }
 
-    public String getAccPub() {
-        return accPub;
+    public String getAccPub_ext() {
+        return accPub_ext;
     }
 
-    public void setAccPub(String accPub) {
-        this.accPub = accPub;
+    public void setAccPub_ext(String accPub_ext) {
+        this.accPub_ext = accPub_ext;
     }
 
-    public String getAccChain() {
-        return accChain;
+    public String getAccChain_ext() {
+        return accChain_ext;
     }
 
-    public void setAccChain(String accChain) {
-        this.accChain = accChain;
+    public void setAccChain_ext(String accChain_ext) {
+        this.accChain_ext = accChain_ext;
+    }
+
+    public int getAccID_int() {
+        return accID_int;
+    }
+
+    public void setAccID_int(int accID_int) {
+        this.accID_int = accID_int;
+    }
+
+    public int getKeyPointer_int() {
+        return keyPointer_int;
+    }
+
+    public void setKeyPointer_int(int keyPointer_int) {
+        this.keyPointer_int = keyPointer_int;
+    }
+
+    public int getAddNum_int() {
+        return addNum_int;
+    }
+
+    public void setAddNum_int(int addNum_int) {
+        this.addNum_int = addNum_int;
+    }
+
+    public String getAccPub_int() {
+        return accPub_int;
+    }
+
+    public void setAccPub_int(String accPub_int) {
+        this.accPub_int = accPub_int;
+    }
+
+    public String getAccChain_int() {
+        return accChain_int;
+    }
+
+    public void setAccChain_int(String accChain_int) {
+        this.accChain_int = accChain_int;
     }
 }

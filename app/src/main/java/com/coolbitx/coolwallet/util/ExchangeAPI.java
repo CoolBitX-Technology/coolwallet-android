@@ -5,6 +5,7 @@ import android.os.AsyncTask;
 
 import com.coolbitx.coolwallet.DataBase.DatabaseHelper;
 import com.coolbitx.coolwallet.callback.APIResultCallback;
+import com.coolbitx.coolwallet.callback.XchsSyncCallback;
 import com.coolbitx.coolwallet.entity.Constant;
 import com.coolbitx.coolwallet.entity.XchsSync;
 import com.coolbitx.coolwallet.entity.dbAddress;
@@ -35,6 +36,8 @@ public class ExchangeAPI {
     Context mContext;
     String CWID;
     APIResultCallback mAPIResultCallback;
+    ArrayList<XchsSync> listXchsSync;
+    XchsSync mXchsSync;
 
     public ExchangeAPI(Context context, CmdManager cmdManager) {
         this.cmdManager = cmdManager;
@@ -43,13 +46,22 @@ public class ExchangeAPI {
 //        this.orderID=orderID;
     }
 
-    public boolean exchangeLogin(APIResultCallback mAPIResultCallback) {
+    public boolean exchangeLogin(final APIResultCallback mAPIResultCallback) {
         initResult = false;
         this.mAPIResultCallback = mAPIResultCallback;
-
-        exchangeToken = FirebaseInstanceId.getInstance().getToken();
+        String mFirebaseToken = FirebaseInstanceId.getInstance().getToken();
+//        exchangeToken = FirebaseInstanceId.getInstance().getToken();
         LogUtil.d("FCM InstanceID token: " + exchangeToken);
 
+        if (mFirebaseToken != null) {
+            try {
+                LogUtil.d("mFirebaseToken=" + mFirebaseToken);
+                LogUtil.d("token=" + new JSONObject(mFirebaseToken).getString("token"));
+                exchangeToken = new JSONObject(mFirebaseToken).getString("token");
+            } catch (Exception e) {
+                new ValidationException(e);
+            }
+        }
         //1.Create Session:get [Challenge] from Server
         LogUtil.d("getSrvInitSession CWID=" + CWID);
         getSrvInitSession(new APIResultCallback() {
@@ -87,24 +99,33 @@ public class ExchangeAPI {
                                         public void onSuccess(int status, byte[] outputData) {
                                             //collect api sync data
                                             if ((status + 65536) == 0x9000) {
-                                                ArrayList<XchsSync> lisXchsSync = querySyncData();
-                                                if (lisXchsSync.size() != 0) {
-                                                    getExchangeSync(CWID, createSyncJson(lisXchsSync, exchangeToken), new APIResultCallback() {
-                                                        @Override
-                                                        public void success(String[] msg) {
-                                                            LogUtil.d("getExchangeSync ok " + msg[0]);
-                                                            initResult = true;
-                                                        }
+//                                                ArrayList<XchsSync> lisXchsSync =querySyncData();
+                                                querySyncData(new XchsSyncCallback() {
+                                                    @Override
+                                                    public void onSuccess(ArrayList<XchsSync> listXchsSync) {
+                                                        ArrayList<XchsSync> lisXchsSync = listXchsSync;
+                                                        if (lisXchsSync.size() != 0) {
+                                                            LogUtil.e("ready to getExchangeSync");
+                                                            String SyncData = createSyncJson(lisXchsSync, exchangeToken);
+                                                            getExchangeSync(CWID, SyncData, new APIResultCallback() {
+                                                                @Override
+                                                                public void success(String[] msg) {
+                                                                    LogUtil.d("getExchangeSync ok " + msg[0]);
+                                                                    mAPIResultCallback.success(msg);
+                                                                }
 
-                                                        @Override
-                                                        public void fail(String msg) {
-                                                            LogUtil.d("getExchangeSync failed:" + msg);
-                                                            //exchangeSite Logout()
+                                                                @Override
+                                                                public void fail(String msg) {
+                                                                    LogUtil.d("getExchangeSync failed:" + msg);
+                                                                    //exchangeSite Logout()
+                                                                }
+                                                            });
+                                                        } else {
+                                                            LogUtil.e("lisXchsSync no data found:");
                                                         }
-                                                    });
-                                                } else {
-                                                    LogUtil.e("lisXchsSync no data found:");
-                                                }
+                                                    }
+                                                });
+
                                             }
                                         }
                                     });
@@ -137,42 +158,19 @@ public class ExchangeAPI {
         return initResult;
     }
 
-
     /**
-     * 生成json
+     * 生成sync json
      */
-    boolean[] isNotAccountReady;
-    boolean[] isNotKeyReady;
-    ArrayList<dbAddress> listAddress;
-    final byte[] cwHdwAccountInfo =
-            new byte[]{Constant.CwAddressKeyChainExternal, Constant.CwAddressKeyChainInternal};
 
 
-    public ArrayList<XchsSync> querySyncData() {
-        // TODO Auto-generated method stub
-        //final int accountId, final int kid, final byte kcId
-//        querySyncData
-        isNotAccountReady = new boolean[FragMainActivity.ACCOUNT_CNT];
-        isNotKeyReady = new boolean[2];
-
-        final XchsSync mXchsSync = new XchsSync();
-        final ArrayList<XchsSync> listXchsSync = new ArrayList<XchsSync>();
-
+    public void querySyncData(final XchsSyncCallback mXchsSyncCallback) {
+        listXchsSync = new ArrayList<XchsSync>();
         int i = 0;
-        while (i < FragMainActivity.ACCOUNT_CNT && !isNotAccountReady[i]) {
-            LogUtil.d("XCHS acc=" + String.valueOf(i));
+        while (i < FragMainActivity.ACCOUNT_CNT ) {
             final int accountId = i;
-            isNotAccountReady[i] = true;
-            listAddress = new ArrayList<dbAddress>();
             int j = 0;
-            while (j <= 1 && !isNotKeyReady[j]) {// && !isNotKeyReady[j]
+            while (j <= 1) {
                 final int kcid = j;
-                isNotKeyReady[j] = true;
-                listAddress = DatabaseHelper.queryAddress(mContext, i, j);
-//                LogUtil.d("XCHS acc=" + String.valueOf(i) + ";kcid=" + kcid);//+"
-                LogUtil.d("XCHS kcid=" + kcid);//+"
-
-
 
                 cmdManager.hdwQueryAccountKeyInfo(Constant.CwHdwAccountKeyInfoPubKeyAndChainCd,
                         j,
@@ -183,6 +181,10 @@ public class ExchangeAPI {
                             public void onSuccess(int status, byte[] outputData) {
                                 if ((status + 65536) == 0x9000) {
                                     if (outputData != null) {
+
+                                        ArrayList<dbAddress> listAddress
+                                                = DatabaseHelper.queryAddress(mContext, accountId, kcid);
+
                                         byte[] publicKeyBytes = new byte[64];
                                         byte[] chainCodeBytes = new byte[32];
                                         int length = outputData.length;
@@ -197,7 +199,6 @@ public class ExchangeAPI {
                                             }
                                             //最後兩個字元一起
 
-
                                             int mFirstKey = Integer.parseInt(PublicPun.byte2HexString(publicKeyBytes[63]), 16);
 
                                             //format last charactors
@@ -210,31 +211,37 @@ public class ExchangeAPI {
                                                 extendPub[a + 1] = publicKeyBytes[a];
                                             }
 
-                                            mXchsSync.setAccID(accountId);
-                                            mXchsSync.setKeyPointer(kcid);
-                                            mXchsSync.setAccPub(LogUtil.byte2HexStringNoBlank(extendPub));
-                                            mXchsSync.setAccChain(LogUtil.byte2HexStringNoBlank(chainCodeBytes));
-                                            mXchsSync.setAddNum(listAddress.size());
+                                            if (kcid == 0) {
+                                                mXchsSync = new XchsSync();
+                                                mXchsSync.setAccID_ext(accountId);
+                                                mXchsSync.setKeyPointer_ext(kcid);
+                                                mXchsSync.setAccPub_ext(LogUtil.byte2HexStringNoBlank(extendPub));
+                                                mXchsSync.setAccChain_ext(LogUtil.byte2HexStringNoBlank(chainCodeBytes));
+                                                mXchsSync.setAddNum_ext(listAddress.size());
 
-                                            LogUtil.d("XCHS account=" + accountId + " ;kcid=" + kcid + " ;num=" + listAddress.size()
-                                                    + " ;建地址的public key=" + LogUtil.byte2HexString(publicKeyBytes)
-                                                    + " ;建地址的chainCodeBytes=" + LogUtil.byte2HexString(chainCodeBytes));
-                                            listXchsSync.add(mXchsSync);
+                                            } else {
+                                                mXchsSync.setAccID_int(accountId);
+                                                mXchsSync.setKeyPointer_int(kcid);
+                                                mXchsSync.setAccPub_int(LogUtil.byte2HexStringNoBlank(extendPub));
+                                                mXchsSync.setAccChain_int(LogUtil.byte2HexStringNoBlank(chainCodeBytes));
+                                                mXchsSync.setAddNum_int(listAddress.size());
 
-                                            isNotAccountReady[accountId] = false;
-                                            isNotKeyReady[kcid] = false;
+                                                listXchsSync.add(mXchsSync);
+                                            }
+
+                                            if (listXchsSync.size() == FragMainActivity.ACCOUNT_CNT) {
+                                                mXchsSyncCallback.onSuccess(listXchsSync);
+                                            }
                                         }
                                     }
                                 } else {
                                 }
                             }
                         });
-
+                j++;
             }
-
+            i++;
         }
-        LogUtil.d("交易所Sync 數量 =" + listXchsSync.size());
-        return listXchsSync;
     }
 
     public String createSyncJson(ArrayList<XchsSync> listXchsSync, String exchangeToken) {
@@ -247,37 +254,28 @@ public class ExchangeAPI {
             jsonStringer.key("token").value(exchangeToken);
             jsonStringer.key("accounts");   //代表array key
             jsonStringer.array();    //代表[
-
-            for (int x = 0; x < FragMainActivity.ACCOUNT_CNT; x++) {
+            for (int x = 0; x < listXchsSync.size(); x++) {
                 //Query accountKeyInfo's addr's Num & publicKey & chaincode
 
-                if (listXchsSync.get(x).getKeyPointer() == 0) {
-                    jsonStringer.object();
-                    jsonStringer.key("id").value(x);
-                    jsonStringer.key("extn");
-                    jsonStringer.object();
-                    jsonStringer.key("num").value(listXchsSync.get(x).getAddNum());
-//                jsonStringer.key("pub").value("035f21fb5476e6a3f3cb176eb44a9af3edabf0deca50032e82fed02fa556d1337b");
-                    jsonStringer.key("pub").value(listXchsSync.get(x).getAccPub());
-//                jsonStringer.key("chaincode").value("54dc901c4001ae7cf41a8b451e1f5db911df60c5353047d26c4a4c4325cee859");
-                    jsonStringer.key("chaincode").value(listXchsSync.get(x).getAccChain());
-
-                } else {
-                    jsonStringer.endObject();
-                    jsonStringer.key("intn");
-                    jsonStringer.object();
-                    jsonStringer.key("num").value(listXchsSync.get(x).getAddNum());
-//                    jsonStringer.key("pub").value("035f21fb5476e6a3f3cb176eb44a9af3edabf0deca50032e82fed02fa556d1337b");
-                    jsonStringer.key("pub").value(listXchsSync.get(x).getAccPub());
-//                    jsonStringer.key("chaincode").value("54dc901c4001ae7cf41a8b451e1f5db911df60c5353047d26c4a4c4325cee859");
-                    jsonStringer.key("chaincode").value(listXchsSync.get(x).getAccChain());
-                    jsonStringer.endObject();
-                    jsonStringer.endObject();
-                }
-
+                jsonStringer.object();
+                jsonStringer.key("id").value(listXchsSync.get(x).getAccID_ext());
+                jsonStringer.key("extn");
+                jsonStringer.object();
+                jsonStringer.key("num").value(listXchsSync.get(x).getAddNum_ext());
+                jsonStringer.key("pub").value(listXchsSync.get(x).getAccPub_ext());
+                jsonStringer.key("chaincode").value(listXchsSync.get(x).getAccChain_ext());
+                jsonStringer.endObject();
+                jsonStringer.key("intn");
+                jsonStringer.object();
+                jsonStringer.key("num").value(listXchsSync.get(x).getAddNum_int());
+                jsonStringer.key("pub").value(listXchsSync.get(x).getAccPub_int());
+                jsonStringer.key("chaincode").value(listXchsSync.get(x).getAccChain_int());
+                jsonStringer.endObject();
+                jsonStringer.endObject();
             }
             jsonStringer.endArray();
             jsonStringer.endObject();
+
             LogUtil.d("交易所 jsonString=" + jsonStringer.toString());
         } catch (Exception e) {
             // TODO Auto-generated catch block
@@ -391,7 +389,7 @@ public class ExchangeAPI {
     public void getExchangeSync(final String CWID, String syncStr, final APIResultCallback apiResultCallback) {
         this.apiResultCallback = apiResultCallback;
         this.mResponse = new String[1];//challenge
-        final String failedlMsg = "ExchangeSync fail.";
+        final String failedlMsg = "ExchangeSync failed.";
         String postData = syncStr;
 
         new AsyncTask<String, Integer, JSONObject>() {
@@ -407,9 +405,13 @@ public class ExchangeAPI {
                 if (result != null) {
                     try {
                         String response = result.getString("response");
-                        mResponse[0] = response;
-                        apiResultCallback.success(mResponse);
-
+                        LogUtil.e("response="+response);
+                        if(response.equals("ok")){
+                            mResponse[0] = response;
+                            apiResultCallback.success(mResponse);
+                        }else{
+                            apiResultCallback.fail(failedlMsg);
+                        }
                     } catch (JSONException e) {
                         apiResultCallback.fail(failedlMsg + ":" + e.toString());
                     }
@@ -454,7 +456,7 @@ public class ExchangeAPI {
         }.execute(postData);
     }
 
-    public void getUnclarifyOrder(final String CWID, final APIResultCallback apiResultCallback) {
+    public void getUnclarifyOrder( final APIResultCallback apiResultCallback) {
         this.apiResultCallback = apiResultCallback;
         this.mResponse = new String[1];//challenge
         final String failedlMsg = "getUnclarifyOrder fail.";

@@ -5,3 +5,4 @@ public interface CmdExecuteCallback {
 
     void onSuccess(int status, byte[] outputData);
 }
+
