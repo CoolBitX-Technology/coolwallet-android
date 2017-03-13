@@ -67,64 +67,64 @@ public class Transaction {
 
     }
 
-    public byte[] getBitcoinOutputStreamBytes() {
-        BitcoinOutputStream baos = new BitcoinOutputStream();
-        try {
-            baos.writeInt32(1);
-            baos.writeVarInt(inputs.length);
-            for (Input input : inputs) {
-                //input.outPoint.hash = txid
-                //input.outPoint.index= getN
-                //input.script  = outputToSpend.getScript().getBytes()
-
-//               byte[]input_outPoint= LogUtil.byte2HexString(input.outPoint.hash).getBytes();
-//                LogUtil.i("input_hash=" + LogUtil.byte2HexString((input_outPoint)));
-
-//                LogUtil.i("Input.OuptPoint.hash length=" + input.outPoint.hash.length);
-//                LogUtil.i("hash的HexString=" + PublicPun.byte2HexString(input.outPoint.hash));
-
-                baos.write(BTCUtils.reverse(input.outPoint.hash));//tid //input.outPoint.hash
-
-                BitcoinOutputStream prevOutputIndexStream = new BitcoinOutputStream();
-                prevOutputIndexStream.writeInt32(input.outPoint.index);//getN
-                baos.write(BTCUtils.reverse(prevOutputIndexStream.toByteArray()));
-
-                int scriptLen = input.script == null ? 0 : input.script.bytes.length;
-
-                LogUtil.i(" input.script=" + input.script + ",Len =" + scriptLen);
-
-                baos.writeVarInt(scriptLen);
-                if (scriptLen > 0) {
-                    baos.write(input.script.bytes);
-                }
-                baos.writeInt32(input.sequence);
-            }
-
-
-            baos.writeVarInt(outputs.length);
-            for (Output output : outputs) {
-                baos.writeInt64(output.value);
-
-                int scriptLen = output.script == null ? 0 : output.script.bytes.length;
-                LogUtil.i("output script=" + output.script + ",Len =" + scriptLen);
-                baos.writeVarInt(scriptLen);
-                if (scriptLen > 0) {
-                    baos.write(output.script.bytes);
-                }
-            }
-            baos.writeInt32(lockTime);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                baos.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return baos.toByteArray();
-
-    }
+//    public byte[] getBitcoinOutputStreamBytes() {
+//        BitcoinOutputStream baos = new BitcoinOutputStream();
+//        try {
+//            baos.writeInt32(1);
+//            baos.writeVarInt(inputs.length);
+//            for (Input input : inputs) {
+//                //input.outPoint.hash = txid
+//                //input.outPoint.index= getN
+//                //input.script  = outputToSpend.getScript().getBytes()
+//
+////               byte[]input_outPoint= LogUtil.byte2HexString(input.outPoint.hash).getBytes();
+////                LogUtil.i("input_hash=" + LogUtil.byte2HexString((input_outPoint)));
+//
+////                LogUtil.i("Input.OuptPoint.hash length=" + input.outPoint.hash.length);
+////                LogUtil.i("hash的HexString=" + PublicPun.byte2HexString(input.outPoint.hash));
+//
+//                baos.write(BTCUtils.reverse(input.outPoint.hash));//tid //input.outPoint.hash
+//
+//                BitcoinOutputStream prevOutputIndexStream = new BitcoinOutputStream();
+//                prevOutputIndexStream.writeInt32(input.outPoint.index);//getN
+//                baos.write(BTCUtils.reverse(prevOutputIndexStream.toByteArray()));
+//
+//                int scriptLen = input.script == null ? 0 : input.script.bytes.length;
+//
+//                LogUtil.i(" input.script=" + input.script + ",Len =" + scriptLen);
+//
+//                baos.writeVarInt(scriptLen);
+//                if (scriptLen > 0) {
+//                    baos.write(input.script.bytes);
+//                }
+//                baos.writeInt32(input.sequence);
+//            }
+//
+//
+//            baos.writeVarInt(outputs.length);
+//            for (Output output : outputs) {
+//                baos.writeInt64(output.value);
+//
+//                int scriptLen = output.script == null ? 0 : output.script.bytes.length;
+//                LogUtil.i("output script=" + output.script + ",Len =" + scriptLen);
+//                baos.writeVarInt(scriptLen);
+//                if (scriptLen > 0) {
+//                    baos.write(output.script.bytes);
+//                }
+//            }
+//            baos.writeInt32(lockTime);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        } finally {
+//            try {
+//                baos.close();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//        return baos.toByteArray();
+//
+//    }
 
     public static class Input {
         public final OutPoint outPoint;
@@ -160,6 +160,12 @@ public class Transaction {
 
 //            LogUtil.i("第二次印出=" + hash.length + ";\nHexString=" + PublicPun.byte2HexString(hash));
         }
+    }
+
+    public static class PrepTrxPoint{
+
+
+
     }
 
     public static final class Script {
@@ -321,13 +327,6 @@ public class Transaction {
             }
             LogUtil.d("產生script的output地址=" + LogUtil.byte2HexString(ScriptAdd));
             return new Script(buf.toByteArray());
-//            } catch (NoSuchAlgorithmException e) {
-//                throw new RuntimeException(e);
-//            } catch (IOException e) {
-//                throw new RuntimeException(e);
-//            }catch( ValidationException e){
-//                throw  new ValidationException(e.getMessage());
-//            }
         }
 
         public void run(Stack<byte[]> stack) throws ScriptInvalidException {
@@ -373,7 +372,7 @@ public class Transaction {
                         break;
                     case OP_VERIFY:
                         if (verifyFails(stack)) {
-                            throw new ScriptInvalidException();
+                            throw new ScriptInvalidException("wrong address");
                         }
                         break;
                     case OP_CHECKSIG:
@@ -436,34 +435,21 @@ public class Transaction {
             return Arrays.hashCode(bytes);
         }
 
-//        /** Creates a scriptPubKey that encodes payment to the given address. */
-//        public static Script createOutputScript(Address to) {
-//            if (to.isP2SHAddress()) {
-//                // OP_HASH160 <scriptHash> OP_EQUAL
-//                return new ScriptBuilder()
-//                        .op(OP_HASH160)
-//                        .data(to.getHash160())
-//                        .op(OP_EQUAL)
-//                        .build();
-//            } else {
-//                // OP_DUP OP_HASH160 <pubKeyHash> OP_EQUALVERIFY OP_CHECKSIG
-//                return new ScriptBuilder()
-//                        .op(OP_DUP)
-//                        .op(OP_HASH160)
-//                        .data(to.getHash160())
-//                        .op(OP_EQUALVERIFY)
-//                        .op(OP_CHECKSIG)
-//                        .build();
-//            }
-//        }
+
 
         public static class ScriptInvalidException extends Exception {
             public ScriptInvalidException() {
+
             }
 
             public ScriptInvalidException(String s) {
                 super(s);
             }
         }
+
+
+
+
+
     }
 }

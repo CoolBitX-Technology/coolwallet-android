@@ -57,6 +57,8 @@ public class PublicPun {
     public final static String csvFilename = "Login";
     public final static String oldPin = "12345678";
     public final static String newPin = "12345678";
+    public static final int HANDLER_SEND_BTC_FINISH = 9527;
+    public static final int HANDLER_SEND_BTC_ERROR = 9521;
     /**
      * 卡片的工作模式
      */
@@ -173,6 +175,31 @@ public class PublicPun {
         return mResult;
     }
 
+    public static String[] jsonParserXchsPrepare(String jsonString) {
+
+        String[] perpTrxResult = null;
+
+        ArrayList<ExchangeOrder> listExchangeOrder = new ArrayList<>();
+        try {
+            JSONObject jsonObject = new JSONObject(jsonString);
+
+            JSONArray jsonArrayBlk = jsonObject.getJSONArray("blks");
+
+            perpTrxResult = new String[jsonArrayBlk.length()];
+            for (int i = 0; i < jsonArrayBlk.length(); i++) {
+                JSONObject jsonObjectData = jsonArrayBlk.getJSONObject(i);
+                perpTrxResult[i] = jsonObjectData.getString("blk");
+                LogUtil.e("jsonParserXchsPrepare " + perpTrxResult[i]);
+            }
+        } catch (Exception e) {
+            LogUtil.e("jsonParserXchsPrepare 錯誤:" + e.toString());
+            e.printStackTrace();
+        } finally {
+
+            return perpTrxResult;
+        }
+    }
+
     public static ArrayList<ExchangeOrder> jsonParserExchange(String jsonString, String mType) {
 
         ArrayList<ExchangeOrder> listExchangeOrder = new ArrayList<>();
@@ -202,6 +229,7 @@ public class PublicPun {
             return listExchangeOrder;
         }
     }
+
     public static ArrayList<UnSpentTxsBean> jsonParserUnspent(String jsonString) {
 
 //      JSONObject  json = RestManager.getJSONfromURL(myuri); // retrieve the entire json stream
@@ -231,7 +259,7 @@ public class PublicPun {
                         JSONObject jsonObjectUnspentData = jsonArrayUnspentData.getJSONObject(j);
                         UnSpentTxsBean mUnSpentTxsBean = gson.fromJson(jsonObjectUnspentData.toString(), UnSpentTxsBean.class);
                         mUnSpentTxsBean.setAddress(UnSpentTxsAddr);
-                        LogUtil.i("mUnSpentTxsBean第" + String.valueOf(j) + " 筆= " + mUnSpentTxsBean.getAddress() + " ; " + String.valueOf(mUnSpentTxsBean.getAmount()) + ";" + mUnSpentTxsBean.getTx());
+                        LogUtil.d("mUnSpentTxsBean第" + String.valueOf(j) + " 筆= " + mUnSpentTxsBean.getAddress() + " ; " + String.valueOf(mUnSpentTxsBean.getAmount()) + ";" + mUnSpentTxsBean.getTx());
                         //skip the data of confirmation=0
                         if (mUnSpentTxsBean.getConfirmations() != 0) {
                             lisUnSpentTxs.add(mUnSpentTxsBean);
@@ -249,7 +277,7 @@ public class PublicPun {
                     JSONObject jsonObjectUnspentData = jsonArrayUnspentData.getJSONObject(j);
                     UnSpentTxsBean mUnSpentTxsBean = gson.fromJson(jsonObjectUnspentData.toString(), UnSpentTxsBean.class);
                     mUnSpentTxsBean.setAddress(UnSpentTxsAddr);
-                    LogUtil.i("mUnSpentTxsBean第" + String.valueOf(j) + " 筆= " + mUnSpentTxsBean.getAddress() + " ; " + String.valueOf(mUnSpentTxsBean.getAmount()) + ";" + mUnSpentTxsBean.getTx());
+                    LogUtil.d("mUnSpentTxsBean第" + String.valueOf(j) + " 筆= " + mUnSpentTxsBean.getAddress() + " ; " + String.valueOf(mUnSpentTxsBean.getAmount()) + ";" + mUnSpentTxsBean.getTx());
                     //skip the data of confirmation=0
                     if (mUnSpentTxsBean.getConfirmations() != 0) {
                         lisUnSpentTxs.add(mUnSpentTxsBean);
@@ -393,6 +421,34 @@ public class PublicPun {
         }
     }
 
+
+    public static String jsonParserRawAddress(Context mContext, String jsonString) {
+
+        String mTransationID = "";
+        try {
+            JSONObject jsonObject = new JSONObject(jsonString);
+            //建立Gson類別並將JSON資料裝入class物件裡
+            Gson gson = new Gson();
+
+            //Txs
+            JSONArray jsonArrayTxs = jsonObject.getJSONArray("txs");
+
+            for (int i = 0; i < jsonArrayTxs.length(); i++) {
+                LogUtil.e(jsonArrayTxs.getString(i));
+                JSONObject jsonObjectTxs = jsonArrayTxs.getJSONObject(i);
+                Txs mTxs = gson.fromJson(jsonObjectTxs.toString(), Txs.class);
+                mTransationID = mTxs.getHash();
+            }
+        } catch (Exception e) {
+            LogUtil.e("jsonParserRawAddress:" + e.toString());
+            Crashlytics.log("jsonParserRawAddress failed jSon=" + jsonString);
+            e.printStackTrace();
+
+        } finally {
+        }
+        return mTransationID;
+    }
+
     public static int jsonParserRefresh(Context mContext, String jsonString, int accountID, boolean isAddressesUpdate) {
 
         int wallet_txs_cnt = 0;
@@ -486,7 +542,6 @@ public class PublicPun {
                 mCwBtcTxs.setWID(wid);
                 mCwBtcTxs.setAccount_ID(accountID);
                 mCwBtcTxs.setAddress(mAddr);
-                mCwBtcTxs.setTxs_TransationID(mTransationID);
                 mCwBtcTxs.setTxs_Address(mTxAddr);
                 mCwBtcTxs.setTxs_Date(mDate);
                 mCwBtcTxs.setTxs_Result(mResult);//tx_value

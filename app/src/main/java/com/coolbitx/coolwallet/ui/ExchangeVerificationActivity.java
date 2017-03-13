@@ -1,6 +1,7 @@
 package com.coolbitx.coolwallet.ui;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -35,7 +36,7 @@ public class ExchangeVerificationActivity extends BaseActivity implements View.O
     private ExchangeAPI mExchangeAPI;
     private ListView listViewVerification;
     ArrayList<ExchangeOrder> listExchangeOrder;
-
+    private ProgressDialog mProgress;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,9 +53,11 @@ public class ExchangeVerificationActivity extends BaseActivity implements View.O
     }
 
     private void GetUnclarifyOrder() {
+        mProgress.show();
         mExchangeAPI.getUnclarifyOrder(new APIResultCallback() {
             @Override
             public void success(String[] msg) {
+                mProgress.dismiss();
                 LogUtil.d("getUnclarifyOrder ok " + msg[0]);
 
                 listExchangeOrder = new ArrayList<>();
@@ -62,20 +65,21 @@ public class ExchangeVerificationActivity extends BaseActivity implements View.O
                 if (listExchangeOrder.size() != 0) {
                     listViewVerification.setAdapter(new UnclarifyOrderAdapter(mContext, listExchangeOrder));
                 } else {
-                    forceFinish("Unable to get Unclarify Order", "Please try again later.");
+                    clickToFinish("Sell order verification", "No unverified orders found.");
                 }
             }
 
             @Override
             public void fail(String msg) {
+                mProgress.dismiss();
                 LogUtil.d("getUnclarifyOrder failed:" + msg);
-                forceFinish("Unable to get Unclarify Order", "Error:" + msg);
+                clickToFinish("Unable to get Unverified Orders", "Error:" + msg);
             }
         });
     }
 
 
-    private void forceFinish(String title, String msg) {
+    private void clickToFinish(String title, String msg) {
         AlertDialog.Builder mBuilder =
                 PublicPun.CustomNoticeDialog(mContext, title, msg);
         mBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -91,7 +95,10 @@ public class ExchangeVerificationActivity extends BaseActivity implements View.O
     }
 
     private void initValues() {
-
+        mProgress = new ProgressDialog(this, ProgressDialog.THEME_HOLO_DARK);
+        mProgress.setCancelable(false);
+        mProgress.setIndeterminate(true);
+        mProgress.setMessage("synchronizing...");
     }
 
     private void initToolbar() {
@@ -198,7 +205,7 @@ public class ExchangeVerificationActivity extends BaseActivity implements View.O
                                                 public void fail(String msg) {
                                                     LogUtil.d("ExWriteOKToken failed:" + msg);
                                                     //exchangeSite Logout()
-
+                                                    PublicPun.showNoticeDialog(mContext, "Unable to Block", "WriteOKToken failed:" +msg);
                                                 }
                                             });
 

@@ -75,7 +75,7 @@ public class CmdProcessor implements BleGattCallback {
             isBusy = true;
             removeCmdAtIndex(0);
         }
-        excuteCmd();
+        executeCmd();
     }
 
     private void removeCmdBeforeIndex(int index) {
@@ -88,7 +88,7 @@ public class CmdProcessor implements BleGattCallback {
         cmdPackets.remove(index);
     }
 
-    private void excuteCmd() {
+        private void executeCmd() {
         byte[] bytes = currentCmdPacket.getInputCmdPacket();
 //        LogUtil.i("executecmd=" + LogUtil.byte2HexString((bytes)));
         if (gattCharacteristics != null) {
@@ -100,6 +100,30 @@ public class CmdProcessor implements BleGattCallback {
             bluetoothGatt.writeCharacteristic(characteristic);
         }
     }
+//    private void executeCmd() {
+//        LogUtil.e("executeCmd="+Integer.toHexString(currentCmdPacket.getIns()));
+//
+//        if (currentCmdPacket.getIns() == CmdIns.TRX_VERIFY_BT) {
+//
+//            if (gattCharacteristics != null) {
+//                final BluetoothGattCharacteristic characteristic = gattCharacteristics.get(0);
+//                if (bluetoothGatt == null) {
+//                    return;
+//                }
+//                bluetoothGatt.writeCharacteristic(characteristic);
+//            }
+//        } else {
+//            byte[] bytes = currentCmdPacket.getInputCmdPacket();
+//            if (gattCharacteristics != null) {
+//                final BluetoothGattCharacteristic characteristic = gattCharacteristics.get(1);
+//                characteristic.setValue(bytes);
+//                if (bluetoothGatt == null) {
+//                    return;
+//                }
+//                bluetoothGatt.writeCharacteristic(characteristic);
+//            }
+//        }
+//    }
 
     static boolean isBeginFlag = false;
     static boolean isBtnFlag = false;
@@ -108,13 +132,13 @@ public class CmdProcessor implements BleGattCallback {
     public void onWriteToA007(byte[] data) {
 
 
-        if ((data[3] == 0x72 ||data[3] == 0x73)&& isBtnFlag) {
+        if ((data[3] == 0x72 || data[3] == 0x73) && isBtnFlag) {
             isBeginFlag = true;
             isBtnFlag = false;
         } else {
             isBeginFlag = false;
         }
-        LogUtil.e("send commond is:" + LogUtil.byte2HexString(data) + " ; isBtnFlag=" + isBtnFlag + " ; isBeginFlag=" + isBeginFlag);
+        LogUtil.e("send command is:" + LogUtil.byte2HexString(data) + " ; isBtnFlag=" + isBtnFlag + " ; isBeginFlag=" + isBeginFlag);
 
         if (gattCharacteristics != null) {
             if (data != null && data.length > 0 && data[data.length - 1] != (byte) 0x00) {
@@ -212,24 +236,78 @@ public class CmdProcessor implements BleGattCallback {
                         }
                     }.start();
                 } else {
-                    if (isReady) {
-                        isBusy = false;
 
-                        if (!outputDatas.isEmpty()) {
-                            outputDatas.clear();
-                        }
 
-                        getCmd();
-                        isReady = false;
-                    } else {
-                        final BluetoothGattCharacteristic characteristic = gattCharacteristics.get(3);
-//                LogUtil.e("准备请求uuid：" + characteristic.getUuid());
-                        bluetoothGatt.readCharacteristic(characteristic);
-                    }
+                    // modified for ble , 20170222
+//                    if (isReady) {
+//                        isBusy = false;
+//
+//                        if (!outputDatas.isEmpty()) {
+//                            outputDatas.clear();
+//                        }
+//
+//                        getCmd();
+//                        isReady = false;
+//                    } else {
+//                        final BluetoothGattCharacteristic characteristic = gattCharacteristics.get(3);
+//                        bluetoothGatt.readCharacteristic(characteristic);
+//                    }
+
+                    final BluetoothGattCharacteristic characteristic = gattCharacteristics.get(3);
+                    LogUtil.e("準備請求uuid：" + characteristic.getUuid());
+                    bluetoothGatt.readCharacteristic(characteristic);
                 }
             }
         }
     }
+
+//    @Override
+//    public void onReadFromA006(byte[] data) {
+//        LogUtil.e("state:" + LogUtil.byte2HexString(data)+";CmdIns="+Integer.toHexString(currentCmdPacket.getIns()));
+//        if (currentCmdPacket.getIns() == CmdIns.TRX_VERIFY_OTP || currentCmdPacket.getIns() == CmdIns.TRX_VERIFY_BT) {
+//            if (gattCharacteristics != null) {
+//                if (data[data.length - 1] == (byte) 0x00) {
+//                    new Thread() {
+//                        @Override
+//                        public void run() {
+//                            try {
+//                                Thread.sleep(100);
+//                            } catch (InterruptedException e) {
+//                                e.printStackTrace();
+//                            } finally {
+//                                final BluetoothGattCharacteristic characteristic = gattCharacteristics.get(0);
+//                                bluetoothGatt.readCharacteristic(characteristic);
+//                            }
+//                        }
+//                    }.start();
+//                } else if (data[data.length - 1] == (byte) 0x80) {
+//                    final BluetoothGattCharacteristic characteristic = gattCharacteristics.get(3);
+//                    bluetoothGatt.readCharacteristic(characteristic);
+//                }
+//            }
+//        } else {
+//            if (gattCharacteristics != null) {
+//                if (data[data.length - 1] == (byte) 0xFF || data[data.length - 1] == (byte) 0x81) {
+//                    new Thread() {
+//                        @Override
+//                        public void run() {
+//                            try {
+//                                Thread.sleep(100);
+//                            } catch (InterruptedException e) {
+//                                e.printStackTrace();
+//                            } finally {
+//                                final BluetoothGattCharacteristic characteristic = gattCharacteristics.get(0);
+//                                bluetoothGatt.readCharacteristic(characteristic);
+//                            }
+//                        }
+//                    }.start();
+//                } else if (data[data.length - 1] == (byte) 0x00) {
+//                    final BluetoothGattCharacteristic characteristic = gattCharacteristics.get(3);
+//                    bluetoothGatt.readCharacteristic(characteristic);
+//                }
+//            }
+//        }
+//    }
 
 
     public void setButtonA006(boolean flag) {
@@ -243,7 +321,7 @@ public class CmdProcessor implements BleGattCallback {
         LogUtil.e("card response is:" + LogUtil.byte2HexString(data));
         if (gattCharacteristics != null) {
             if (data.length == 1 && data[0] == (byte) 0xFC) {
-                //读取完毕，最后遇到0xfc标识
+                //讀取完畢,最後返回FC
                 currentCmdPacket.parseOutputDataPacket(outputDatas);
 
                 isBusy = false;
@@ -253,24 +331,25 @@ public class CmdProcessor implements BleGattCallback {
                 }
 
                 getCmd();
-                isReady = false;
 
-//                final BluetoothGattCharacteristic characteristic = gattCharacteristics.get(0);
-//                LogUtil.e("准备请求uuid：" + characteristic.getUuid());
-//                bluetoothGatt.readCharacteristic(characteristic);
+                //modified for ble
+//                isReady = false;
 
             } else if (data.length == 3 && data[0] == 0x00) {
-                //返回错误码
+                //回覆錯誤碼
                 //no data return, sw return only
                 //add this case for speed up, skip read FC
                 byte[] swOnly = {0x01, 0x02, data[1], data[2]};
                 outputDatas.add(swOnly);
                 currentCmdPacket.parseOutputDataPacket(outputDatas);
 
-                isReady = true;
-                final BluetoothGattCharacteristic characteristic = gattCharacteristics.get(0);
-//                LogUtil.e("准备请求uuid：" + characteristic.getUuid());
-                bluetoothGatt.readCharacteristic(characteristic);
+                isBusy = false;
+
+                // modified for ble
+//                isReady = true;
+//                final BluetoothGattCharacteristic characteristic = gattCharacteristics.get(0);
+//                bluetoothGatt.readCharacteristic(characteristic);
+
             } else {
                 //继续读取其他数据
                 outputDatas.add(data);

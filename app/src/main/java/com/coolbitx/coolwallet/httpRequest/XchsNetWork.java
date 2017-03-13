@@ -28,6 +28,51 @@ public class XchsNetWork {
     public XchsNetWork() {
     }
 
+
+    public JSONObject doGetRawAddress( String mUrl) {
+        String response = "";
+        HttpURLConnection conn = null;
+        try {
+            URL url = new URL(mUrl);
+            conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setDoInput(true);
+            conn.setDoOutput(false);
+            conn.setReadTimeout(10000);
+            conn.setConnectTimeout(30000);
+            int responseCode = conn.getResponseCode();
+
+            LogUtil.d("doGetRawAddress responseCode=" + String.valueOf(responseCode));
+
+            if (responseCode == HttpsURLConnection.HTTP_OK) {
+                String line;
+                BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                while ((line = br.readLine()) != null) {
+                    response += line;
+                }
+            } else {
+                response = "{\"response\":" + conn.getResponseMessage() + "}";
+                LogUtil.d("makeHttpRequestGet JSON Parser errString: " + response);
+            }
+        } catch (Exception e) {
+            LogUtil.d("getSrvInitSession JSON Parser makeHttpRequest Error: " + e.toString());
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
+        }
+        // try parse the string to a JSON object
+        JSONObject jObj = null;
+        try {
+            jObj = new JSONObject(response);
+        } catch (JSONException e) {
+            LogUtil.d("JSON Parser getJSONFromUrl Error parsing data " + e.toString());
+        }
+        // return JSON String
+        return jObj;
+    }
+
+
     public JSONObject makeHttpRequestInit(String temp_url, String data) {
         String response = "";
         HttpURLConnection conn = null;

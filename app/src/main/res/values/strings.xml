@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">CoolWallet</string>
     <string name="hello_world">Hello world!</string>
-    <string name="action_settings">Settings</string>
+    <string name="action_settings">Exchange Login OTP</string>
     <string name="img_logo1">logo1</string>
 
     <string name="drawer_open">Drawer Open</string>
@@ -19,6 +19,8 @@
     <string name="BLOCKR_ADDRESS_INFO_API">http://btc.blockr.io/api/v1/address/info/</string>
 
     <!--Exchange-->
+
+    <string name="msg_xchs_get_raw_addr">Get transaction data failed.</string>
     <string name="tv_exchange_sell_str">Matched sell orders</string>
     <string name="tv_exchange_buy_str">Matched buy orders</string>
     <string name="tv_exchange_verification_str">Verify OTP to place your sell orders</string>
@@ -26,6 +28,8 @@
     <string name="btn_complete_order_str">Complete order</string>
     <string name="btn_str_login">Sign up now</string>
     <string name="str_login_title">Trade wih other CoolWallet holders\non CoolBitx Exchange</string>
+    <string name="btn_place_order">Place an order now</string>
+    <string name="tv_no_matched_order">No matched orders yet</string>
 
     <!--Preference-->
     <string name="pref_title_security_otp">Enable One Time Password\n(OTP) on transactions</string>
@@ -139,6 +143,8 @@
     <string name="send_notification_unable_to_send">Unable to Send</string>
     <string name="btn_str_send">Send</string>
     <string name="note_unspent">Your balance needs at least one confirmation on Blockchain before you can send it out. Please try again later.</string>
+
+
     <string name="send_notification_str_failed_title">Transaction Failed</string>
     <string name="send_notification_str_failed_msg">Timeout.Please try again.</string>
     <string name="send_confirm_btn_send">Send</string>

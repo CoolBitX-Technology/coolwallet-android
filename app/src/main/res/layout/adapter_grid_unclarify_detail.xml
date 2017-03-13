@@ -7,7 +7,7 @@
 
     <TextView
         android:id="@+id/tv_grid_orderId"
-        style="@style/TextView_White_14"
+        style="@style/TextView_White_16"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"
@@ -18,7 +18,7 @@
 
     <TextView
         android:id="@+id/tv_grid_amount"
-        style="@style/TextView_White_14"
+        style="@style/TextView_White_16"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"
@@ -28,7 +28,7 @@
 
     <TextView
         android:id="@+id/tv_grid_price"
-        style="@style/TextView_White_14"
+        style="@style/TextView_White_16"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"

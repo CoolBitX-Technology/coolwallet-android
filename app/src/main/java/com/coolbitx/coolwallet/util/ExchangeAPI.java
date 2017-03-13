@@ -7,14 +7,17 @@ import com.coolbitx.coolwallet.DataBase.DatabaseHelper;
 import com.coolbitx.coolwallet.callback.APIResultCallback;
 import com.coolbitx.coolwallet.callback.XchsSyncCallback;
 import com.coolbitx.coolwallet.entity.Constant;
+import com.coolbitx.coolwallet.entity.TrxBlks;
 import com.coolbitx.coolwallet.entity.XchsSync;
 import com.coolbitx.coolwallet.entity.dbAddress;
+import com.coolbitx.coolwallet.general.BtcUrl;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.coolbitx.coolwallet.httpRequest.XchsNetWork;
 import com.coolbitx.coolwallet.ui.Fragment.FragMainActivity;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.snscity.egdwlib.CmdManager;
 import com.snscity.egdwlib.cmd.CmdResultCallback;
+import com.snscity.egdwlib.utils.ByteUtil;
 import com.snscity.egdwlib.utils.LogUtil;
 
 import org.json.JSONException;
@@ -46,8 +49,7 @@ public class ExchangeAPI {
 //        this.orderID=orderID;
     }
 
-    public boolean exchangeLogin(final APIResultCallback mAPIResultCallback) {
-        initResult = false;
+    public void exchangeLogin(final APIResultCallback mAPIResultCallback) {
         this.mAPIResultCallback = mAPIResultCallback;
         String mFirebaseToken = FirebaseInstanceId.getInstance().getToken();
 //        exchangeToken = FirebaseInstanceId.getInstance().getToken();
@@ -154,8 +156,6 @@ public class ExchangeAPI {
                 LogUtil.d("getSrvInitSession=" + msg);
             }
         });
-
-        return initResult;
     }
 
     /**
@@ -166,7 +166,7 @@ public class ExchangeAPI {
     public void querySyncData(final XchsSyncCallback mXchsSyncCallback) {
         listXchsSync = new ArrayList<XchsSync>();
         int i = 0;
-        while (i < FragMainActivity.ACCOUNT_CNT ) {
+        while (i < FragMainActivity.ACCOUNT_CNT) {
             final int accountId = i;
             int j = 0;
             while (j <= 1) {
@@ -244,7 +244,7 @@ public class ExchangeAPI {
         }
     }
 
-    public String createSyncJson(ArrayList<XchsSync> listXchsSync, String exchangeToken) {
+    private String createSyncJson(ArrayList<XchsSync> listXchsSync, String exchangeToken) {
 
         JSONStringer jsonStringer = new JSONStringer();
 
@@ -295,8 +295,7 @@ public class ExchangeAPI {
             protected JSONObject doInBackground(String... param) {
                 String url = "http://xsm.coolbitx.com:8080/api/res/cw/session/logout/";
                 LogUtil.d("exchangeLogOut url=" + url);
-                XchsNetWork mXchsNetWork = new XchsNetWork();
-                return mXchsNetWork.makeHttpRequestLogout(url);
+                return new XchsNetWork().makeHttpRequestLogout(url);
             }
 
             @Override
@@ -330,8 +329,7 @@ public class ExchangeAPI {
             protected JSONObject doInBackground(String... param) {
                 String url = "http://xsm.coolbitx.com:8080/api/res/cw/session/" + CWID;
                 LogUtil.d("getSrvInitSession url=" + url);
-                XchsNetWork jParser = new XchsNetWork();
-                return jParser.makeHttpRequestInit(url, param[0]);
+                return new XchsNetWork().makeHttpRequestInit(url, param[0]);
             }
 
             @Override
@@ -364,8 +362,7 @@ public class ExchangeAPI {
             @Override
             protected JSONObject doInBackground(String... param) {
                 String url = "http://xsm.coolbitx.com:8080/api/res/cw/session/" + CWID;
-                XchsNetWork jParser = new XchsNetWork();
-                return jParser.makeHttpRequestPost(url, param[0]);
+                return new XchsNetWork().makeHttpRequestPost(url, param[0]);
             }
 
             @Override
@@ -396,8 +393,7 @@ public class ExchangeAPI {
             @Override
             protected JSONObject doInBackground(String... param) {
                 String url = "http://xsm.coolbitx.com:8080/api/res/cw/" + CWID;
-                XchsNetWork jParser = new XchsNetWork();
-                return jParser.makeHttpRequestPost(url, param[0]);
+                return new XchsNetWork().makeHttpRequestPost(url, param[0]);
             }
 
             @Override
@@ -405,11 +401,11 @@ public class ExchangeAPI {
                 if (result != null) {
                     try {
                         String response = result.getString("response");
-                        LogUtil.e("response="+response);
-                        if(response.equals("ok")){
+                        LogUtil.e("response=" + response);
+                        if (response.equals("ok")) {
                             mResponse[0] = response;
                             apiResultCallback.success(mResponse);
-                        }else{
+                        } else {
                             apiResultCallback.fail(failedlMsg);
                         }
                     } catch (JSONException e) {
@@ -432,8 +428,7 @@ public class ExchangeAPI {
             @Override
             protected JSONObject doInBackground(String... param) {
                 String url = "http://xsm.coolbitx.com:8080/api/res/cw/pending/" + CWID;
-                XchsNetWork jParser = new XchsNetWork();
-                return jParser.makeHttpRequestGet(url, param[0]);
+                return new XchsNetWork().makeHttpRequestGet(url, param[0]);
             }
 
             @Override
@@ -456,7 +451,7 @@ public class ExchangeAPI {
         }.execute(postData);
     }
 
-    public void getUnclarifyOrder( final APIResultCallback apiResultCallback) {
+    public void getUnclarifyOrder(final APIResultCallback apiResultCallback) {
         this.apiResultCallback = apiResultCallback;
         this.mResponse = new String[1];//challenge
         final String failedlMsg = "getUnclarifyOrder fail.";
@@ -466,8 +461,7 @@ public class ExchangeAPI {
             @Override
             protected JSONObject doInBackground(String... param) {
                 String url = "http://xsm.coolbitx.com:8080/api/res/cw/unclarify/" + CWID;
-                XchsNetWork jParser = new XchsNetWork();
-                return jParser.makeHttpRequestGet(url, param[0]);
+                return new XchsNetWork().makeHttpRequestGet(url, param[0]);
             }
 
             @Override
@@ -500,8 +494,7 @@ public class ExchangeAPI {
             @Override
             protected JSONObject doInBackground(String... param) {
                 String url = "http://xsm.coolbitx.com:8080/api/res/cw/order/" + hexOrder + "/" + blockOtp;
-                XchsNetWork jParser = new XchsNetWork();
-                return jParser.makeHttpRequestGet(url, param[0]);
+                return new XchsNetWork().makeHttpRequestGet(url, param[0]);
             }
 
             @Override
@@ -535,8 +528,7 @@ public class ExchangeAPI {
             @Override
             protected JSONObject doInBackground(String... param) {
                 String url = "http://xsm.coolbitx.com:8080/api/res/cw/oktoken/" + hexOrder;
-                XchsNetWork jParser = new XchsNetWork();
-                return jParser.makeHttpRequestPost(url, param[0]);
+                return new XchsNetWork().makeHttpRequestPost(url, param[0]);
             }
 
             @Override
@@ -569,8 +561,7 @@ public class ExchangeAPI {
             @Override
             protected JSONObject doInBackground(String... param) {
                 String url = "http://xsm.coolbitx.com:8080/api/res/cw/unblock/" + orderId;
-                XchsNetWork jParser = new XchsNetWork();
-                return jParser.makeHttpRequestGet(url, param[0]);
+                return new XchsNetWork().makeHttpRequestGet(url, param[0]);
             }
 
             @Override
@@ -611,8 +602,7 @@ public class ExchangeAPI {
             @Override
             protected JSONObject doInBackground(String... param) {
                 String url = "http://xsm.coolbitx.com:8080/api/res/cw/order/" + orderId;
-                XchsNetWork jParser = new XchsNetWork();
-                return jParser.makeHttpDelete(url);
+                return new XchsNetWork().makeHttpDelete(url);
             }
 
             @Override
@@ -645,8 +635,7 @@ public class ExchangeAPI {
             protected JSONObject doInBackground(String... param) {
                 LogUtil.d("doExGetTrxInfo order ID=" + orderId);
                 String url = "http://xsm.coolbitx.com:8080/api/res/cw/trxinfo/" + orderId;
-                XchsNetWork jParser = new XchsNetWork();
-                return jParser.makeHttpRequestGet(url, param[0]);
+                return new XchsNetWork().makeHttpRequestGet(url, param[0]);
             }
 
             @Override
@@ -669,26 +658,57 @@ public class ExchangeAPI {
     }
 
     //ExGetTrxPrepareBlocks
-    public void doExGetTrxPrepareBlocks(String inputData, final String orderID, final APIResultCallback apiResultCallback) {
+    public void doExGetTrxPrepareBlocks(ArrayList<TrxBlks> mLisTrxBlks, final APIResultCallback apiResultCallback) {
         this.apiResultCallback = apiResultCallback;
         this.mResponse = new String[1];//challenge
         final String failedlMsg = "doExGetTrxPrepareBlocks fail.";
-        String postData = "";
-
+        String inputData = createXchsTrxJson(mLisTrxBlks);
         new AsyncTask<String, Integer, JSONObject>() {
             @Override
             protected JSONObject doInBackground(String... param) {
-                String url = "http://xsm.coolbitx.com:8080/api/res/cw/trxblks/" + orderID;
-                XchsNetWork jParser = new XchsNetWork();
-                return jParser.makeHttpRequestPost(url, param[0]);
+                String url = "http://xsm.coolbitx.com:8080/api/res/cw/trxblks/";
+//                XchsNetWork jParser = new XchsNetWork();
+                return new XchsNetWork().makeHttpRequestPost(url, param[0]);
             }
 
             @Override
             protected void onPostExecute(JSONObject result) {
                 if (result != null) {
                     try {
-                        LogUtil.d("doExGetTrxPrepareBlocks=" + result);
-                        String response = result.getString("block_btc");
+                        LogUtil.d("doExGetTrxPrepareBlocks response=" + result);
+                        String response = result.toString();
+                        mResponse[0] = response;
+                        apiResultCallback.success(mResponse);
+
+                    } catch (Exception e) {
+                        apiResultCallback.fail(failedlMsg + ":" + e.toString());
+                    }
+                } else {
+                    apiResultCallback.fail(failedlMsg);
+                }
+            }
+        }.execute(inputData);
+    }
+
+
+    public void getBlockChainRawAddress(final String addr, final APIResultCallback apiResultCallback) {
+
+        final String failedlMsg = "getBlockChainRawAddress failed.";
+        String postData = null;
+        this.mResponse = new String[1];
+        new AsyncTask<String, Integer, JSONObject>() {
+            @Override
+            protected JSONObject doInBackground(String... param) {
+                String url = BtcUrl.URL_BLICKCHAIN_RAW_ADDRESS + addr;
+                return new XchsNetWork().doGetRawAddress(url);
+            }
+
+            @Override
+            protected void onPostExecute(JSONObject result) {
+                if (result != null) {
+                    try {
+                        LogUtil.d("getBlockChainRawAddress response=" + result);
+                        String response = result.toString();
                         mResponse[0] = response;
                         apiResultCallback.success(mResponse);
 
@@ -702,4 +722,113 @@ public class ExchangeAPI {
         }.execute(postData);
     }
 
+
+    public void doTrxSubmit(final String orderId, final String trxId, final APIResultCallback apiResultCallback) {
+        this.apiResultCallback = apiResultCallback;
+        this.mResponse = new String[1];//challenge
+        final String failedlMsg = "doTrxSubmit fail.";
+
+        String postData = "{\"bcTrxId\":\"" + trxId + "\"}";
+
+        new AsyncTask<String, Integer, JSONObject>() {
+            @Override
+            protected JSONObject doInBackground(String... param) {
+                String url = "http://xsm.coolbitx.com:8080/api/res/cw/trxblks/" + orderId;
+                XchsNetWork jParser = new XchsNetWork();
+                return jParser.makeHttpRequestPost(url, param[0]);
+            }
+
+            @Override
+            protected void onPostExecute(JSONObject result) {
+                if (result != null) {
+                    try {
+                        LogUtil.d("doTrxSubmit response=" + result);
+                        String response = result.toString();
+                        mResponse[0] = response;
+                        apiResultCallback.success(mResponse);
+
+                    } catch (Exception e) {
+                        apiResultCallback.fail(failedlMsg + ":" + e.toString());
+                    }
+                } else {
+                    apiResultCallback.fail(failedlMsg);
+                }
+            }
+        }.execute(postData);
+    }
+
+    private String createXchsTrxJson(ArrayList<TrxBlks> mLisTrxBlks) {
+
+        JSONStringer jsonStringer = new JSONStringer();
+
+        try {
+            jsonStringer.object();  //代表{
+            jsonStringer.key("blks");
+            jsonStringer.array();    //代表[
+
+            for (int i = 0; i < mLisTrxBlks.size(); i++) {
+                jsonStringer.object();
+                jsonStringer.key("idx").value(i + 1);//from 1 begin
+                jsonStringer.key("blk").value(getBlkValue(mLisTrxBlks.get(i)));
+                jsonStringer.endObject();
+            }
+
+            jsonStringer.endArray();
+            jsonStringer.endObject();
+
+            LogUtil.d("丟交易所 jsonString=" + jsonStringer.toString());
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return jsonStringer.toString();
+    }
+
+    private String getBlkValue(TrxBlks mTrxBlks) {
+        String result = "";
+
+//        byte[] trxHandle = mTrxBlks.getTrxHandle();
+        byte[] accBytes = ByteUtil.intToByteLittle(mTrxBlks.getAccid(), 4);//4 bytes, little-endian
+        byte kcidBytes = (byte) mTrxBlks.getKcid();
+        byte[] kidBytes = ByteUtil.intToByteLittle(mTrxBlks.getKid(), 4);//4 bytes, little-endian
+        byte[] out1Addr = mTrxBlks.getOut1Addr();
+        byte[] out2Addr = mTrxBlks.getOut2Addr();
+        byte[] sigMtrl = mTrxBlks.getSigmtrl();
+
+
+//        [ACCID] [KCID] [KID]
+//        [OUT1ADDR] [OUT2ADDR] [SIGMTRL]
+//        byte[] inputData = new byte[4 + 4 + 1 + 4 + 25 + 25 + 32];
+        byte[] inputData = new byte[4 + 1 + 4 + 25 + 25 + 32];
+
+        LogUtil.e("input=" + inputData.length);
+
+        //(來源陣列，起始索引值，目的陣列，起始索引值，複製長度)
+//        System.arraycopy(trxHandle, 0, inputData, 0, 4);
+//        LogUtil.e("input add handle=" + LogUtil.byte2HexStringNoBlank(inputData));
+
+        System.arraycopy(accBytes, 0, inputData, 0, 4);
+        LogUtil.e("input add acc=" + LogUtil.byte2HexStringNoBlank(inputData));
+
+        inputData[4] = kcidBytes;
+        LogUtil.e("input add kcid=" + LogUtil.byte2HexStringNoBlank(inputData));
+
+        System.arraycopy(kidBytes, 0, inputData, 4 + 1, 4);
+        LogUtil.e("input add kid=" + LogUtil.byte2HexStringNoBlank(inputData));
+
+        System.arraycopy(out1Addr, 0, inputData, 4 + 1 + 4, 25);
+        LogUtil.e("input add out1Addr=" + LogUtil.byte2HexStringNoBlank(inputData));
+
+        System.arraycopy(out2Addr, 0, inputData, 4 + 1 + 4 + 25, 25);
+        LogUtil.e("input add out2Addr=" + LogUtil.byte2HexStringNoBlank(inputData));
+
+        System.arraycopy(sigMtrl, 0, inputData, 4 + 1 + 4 + 25 + 25, 32);
+        LogUtil.e("input add sigMtrl=" + LogUtil.byte2HexStringNoBlank(inputData));
+
+        result = LogUtil.byte2HexStringNoBlank(inputData);
+
+        LogUtil.e("blkTrx inputData=" + result);
+
+        return result;
+    }
 }

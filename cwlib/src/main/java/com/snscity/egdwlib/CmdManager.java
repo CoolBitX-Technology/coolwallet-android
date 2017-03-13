@@ -130,8 +130,8 @@ public class CmdManager {
     //Exchange Site
     public void XchsGetOtp(int infoId,CmdResultCallback cmdResultCallback) {
         CmdPacket cmdPacket = new CmdPacket.Builder()
-                .setCla(CmdCla.EX_GET_OTP)
-                .setIns(CmdIns.EX_GET_OTP)
+                .setCla(CmdCla.XCHS_GET_OTP)
+                .setIns(CmdIns.XCHS_GET_OTP)
                 .setPram1(infoId)
                 .build();
         cmdPacket.setCmdResultListener(cmdResultCallback);
@@ -141,8 +141,8 @@ public class CmdManager {
     //trxID,byte[]accID,byte[] Acount,byte[] mac, byte[]nonce,
     public void XchsBlockBtc(byte[] svrResp, CmdResultCallback cmdResultCallback) {
         CmdPacket cmdPacket = new CmdPacket.Builder()
-                .setCla(CmdCla.EX_BLOCK_BTC)
-                .setIns(CmdIns.EX_BLOCK_BTC)
+                .setCla(CmdCla.XCHS_BLOCK_BTC)
+                .setIns(CmdIns.XCHS_BLOCK_BTC)
                 .setInputData(svrResp)
                 .build();
         cmdPacket.setCmdResultListener(cmdResultCallback);
@@ -151,8 +151,8 @@ public class CmdManager {
 
     public void XchsCancelBlock(byte[] cancelInfo,CmdResultCallback cmdResultCallback) {
         CmdPacket cmdPacket = new CmdPacket.Builder()
-                .setCla(CmdCla.EX_BLOCK_CANCEL)
-                .setIns(CmdIns.EX_BLOCK_CANCEL)
+                .setCla(CmdCla.XCHS_BLOCK_CANCEL)
+                .setIns(CmdIns.XCHS_BLOCK_CANCEL)
                 .setInputData(cancelInfo)
                 .build();
         cmdPacket.setCmdResultListener(cmdResultCallback);
@@ -160,8 +160,8 @@ public class CmdManager {
     }
     public void XchsSessionInit(byte[] svrChlng, CmdResultCallback cmdResultCallback) {
         CmdPacket cmdPacket = new CmdPacket.Builder()
-                .setCla(CmdCla.EX_SESSION_INIT)
-                .setIns(CmdIns.EX_SESSION_INIT)
+                .setCla(CmdCla.XCHS_SESSION_INIT)
+                .setIns(CmdIns.XCHS_SESSION_INIT)
                 .setInputData(svrChlng)
                 .build();
         cmdPacket.setCmdResultListener(cmdResultCallback);
@@ -170,8 +170,8 @@ public class CmdManager {
 
     public void XchsSessionEstablish(byte[] svrResp,CmdResultCallback cmdResultCallback) {
         CmdPacket cmdPacket = new CmdPacket.Builder()
-                .setCla(CmdCla.EX_SESSION_ESTAB)
-                .setIns(CmdIns.EX_SESSION_ESTAB)
+                .setCla(CmdCla.XCHS_SESSION_ESTAB)
+                .setIns(CmdIns.XCHS_SESSION_ESTAB)
                 .setInputData(svrResp)
                 .build();
         cmdPacket.setCmdResultListener(cmdResultCallback);
@@ -180,30 +180,38 @@ public class CmdManager {
 
     public void XchsTrxsignLogin(byte[] loginBlk,CmdResultCallback cmdResultCallback) {
         CmdPacket cmdPacket = new CmdPacket.Builder()
-                .setCla(CmdCla.EX_TRX_SIGN_LOGIN)
-                .setIns(CmdIns.EX_TRX_SIGN_LOGIN)
+                .setCla(CmdCla.XCHS_TRX_SIGN_LOGIN)
+                .setIns(CmdIns.XCHS_TRX_SIGN_LOGIN)
                 .setInputData(loginBlk)
                 .build();
         cmdPacket.setCmdResultListener(cmdResultCallback);
         cmdProcessor.addCmd(cmdPacket);
     }
 
+    public void XchsTrxsignPrepare(int inputId,byte[] inputData,CmdResultCallback cmdResultCallback ) {
 
-    public void XchsTrxsignPrepare(byte[] svrResp,CmdResultCallback cmdResultCallback) {
+
+
         CmdPacket cmdPacket = new CmdPacket.Builder()
-                .setCla(CmdCla.EX_TRX_SIGN_PREPARE)
-                .setIns(CmdIns.EX_TRX_SIGN_PREPARE)
-                .setInputData(svrResp)
+                .setCla(CmdCla.XCHS_TRX_SIGN_PREPARE)
+                .setIns(CmdIns.XCHS_TRX_SIGN_PREPARE)
+                .setPram1(inputId)
+                .setInputData(inputData)
                 .build();
         cmdPacket.setCmdResultListener(cmdResultCallback);
         cmdProcessor.addCmd(cmdPacket);
     }
 
-    public void XchsTrxsignLogout(byte[] svrResp,CmdResultCallback cmdResultCallback) {
+    public void XchsTrxsignLogout(byte[] trxHandle,byte[] nonce,CmdResultCallback cmdResultCallback) {
+
+        byte[] data = new byte[trxHandle.length+nonce.length];
+        System.arraycopy(trxHandle,0,data,0,trxHandle.length);
+        System.arraycopy(nonce,0,data,trxHandle.length,nonce.length);
+        LogUtil.e("XchsTrxsignLogout input="+byte2HexString(data));
         CmdPacket cmdPacket = new CmdPacket.Builder()
-                .setCla(CmdCla.EX_TRX_SIGN_LOGOUT)
-                .setIns(CmdIns.EX_TRX_SIGN_LOGOUT)
-                .setInputData(svrResp)
+                .setCla(CmdCla.XCHS_TRX_SIGN_LOGOUT)
+                .setIns(CmdIns.XCHS_TRX_SIGN_LOGOUT)
+                .setInputData(data)
                 .build();
         cmdPacket.setCmdResultListener(cmdResultCallback);
         cmdProcessor.addCmd(cmdPacket);
@@ -235,6 +243,16 @@ public class CmdManager {
         cmdProcessor.addCmd(cmdPacket);
     }
 
+
+    public void trxButton(CmdResultCallback cmdResultCallback) {
+        LogUtil.e("command trxButton");
+        CmdPacket cmdPacket = new CmdPacket.Builder()
+                .setCla(CmdCla.TRX_VERIFY_BT)
+                .setIns(CmdIns.TRX_VERIFY_BT)
+                .build();
+        cmdPacket.setCmdResultListener(cmdResultCallback);
+        cmdProcessor.addCmd(cmdPacket);
+    }
 
     public void hdwQueryAccountInfo(int infoId, int accountId, CmdResultCallback cmdResultCallback) {
         //P1: infoId: 1B (00 name, 01 balance, 02 ext key pointer, 03 int key pointer)

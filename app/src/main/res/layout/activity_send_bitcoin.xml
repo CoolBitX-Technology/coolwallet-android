@@ -129,6 +129,7 @@
             android:background="@drawable/edit_format"
             android:imeOptions="actionDone"
             android:inputType="numberDecimal"
+            android:padding="5dp"
             />
         <!--android:inputType="numberDecimal"-->
         <TextView
@@ -166,10 +167,11 @@
             android:layout_width="180dp"
             android:layout_height="40dp"
             android:layout_gravity="center"
-            android:layout_marginLeft="20dp"
+            android:layout_marginLeft="19dp"
             android:background="@drawable/edit_format"
             android:imeOptions="actionDone"
-            android:inputType="numberDecimal"/>
+            android:inputType="numberDecimal"
+            android:padding="5dp"/>
 
         <TextView
             android:id="@+id/tv_send_subtitle_country2"

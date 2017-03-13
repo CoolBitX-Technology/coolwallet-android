@@ -24,6 +24,7 @@
         android:id="@+id/alert_editotp"
         android:layout_marginTop="5dp"
         android:maxLength="6"
+        android:paddingLeft="5dp"
         android:layout_centerHorizontal="true"
         android:background="@drawable/textview_border"
         style="@style/TextView_Black_16"

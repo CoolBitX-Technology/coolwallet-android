@@ -99,9 +99,9 @@ public class TransactionConfirmDialog extends AlertDialog implements View.OnClic
         tvFeesForeignAmount.setText("$" + String.valueOf(new DecimalFormat("#.##").format(
                 mTxsConfirm.getFees() * PublicPun.SATOSHI_RATE * UseExchangeRate)));
         tvTotalAmount.setText("฿" + String.valueOf(new DecimalFormat("#.########").format(
-                mTxsConfirm.getOuput_total() * PublicPun.SATOSHI_RATE)));
+                mTxsConfirm.getOutput_total() * PublicPun.SATOSHI_RATE)));
         tvTotalForeignAmount.setText("$" + String.valueOf(new DecimalFormat("#.##").format(
-                mTxsConfirm.getOuput_total() * PublicPun.SATOSHI_RATE * UseExchangeRate)));
+                mTxsConfirm.getOutput_total() * PublicPun.SATOSHI_RATE * UseExchangeRate)));
         tvInputStr.setText(String.valueOf(mTxsConfirm.getInput_count()) + " Inputs");
         tvInputAmount.setText("฿" + String.valueOf(new DecimalFormat("#.########").format(
                 mTxsConfirm.getInput_amount() * PublicPun.SATOSHI_RATE)));
@@ -120,7 +120,8 @@ public class TransactionConfirmDialog extends AlertDialog implements View.OnClic
             case R.id.btn_confirm:
                 //confirm to send
                 if (mConfirmListener != null) {
-                    mConfirmListener.TransactionConfirm();
+                    mConfirmListener.TransactionConfirm(mTxsConfirm.getOutput_addrese(),
+                            mTxsConfirm.getChange_address(),mTxsConfirm.getOutput_amount());
                 }
                 dismiss();
                 break;

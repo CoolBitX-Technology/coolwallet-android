@@ -4,8 +4,6 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.widget.BaseAdapter;
 
-import com.snscity.egdwlib.utils.LogUtil;
-
 import java.util.List;
 
 /**
@@ -21,7 +19,7 @@ public abstract class CommonAdapter<T> extends BaseAdapter {
         mInflater = LayoutInflater.from(context);
         this.mContext = context;
         this.mDatas = mDatas;
-        LogUtil.d("call CommonAdapter");
+//        LogUtil.d("call CommonAdapter");
     }
 
     @Override

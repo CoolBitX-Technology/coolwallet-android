@@ -21,7 +21,7 @@ import com.snscity.egdwlib.utils.LogUtil;
  * Created by ShihYi on 2015/10/20.
  */
 public class InitialSecuritySettingActivity extends BaseActivity implements CompoundButton.OnCheckedChangeListener {
-    public static boolean[] settingOptions = new boolean[4];
+
     private Switch switchOtp;
     private Switch switchEnablePressButton;
     private Switch switchDog;
@@ -154,7 +154,7 @@ public class InitialSecuritySettingActivity extends BaseActivity implements Comp
         LogUtil.i("switch:" + id + " isChecked:" + isChecked);
     }
 
-    private void getSecpo() {
+    public void getSecpo() {
 
             cmdManager.getSecpo(new CmdResultCallback() {
                 @Override

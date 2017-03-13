@@ -26,34 +26,34 @@ public class CwBtcNetWork {
 
     private int httpTimeOut = 30000;
 
-    private byte[] hexStringToBytes(String hexStr) {
-        return null;
-    }
-
-    private String bytesToHexString(byte[] bytes) {
-        return null;
-    }
-
-    private byte[] HTTPRequestUsingGETMethodFrom() {
-        return null;
-    }
-
-    /**
-     * 获取当前汇率
-     *
-     * @return
-     */
-    public double getCurrRate() {
-        return 0;
-    }
-
-    public void getTransactionByAccount(int accountId) {
-
-    }
-
-    public void registerNotifyByAccount(int accountId) {
-
-    }
+//    private byte[] hexStringToBytes(String hexStr) {
+//        return null;
+//    }
+//
+//    private String bytesToHexString(byte[] bytes) {
+//        return null;
+//    }
+//
+//    private byte[] HTTPRequestUsingGETMethodFrom() {
+//        return null;
+//    }
+//
+//    /**
+//     * 获取当前汇率
+//     *
+//     * @return
+//     */
+//    public double getCurrRate() {
+//        return 0;
+//    }
+//
+//    public void getTransactionByAccount(int accountId) {
+//
+//    }
+//
+//    public void registerNotifyByAccount(int accountId) {
+//
+//    }
 
 
     public String doGet(ContentValues cv, String extraUrl, String params) {
@@ -76,12 +76,11 @@ public class CwBtcNetWork {
                     url = BtcUrl.URL_BLICKCHAIN_SERVER_SITE + "multiaddr?offset=" + params + "&active=" + cv.getAsString("addresses");
                 }
             } else {
-                //
+                url = extraUrl;
             }
 
             LogUtil.i(extraUrl + ":URL地址 = " + url);
             Crashlytics.log("doGet url=" + url);
-
 
             URL getUrl = new URL(url);
             connection = (HttpURLConnection) getUrl.openConnection();

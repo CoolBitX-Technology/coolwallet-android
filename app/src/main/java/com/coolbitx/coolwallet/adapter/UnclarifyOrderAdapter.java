@@ -9,6 +9,7 @@ import com.coolbitx.coolwallet.R;
 import com.coolbitx.coolwallet.entity.ExchangeOrder;
 import com.snscity.egdwlib.utils.LogUtil;
 
+import java.text.DecimalFormat;
 import java.util.List;
 
 /**
@@ -35,7 +36,7 @@ public class UnclarifyOrderAdapter<T> extends CommonAdapter<T> {
         mOrderId.setText(String.valueOf(exchangeOrder.getOrderId()));
 
         TextView mAmount = viewHolder.getView(R.id.tv_grid_amount);
-        mAmount.setText(String.valueOf(exchangeOrder.getAmount()));
+        mAmount.setText(new DecimalFormat("#.########").format(exchangeOrder.getAmount()));
 
 
         TextView mPrice = viewHolder.getView(R.id.tv_grid_price);

@@ -83,23 +83,25 @@ public class CmdCla {
     //Transaction Commands
     public static final int TRX_STATUS = ClaType.KEEP_MEMORY;
     public static final int TRX_BEGIN = ClaType.KEEP_MEMORY;
+    public static final int TRX_VERIFY_BT = ClaType.KEEP_NONE;
     public static final int TRX_VERIFY_OTP = ClaType.KEEP_MEMORY;
     public static final int TRX_SIGN = ClaType.KEEP_MEMORY;
     public static final int TRX_FINISH = ClaType.KEEP_MEMORY;
     public static final int TRX_GET_ADDR = ClaType.KEEP_MEMORY; //?
 
-    //Exchange Site Commands
-    public static final int EX_REG_STATUS = ClaType.KEEP_MEMORY;
-    public static final int EX_GET_OTP = ClaType.KEEP_MEMORY;
-    public static final int EX_SESSION_INIT = ClaType.KEEP_MEMORY_GET_FLASH; //?
-    public static final int EX_SESSION_ESTAB = ClaType.KEEP_MEMORY_SET_FLASH; //?
-    public static final int EX_SESSION_LOGOUT = ClaType.KEEP_MEMORY_SET_FLASH; //?
-    public static final int EX_BLOCK_INFO = ClaType.KEEP_MEMORY_SET_FLASH; //?
-    public static final int EX_BLOCK_BTC = ClaType.KEEP_MEMORY_SET_FLASH; //?
-    public static final int EX_BLOCK_CANCEL = ClaType.KEEP_MEMORY_SET_FLASH; //?
-    public static final int EX_TRX_SIGN_LOGIN = ClaType.KEEP_MEMORY_SET_FLASH; //?
-    public static final int EX_TRX_SIGN_PREPARE = ClaType.KEEP_MEMORY_SET_FLASH; //?
-    public static final int EX_TRX_SIGN_LOGOUT = ClaType.KEEP_MEMORY_SET_FLASH; //?
+    //Exchange Site Command
+    public static final int XCHS_SESSION_INIT = ClaType.KEEP_MEMORY_GET_FLASH; //?
+    public static final int XCHS_REG_STATUS = ClaType.KEEP_MEMORY_SET_FLASH;
+    public static final int XCHS_GET_OTP = ClaType.KEEP_MEMORY_SET_FLASH;
+    public static final int XCHS_SESSION_ESTAB = ClaType.KEEP_MEMORY_SET_FLASH; //?
+    public static final int XCHS_SESSION_LOGOUT = ClaType.KEEP_MEMORY_SET_FLASH; //?
+    public static final int XCHS_BLOCK_INFO = ClaType.KEEP_MEMORY_SET_FLASH; //?
+    public static final int XCHS_BLOCK_BTC = ClaType.KEEP_MEMORY_SET_FLASH; //?
+    public static final int XCHS_BLOCK_CANCEL = ClaType.KEEP_MEMORY_SET_FLASH; //?
+
+    public static final int XCHS_TRX_SIGN_LOGIN = ClaType.KEEP_MEMORY_SET_FLASH; //?
+    public static final int XCHS_TRX_SIGN_PREPARE = ClaType.KEEP_MEMORY_SET_FLASH; //?
+    public static final int XCHS_TRX_SIGN_LOGOUT = ClaType.KEEP_MEMORY_SET_FLASH; //?
 
     //FirmwareUpload Commmands
     public static final int BACK_TO_LOADER = ClaType.KEEP_NONE; //?

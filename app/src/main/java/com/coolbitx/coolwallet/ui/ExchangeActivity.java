@@ -5,11 +5,16 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -17,6 +22,7 @@ import com.coolbitx.coolwallet.R;
 import com.coolbitx.coolwallet.adapter.PendingOrderAdapter;
 import com.coolbitx.coolwallet.callback.APIResultCallback;
 import com.coolbitx.coolwallet.entity.ExchangeOrder;
+import com.coolbitx.coolwallet.general.BtcUrl;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.coolbitx.coolwallet.util.ExchangeAPI;
 import com.snscity.egdwlib.CmdManager;
@@ -32,7 +38,8 @@ public class ExchangeActivity extends BaseActivity implements View.OnClickListen
 
     private CmdManager cmdManager;
     private Context mContext;
-    private TextView sellVerification;
+    private TextView sellVerification, tv_noMatchedOrders;
+    private Button btn_place_order;
     private ListView gridViewSell;
     private ListView gridViewBuy;
     private ExchangeAPI mExchangeAPI;
@@ -40,6 +47,7 @@ public class ExchangeActivity extends BaseActivity implements View.OnClickListen
     ArrayList<ExchangeOrder> listExchangeBuyOrder;
     private String orderId = "";
     private ProgressDialog mProgress;
+    private LinearLayout lin_orders;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,7 +63,6 @@ public class ExchangeActivity extends BaseActivity implements View.OnClickListen
 
         GetPendingOrder();
 
-
     }
 
     private void GetPendingOrder() {
@@ -66,7 +73,7 @@ public class ExchangeActivity extends BaseActivity implements View.OnClickListen
         mExchangeAPI.getPendingOrder(new APIResultCallback() {
             @Override
             public void success(String[] msg) {
-                LogUtil.d("GetPendingOrder ok " + msg[0]);
+//                LogUtil.d("GetPendingOrder ok " + msg[0]);
                 String[] mString = new String[]{"sell", "buy"};
                 mProgress.dismiss();
                 for (int i = 0; i < mString.length; i++) {
@@ -78,7 +85,13 @@ public class ExchangeActivity extends BaseActivity implements View.OnClickListen
                         gridViewBuy.setAdapter(new PendingOrderAdapter(mContext, listExchangeBuyOrder));
                     }
                 }
-                LogUtil.d("listExchangeSellOrder.size=" + listExchangeSellOrder.size() + " ; listExchangeBuyOrder.size=" + listExchangeBuyOrder.size());
+//                LogUtil.d("listExchangeSellOrder.size=" + listExchangeSellOrder.size() + " ; listExchangeBuyOrder.size=" + listExchangeBuyOrder.size());
+
+                if (listExchangeSellOrder.size() == 0 && listExchangeBuyOrder.size() == 0) {
+                    isShowOrders(false);
+                } else {
+                    isShowOrders(true);
+                }
             }
 
             @Override
@@ -188,7 +201,7 @@ public class ExchangeActivity extends BaseActivity implements View.OnClickListen
                                         @Override
                                         public void onSuccess(int status, byte[] outputData) {
                                             PublicPun.showNoticeDialog(mContext, "Unable to Cancel Block", "Error:" + Integer.toHexString(status)
-                                                    +"-"+PublicPun.byte2HexString(outputData));
+                                                    + "-" + PublicPun.byte2HexString(outputData));
                                         }
                                     });
                                 }
@@ -237,6 +250,24 @@ public class ExchangeActivity extends BaseActivity implements View.OnClickListen
         gridViewSell.setOnItemLongClickListener(this);
         gridViewBuy.setOnItemLongClickListener(this);
 
+        lin_orders = (LinearLayout) findViewById(R.id.layout_matched_orders);
+        tv_noMatchedOrders = (TextView) findViewById(R.id.tv_no_matched_orders);
+        btn_place_order = (Button) findViewById(R.id.btn_place_order);
+        btn_place_order.setOnClickListener(this);
+        isShowOrders(true);
+
+    }
+
+    private void isShowOrders(boolean isShow) {
+        if (isShow) {
+            lin_orders.setVisibility(View.VISIBLE);
+            tv_noMatchedOrders.setVisibility(View.GONE);
+            btn_place_order.setVisibility(View.GONE);
+        } else {
+            lin_orders.setVisibility(View.GONE);
+            tv_noMatchedOrders.setVisibility(View.VISIBLE);
+            btn_place_order.setVisibility(View.VISIBLE);
+        }
     }
 
     private void initValues() {
@@ -255,6 +286,39 @@ public class ExchangeActivity extends BaseActivity implements View.OnClickListen
         // 打開 up button_up
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setHomeButtonEnabled(true);
+
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_settings:
+                int infoid = 0;
+                cmdManager.XchsGetOtp(infoid, new CmdResultCallback() {
+                    @Override
+                    public void onSuccess(int status, byte[] outputData) {
+                        if ((status + 65536) == 0x9000) {//-28672//36864
+                            LogUtil.d("XchsGetOtp ok= " + outputData);
+                        } else {
+                            LogUtil.d("XchsGetOtp fail= " + outputData);
+
+                        }
+                    }
+                });
+                break;
+
+            default:
+                break;
+        }
+
+        return true;
     }
 
     @Override
@@ -270,6 +334,9 @@ public class ExchangeActivity extends BaseActivity implements View.OnClickListen
             Intent intent;
             intent = new Intent(getApplicationContext(), ExchangeVerificationActivity.class);
             startActivityForResult(intent, 0);
+        } else if (v == btn_place_order) {
+            Intent ie = new Intent(Intent.ACTION_VIEW, Uri.parse(BtcUrl.CW_XHCS_SITE));
+            startActivity(ie);
         }
     }
 

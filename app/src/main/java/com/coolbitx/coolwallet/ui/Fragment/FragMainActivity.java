@@ -237,8 +237,11 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
         mSavedInstanceState = savedInstanceState;
         if (intent != null) {
             mParentActivityName = intent.getStringExtra("Parent");
-            LogUtil.i("getSimpleName=" + RecovWalletActivity.class.getSimpleName());
-            isFromRecovery = mParentActivityName.equals(RecovWalletActivity.class.getSimpleName());
+            if(mParentActivityName!=null){
+                LogUtil.d("mParentActivityName="+mParentActivityName+";getSimpleName=" + RecovWalletActivity.class.getSimpleName());
+                isFromRecovery = mParentActivityName.equals(RecovWalletActivity.class.getSimpleName());
+            }
+
         }
 
         //LogUtil.e("class name = " + mParentActivityName);

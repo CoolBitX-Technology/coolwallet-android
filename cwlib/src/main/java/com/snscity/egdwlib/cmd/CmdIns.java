@@ -65,22 +65,23 @@ public class CmdIns {
     public static final int TRX_STATUS = 0x80;
     public static final int TRX_BEGIN = 0x72;
     public static final int TRX_VERIFY_OTP = 0x73;
+    public static final int TRX_VERIFY_BT = 0x7A; // 認證按鈕（虛擬命令）
     public static final int TRX_SIGN = 0x74;
     public static final int TRX_FINISH = 0x76;
     public static final int TRX_GET_ADDR = 0x79;
 
     //Exchange Site Commands
-    public static final int EX_REG_STATUS = 0xF0;
-    public static final int EX_GET_OTP = 0xF4;
-    public static final int EX_SESSION_INIT = 0xF5;
-    public static final int EX_SESSION_ESTAB = 0xF6;
-    public static final int EX_SESSION_LOGOUT = 0xF7;
-    public static final int EX_BLOCK_INFO = 0xF8;
-    public static final int EX_BLOCK_BTC = 0xF9;
-    public static final int EX_BLOCK_CANCEL = 0xFA;
-    public static final int EX_TRX_SIGN_LOGIN = 0xFB;
-    public static final int EX_TRX_SIGN_PREPARE = 0xFC;
-    public static final int EX_TRX_SIGN_LOGOUT = 0xFD;
+    public static final int XCHS_REG_STATUS = 0xF0;
+    public static final int XCHS_GET_OTP = 0xF4;
+    public static final int XCHS_SESSION_INIT = 0xF5;
+    public static final int XCHS_SESSION_ESTAB = 0xF6;
+    public static final int XCHS_SESSION_LOGOUT = 0xF7;
+    public static final int XCHS_BLOCK_INFO = 0xF8;
+    public static final int XCHS_BLOCK_BTC = 0xF9;
+    public static final int XCHS_BLOCK_CANCEL = 0xFA;
+    public static final int XCHS_TRX_SIGN_LOGIN = 0xFB;
+    public static final int XCHS_TRX_SIGN_PREPARE = 0xFC;
+    public static final int XCHS_TRX_SIGN_LOGOUT = 0xFD;
 
     //FirmwareUpload Commmands
     public static final int BACK_TO_LOADER = 0x78;

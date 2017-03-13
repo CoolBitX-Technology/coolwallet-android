@@ -1,9 +1,11 @@
 package com.coolbitx.coolwallet.ui;
 
+import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -51,6 +53,7 @@ public class BaseActivity extends AppCompatActivity {
     public static CmdManager cmdManager;
     public boolean isShowDisconnAlert = true;
     Context mContext;
+    public static boolean[] settingOptions = new boolean[4];
     LocalBroadcastManager mLocalBroadcastManager = null;
     //for Exchange test.
     BroadcastReceiver ExchangeReceiver = new BroadcastReceiver() {
@@ -112,7 +115,9 @@ public class BaseActivity extends AppCompatActivity {
                 case BSConfig.HANDLER_DISCONN:
                     LogUtil.i("BaseActivity HANDLER_DISCONN");
                     String title = "CoolWallet Disconnected";
-
+                    ActivityManager am = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+                    ComponentName cn = am.getRunningTasks(1).get(0).topActivity;
+                    LogUtil.d("DISCONN and current activity="+cn.getClass().getSimpleName());
                     String noteMsg;
                     if (PublicPun.card.getCardName() == null) {
                         noteMsg = "CoolWallet Disconnected";
@@ -129,9 +134,8 @@ public class BaseActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        mContext = this;
         LogUtil.d("BaseActivity onCreate");
+        mContext = this;
 
     }
 
@@ -181,6 +185,34 @@ public class BaseActivity extends AppCompatActivity {
         }
     }
 
+    public void getSecpo() {
+         final byte CwSecurityPolicyMaskOtp = 0x01;
+         final byte CwSecurityPolicyMaskBtn = 0x02;
+         final byte CwSecurityPolicyMaskWatchDog = 0x10;
+         final byte CwSecurityPolicyMaskAddress = 0x20;
+
+        cmdManager.getSecpo(new CmdResultCallback() {
+            @Override
+            public void onSuccess(int status, byte[] outputData) {
+                if ((status + 65536) == 0x9000) {
+                    if (outputData != null && outputData.length > 0) {
+                        settingOptions[0] = (outputData[0] & CwSecurityPolicyMaskOtp) >= 1;
+
+                        settingOptions[1] = (outputData[0] & CwSecurityPolicyMaskBtn) >= 1;
+
+                        settingOptions[2] = (outputData[0] & CwSecurityPolicyMaskAddress) >= 1;
+
+                        settingOptions[3] = (outputData[0] & CwSecurityPolicyMaskWatchDog) >= 1;
+                        LogUtil.i("安全設置:otp=" + InitialSecuritySettingActivity.settingOptions[0] +
+                                ";button_up=" + InitialSecuritySettingActivity.settingOptions[1] +
+                                ";address" + InitialSecuritySettingActivity.settingOptions[2] +
+                                ";dog=" + InitialSecuritySettingActivity.settingOptions[3]);
+//                        SetSecpo(true);
+                    }
+                }
+            }
+        });
+    }
 
     public void getUniqueId() {
         cmdManager.getUniqueId(new CmdResultCallback() {

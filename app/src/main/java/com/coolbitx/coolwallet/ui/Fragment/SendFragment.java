@@ -37,7 +37,6 @@ import com.coolbitx.coolwallet.general.AppPrefrence;
 import com.coolbitx.coolwallet.general.BtcUrl;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.coolbitx.coolwallet.httpRequest.CwBtcNetWork;
-import com.coolbitx.coolwallet.ui.InitialSecuritySettingActivity;
 import com.coolbitx.coolwallet.ui.TransactionConfirmDialog;
 import com.coolbitx.coolwallet.util.BTCUtils;
 import com.coolbitx.coolwallet.util.Base58;
@@ -61,6 +60,10 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import static com.coolbitx.coolwallet.general.PublicPun.HANDLER_SEND_BTC_ERROR;
+import static com.coolbitx.coolwallet.general.PublicPun.HANDLER_SEND_BTC_FINISH;
+import static com.coolbitx.coolwallet.ui.BaseActivity.settingOptions;
+
 
 /**
  * Created by ShihYi on 2015/12/30.
@@ -69,15 +72,13 @@ import java.util.TimerTask;
 // the tag "error" means that dora remarks the code because the APP crush.
 public class SendFragment extends BaseFragment implements View.OnClickListener {
 
-    private static final int HANDLER_SEND_BTC_FINISH = 9527;
-    private static final int HANDLER_SEND_BTC_ERROR = 9521;
+
     private static final String DATA_NAME = "name";
     private static final String DATA_ID = "id";
     //    100,000,000 Satoshi = 1.00000000 ฿
     private static final int SATOSHIS_PER_COIN = 100000000;
     //the card response of waiting button_up is:01 06 54 52 58 2d 4f 4b ( fix value: TRX-OK )
     final byte[] successBtnPressesData = {0x54, 0x52, 0x58, 0x2d};
-    CwBtcNetWork netWork = new CwBtcNetWork();
     UnSpentTxsAsyncTask unSpentTxsAsyncTask;
     Transaction.Input[] signedInputs;
     Transaction.Output[] outputs;
@@ -170,9 +171,9 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
             int postPushResult = -1;
             int hadlerMsg = 0;
 
-            postDecodeResult = netWork.doPost(BtcUrl.URL_BLOCKR_SERVER_SITE + BtcUrl.URL_BLICKR_DECODE, currUnsignedTx);
+            postDecodeResult = cwBtcNetWork.doPost(BtcUrl.URL_BLOCKR_SERVER_SITE + BtcUrl.URL_BLICKR_DECODE, currUnsignedTx);
             if (postDecodeResult == 200) {
-                postPushResult = netWork.doPost(BtcUrl.URL_BLOCKR_SERVER_SITE + BtcUrl.URL_BLICKR_PUSH, currUnsignedTx);
+                postPushResult = cwBtcNetWork.doPost(BtcUrl.URL_BLOCKR_SERVER_SITE + BtcUrl.URL_BLICKR_PUSH, currUnsignedTx);
                 if (postPushResult == 200) {
                     hadlerMsg = HANDLER_SEND_BTC_FINISH;
                 } else {
@@ -470,13 +471,13 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
             }
 
             if (processedTxData.change == 0) {
-                LogUtil.i("發送不用找零,發送地址=" + outputAddress);
+                LogUtil.d("發送不用找零,發送地址=" + outputAddress);
                 outputs = new Transaction.Output[]{
                         new Transaction.Output(processedTxData.amountForRecipient, Transaction.Script.buildOutput(outputAddress)),
                 };
             } else {
 
-                LogUtil.i("發送要找零=" + processedTxData.change + "; 發送金額=" +
+                LogUtil.d("發送要找零=" + processedTxData.change + "; 發送金額=" +
                         processedTxData.amountForRecipient + "; 發送地址=" +
                         outputAddress + "; 找零地址=" + changeAddress);
                 //the outputs of transation
@@ -511,10 +512,10 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
         // Ask if ready to send.
         new TransactionConfirmDialog(mContext, mTxsConfirm, new TransactionConfirmCallback() {
             @Override
-            public void TransactionConfirm() {
+            public void TransactionConfirm(String outputAddr, String changeAddr,long spendAmount) {
                 mProgress.show();
                 TimeOutCheck();
-                prepareTransaction(outputAddress, changeAddress, amountToSend);
+                prepareTransaction(outputAddr, changeAddr, spendAmount);
             }
 
             @Override
@@ -673,7 +674,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
                                                             LogUtil.i("length=" + prepRsult.length + " check prep=" + isdidPrepareTransaction);
 
                                                             if (isdidPrepareTransaction) {
-                                                                didTrxBegin(outputAddress);
+                                                                doTrxBegin(outputAddress);
                                                             }
                                                         }
                                                     }
@@ -718,17 +719,17 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
             public void onSuccess(int status, byte[] outputData) {
                 if ((status + 65536) == 0x9000) {
                     if (outputData != null && outputData.length > 0) {
-                        InitialSecuritySettingActivity.settingOptions[0] = (outputData[0] & CwSecurityPolicyMaskOtp) >= 1;
+                        settingOptions[0] = (outputData[0] & CwSecurityPolicyMaskOtp) >= 1;
 
-                        InitialSecuritySettingActivity.settingOptions[1] = (outputData[0] & CwSecurityPolicyMaskBtn) >= 1;
+                        settingOptions[1] = (outputData[0] & CwSecurityPolicyMaskBtn) >= 1;
 
-                        InitialSecuritySettingActivity.settingOptions[2] = (outputData[0] & CwSecurityPolicyMaskAddress) >= 1;
+                        settingOptions[2] = (outputData[0] & CwSecurityPolicyMaskAddress) >= 1;
 
-                        InitialSecuritySettingActivity.settingOptions[3] = (outputData[0] & CwSecurityPolicyMaskWatchDog) >= 1;
-                        LogUtil.i("安全設置:otp=" + InitialSecuritySettingActivity.settingOptions[0] +
-                                ";button_up=" + InitialSecuritySettingActivity.settingOptions[1] +
-                                ";address" + InitialSecuritySettingActivity.settingOptions[2] +
-                                ";dog=" + InitialSecuritySettingActivity.settingOptions[3]);
+                        settingOptions[3] = (outputData[0] & CwSecurityPolicyMaskWatchDog) >= 1;
+                        LogUtil.i("安全設置:otp=" + settingOptions[0] +
+                                ";button_up=" + settingOptions[1] +
+                                ";address" + settingOptions[2] +
+                                ";dog=" + settingOptions[3]);
 //                        SetSecpo(true);
                     }
                 }
@@ -751,9 +752,9 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
         }
     }
 
-    private void didTrxBegin(String outputAddress) {
+    private void doTrxBegin(String outputAddress) {
 
-        if (!InitialSecuritySettingActivity.settingOptions[0] && InitialSecuritySettingActivity.settingOptions[1]) {
+        if (!settingOptions[0] && settingOptions[1]) {
             didGetButton();
         }
 //        cmdManager.getCmdProcessor().setButtonA006(); taptap otp
@@ -765,7 +766,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
                 new CmdResultCallback() {
                     @Override
                     public void onSuccess(int status, byte[] outputData) {
-                        if (!InitialSecuritySettingActivity.settingOptions[0] && InitialSecuritySettingActivity.settingOptions[1]) {
+                        if (!settingOptions[0] && settingOptions[1]) {
                             if (outputData != null) {
                                 if (Arrays.equals(outputData, successBtnPressesData)) {
                                     trxStatus = Constant.TrxStatusGetBtn;
@@ -781,7 +782,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
                             if ((status + 65536) == 0x9000) {
                                 if (outputData != null) {
                                     LogUtil.i("cwCmdTrxBegin 成功!!");
-                                    if (InitialSecuritySettingActivity.settingOptions[0]) {
+                                    if (settingOptions[0]) {
                                         // 交易要otp
                                         didVerifyOtp();
                                     }
@@ -834,7 +835,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
                         otpCode = editText.getText().toString().trim();
                         LogUtil.i("otp press ok:" + editText.getText().toString());
 
-                        if (InitialSecuritySettingActivity.settingOptions[1]) {
+                        if (settingOptions[1]) {
                             //發送一個給a006讀取特殊狀態的cmd
                             didGetButton();
                         }
@@ -842,7 +843,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
                         cmdManager.trxVerifyOtp(otpCode, new CmdResultCallback() {
                             @Override
                             public void onSuccess(int status, byte[] outputData) {
-                                if (InitialSecuritySettingActivity.settingOptions[1]) {
+                                if (settingOptions[1]) {
                                     if (outputData != null) {
                                         if (Arrays.equals(outputData, successBtnPressesData)) {
                                             //otp+button_up verify
@@ -873,7 +874,6 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
                 .setNegativeButton(R.string.strCancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        EditText editText = (EditText) item.findViewById(R.id.alert_editotp);
                         dialog.dismiss();
                         cancelTrx();
                     }
@@ -1174,16 +1174,16 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
 
     private void SetSecpo(boolean setWatchDog) {
 
-        InitialSecuritySettingActivity.settingOptions[0] = true;
-        InitialSecuritySettingActivity.settingOptions[1] = false;
+        settingOptions[0] = true;
+        settingOptions[1] = false;
 //        settingOptions[2] = switchAddress.isChecked();
 
-        InitialSecuritySettingActivity.settingOptions[3] = setWatchDog;
+        settingOptions[3] = setWatchDog;
 
-        LogUtil.i("set安全設置:otp=" + InitialSecuritySettingActivity.settingOptions[0] + ";button_up=" + InitialSecuritySettingActivity.settingOptions[1] +
-                ";address" + InitialSecuritySettingActivity.settingOptions[2] + ";dog=" + InitialSecuritySettingActivity.settingOptions[3]);
+        LogUtil.i("set安全設置:otp=" + settingOptions[0] + ";button_up=" + settingOptions[1] +
+                ";address" + settingOptions[2] + ";dog=" + settingOptions[3]);
 
-        cmdManager.setSecpo(InitialSecuritySettingActivity.settingOptions, new CmdResultCallback() {
+        cmdManager.setSecpo(settingOptions, new CmdResultCallback() {
             @Override
             public void onSuccess(int status, byte[] outputData) {
                 if ((status + 65536) == 0x9000) {

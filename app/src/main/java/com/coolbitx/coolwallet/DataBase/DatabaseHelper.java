@@ -396,7 +396,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         null,                                              // 查詢條件值字串陣列
                         null,                                              // Group By字串語法
                         null,                                              // Having字串法
-                        "WID,ACCOUNT_ID,ACCOUNT_ID",                        // Order By字串語法(排序)
+                        "WID,ACCOUNT_ID,Date(TX_DATE)",                        // Order By字串語法(排序)
                         null);                                             // Limit字串語法
             } else {
                 c = db.query("TXS",                                 // 資料表名字
@@ -405,7 +405,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         null,                                              // 查詢條件值字串陣列
                         null,                                              // Group By字串語法
                         null,                                              // Having字串法
-                        "WID,ACCOUNT_ID,ACCOUNT_ID",                        // Order By字串語法(排序)
+                        "WID,ACCOUNT_ID,Date(TX_DATE)",                        // Order By字串語法(排序)
                         null);                                             // Limit字串語法
             }
             while (c.moveToNext()) {
@@ -420,13 +420,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 d.setTxs_Date(c.getString(6));
                 d.setTxs_Confirmation(c.getInt(7));
 
-                LogUtil.i("query record-" + mCount
+                LogUtil.i("query Txs record-" + mCount
                         + ":WID=" + c.getString(0)
                         + ",AccountID=" + c.getInt(1)
                         + ",TX_ID=" + c.getString(3)
-                        + ",TX_ADDRESS" + c.getString(4)
+                        + ",TX_ADDRESS=" + c.getString(4)
                         + ",TX_RESULT=" + c.getLong(5)
-                        + ",TX_DATE" + c.getString(6));
+                        + ",TX_DATE=" + c.getString(6));
 
                 listResult.add(d);
             }

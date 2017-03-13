@@ -8,7 +8,7 @@ public class TxsConfirm {
     private String output_addrese;
     private long output_amount;
     private long fees;
-    private long ouput_total;
+    private long output_total;
     private int input_count;
     private long input_amount;
     private String change_address;
@@ -18,7 +18,7 @@ public class TxsConfirm {
         this.output_addrese = output_addrese;
         this.output_amount = output_amount;
         this.fees = fees;
-        this.ouput_total = fees + output_amount;
+        this.output_total = fees + output_amount;
         this.input_count = input_count;
         this.input_amount = input_amount;
         this.change_address = change_address;
@@ -37,8 +37,8 @@ public class TxsConfirm {
         return fees;
     }
 
-    public long getOuput_total() {
-        return ouput_total;
+    public long getOutput_total() {
+        return output_total;
     }
 
     public int getInput_count() {

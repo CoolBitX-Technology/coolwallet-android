@@ -10,7 +10,6 @@ import java.util.List;
 
 public class CmdPacket {
     private CmdPriority priority;
-    private String TAG="coolwallet";
     private int cla;
     private int ins;
     private int pram1;

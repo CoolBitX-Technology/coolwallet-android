@@ -7,7 +7,6 @@ import android.widget.TextView;
 
 import com.coolbitx.coolwallet.R;
 import com.coolbitx.coolwallet.entity.ExchangeOrder;
-import com.snscity.egdwlib.utils.LogUtil;
 
 import java.text.DecimalFormat;
 import java.util.List;
@@ -29,7 +28,7 @@ public class PendingOrderAdapter<T> extends CommonAdapter<T> {
 
         ExchangeOrder exchangeOrder = (ExchangeOrder) mDatas.get(position);
 
-        LogUtil.d(String.valueOf(exchangeOrder.getAmount())+";"+String.valueOf(exchangeOrder.getPrice())+";"+exchangeOrder.getExpiration());
+//        LogUtil.d(String.valueOf(exchangeOrder.getAmount())+";"+String.valueOf(exchangeOrder.getPrice())+";"+exchangeOrder.getExpiration());
 
         TextView mAmount = viewHolder.getView(R.id.tv_grid_sell_amount);
 //        mAmount.setText(String.valueOf(exchangeOrder.getAmount()));
