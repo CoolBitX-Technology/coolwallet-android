@@ -26,7 +26,7 @@ CoolWallet Android app connects with the CoolWallet (a wireless Bitcoin cold sto
 
 - Install Android SDK.
 
-- Select and install a set of packages and platforms from the Android SDK. 
+- Select and install a set of packages and platforms from the Android SDK.
 
   ***Note:*** The SDK platform must be Android API level 18 or above.
 
@@ -38,5 +38,7 @@ CoolWallet Android app connects with the CoolWallet (a wireless Bitcoin cold sto
 
 Please see [this document](https://github.com/CoolBitX-Technology/coolwallet-ios/blob/master/docs/CW-SPEC-0002-se_spi_apdu_spec_v0110.pdf) with specifications for commands and responses.
 
-***Note:*** 
-As Bluetooth is required to communicate with the CoolWallet, testing can only be done on a real device (Android 4.3 or later).
+***Note:***
+* As Bluetooth is required to communicate with the CoolWallet, testing can only be done on a real device (Android 4.3 or later).
+* Set your api key in fabric.properties
+* Set your api key in google-services.json

@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "XXXXXXX",
+    "firebase_url": "https://coolwallet-XXXX.firebaseio.com",
+    "project_id": "coolwallet-XXXX",
+    "storage_bucket": "coolwallet-XXXX.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:XXXXX:android:XXXX",
+        "android_client_info": {
+          "package_name": "com.coolbitx.coolwallet"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "XXXX.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "XXXX"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
