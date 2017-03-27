@@ -18,7 +18,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-
 import com.coolbitx.coolwallet.DataBase.DatabaseHelper;
 import com.coolbitx.coolwallet.R;
 import com.coolbitx.coolwallet.callback.APIResultCallback;
@@ -46,7 +45,6 @@ import com.snscity.egdwlib.CmdManager;
 import com.snscity.egdwlib.cmd.CmdResultCallback;
 import com.snscity.egdwlib.utils.ByteUtil;
 import com.snscity.egdwlib.utils.LogUtil;
-
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
@@ -190,11 +188,12 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
         // 4.
         final int inputId = 0;
 
-//        XchsTrxsignLogout();
+//        XchsTrxsignLogout(PublicPun.hexStringToByteArray("6fa7db50"));
+
 
         mExchangeAPI.doExGetTrxInfo(xchsOrder.getOrderId(), new APIResultCallback() {
             @Override
-            public void success(String[] msg) {
+            public void success(final String[] msg) {
                 LogUtil.d("doExGetTrxInfo ok " + msg[0]);
                 //{"loginblk":"3488162291780ad0c38e7ebbc44406347d770086fc2c54da0300000000000000000027100ba5ea57e799ef00e33dcb58836c6fbee9820ce0616b26dff7c51c3bdd89eb08",
                 // "out1addr":"1PHcgbVxMCNsB5RnfvKdUC7hidzSdovL2s"}
@@ -207,7 +206,8 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
                     public void onSuccess(int status, byte[] outputData) {
                         if ((status + 65536) == 0x9000) {
                             trxHandle = outputData;
-                            LogUtil.d("XchsTrxSignLogin trxHandle=" + PublicPun.byte2HexString(trxHandle));
+                            LogUtil.d("XchsTrxSignLogin trxHandle=" + LogUtil.byte2HexStringNoBlank(trxHandle));
+
 
                             //開始組prepare資料
 //                            inId: 1B
@@ -219,6 +219,27 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
 //                            mac: 32B
 
                             PrepareToGetUnspentTrx();
+
+//                            byte[] msg1 =
+//                                    PublicPun.hexStringToByteArray(msg[0]);
+//                            cmdManager.XchsTrxsignLogin(msg1, new CmdResultCallback() {
+//                                @Override
+//                                public void onSuccess(int status, byte[] outputData) {
+//                                    if ((status + 65536) == 0x9000) {
+//                                        trxHandle = outputData;
+//                                        LogUtil.d("XchsTrxSignLogin trxHandle=" + LogUtil.byte2HexStringNoBlank(trxHandle));
+//
+//                                    } else {
+//                                        cmdManager.getError(new CmdResultCallback() {
+//                                            @Override
+//                                            public void onSuccess(int status, byte[] outputData) {
+//                                                LogUtil.d("Login failed = " + Integer.toHexString(status) + ";outputData=" + PublicPun.byte2HexString(outputData));
+//                                            }
+//                                        });
+//                                    }
+//                                }
+//                            });
+
 
                         } else {
 
@@ -356,7 +377,7 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
             }
             LogUtil.e("outputs length=" + outputs.length);
             mTxsConfirm = new TxsConfirm(outputAddress, processedTxData.amountForRecipient, processedTxData.fee,
-                    processedTxData.outputsToSpend.size(), processedTxData.valueOfUnspentOutputs, changeAddress, processedTxData.change);
+                    processedTxData.outputsToSpend.size(), processedTxData.valueOfUnspentOutputs, changeAddress, processedTxData.change, processedTxData.isDust);
         } catch (ValidationException ve) {
             cancelTrx();
             PublicPun.showNoticeDialog(mContext, "Unable to send:", ve.getMessage());
@@ -506,6 +527,7 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
 //                                        byte[] out2 = mTxsConfirm.getChange_address().getBytes();
                                         trxblks.setOut1Addr(Base58.decode(mTxsConfirm.getOutput_addrese()));
                                         trxblks.setOut2Addr(Base58.decode(mTxsConfirm.getChange_address()));
+                                        trxblks.setChangeKid(DatabaseHelper.queryAddrKid(ExchangeOrderActivity.this,mTxsConfirm.getChange_address()));
                                         trxblks.setSigmtrl(hash);
                                         lisTrxBlks.add(trxblks);
 
@@ -576,6 +598,7 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
                                     if (exePrepCnt == mLisTrxBlks.size()) {
                                         doTrxBegin(mTxsConfirm.getOutput_addrese());
                                     }
+
                                 } else {
                                     cmdManager.getError(new CmdResultCallback() {
                                         @Override
@@ -762,7 +785,7 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
                                         currUnsignedTx = genRawTxData(scriptSigs);
                                         LogUtil.e("取得 currUnsignedTx=" + currUnsignedTx + ";length=" + currUnsignedTx.length());
                                         LogUtil.e("byte長度=" + PublicPun.hexStringToByteArray(currUnsignedTx).length);
-                                        PublishToNetwork(currUnsignedTx);
+//                                        PublishToNetwork(currUnsignedTx);
                                     }
                                 }
                             }
@@ -781,7 +804,6 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
     private String genRawTxData(List<byte[]> scriptSigs) {
 
         APITx.Tx ctx = new APITx.Tx();
-
 
         ctx.setVersion(1);
         ctx.setTxinCnt(signedInputs.length);
@@ -1094,16 +1116,26 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
         cmdManager.XchsTrxsignLogout(trxHandle, nonce, new CmdResultCallback() {
             @Override
             public void onSuccess(int status, byte[] outputData) {
-                LogUtil.d("XchsTrxsignLogout ok");
+                LogUtil.d("XchsTrxsignLogout 成功");
+
+                if ((status + 65536) == 0x9000) {
+                    cmdManager.getError(new CmdResultCallback() {
+                        @Override
+                        public void onSuccess(int status, byte[] outputData) {
+                            LogUtil.d("Login failed = " + Integer.toHexString(status) + ";outputData=" + PublicPun.byte2HexString(outputData));
+                        }
+                    });
+                }
+
             }
         });
     }
 
-    String genChangeAddressResult = "";
+    String genChangeAddressResult;
 
     //產生收零地址(of output)
     private String genChangeAddress(final int keyChainId) {
-
+        genChangeAddressResult = "";
         String addr = "";
         amount = 0;
         amount = xchsOrder.getAmount();
@@ -1200,7 +1232,7 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
 
     private void cancelTrx() {
 
-        FunTrxFinish();
+//        FunTrxFinish();
         if (mProgress.isShowing()) {
             mProgress.dismiss();
         }
@@ -1210,6 +1242,11 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
         }
     }
 
+    private void failedTrx() {
+        mProgress.dismiss();
+        PublicPun.showNoticeDialog(mContext, getString(R.string.send_notification_str_failed_title), getString(R.string.msg_xchs_get_raw_addr));
+    }
+
     private void FunTrxFinish() {
 //        end transaction if exists
         cmdManager.trxFinish(new CmdResultCallback() {
@@ -1217,68 +1254,56 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
             public void onSuccess(int status, byte[] outputData) {
                 if ((status + 65536) == 0x9000) {
                     LogUtil.i("trxFinish成功");
-                }
-            }
-        });
 
-        //API Single Address
-        //CALL XCHS SUBMIT API
+                    byte[] nonce = PublicPun.hexStringToByteArray("0000000000000000" +
+                            "0000000000000000");
+                    cmdManager.XchsTrxsignLogout(trxHandle, nonce, new CmdResultCallback() {
+                        @Override
+                        public void onSuccess(int status, byte[] outputData) {
+                            LogUtil.d("XchsTrxsignLogout 成功");
 
-        mProgress.setMessage("Synchronizing to Exchange Site...");
-        mProgress.show();
+                            final String trxReceipt = LogUtil.byte2HexStringNoBlank(outputData);
+                            // get Receipt
+                            //API Single Address
+                            //CALL XCHS SUBMIT API
+
+                            mProgress.setMessage("Synchronizing to Exchange Site...");
+                            mProgress.show();
 
 //        String addr = "1Jan75oAX8Hv9Nzt5zU4uW9W61abf52Sg6";
-        mExchangeAPI.getBlockChainRawAddress(xchsOrder.getAddr(), new APIResultCallback() {
-            @Override
-            public void success(String[] msg) {
-                String trxId = PublicPun.jsonParserRawAddress(ExchangeOrderActivity.this,msg[0]);
-                LogUtil.e("trxID="+trxId);
+                            mExchangeAPI.getBlockChainRawAddress(xchsOrder.getAddr(), new APIResultCallback() {
+                                @Override
+                                public void success(String[] msg) {
+                                    String trxId = PublicPun.jsonParserRawAddress(ExchangeOrderActivity.this, msg[0]);
+                                    LogUtil.e("trxID=" + trxId);
 
-                if(trxId==""){
-                    mProgress.dismiss();
-                    PublicPun.showNoticeDialog(mContext, getString(R.string.send_notification_str_failed_title), getString(R.string.msg_xchs_get_raw_addr));
-                }else{
-                    mExchangeAPI.doTrxSubmit(xchsOrder.getOrderId(), trxId, new APIResultCallback() {
-                        @Override
-                        public void success(String[] msg) {
-                            mProgress.dismiss();
+                                    if (trxId == "") {
 
-                        }
-                        @Override
-                        public void fail(String msg) {
-                            mProgress.dismiss();
+                                    } else {
+                                        mExchangeAPI.doTrxSubmit(xchsOrder.getOrderId(), trxId, trxReceipt, new APIResultCallback() {
+                                            @Override
+                                            public void success(String[] msg) {
+                                                mProgress.dismiss();
+
+                                            }
+
+                                            @Override
+                                            public void fail(String msg) {
+                                                failedTrx();
+
+                                            }
+                                        });
+                                    }
+                                }
+
+                                @Override
+                                public void fail(String msg) {
+                                    failedTrx();
+                                }
+                            });
                         }
                     });
                 }
-            }
-
-            @Override
-            public void fail(String msg) {
-                mProgress.dismiss();
-            }
-        });
-
-        mExchangeAPI.getBlockChainRawAddress(xchsOrder.getAddr(), new APIResultCallback() {
-            @Override
-            public void success(String[] msg) {
-
-                String trxId = "";
-                mExchangeAPI.doTrxSubmit(xchsOrder.getOrderId(), trxId, new APIResultCallback() {
-                    @Override
-                    public void success(String[] msg) {
-                        mProgress.dismiss();
-
-                    }
-                    @Override
-                    public void fail(String msg) {
-                        mProgress.dismiss();
-                    }
-                });
-            }
-
-            @Override
-            public void fail(String msg) {
-                mProgress.dismiss();
             }
         });
     }

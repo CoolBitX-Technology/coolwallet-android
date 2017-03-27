@@ -1,29 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
+    android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:padding="5dp">
 
+    <Space
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.5" />
+
 
     <Button
         android:id="@+id/btn_connect"
-        style="@style/TextView_Black_16"
-        android:layout_width="200dp"
-        android:layout_height="30dp"
-        android:layout_marginLeft="30dp"
-        android:layout_marginTop="10dp"
+        style="@style/TextView_Brown_16"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="6.5"
         android:background="@drawable/selector_button"
-        android:src="@color/button_material_dark"
         android:text="Connect" />
+
 
     <Button
         android:id="@+id/btn_reset"
-        style="@style/TextView_Black_16"
-        android:layout_width="80dp"
-        android:layout_height="30dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginTop="10dp"
+        style="@style/TextView_Brown_16"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="3"
         android:background="@drawable/selector_button"
         android:text="Reset" />
+
 </LinearLayout>

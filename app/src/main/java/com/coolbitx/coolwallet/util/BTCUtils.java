@@ -81,6 +81,7 @@ public class BTCUtils {
         //fees per byte *1000=1kb
         int txOneOutputLen = 0;
         long updatedFee = 0;
+        boolean isDust = false;
         RECOMMENDED_FEE_PER_BYTE = AppPrefrence.getRecommendedFastestFee(mContext);
         ArrayList<UnSpentTxsBean> outputsToSpend = new ArrayList<>();
         if (amountToSend <= 0) {    //No this situation,already rule out by uone instruction.
@@ -129,14 +130,20 @@ public class BTCUtils {
 
             LogUtil.i("總計寄出資料=" + outputsToSpend.size() + "筆input,餘額=" +
                     valueOfUnspentOutputs + ",fee=" + fee + ",amountToSend=" + amountToSend + ",change=" + change);
-
         }
+
+        //BitCoin dust
+        if (change < 5460) {
+//            amountToSend = amountToSend + change;
+//            change = 0;
+            isDust = true;
+        }
+
         //ZERO Confirmation unspent?
-        if (amountToSend > valueOfUnspentOutputs - fee) {
+        if (amountToSend + fee > valueOfUnspentOutputs) {
             LogUtil.e("Not enough funds " + (valueOfUnspentOutputs - fee));
             float output = (((float) valueOfUnspentOutputs - (float) fee - (float) amountToSend) / (float) SATOSHIS_PER_COIN);
             throw new ValidationException("Insufficient funds: " + new DecimalFormat("#.########").format(output) + " BTC\nFees:" + new DecimalFormat("#.########").format((float) fee / (float) SATOSHIS_PER_COIN) + " BTC");
-
         }
         if (outputsToSpend.isEmpty()) {
             LogUtil.e("No outputs to spend");
@@ -158,7 +165,7 @@ public class BTCUtils {
             LogUtil.e("Incorrect amount to send " + amountToSend);
             throw new ValidationException("Incorrect amount to send " + amountToSend);
         }
-        return new FeeChangeAndSelectedOutputs(fee + extraFee, change, amountToSend, outputsToSpend, valueOfUnspentOutputs);
+        return new FeeChangeAndSelectedOutputs(fee + extraFee, change, amountToSend, outputsToSpend, valueOfUnspentOutputs, isDust);
     }
 
     /**
@@ -424,13 +431,15 @@ public class BTCUtils {
     public static class FeeChangeAndSelectedOutputs {
         public final long amountForRecipient, change, fee, valueOfUnspentOutputs;
         public final ArrayList<UnSpentTxsBean> outputsToSpend;
+        public final boolean isDust;
 
-        public FeeChangeAndSelectedOutputs(long fee, long change, long amountForRecipient, ArrayList<UnSpentTxsBean> outputsToSpend, long ValueOfUnspentOutputs) {
+        public FeeChangeAndSelectedOutputs(long fee, long change, long amountForRecipient, ArrayList<UnSpentTxsBean> outputsToSpend, long ValueOfUnspentOutputs, boolean isDust) {
             this.fee = fee;
             this.change = change;
             this.amountForRecipient = amountForRecipient;
             this.outputsToSpend = outputsToSpend;
             this.valueOfUnspentOutputs = ValueOfUnspentOutputs;
+            this.isDust = isDust;
             LogUtil.e("fee=" + fee + ";change=" + change + ";amountForRecipient=" + amountForRecipient + ";valueOfUnspentOutputs=" + valueOfUnspentOutputs);
         }
     }

@@ -20,17 +20,17 @@
 
     <EditText
         android:layout_width="250dp"
-        android:layout_height="40dp"
+        android:layout_height="wrap_content"
         android:id="@+id/alert_editotp"
         android:layout_marginTop="5dp"
         android:maxLength="6"
-        android:paddingLeft="5dp"
+        android:padding="@dimen/editText_margin"
         android:layout_centerHorizontal="true"
-        android:background="@drawable/textview_border"
+        android:background="@drawable/edit_format"
         style="@style/TextView_Black_16"
         android:numeric="integer"
         android:textColor="@android:color/black"/>
-
+    <!--android:background="@drawable/textview_border"-->
     <View
         android:layout_height="0.5dip"
         android:layout_marginTop="20sp"

@@ -10,6 +10,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -104,7 +105,8 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
     private TextView tvSendTitle;
     private TextView tvSendSubtitle;
     private TextView tvSendSubtitle_country;
-    private TextView tvSendSubtitle_country2;
+    private TextView tvSendAmountTop;
+    private TextView tvSendAmountBottom;
     private EditText editSendAddress;
     private ImageView imagScan;
     private EditText editSendBtc;
@@ -120,6 +122,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
     private ProgressDialog mProgress;
     private ArrayList<dbAddress> lisCwBtcAdd = new ArrayList<dbAddress>();
     //modify
+    AppCompatActivity mActivity;
     private String title = "";
     private String value = "";
     private int id;
@@ -129,6 +132,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
     private byte CwSecurityPolicyMaskBtn = 0x02;
     private byte CwSecurityPolicyMaskWatchDog = 0x10;
     private byte CwSecurityPolicyMaskAddress = 0x20;
+
     private Handler mHandler = new Handler() {
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
@@ -208,7 +212,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-
+        mActivity=(AppCompatActivity) activity;
         //already do it on BaseFragment
     }
 
@@ -237,9 +241,9 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.activity_send_bitcoin, container, false);
+        LogUtil.e("onCreateView");
         initView(view);
         setListener();
-        LogUtil.e("onCreateView");
 
         return view;
     }
@@ -259,9 +263,17 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
                 PublicPun.showNoticeDialog(mContext, "Unable to send", "Please enter an amount.");
                 return;
             }
+            if(Double.valueOf(editSendBtc.getText().toString())<=0) {
+                PublicPun.showNoticeDialog(mContext, "Unable to send", "Please enter an amount.");
+                return;
+            }
 
             recvAddress = editSendAddress.getText().toString().trim();
-            spendAmountStr = editSendBtc.getText().toString().trim();// for some Europe's money format
+            if(tvSendAmountBottom.getText().toString().equals("BTC")) {
+                spendAmountStr = editSendBtc.getText().toString().trim();// for some Europe's money format
+            }else{
+                spendAmountStr = editSendUsd.getText().toString().trim();// for some Europe's money format
+            }
             spendAmountStr = spendAmountStr.replace(",", ".");
             spendAmount = Double.parseDouble(spendAmountStr);
             LogUtil.e("click後對方接收地址=" + recvAddress + ";發送的金額=" + spendAmountStr);
@@ -279,24 +291,32 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
                 return;
             }
 
-            //modify to check in calcFeeChangeAndSelectOutputsToSpend();
-//            double totalAmount = Double.valueOf(tvSendTitle.getText().toString());
-//            if ((totalAmount - spendAmount - 0.0001 < 0) || spendAmount <= 0) {
-//                PublicPun.showNoticeDialog(mContext, "Unable to send", "Amount is lower than balance");
-////                Transaction fee: 0.0001 BTC
-//                return;
-
-//            }
-
             getSecpo();
             FunGetUnspentAddresses(currentAccount);
 
         } else if (v == imagScan) {
             IntentIntegrator scanIntegrator = new IntentIntegrator(getActivity());
             scanIntegrator.initiateScan();
+        } else if(v==tvSendAmountBottom||v==tvSendAmountTop){
+            changeCurrencyIndicate();
+        }else{
+
         }
     }
 
+    private void changeCurrencyIndicate(){
+        String mBtc = editSendBtc.getText().toString();
+        String mUsd = editSendUsd.getText().toString();
+        editSendBtc.setText(mUsd);
+        editSendUsd.setText(mBtc);
+        if(tvSendAmountTop.getText().toString().equals("BTC")){
+            tvSendAmountTop.setText(tvSendSubtitle_country.getText().toString());
+            tvSendAmountBottom.setText("BTC");
+        }else{
+            tvSendAmountTop.setText("BTC");
+            tvSendAmountBottom.setText(tvSendSubtitle_country.getText().toString());
+        }
+    }
     private void FunGetUnspentAddresses(int accountID) {
         LogUtil.i("FunGetUnspentAddresses");
         lisCwBtcAdd = DatabaseHelper.queryAddress(getActivity(), accountID, -1);
@@ -373,10 +393,12 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
         return UnSpentTxsBeanList;
     }
 
-    //產生收零地址(of output)
-    public void genChangeAddress(final int keyChainId) {
+    String genChangeAddressResult;
 
+    //產生收零地址(of output)
+    public String genChangeAddress(final int keyChainId) {
         final int accountId = currentAccount;
+        genChangeAddressResult = "";
         //對方接收資訊
 //        final String recvAddress = editSendAddress.getText().toString().trim();
 //        String spendAmountStr = editSendBtc.getText().toString().trim();
@@ -393,7 +415,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
         if (changeAddressStr != null) {
             //new 對方接收地址, 自己的找零地址, 發送的金額
             LogUtil.e("自己的找零地址=" + changeAddressStr);
-            PreviousPrepareTransaction(recvAddress, changeAddressStr, BTCUtils.convertToSatoshisValueForDIsplay(spendAmountStr));
+            genChangeAddressResult = changeAddressStr;
         } else {
             cmdManager.hdwGetNextAddress(keyChainId, accountId, new CmdResultCallback() {
                 @Override
@@ -429,25 +451,20 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
                             DatabaseHelper.insertAddress(mContext, accountId, addressStr, 0, keyId, 0, 0);
                             LogUtil.e("產生的找零地址=" + addressStr);
                             //new 對方接收地址, 自己的找零地址, 發送的金額
-                            PreviousPrepareTransaction(recvAddress, addressStr, BTCUtils.convertToSatoshisValueForDIsplay(spendAmountStr));
+                            genChangeAddressResult = addressStr;
                         }
                     }
                 }
             });
         }
+        return genChangeAddressResult;
     }
 
-    private void PreviousPrepareTransaction(final String outputAddress, final String changeAddress, final long amountToSend) {
+    //    private void PreviousPrepareTransaction(final String outputAddress, final String changeAddress, final long amountToSend) {
+    private void PreviousPrepareTransaction(final String outputAddress, final long amountToSend) {
+
         trxStatus = Constant.TrxStatusBegin;
-
-        //its legal that Change address equals to recipient's address
-        if (outputAddress.equals(changeAddress)) {
-            cancelTrx();
-            PublicPun.showNoticeDialog(mContext, "Notification", getString(R.string.send_notification_unable_to_send_with_change_error));
-        return;
-        }
-
-
+        String changeAddress = "";
         long availableAmount = 0;
         for (UnSpentTxsBean unSpentTxsBean : unSpentTxsBeanList) {
 //            availableAmount += (long) (unSpentTxsBean.getAmount() * SATOSHIS_PER_COIN);
@@ -476,19 +493,34 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
                         new Transaction.Output(processedTxData.amountForRecipient, Transaction.Script.buildOutput(outputAddress)),
                 };
             } else {
+                //Bitcoin dust
+                if (processedTxData.isDust) {
+                    LogUtil.d("發送不用找零,發送地址=" + outputAddress);
+                    outputs = new Transaction.Output[]{
+                            new Transaction.Output(processedTxData.amountForRecipient, Transaction.Script.buildOutput(outputAddress)),
+                    };
+                } else {
+                    changeAddress = genChangeAddress(Constant.CwAddressKeyChainInternal);
+                    LogUtil.d("發送要找零=" + processedTxData.change + "; 發送金額=" +
+                            processedTxData.amountForRecipient + "; 發送地址=" +
+                            outputAddress + "; 找零地址=" + changeAddress);
+                    //its legal that Change address equals to recipient's address
+                    if (outputAddress.equals(changeAddress)) {
+                        cancelTrx();
+                        PublicPun.showNoticeDialog(mContext, "Notification", getString(R.string.send_notification_unable_to_send_with_change_error));
+                        return;
+                    }
 
-                LogUtil.d("發送要找零=" + processedTxData.change + "; 發送金額=" +
-                        processedTxData.amountForRecipient + "; 發送地址=" +
-                        outputAddress + "; 找零地址=" + changeAddress);
-                //the outputs of transation
-                outputs = new Transaction.Output[]{
-                        new Transaction.Output(processedTxData.amountForRecipient, Transaction.Script.buildOutput(outputAddress)),
-                        new Transaction.Output(processedTxData.change, Transaction.Script.buildOutput(changeAddress)),
-                };
+                    //the outputs of transation
+                    outputs = new Transaction.Output[]{
+                            new Transaction.Output(processedTxData.amountForRecipient, Transaction.Script.buildOutput(outputAddress)),
+                            new Transaction.Output(processedTxData.change, Transaction.Script.buildOutput(changeAddress)),
+                    };
+                }
             }
             LogUtil.e("outputs length=" + outputs.length);
             mTxsConfirm = new TxsConfirm(outputAddress, processedTxData.amountForRecipient, processedTxData.fee,
-                    processedTxData.outputsToSpend.size(), processedTxData.valueOfUnspentOutputs, changeAddress, processedTxData.change);
+                    processedTxData.outputsToSpend.size(), processedTxData.valueOfUnspentOutputs, changeAddress, processedTxData.change, processedTxData.isDust);
         } catch (ValidationException ve) {
             cancelTrx();
             PublicPun.showNoticeDialog(mContext, "Unable to send:", ve.getMessage());
@@ -512,7 +544,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
         // Ask if ready to send.
         new TransactionConfirmDialog(mContext, mTxsConfirm, new TransactionConfirmCallback() {
             @Override
-            public void TransactionConfirm(String outputAddr, String changeAddr,long spendAmount) {
+            public void TransactionConfirm(String outputAddr, String changeAddr, long spendAmount) {
                 mProgress.show();
                 TimeOutCheck();
                 prepareTransaction(outputAddr, changeAddr, spendAmount);
@@ -709,7 +741,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
                     });
                 }
             }
-        }, 60000);////60s沒成功就自動cacel
+        }, 90000);////60s沒成功就自動cacel
     }
 
     private void getSecpo() {
@@ -824,7 +856,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
         if (trxStatus == Constant.TrxStatusWaitOtp) {
             trxStatus = Constant.TrxStatusGetOtp;
         }
-        AlertDialog.Builder otp_dialog = new AlertDialog.Builder(getActivity(),ProgressDialog.THEME_HOLO_LIGHT);
+        AlertDialog.Builder otp_dialog = new AlertDialog.Builder(getActivity(), ProgressDialog.THEME_HOLO_LIGHT);
         final View item = LayoutInflater.from(getActivity()).inflate(R.layout.alert_dialog_otp_input, null);
         otp_dialog.setCancelable(false);
         otp_dialog.setView(item)
@@ -903,7 +935,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
                                     doTrxSignSuccessCnt++;
 //                                    LogUtil.i("xxxxxxxxxx :addr " + inputID + inputAddressList.get(inputID).getAddress() +
 //                                            ";punlickey =" + LogUtil.byte2HexString(BTCUtils.reverse(inputAddressList.get(inputID).getPublickey())));
-                                    scriptSigs.add(genScriptSig(signOfTx,inputAddressList.get(inputID).getPublickey()));
+                                    scriptSigs.add(genScriptSig(signOfTx, inputAddressList.get(inputID).getPublickey()));
 
                                     if (doTrxSignSuccessCnt == signedInputs.length) {
                                         currUnsignedTx = genRawTxData(scriptSigs);
@@ -1197,7 +1229,6 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
         tvSendTitle = (TextView) view.findViewById(R.id.tv_send_title);
         tvSendSubtitle = (TextView) view.findViewById(R.id.tv_send_subtitle);
         tvSendSubtitle_country = (TextView) view.findViewById(R.id.tv_send_subtitle_country);
-        tvSendSubtitle_country2 = (TextView) view.findViewById(R.id.tv_send_subtitle_country2);
         editSendAddress = (EditText) view.findViewById(R.id.edit_send_address);
         imagScan = (ImageView) view.findViewById(R.id.imageView);
         editSendBtc = (EditText) view.findViewById(R.id.edit_send_btc);
@@ -1205,70 +1236,29 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
         btnSend = (Button) view.findViewById(R.id.btn_send);
         btnSend.setOnClickListener(this);
         imagScan.setOnClickListener(this);
+        tvSendAmountTop = (TextView) view.findViewById(R.id.tv_send_amount_top);
+        tvSendAmountBottom = (TextView) view.findViewById(R.id.tv_send_amount_bottom);
+        tvSendAmountTop.setOnClickListener(this);
+        tvSendAmountBottom.setOnClickListener(this);
     }
 
     private void setListener() {
-
-        editSendBtc.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (!hasFocus) {
-                    strEditBtc = editSendBtc.getText().toString().trim().replace(",", ".");
-                    if (!TextUtils.isEmpty(strEditBtc)) {
-                        editBtc = Float.valueOf(strEditBtc);
-                        if (editBtc > 0) {
-                            changeRate(mContext, editSendUsd, editBtc, "#.##");
-                        }
-                    }
-                }
-            }
-        });
-
-        editSendUsd.setOnFocusChangeListener(
-                new View.OnFocusChangeListener() {
-                    @Override
-                    public void onFocusChange(View v, boolean hasFocus) {
-                        if (!hasFocus) {
-                            strEditCurrency = editSendUsd.getText().toString().trim();
-                            if (!TextUtils.isEmpty(strEditCurrency)) {
-                                editBtc = Float.valueOf(strEditCurrency);
-                                if (editBtc > 0) {
-                                    changeRate(mContext, editSendBtc, editBtc, "#.########");
-                                }
-                            }
-                        }
-                    }
-                }
-        );
 
         editSendBtc.setOnEditorActionListener(
                 new TextView.OnEditorActionListener() {
                     @Override
                     public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                        LogUtil.e("editSendBtc onEditorAction");
                         if (actionId == EditorInfo.IME_ACTION_DONE) {
                             strEditBtc = editSendBtc.getText().toString().trim().replace(",", ".");
                             if (!TextUtils.isEmpty(strEditBtc)) {
                                 editBtc = Float.valueOf(strEditBtc);
                                 if (editBtc > 0) {
-                                    changeRate(mContext, editSendUsd, editBtc, "#.##");
-                                }
-                            }
-                        }
-                        return false;
-                    }
-                }
-        );
-
-        editSendUsd.setOnEditorActionListener(
-                new TextView.OnEditorActionListener() {
-                    @Override
-                    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                        if (actionId == EditorInfo.IME_ACTION_DONE) {
-                            strEditCurrency = editSendUsd.getText().toString().trim();
-                            if (!TextUtils.isEmpty(strEditCurrency)) {
-                                editBtc = Float.valueOf(strEditCurrency);
-                                if (editBtc > 0) {
-                                    changeRate(mContext, editSendBtc, editBtc, "#.########");
+                                    if(tvSendAmountBottom.getText().toString().equals("BTC")){
+                                        changeRate(mContext, editSendUsd, editBtc, "#.##",true);
+                                    }else {
+                                        changeRate(mContext, editSendUsd, editBtc, "#.########",false);
+                                    }
                                 }
                             }
                         }
@@ -1288,23 +1278,22 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
         mDialogMessage.setText(mMessage);
         mDialogTitle.setText(mTitle);
         //-----------產生輸入視窗--------
-//        builder = new AlertDialog.Builder(mContext, AlertDialog.THEME_DEVICE_DEFAULT_LIGHT);
-//        builder.setView(alert_view);
-//        btnTxBuilder = builder.show();
 
         btnTxBuilder = new AlertDialog.Builder(mContext, AlertDialog.THEME_DEVICE_DEFAULT_LIGHT)
                 .setView(alert_view)
                 .show();
     }
 
-    private void changeRate(Context context, EditText toEditText, float amount, String format) {
+    private void changeRate(Context context, EditText toEditText, float amount, String format,boolean isBtc) {
         float mChangeAmt = 0;
-        if (toEditText.getId() == editSendBtc.getId()) {
-            mChangeAmt = (amount / AppPrefrence.getCurrentRate(context));
-        } else {
+
+        if(isBtc){
             mChangeAmt = (amount * AppPrefrence.getCurrentRate(context));
+        }else{
+            mChangeAmt = (amount / AppPrefrence.getCurrentRate(context));
         }
-        LogUtil.d("rate changed amt : " + mChangeAmt);
+
+        LogUtil.e("rate changed amt : " + mChangeAmt);
         toEditText.setText(new DecimalFormat(format).format(mChangeAmt));
     }
 
@@ -1318,7 +1307,6 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
         btcAmt = final_balance * PublicPun.SATOSHI_RATE;
         tvSendTitle.setText(TabFragment.BtcFormatter.format(btcAmt));
         tvSendSubtitle_country.setText(AppPrefrence.getCurrentCountry(mContext));
-        tvSendSubtitle_country2.setText(AppPrefrence.getCurrentCountry(mContext));
         double currRate = btcAmt * AppPrefrence.getCurrentRate(mContext);
         tvSendSubtitle.setText(TabFragment.currentFormatter.format(currRate));
 
@@ -1342,10 +1330,10 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
                 mProgress.dismiss();
             } else {
                 LogUtil.d("UnSpentTxsBeans 取得完成有 " + UnSpentTxsBeans.size() + " 筆");
-                genChangeAddress(Constant.CwAddressKeyChainInternal);
+//                genChangeAddress(Constant.CwAddressKeyChainInternal);
+                PreviousPrepareTransaction(recvAddress, BTCUtils.convertToSatoshisValueForDIsplay(spendAmountStr));
             }
             super.onPostExecute(UnSpentTxsBeans);
         }
     }
-
 }

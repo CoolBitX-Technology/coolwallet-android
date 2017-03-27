@@ -27,7 +27,7 @@
 
     <EditText
         android:layout_width="180dp"
-        android:layout_height="30dp"
+        android:layout_height="wrap_content"
         android:id="@+id/editotp"
         android:layout_marginTop="5dp"
         android:layout_below="@+id/txtsearch"
@@ -35,6 +35,7 @@
         android:background="@drawable/edit_format"
         style="@style/TextView_Black_16"
         android:maxLength="6"
+        android:padding="@dimen/editText_margin"
         android:numeric="integer"
         android:imeOptions="actionDone"/>
 
@@ -51,28 +52,26 @@
 
     <Button
         android:id="@+id/btn_pair"
-        style="@style/TextView_Black_16"
+        style="@style/TextView_Brown_16"
         android:layout_width="250dp"
-        android:layout_height="30dp"
-        android:layout_marginLeft="30dp"
+        android:layout_height="wrap_content"
         android:background="@drawable/selector_button"
         android:text="@string/strPairPhone"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="88dp" />
+        android:layout_marginBottom="85dp" />
 
     <Button
         android:id="@+id/btn_cancel"
-        style="@style/TextView_Black_16"
+        style="@style/TextView_Brown_16"
         android:layout_width="250dp"
-        android:layout_height="30dp"
-        android:layout_marginLeft="30dp"
+        android:layout_height="wrap_content"
         android:background="@drawable/selector_button"
         android:src="@color/button_material_dark"
         android:text="@string/strCancel"
         android:layout_alignTop="@+id/btn_pair"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="40dp"/>
+        android:layout_marginTop="50dp"/>
 
 
 </RelativeLayout>

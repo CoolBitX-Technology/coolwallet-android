@@ -23,10 +23,10 @@
         android:layout_below="@+id/txtsearch"
         android:layout_centerHorizontal="true"
         android:layout_gravity="center"
-        android:maxLength="8"
         android:layout_marginTop="10dp"
         android:background="@drawable/edit_format"
-        android:imeOptions="actionDone"/>
+        android:imeOptions="actionDone"
+        android:maxLength="8" />
 
     <!--border lines for rows-->
     <View
@@ -67,15 +67,18 @@
         android:layout_marginTop="10sp"
         android:background="@color/dark_gray" />
 
-    <Button
-        android:id="@+id/btn_card_update"
-        style="@style/TextView_Black_16"
-        android:layout_width="350dp"
-        android:layout_height="40dp"
-        android:layout_alignParentBottom="true"
-        android:layout_gravity="center"
-        android:layout_marginTop="20dp"
-        android:background="@drawable/selector_button"
-        android:text="@string/btn_setting_str_update" />
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
 
+        <Button
+            android:id="@+id/btn_card_update"
+            style="@style/TextView_Brown_16"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_margin="@dimen/send_confirm_margin"
+            android:background="@drawable/selector_button"
+            android:text="@string/btn_setting_str_update" />
+    </RelativeLayout>
 </LinearLayout>

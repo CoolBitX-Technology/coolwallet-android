@@ -109,7 +109,7 @@ public class SlidingTabLayout extends HorizontalScrollView {
 
     /**
      * Set the custom {@link TabColorizer} to be used.
-     *
+     * <p>
      * If you only require simple custmisation then you can use
      * {@link #setSelectedIndicatorColors(int...)} and {@link #setDividerColors(int...)} to achieve
      * similar effects.
@@ -149,7 +149,7 @@ public class SlidingTabLayout extends HorizontalScrollView {
      * Set the custom layout to be inflated for the tab views.
      *
      * @param layoutResId Layout id to be inflated
-     * @param textViewId id of the {@link TextView} in the inflated view
+     * @param textViewId  id of the {@link TextView} in the inflated view
      */
     public void setCustomTabView(int layoutResId, int textViewId) {
         mTabViewLayoutId = layoutResId;
@@ -162,7 +162,7 @@ public class SlidingTabLayout extends HorizontalScrollView {
      */
     public void setViewPager(ViewPager viewPager) {
         mTabStrip.removeAllViews();
-    LogUtil.i("setViewPager!!!!!!");
+        LogUtil.i("setViewPager!!!!!!");
         mViewPager = viewPager;
         if (viewPager != null) {
             viewPager.setOnPageChangeListener(new InternalViewPagerListener());
@@ -198,7 +198,7 @@ public class SlidingTabLayout extends HorizontalScrollView {
 
         int padding = (int) (TAB_VIEW_PADDING_DIPS * getResources().getDisplayMetrics().density);
         textView.setPadding(padding, padding, padding, padding);
-        textView.setWidth(getResources().getDisplayMetrics().widthPixels/5);
+        textView.setWidth(getResources().getDisplayMetrics().widthPixels / 5);
 
         return textView;
     }
@@ -230,6 +230,11 @@ public class SlidingTabLayout extends HorizontalScrollView {
             tabView.setOnClickListener(tabClickListener);
 
             mTabStrip.addView(tabView);
+
+//            if (i == mViewPager.getCurrentItem()) {
+//                tabView.setSelected(true);
+//            }
+//            tabTitleView.setBackground(getResources().getDrawable( R.drawable.selector_tabs_stoke));
         }
     }
 

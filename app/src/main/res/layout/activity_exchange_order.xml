@@ -252,9 +252,9 @@
 
         <Button
             android:id="@+id/btn_complete_order"
-            style="@style/TextView_Brown_18"
+            style="@style/TextView_Brown_16"
             android:layout_width="200dp"
-            android:layout_height="50dp"
+            android:layout_height="wrap_content"
             android:layout_marginBottom="20dp"
             android:background="@drawable/selector_button"
             android:text="@string/btn_complete_order_str" />

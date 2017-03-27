@@ -207,10 +207,10 @@
     <Button
         android:id="@+id/btn_place_order"
         android:layout_width="300dp"
-        android:layout_height="40dp"
+        android:layout_height="wrap_content"
         android:text="@string/btn_place_order"
         android:background="@drawable/selector_button"
-        style="@style/TextView_Black_16"
+        style="@style/TextView_Brown_16"
         android:layout_marginTop="100dp"
         android:layout_gravity="center"/>
 

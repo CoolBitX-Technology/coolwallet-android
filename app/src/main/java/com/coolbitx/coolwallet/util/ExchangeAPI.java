@@ -51,19 +51,20 @@ public class ExchangeAPI {
 
     public void exchangeLogin(final APIResultCallback mAPIResultCallback) {
         this.mAPIResultCallback = mAPIResultCallback;
-        String mFirebaseToken = FirebaseInstanceId.getInstance().getToken();
-//        exchangeToken = FirebaseInstanceId.getInstance().getToken();
+//        String mFirebaseToken = FirebaseInstanceId.getInstance().getToken();
+        exchangeToken = FirebaseInstanceId.getInstance().getToken();
         LogUtil.d("FCM InstanceID token: " + exchangeToken);
 
-        if (mFirebaseToken != null) {
-            try {
-                LogUtil.d("mFirebaseToken=" + mFirebaseToken);
-                LogUtil.d("token=" + new JSONObject(mFirebaseToken).getString("token"));
-                exchangeToken = new JSONObject(mFirebaseToken).getString("token");
-            } catch (Exception e) {
-                new ValidationException(e);
-            }
-        }
+//        if (mFirebaseToken != null) {
+//            try {
+//                LogUtil.d("mFirebaseToken=" + mFirebaseToken);
+//                LogUtil.d("token=" + new JSONObject(mFirebaseToken).getString("token"));
+//                exchangeToken = new JSONObject(mFirebaseToken).getString("token");
+//            } catch (Exception e) {
+//                new ValidationException(e);
+//            }
+//        }
+
         //1.Create Session:get [Challenge] from Server
         LogUtil.d("getSrvInitSession CWID=" + CWID);
         getSrvInitSession(new APIResultCallback() {
@@ -723,12 +724,11 @@ public class ExchangeAPI {
     }
 
 
-    public void doTrxSubmit(final String orderId, final String trxId, final APIResultCallback apiResultCallback) {
+    public void doTrxSubmit(final String orderId, final String trxId, final String trxReceipt, final APIResultCallback apiResultCallback) {
         this.apiResultCallback = apiResultCallback;
         this.mResponse = new String[1];//challenge
         final String failedlMsg = "doTrxSubmit fail.";
-
-        String postData = "{\"bcTrxId\":\"" + trxId + "\"}";
+        String postData = "{\"bcTrxId\":\"" + trxId + "\", \"trxReceipt\":\"" + trxReceipt + "\"}";
 
         new AsyncTask<String, Integer, JSONObject>() {
             @Override
@@ -763,6 +763,7 @@ public class ExchangeAPI {
 
         try {
             jsonStringer.object();  //代表{
+            jsonStringer.key("changeKid").value(mLisTrxBlks.get(0).getChangeKid());
             jsonStringer.key("blks");
             jsonStringer.array();    //代表[
 

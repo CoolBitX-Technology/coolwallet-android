@@ -359,6 +359,7 @@
                     android:singleLine="true"
                     android:text="1Pj6zjzSWF..." />
 
+
             </LinearLayout>
 
 
@@ -366,9 +367,16 @@
 
         <TableRow>
 
-            <android.support.v4.widget.Space
+            <TextView
+                android:id="@+id/tv_dust"
                 android:layout_width="wrap_content"
-                android:layout_height="30sp" />
+                android:layout_height="35sp"
+                android:paddingLeft="@dimen/send_dialog_margin"
+                android:paddingRight="@dimen/send_dialog_margin"
+                android:text="@string/note_dust"
+                android:textColor="@color/md_red_A700" />
+
+
         </TableRow>
 
     </TableLayout>
@@ -382,9 +390,9 @@
 
         <Button
             android:id="@+id/btn_confirm"
-            style="@style/TextView_Black_16_Bold"
+            style="@style/TextView_Brown_16"
             android:layout_width="0dp"
-            android:layout_height="35sp"
+            android:layout_height="wrap_content"
             android:layout_weight="4.9"
             android:background="@drawable/selector_button"
             android:text="@string/send_confirm_btn_send" />
@@ -396,9 +404,9 @@
 
         <Button
             android:id="@+id/btn_cancel"
-            style="@style/TextView_Black_16_Bold"
+            style="@style/TextView_Brown_16"
             android:layout_width="0dp"
-            android:layout_height="35sp"
+            android:layout_height="wrap_content"
             android:layout_weight="4.9"
             android:background="@drawable/selector_button"
             android:text="@string/send_confirm_btn_cancel" />

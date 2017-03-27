@@ -55,9 +55,9 @@
 
             <Button
                 android:id="@+id/seedWords_confirm"
-                style="@style/TextView_Black_16"
+                style="@style/TextView_Brown_16"
                 android:layout_width="180dp"
-                android:layout_height="40dp"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:background="@drawable/selector_button"
                 android:text="@string/btn_create_HDW" />
@@ -71,9 +71,9 @@
 
             <Button
                 android:id="@+id/seedWords_previous"
-                style="@style/TextView_Black_16"
+                style="@style/TextView_Brown_16"
                 android:layout_width="180dp"
-                android:layout_height="40dp"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:background="@drawable/selector_button"
                 android:text="@string/btn_previous" />

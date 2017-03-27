@@ -12,16 +12,4 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="30dp"/>
 
-    <!--<TextView-->
-        <!--android:id="@+id/cwlist_item_address"-->
-        <!--style="@style/TextView_White_18"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content" />-->
-
-    <!--<TextView-->
-        <!--android:id="@+id/cwlist_item_rssi"-->
-        <!--style="@style/TextView_White_18"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content" />-->
-
 </LinearLayout>

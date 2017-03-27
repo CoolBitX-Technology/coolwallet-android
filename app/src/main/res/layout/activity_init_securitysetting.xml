@@ -191,15 +191,17 @@
         android:layout_marginTop="20sp"
         android:background="@color/dark_gray" />
 
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
     <Button
         android:id="@+id/btn_update_sec"
-        style="@style/TextView_Black_16"
-        android:layout_width="250dp"
-        android:layout_height="40dp"
+        style="@style/TextView_Brown_16"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_gravity="center"
-        android:layout_marginTop="20dp"
+        android:layout_margin="@dimen/send_confirm_margin"
         android:background="@drawable/selector_button"
         android:text="@string/btn_security_str_update" />
-
+    </RelativeLayout>
 </LinearLayout>

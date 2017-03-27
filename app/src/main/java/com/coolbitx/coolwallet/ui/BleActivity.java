@@ -95,19 +95,20 @@ public class BleActivity extends BaseActivity {
         @Override
         public void onBleDeviceDiscovered(BluetoothDevice device, int rssi, byte[] scanRecord) {
             String address = device.getAddress();
-//            Log.e(TAG, "BleScanCallback address:" + address);
+//            LogUtil.e("BleScanCallback address:" + address);
+
             if (!TextUtils.isEmpty(address)) {
                 if (!contains(address)) {
-                    imgSearch.setVisibility(View.INVISIBLE);
-                    txtSearch.setVisibility(View.INVISIBLE);
-                    txtSearchDetail.setVisibility(View.INVISIBLE);
-
                     String name = device.getName();
                     if (name == null || !name.startsWith("CoolWallet")) {
                         return;
                     }
 
+                    imgSearch.setVisibility(View.INVISIBLE);
+                    txtSearch.setVisibility(View.INVISIBLE);
+                    txtSearchDetail.setVisibility(View.INVISIBLE);
                     //列表中没有该蓝牙设备，添加设备到列表中
+
                     MyDevice myDevice = new MyDevice();
                     myDevice.setName(name == null ? "unknown device" : name);
                     myDevice.setAddress(address == null ? "unknown address" : address);
@@ -120,10 +121,6 @@ public class BleActivity extends BaseActivity {
 
                     }
                 }
-            } else {
-                imgSearch.setVisibility(View.VISIBLE);
-                txtSearch.setVisibility(View.VISIBLE);
-                txtSearchDetail.setVisibility(View.VISIBLE);
             }
         }
     };
@@ -295,6 +292,10 @@ public class BleActivity extends BaseActivity {
         tvPullMsg = (TextView) findViewById(R.id.tvPullMsg);
         tvVer = (TextView) findViewById(R.id.tvVer);
 
+        imgSearch.setVisibility(View.VISIBLE);
+        txtSearch.setVisibility(View.VISIBLE);
+        txtSearchDetail.setVisibility(View.VISIBLE);
+
         PackageManager manager = this.getPackageManager();
         try {
             PackageInfo info = manager.getPackageInfo(this.getPackageName(), 0);
@@ -313,6 +314,9 @@ public class BleActivity extends BaseActivity {
             @Override
             public void onRefresh() {
                 LogUtil.i("swipeRefresh");
+                imgSearch.setVisibility(View.VISIBLE);
+                txtSearch.setVisibility(View.VISIBLE);
+                txtSearchDetail.setVisibility(View.VISIBLE);
                 bleManager.stopScanBle();
                 isScanning = false;
                 swipeRefreshLayout.setRefreshing(false);
@@ -341,8 +345,9 @@ public class BleActivity extends BaseActivity {
                 isScanning = false;
                 MyDevice device = myDeviceList.get(position);
                 address = device.getAddress();
+
                 if (!address.isEmpty()) {
-                    LogUtil.i("卡片連線=" + address + "---" + device.getName());
+
                     Thread thread = new Thread() {
                         @Override
                         public void run() {
@@ -359,6 +364,9 @@ public class BleActivity extends BaseActivity {
 
                             //處理程式寫在此
                             final boolean isConnectBle = bleManager.connectBle(address, bleStateCallback);
+                            SharedPreferences settings = mContext.getSharedPreferences("Preference", 0);
+                            settings.edit().putString("connAddress", address).commit();
+
                             LogUtil.i("Connect 正在連接:" + address + "; is connectBle=" + isConnectBle);
 
                             mTimer = new Timer();
@@ -405,13 +413,16 @@ public class BleActivity extends BaseActivity {
                                 }
                             });
                             //處理程式寫在此
+                            SharedPreferences settings = mContext.getSharedPreferences("Preference", 0);
+                            settings.edit().putString("connAddress", address).commit();
+                            LogUtil.i("Reset 正在連接:" + address);
                             bleManager.connectBle(address, bleStateCallback);
 //                            handler.post(runnable);
                         }
                     };
                     thread.start();
 
-                    LogUtil.i("Reset 正在連接:" + address);
+
 
                 }
             }

@@ -39,7 +39,7 @@
     <string name="strPairSuccessfulDetail">CoolWallet allows you to pair up to\n3 devices,This device will be able to authenticate the second device.</string>
     <string name="strCancel">Cancel</string>
     <string name="strReset">Reset</string>
-    <string name="strPairPhone">Pair With This Phone</string>
+    <string name="strPairPhone">Pair with this device</string>
     <string name="connetc_status">Connect status</string>
     <string name="ok">ok</string>
 
@@ -143,6 +143,10 @@
     <string name="send_notification_unable_to_send">Unable to Send</string>
     <string name="btn_str_send">Send</string>
     <string name="note_unspent">Your balance needs at least one confirmation on Blockchain before you can send it out. Please try again later.</string>
+    <string name="note_dust"> the Bitcoin dust of this transaction (BTC %1$f) will be added to mining fee.</string>
+
+    <string name="send_hint_edit_address">Recipient \'s Address</string>
+    <string name="send_hint_edit_amount">Enter Amount</string>
 
 
     <string name="send_notification_str_failed_title">Transaction Failed</string>
@@ -167,8 +171,8 @@
 
     <!--Receive BC-->
     <!--<string name="btn_edit">Edit label</string>-->
-    <string name="btn_str_edit">Edit label</string>
-    <string name="btn_str_request">Request Payment</string>
+    <string name="btn_str_edit">Label</string>
+    <string name="btn_str_request">Request</string>
     <string name="btn_str_copy">Copy</string>
     <string name="btn_str_create_new_address">Create New Address</string>
 

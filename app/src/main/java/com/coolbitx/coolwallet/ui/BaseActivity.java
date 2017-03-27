@@ -112,19 +112,42 @@ public class BaseActivity extends AppCompatActivity {
                         });
                     }
                     break;
+
                 case BSConfig.HANDLER_DISCONN:
-                    LogUtil.i("BaseActivity HANDLER_DISCONN");
+
                     String title = "CoolWallet Disconnected";
                     ActivityManager am = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
                     ComponentName cn = am.getRunningTasks(1).get(0).topActivity;
-                    LogUtil.d("DISCONN and current activity="+cn.getClass().getSimpleName());
+                    int ind = cn.getShortClassName().lastIndexOf(".")+1;//.ui.EraseActivity → EraseActivity
+                    String act = cn.getShortClassName().substring(ind);
+
+                    LogUtil.e("BaseActivity HANDLER_DISCONN actitvity="+act);
+//                    if(act.equals("BleActivity")){
+//                        SharedPreferences settings = getSharedPreferences("Preference", 0);
+//                        //取出name屬性的字串
+//                        String address = settings.getString("connAddress", "");
+//                        bleManager.connectBle(address);
+//
+//                    }else{
+//                        LogUtil.e("not BleActivity");
+//                        String noteMsg;
+//                        if (PublicPun.card.getCardName() == null) {
+//                            noteMsg = "CoolWallet Disconnected";
+//                        } else {
+//                            noteMsg = PublicPun.card.getCardName() + " Disconnected";
+//                        }
+//                        PublicPun.showNoticeDialogToFinish(mContext, title, noteMsg);
+//                        systemNotification(title, noteMsg);
+//                    }
                     String noteMsg;
                     if (PublicPun.card.getCardName() == null) {
                         noteMsg = "CoolWallet Disconnected";
                     } else {
                         noteMsg = PublicPun.card.getCardName() + " Disconnected";
                     }
+                    PublicPun.showNoticeDialogToFinish(mContext, title, noteMsg);
                     systemNotification(title, noteMsg);
+
                     break;
             }
             super.handleMessage(msg);

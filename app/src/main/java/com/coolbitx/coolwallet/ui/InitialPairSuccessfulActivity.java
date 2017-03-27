@@ -30,6 +30,7 @@ public class InitialPairSuccessfulActivity extends BaseActivity implements View.
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
     private ProgressDialog mProgress;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,12 +76,16 @@ public class InitialPairSuccessfulActivity extends BaseActivity implements View.
 
     @Override
     public void onBackPressed() {
-        BleActivity.bleManager.disConnectBle();
-        finish();
+        try {
+            BleActivity.bleManager.disConnectBle();
+            finish();
 
-        Intent intent = new Intent(this, BleActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(intent);
+            Intent intent = new Intent(this, BleActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
+        } catch (Exception e) {
+            e.getStackTrace();
+        }
     }
 
     private void initViews() {

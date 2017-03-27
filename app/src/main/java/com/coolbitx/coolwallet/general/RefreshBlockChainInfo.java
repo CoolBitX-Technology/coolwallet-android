@@ -217,9 +217,9 @@ public class RefreshBlockChainInfo {
 
                                 case cwHdwAccountInfoBlockAmount:
 
-                                    String blockAmount = PublicPun.byte2HexString(outputData).replace(" ", "");
-                                    LogUtil.i("blockAmount=" + blockAmount);
-                                    account.setBlockAmount(Double.parseDouble(blockAmount));
+//                                    String blockAmount = PublicPun.byte2HexString(outputData).replace(" ", "");
+//                                    LogUtil.i("blockAmount=" + blockAmount);
+//                                    account.setBlockAmount(Double.parseDouble(blockAmount));
                                     flag[4] = true;
                                     break;
                             }

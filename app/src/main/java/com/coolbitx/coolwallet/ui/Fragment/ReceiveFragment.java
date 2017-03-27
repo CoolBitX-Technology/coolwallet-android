@@ -67,10 +67,10 @@ public class ReceiveFragment extends BaseFragment implements View.OnClickListene
     private Button item_btn_request;
     private Button item_btn_copy;
     private int mPosition = -1;
-    private TextView vEditLable;
-    private TextView vClickLabel;
+    private TextView tvQrCodeLable;
+    private TextView tvQrCodeAddr;
     private ReceiveListViewAdapter.OnRecvListClickListener mOnRecvListClickListener = null;
-//    private Context mContext;
+    //    private Context mContext;
     //for Bundle
     private String value = "";
     private String title = "";
@@ -201,7 +201,7 @@ public class ReceiveFragment extends BaseFragment implements View.OnClickListene
 
                         } else {
                             String mBCaddress;
-                            mBCaddress ="bitcoin:"+TabFragment.lisCwBtcAdd.get(position).getAddress()
+                            mBCaddress = "bitcoin:" + TabFragment.lisCwBtcAdd.get(position).getAddress()
                                     + "?amount="
                                     + mEditText.getText().toString().trim();
                             TabFragment.lisCwBtcAdd.get(position).setBCAddress(mBCaddress);
@@ -259,7 +259,7 @@ public class ReceiveFragment extends BaseFragment implements View.OnClickListene
 
                         account.setOutputIndex(Integer.valueOf(extKey, 16));
 //                        genKid = Integer.valueOf(extKey, 16) + 1;
-                        LogUtil.e("ExtKey="+ Integer.valueOf(extKey, 16) );
+                        LogUtil.e("ExtKey=" + Integer.valueOf(extKey, 16));
 //                        cntAdd += Integer.valueOf(extKey, 16);
                         getAccountKeyInfo(accountId, Integer.valueOf(extKey, 16), Constant.CwAddressKeyChainExternal);
                         cwAccountList.add(account);
@@ -351,7 +351,8 @@ public class ReceiveFragment extends BaseFragment implements View.OnClickListene
         item_btn_edit = (Button) view.findViewById(R.id.btn_edit_label);
         item_btn_request = (Button) view.findViewById(R.id.btn_request);
         item_btn_copy = (Button) view.findViewById(R.id.btn_copy);
-        vClickLabel = (TextView) view.findViewById(R.id.receive_click_label);
+        tvQrCodeAddr = (TextView) view.findViewById(R.id.receive_click_label);
+        tvQrCodeLable = (TextView) view.findViewById(R.id.receive_click_label_2);
         listView = (ListView) view.findViewById(R.id.lvAddress);
 
         item_btn_edit.setOnClickListener(this);
@@ -428,7 +429,7 @@ public class ReceiveFragment extends BaseFragment implements View.OnClickListene
             }
         }
         if (NotrsAddress >= 5) {
-            PublicPun.showNoticeDialog(mContext,"Unable to create new address","Maximum number of 5 unused addresses reached in this account");
+            PublicPun.showNoticeDialog(mContext, "Unable to create new address", "Maximum number of 5 unused addresses reached in this account");
         } else {
             mProgress.setMessage("Generating New address...");
             mProgress.show();
@@ -491,7 +492,9 @@ public class ReceiveFragment extends BaseFragment implements View.OnClickListene
                 item_btn_request.setVisibility(View.VISIBLE);
                 item_btn_copy.setVisibility(View.VISIBLE);
                 mPosition = position;
-                vClickLabel.setText(TabFragment.lisCwBtcAdd.get(position).getAddress().toString());
+                tvQrCodeAddr.setText(TabFragment.lisCwBtcAdd.get(position).getAddress().toString());
+//                tvQrCodeLable.setText(TabFragment.lisCwBtcAdd.get(position).getAddLabel() == null ?
+//                        String.valueOf(position): TabFragment.lisCwBtcAdd.get(position).getAddLabel().toString());
             }
         };
         ReceiveListViewAdapter.registerOnRecvListClickListenerCallback(mOnRecvListClickListener);

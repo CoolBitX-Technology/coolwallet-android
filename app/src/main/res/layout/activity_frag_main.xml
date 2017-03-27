@@ -1,30 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
-    <!--android:layout_width="match_parent"-->
-    <!--android:layout_height="match_parent"-->
-    <!--android:orientation="vertical"-->
-    <!--android:background="@android:color/black">-->
-
-        <!--<include layout="@layout/toolbar" />-->
-
-        <!--&lt;!&ndash; The main content view &ndash;&gt;-->
-        <!--<FrameLayout-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="match_parent"-->
-            <!--android:orientation="vertical"-->
-            <!--android:id="@+id/content_fragment" />-->
-        <!--&lt;!&ndash; The navigation drawer &ndash;&gt;-->
-
-<!--</LinearLayout>-->
-
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@android:color/black"
     android:orientation="vertical">
 
-    <include
-        layout="@layout/toolbar_main" />
+    <include layout="@layout/toolbar_main" />
+    <!--<include layout="@layout/toolbar" />-->
 
     <android.support.v4.widget.DrawerLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
@@ -34,40 +16,24 @@
         android:layout_below="@+id/toolbar_main"
         android:layout_above="@+id/ll_bottom_tab">
 
-        <!-- The main content view -->
-        <!--<android.support.v4.widget.SwipeRefreshLayout-->
-            <!--android:id="@+id/refresh_layout"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="match_parent">-->
 
-            <RelativeLayout
-                android:id="@+id/content_fragment"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"></RelativeLayout>
+        <RelativeLayout
+            android:id="@+id/content_fragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/md_grey_900"></RelativeLayout>
 
-        <!--</android.support.v4.widget.SwipeRefreshLayout>-->
 
-        <!-- The navigation drawer -->
-        <!--<ListView-->
-            <!--android:id="@+id/left_drawer"-->
-            <!--android:layout_width="240dp"-->
-            <!--android:layout_height="match_parent"-->
-            <!--android:layout_gravity="start"-->
-            <!--android:background="#99999999"-->
-            <!--android:choiceMode="singleChoice"-->
-            <!--android:divider="@android:color/transparent"-->
-            <!--android:dividerHeight="0dp" />-->
-
-        <LinearLayout android:id="@+id/llv_left_drawer"
+        <LinearLayout
+            android:id="@+id/llv_left_drawer"
             android:layout_width="240dp"
             android:layout_height="match_parent"
             android:layout_gravity="start"
-            android:orientation="vertical"
-            android:background="@color/md_grey_800"
-             >
-            <!--android:background="#99999999"-->
+            android:background="@color/md_grey_900"
+            android:orientation="vertical">
 
-            <ListView android:id="@+id/lsv_drawer_menu"
+            <ListView
+                android:id="@+id/lsv_drawer_menu"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:choiceMode="singleChoice"
@@ -77,118 +43,79 @@
         </LinearLayout>
 
     </android.support.v4.widget.DrawerLayout>
-
     <!-- 底部tab -->
+
 
     <RadioGroup
         android:id="@+id/ll_bottom_tab"
         android:layout_width="match_parent"
-        android:layout_height="38dp"
+        android:layout_height="35dp"
         android:layout_alignParentBottom="true"
         android:background="@android:color/black"
+        android:orientation="horizontal"
         android:baselineAligned="true"
         android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:weightSum="7"
-        >
+        android:weightSum="9">
 
         <Space
-           android:layout_height="match_parent"
-            android:layout_weight="1"
             android:layout_width="0dp"
-            />
+            android:layout_height="match_parent"
+            android:layout_weight="1.5" />
+
+        <!--<LinearLayout-->
+        <!--android:layout_width="0dp"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:orientation="vertical"-->
+        <!--android:layout_weight="1"-->
+        <!--&gt;-->
+
         <RadioButton
             android:id="@+id/rb_send"
             style="@style/RadioButton"
-            android:background="@mipmap/send_grey"
-            android:checked="false" />
+            android:background="@drawable/send_gray"
+            android:checked="false"
+            android:textColor="@color/md_white_1000" />
+
+        <!--<TextView-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:text="Send" />-->
+
+        <!--</LinearLayout>-->
 
         <Space
-            android:layout_height="match_parent"
-            android:layout_weight="1"
             android:layout_width="0dp"
-            />
+            android:layout_height="match_parent"
+            android:layout_weight="1.5" />
 
         <RadioButton
-            style="@style/RadioButton"
             android:id="@+id/rb_home"
-            android:background="@mipmap/home_grey"/>
+            style="@style/RadioButton"
+            android:layout_height="wrap_content"
+            android:background="@drawable/home_gray"
+            android:textColor="@color/md_white_1000" />
 
         <Space
-            android:layout_height="match_parent"
-            android:layout_weight="1"
             android:layout_width="0dp"
-            />
+            android:layout_height="match_parent"
+            android:layout_weight="1.5" />
 
         <RadioButton
-            style="@style/RadioButton"
             android:id="@+id/rb_receive"
-            android:background="@mipmap/receive_grey"/>
+            style="@style/RadioButton"
+            android:background="@drawable/receive_gray"
+            android:textColor="@color/md_white_1000" />
 
         <Space
-            android:layout_height="match_parent"
-            android:layout_weight="1"
             android:layout_width="0dp"
-            />
+            android:layout_height="match_parent"
+            android:layout_weight="1.5" />
     </RadioGroup>
-
-    <!-- 内容部分， fragment切换 -->
-
-    <!--<LinearLayout-->
-        <!--android:id="@+id/content_layout"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="match_parent"-->
-        <!--android:layout_above="@+id/line"-->
-        <!--android:orientation="vertical"></LinearLayout>-->
 
     <View
         android:id="@+id/line"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_above="@id/ll_bottom_tab"
-     />
+        android:layout_above="@id/ll_bottom_tab"/>
 
 </RelativeLayout>
-
-<!--&#45;&#45;#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45-->
-
-
-
-<!--<android.support.v4.widget.DrawerLayout-->
-    <!--xmlns:android="http://schemas.android.com/apk/res/android"-->
-    <!--android:id="@+id/drawer_layout"-->
-    <!--android:layout_width="match_parent"-->
-    <!--android:layout_height="match_parent">-->
-
-<!--<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
-    <!--android:layout_width="match_parent"-->
-    <!--android:layout_height="match_parent"-->
-    <!--android:orientation="vertical"-->
-    <!--android:background="@android:color/black">-->
-
-<!--<include layout="@layout/toolbar" />-->
-    <!--&lt;!&ndash; The main content view &ndash;&gt;-->
-    <!--<android.support.v4.widget.SwipeRefreshLayout-->
-        <!--android:id="@+id/refresh_layout"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="match_parent">-->
-
-        <!--<RelativeLayout-->
-            <!--android:id="@+id/content_fragment"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="match_parent"></RelativeLayout>-->
-
-    <!--</android.support.v4.widget.SwipeRefreshLayout>-->
-<!--</LinearLayout>-->
-    <!--&lt;!&ndash; The navigation drawer &ndash;&gt;-->
-    <!--<ListView-->
-        <!--android:id="@+id/left_drawer"-->
-        <!--android:layout_width="240dp"-->
-        <!--android:layout_height="match_parent"-->
-        <!--android:layout_gravity="start"-->
-        <!--android:background="#99999999"-->
-        <!--android:choiceMode="singleChoice"-->
-        <!--android:divider="@android:color/transparent"-->
-        <!--android:dividerHeight="0dp" />-->
-
-<!--</android.support.v4.widget.DrawerLayout>-->

@@ -534,6 +534,40 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
+    public static int queryAddrKid(Context context,String addr){
+
+        int result = -1;
+        DatabaseHelper mOpenHelper = new DatabaseHelper(context);
+        // 取得唯讀模式資料庫
+        SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+        // 透過query來查詢資料
+        Cursor c = null;
+        try {
+            c = db.query("ADDR",                                 // 資料表名字
+                    new String[]{"KID"},  // 要取出的欄位資料
+                    "WID='" + wid + "' AND ADDRESS='" + addr + "'",                                              // 查詢條件式
+                    null,                                              // 查詢條件值字串陣列
+                    null,                                              // Group By字串語法
+                    null,                                              // Having字串法
+                    null,                                              // Order By字串語法(排序)
+                    null);                                             // Limit字串語法
+
+            while (c.moveToNext()) {
+
+                result = c.getInt(0);
+            }
+            LogUtil.d(addr + " queryAddrKid " + result);
+            // 釋放資源
+        } catch (Exception e) {
+
+        } finally {
+            c.close();
+            db.close();
+
+            return result;
+        }
+    }
+
     public static int queryAccountByAddress(Context context, String addr) {
 
         int resultAccount = -1;
@@ -556,7 +590,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
                 resultAccount = c.getInt(0);
             }
-            LogUtil.i(addr + " queryAccountByAddress " + resultAccount);
+            LogUtil.d(addr + " queryAccountByAddress " + resultAccount);
             // 釋放資源
         } catch (Exception e) {
 

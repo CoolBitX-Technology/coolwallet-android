@@ -35,9 +35,9 @@
 
         <Button
             android:id="@+id/btn_ex_login"
-            style="@style/TextView_Black_16"
+            style="@style/TextView_Brown_16"
             android:layout_width="350dp"
-            android:layout_height="40dp"
+            android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:layout_gravity="center"
             android:layout_marginTop="20dp"

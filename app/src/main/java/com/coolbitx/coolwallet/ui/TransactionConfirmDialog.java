@@ -32,7 +32,7 @@ public class TransactionConfirmDialog extends AlertDialog implements View.OnClic
     //use the parent context
     private Button btnConfrim, btnCancel;  //確定取消按鈕
     private TextView tvAddress, tvAddressLower, tvSendAmount, tvSendForeignAmount, tvFeesAmount, tvFeesForeignAmount,
-            tvTotalAmount, tvTotalForeignAmount, tvInputStr, tvInputAmount, tvChangeAddr, tvChangeAmount;
+            tvTotalAmount, tvTotalForeignAmount, tvInputStr, tvInputAmount, tvChangeAddr, tvChangeAmount,tv_dust;//
     private TxsConfirm mTxsConfirm;
     private Context mContext;
     private AppCompatActivity activity;
@@ -108,6 +108,14 @@ public class TransactionConfirmDialog extends AlertDialog implements View.OnClic
         tvChangeAddr.setText(mTxsConfirm.getChange_address());
         tvChangeAmount.setText("฿" + String.valueOf(new DecimalFormat("#.########").format(
                 mTxsConfirm.getChange_amount() * PublicPun.SATOSHI_RATE)));
+
+        if(mTxsConfirm.isDust()){
+            tv_dust.setVisibility(View.VISIBLE);
+            tv_dust.setText( String.format(mContext.getString(R.string.note_dust),
+                    mTxsConfirm.getChange_amount() * PublicPun.SATOSHI_RATE));
+        }else{
+            tv_dust.setVisibility(View.INVISIBLE);
+        }
     }
 
 
@@ -138,6 +146,7 @@ public class TransactionConfirmDialog extends AlertDialog implements View.OnClic
                     tvFeeAlert.setVisibility(View.GONE);
                 }
                 isClick=!isClick;
+
                 break;
         }
     }
@@ -150,6 +159,10 @@ public class TransactionConfirmDialog extends AlertDialog implements View.OnClic
         toolbar.setLogo(mContext.getResources().getDrawable(R.mipmap.logo2));
         activity.setSupportActionBar(toolbar);
 //        toolbar.setNavigationIcon(R.mipmap.menu_3x);
+
+
+
+
         // Navigation Icon設定在 setSupoortActionBar後才有作用,否則會出現 back button_up
 //        ActionBar actionBar = activity.getSupportActionBar();
         // 打開  "<"
@@ -174,6 +187,7 @@ public class TransactionConfirmDialog extends AlertDialog implements View.OnClic
         btnCancel = (Button) findViewById(R.id.btn_cancel);
         imgAlert = (ImageView) findViewById(R.id.img_alert);
         tvFeeAlert = (TextView)findViewById(R.id.notice_fee_alert);
+        tv_dust = (TextView)findViewById(R.id.tv_dust);
         btnConfrim.setOnClickListener(this);
         btnCancel.setOnClickListener(this);
         imgAlert.setOnClickListener(this);

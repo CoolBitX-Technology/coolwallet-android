@@ -40,14 +40,14 @@ public class BleManager {
 
     private Handler handler;
 
-    public BleManager(Context context)  {
+    public BleManager(Context context) {
         this.context = context;
         handler = new Handler();
         try {
             initialize();
-        }catch(ValidationException ve){
+        } catch (ValidationException ve) {
 //            LogUtil.ClickFunction(context,"Alert Message",ve.getMessage());
-            Toast.makeText(context,ve.getMessage(),Toast.LENGTH_LONG).show();
+            Toast.makeText(context, ve.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -137,6 +137,21 @@ public class BleManager {
         return true;
     }
 
+    public boolean connectBle(String address) {
+        LogUtil.e("ReConnect="+address);
+        if (bluetoothAddress != null && address.equals(bluetoothAddress) && bluetoothGatt != null) {
+            return bluetoothGatt.connect();
+        }
+        BluetoothDevice device = bluetoothAdapter.getRemoteDevice(address);
+        if (device == null) {
+            return false;
+        }
+        bluetoothGatt = device.connectGatt(context.getApplicationContext(), false, mGattCallback);
+        bluetoothAddress = address;
+        return true;
+    }
+
+
     private final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
@@ -148,6 +163,7 @@ public class BleManager {
                 }
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 LogUtil.e("device disconnected");
+
                 final BleStateCallback callback = bleStateCallback;
                 handler.post(new Runnable() {
                     @Override

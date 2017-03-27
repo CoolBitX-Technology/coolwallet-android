@@ -101,9 +101,9 @@ public class TabFragment extends Fragment {
         rbSend.setChecked(false);
         rbHome.setChecked(true);
 
-        rbHome.setBackgroundResource(R.mipmap.home);
-        rbSend.setBackgroundResource(R.mipmap.send_grey);
-        rbReceive.setBackgroundResource(R.mipmap.receive_grey);
+        rbHome.setBackgroundResource(R.drawable.home);
+        rbSend.setBackgroundResource(R.drawable.send_gray);
+        rbReceive.setBackgroundResource(R.drawable.receive_gray);
 
         fragments = new LinkedList<BaseFragment>();
         getFragments(mPageType);
@@ -114,9 +114,12 @@ public class TabFragment extends Fragment {
         //取消滑動
 //        pager.beginFakeDrag();
         pager.setAdapter(adapter);
-        //tabs
+        //頁簽tabs
         tabs = (SlidingTabLayout) view.findViewById(R.id.tabs);
-        tabs.setSelectedIndicatorColors(Color.DKGRAY);
+        tabs.setSelectedIndicatorColors(Color.DKGRAY);//Color.DKGRAY
+        //dora
+//        tabs.setDividerColors(R.color.md_white_1000);
+
         tabs.setCustomTabColorizer(new SlidingTabLayout.TabColorizer() {
 
             @Override
@@ -165,6 +168,9 @@ public class TabFragment extends Fragment {
 
     }
 
+    public int getPageType(){
+        return mPageType;
+    }
     /**
      * 記錄被選擇的選單(accountID)指標用
      */
@@ -242,9 +248,9 @@ public class TabFragment extends Fragment {
         rbSend.setChecked(false);
         rbHome.setChecked(true);
 
-        rbHome.setBackgroundResource(R.mipmap.home);
-        rbSend.setBackgroundResource(R.mipmap.send_grey);
-        rbReceive.setBackgroundResource(R.mipmap.receive_grey);
+        rbHome.setBackgroundResource(R.drawable.home);
+        rbSend.setBackgroundResource(R.drawable.send_gray);
+        rbReceive.setBackgroundResource(R.drawable.receive_gray);
 
 
 //        FragMainActivity.ACCOUNT_CNT++;
@@ -404,7 +410,7 @@ public class TabFragment extends Fragment {
     private BaseFragment getFragmentByType(int type, String title, int index) {
         BaseFragment f = null;
         if (type == HOME_PAGE) {
-            f = HomeFragment.newInstance(title, Color.DKGRAY, dividerColor, R.mipmap.logo2, index);
+            f = HomeFragment.newInstance(title, Color.DKGRAY, dividerColor, R.mipmap.logo2, index);//Color.DKGRAY
         } else if (type == SEND_PAGE) {
             f = SendFragment.newInstance(title, Color.DKGRAY, dividerColor, R.mipmap.logo2, index);
         } else {
@@ -624,25 +630,25 @@ public class TabFragment extends Fragment {
                 if (!isAddFrag) {
                     if (buttonView == rbSend) {
                         if (isChecked) {
-                            rbSend.setBackgroundResource(R.mipmap.send);
-                            rbHome.setBackgroundResource(R.mipmap.home_grey);
-                            rbReceive.setBackgroundResource(R.mipmap.receive_grey);
+                            rbSend.setBackgroundResource(R.drawable.send);
+                            rbHome.setBackgroundResource(R.drawable.home_gray);
+                            rbReceive.setBackgroundResource(R.drawable.receive_gray);
 
                             mPageType = SEND_PAGE;
                         }
                     } else if (buttonView == rbHome) {
                         if (isChecked) {
 
-                            rbHome.setBackgroundResource(R.mipmap.home);
-                            rbSend.setBackgroundResource(R.mipmap.send_grey);
-                            rbReceive.setBackgroundResource(R.mipmap.receive_grey);
+                            rbHome.setBackgroundResource(R.drawable.home);
+                            rbSend.setBackgroundResource(R.drawable.send_gray);
+                            rbReceive.setBackgroundResource(R.drawable.receive_gray);
                             mPageType = HOME_PAGE;
                         }
                     } else if (buttonView == rbReceive) {
                         if (isChecked) {
-                            rbHome.setBackgroundResource(R.mipmap.home_grey);
-                            rbSend.setBackgroundResource(R.mipmap.send_grey);
-                            rbReceive.setBackgroundResource(R.mipmap.receive);
+                            rbHome.setBackgroundResource(R.drawable.home_gray);
+                            rbSend.setBackgroundResource(R.drawable.send_gray);
+                            rbReceive.setBackgroundResource(R.drawable.receive);
                             mPageType = RECEIVE_PAGE;
 
                         }

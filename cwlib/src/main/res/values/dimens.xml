@@ -5,5 +5,6 @@
     <dimen name="send_dialog_margin">15dp</dimen>
     <dimen name="share_addr_screen_margin">10dp</dimen>
     <dimen name="send_confirm_margin">20dp</dimen>
+    <dimen name="editText_margin">5dp</dimen>
 
 </resources>

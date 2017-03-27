@@ -48,7 +48,8 @@
 
     <EditText
         android:layout_width="330dp"
-        android:layout_height="30dp"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/editText_margin"
         android:id="@+id/edt_createHD"
         android:layout_marginTop="20dp"
         android:layout_marginLeft="20dp"
@@ -68,9 +69,9 @@
 
     <Button
         android:id="@+id/btn_create_wallet"
-        style="@style/TextView_Black_16"
+        style="@style/TextView_Brown_16"
         android:layout_width="200dp"
-        android:layout_height="30dp"
+        android:layout_height="wrap_content"
         android:background="@drawable/selector_button"
         android:src="@color/button_material_dark"
         android:text="@string/strCreateWallet"

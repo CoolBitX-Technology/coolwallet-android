@@ -40,9 +40,9 @@
 
     <Button
         android:id="@+id/btn_pair_next"
-        style="@style/TextView_Black_16"
+        style="@style/TextView_Brown_16"
         android:layout_width="200dp"
-        android:layout_height="30dp"
+        android:layout_height="wrap_content"
         android:layout_marginLeft="30dp"
         android:background="@drawable/selector_button"
         android:text="@string/btn_next"

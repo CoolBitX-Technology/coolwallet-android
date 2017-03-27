@@ -13,8 +13,10 @@ public class TxsConfirm {
     private long input_amount;
     private String change_address;
     private long change_amount;
+    private boolean isDust;
 
-    public TxsConfirm(String output_addrese, long output_amount, long fees, int input_count, long input_amount, String change_address, long change_amount) {
+    public TxsConfirm(String output_addrese, long output_amount, long fees, int input_count,
+                      long input_amount, String change_address, long change_amount,boolean isDust) {
         this.output_addrese = output_addrese;
         this.output_amount = output_amount;
         this.fees = fees;
@@ -23,6 +25,11 @@ public class TxsConfirm {
         this.input_amount = input_amount;
         this.change_address = change_address;
         this.change_amount = change_amount;
+        this.isDust = isDust;
+    }
+
+    public boolean isDust() {
+        return isDust;
     }
 
     public String getOutput_addrese() {

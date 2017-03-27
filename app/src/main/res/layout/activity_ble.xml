@@ -25,38 +25,6 @@
             android:layout_height="match_parent" />
     </android.support.v4.widget.SwipeRefreshLayout>
 
-    <ImageView
-        android:id="@+id/imgsearch"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="130dp"
-        android:contentDescription="@string/img_logo1"
-        android:src="@mipmap/search" />
-
-    <TextView
-        android:id="@+id/txtsearch"
-        style="@style/TextView_White_Bold_18"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_gravity="center"
-        android:layout_marginBottom="88dp"
-        android:text="@string/strSearch" />
-
-    <TextView
-        android:id="@+id/txtsearchDetail"
-        style="@style/TextView_White_18"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignStart="@+id/txtsearch"
-        android:layout_gravity="center"
-        android:layout_marginBottom="45dp"
-        android:text="@string/strSearchDetail" />
-
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -87,5 +55,35 @@
 
     </LinearLayout>
 
+    <ImageView
+        android:id="@+id/imgsearch"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:contentDescription="@string/img_logo1"
+        android:src="@drawable/search"
+        android:layout_below="@+id/imgLogo"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="40dp" />
+
+    <TextView
+        android:id="@+id/txtsearch"
+        style="@style/TextView_White_Bold_18"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="20dp"
+        android:layout_below="@+id/imgsearch"
+        android:text="@string/strSearch"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:id="@+id/txtsearchDetail"
+        style="@style/TextView_White_18"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/txtsearch"
+        android:layout_centerHorizontal="true"
+        android:layout_gravity="center"
+        android:text="@string/strSearchDetail" />
 
 </RelativeLayout>

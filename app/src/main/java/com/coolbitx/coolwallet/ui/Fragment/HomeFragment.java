@@ -65,6 +65,7 @@ public class HomeFragment extends BaseFragment implements AdapterView.OnItemClic
         f.setTitle(title);
         f.setIndicatorColor(indicatorColor);
         f.setDividerColor(dividerColor);
+//        f.setDividerColor(R.drawable.linearlayout_stroke);
         f.setIconResId(iconResId);
 
 
