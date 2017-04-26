@@ -17,7 +17,7 @@ import android.widget.ListView;
 import com.coolbitx.coolwallet.R;
 import com.coolbitx.coolwallet.adapter.UnclarifyOrderAdapter;
 import com.coolbitx.coolwallet.callback.APIResultCallback;
-import com.coolbitx.coolwallet.entity.ExchangeOrder;
+import com.coolbitx.coolwallet.bean.ExchangeOrder;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.coolbitx.coolwallet.util.ExchangeAPI;
 import com.snscity.egdwlib.CmdManager;
@@ -37,6 +37,7 @@ public class ExchangeVerificationActivity extends BaseActivity implements View.O
     private ListView listViewVerification;
     ArrayList<ExchangeOrder> listExchangeOrder;
     private ProgressDialog mProgress;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,7 +62,7 @@ public class ExchangeVerificationActivity extends BaseActivity implements View.O
                 LogUtil.d("getUnclarifyOrder ok " + msg[0]);
 
                 listExchangeOrder = new ArrayList<>();
-                listExchangeOrder = PublicPun.jsonParserExchange(msg[0], "response");
+                listExchangeOrder = PublicPun.jsonParserExchange(msg[0], "response", false);
                 if (listExchangeOrder.size() != 0) {
                     listViewVerification.setAdapter(new UnclarifyOrderAdapter(mContext, listExchangeOrder));
                 } else {
@@ -165,6 +166,8 @@ public class ExchangeVerificationActivity extends BaseActivity implements View.O
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
+                mProgress.setMessage("Begin to block order...");
+                mProgress.show();
                 //1.transit to server
 
                 String blockOtp = editText.getText().toString();
@@ -187,32 +190,34 @@ public class ExchangeVerificationActivity extends BaseActivity implements View.O
                             public void onSuccess(int status, byte[] outputData) {
 
                                 if ((status + 65536) == 0x9000) {//-28672//36864
-                                    LogUtil.d("XchsBlockBtc  success = " + LogUtil.byte2HexStringNoBlank(outputData));
+                                    LogUtil.d("XchsBlockBtc  success = " + PublicPun.byte2HexStringNoBlank(outputData));
 
                                     System.arraycopy(outputData, 32, okTkn, 0, 4);
                                     System.arraycopy(outputData, 36, unblockTkn, 0, 16);
 
-                                    mExchangeAPI.doExWriteOKToken(orderID, LogUtil.byte2HexStringNoBlank(okTkn), LogUtil.byte2HexStringNoBlank(unblockTkn),
+                                    mExchangeAPI.doExWriteOKToken(orderID, PublicPun.byte2HexStringNoBlank(okTkn), PublicPun.byte2HexStringNoBlank(unblockTkn),
                                             new APIResultCallback() {
                                                 @Override
                                                 public void success(String[] msg) {
                                                     LogUtil.d("ExWriteOKToken " + msg[0]);//orderId(4B)/accId(4B)/amount(8B)/mac1(32B)/nonce(16B)
 //                                                    finish();
                                                     GetUnclarifyOrder();
+                                                    mProgress.dismiss();
                                                 }
 
                                                 @Override
                                                 public void fail(String msg) {
                                                     LogUtil.d("ExWriteOKToken failed:" + msg);
-                                                    //exchangeSite Logout()
-                                                    PublicPun.showNoticeDialog(mContext, "Unable to Block", "WriteOKToken failed:" +msg);
+                                                    mProgress.dismiss();
+                                                    PublicPun.showNoticeDialog(mContext, "Unable to Block", "WriteOKToken failed:" + msg);
                                                 }
                                             });
 
                                 } else {
                                     LogUtil.d("XchsBlockBtc fail");
+                                    mProgress.dismiss();
+                                    PublicPun.showNoticeDialog(mContext, "Unable to Block", "WriteOKToken failed:" + Integer.toHexString(status));
                                 }
-
                             }
                         });
                     }
@@ -220,7 +225,8 @@ public class ExchangeVerificationActivity extends BaseActivity implements View.O
                     @Override
                     public void fail(String msg) {
                         LogUtil.d("getExRequestOrderBlock failed:" + msg);
-                        //exchangeSite Logout()
+                        mProgress.dismiss();
+                        PublicPun.showNoticeDialog(mContext, "Unable to Block", msg);
 
                     }
                 });
@@ -229,51 +235,10 @@ public class ExchangeVerificationActivity extends BaseActivity implements View.O
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
-//                cancelTrx(truP e);
-                //queryAccountInfo
-
-                mExchangeAPI.getExUnBlock(orderID, new APIResultCallback() {
-                    @Override
-                    public void success(String[] msg) {
-
-//                        {"orderId":"15847930","okToken":"abc123","unblockTkn":"abc123",
-//                                "mac":"dbe57d18f1c176606f40361a11c755ed655804a319d7b7120cdb1e729786d5dd"}
-                        cancelBlkInfo = PublicPun.hexStringToByteArray(msg[0] + msg[1] + msg[2] + msg[3] + msg[4]);
-
-                        cmdManager.XchsCancelBlock(cancelBlkInfo, new CmdResultCallback() {
-                            @Override
-                            public void onSuccess(int status, byte[] outputData) {
-
-                                if ((status + 65536) == 0x9000) {//-28672//36864
-                                    LogUtil.d("XchsCancelBlock  success = " + outputData);
-                                    cancelBlkInfo = outputData;
-                                } else {
-                                    LogUtil.d("XchsCancelBlock fail");
-                                    //for debug error code
-                                    cmdManager.getError(new CmdResultCallback() {
-                                        @Override
-                                        public void onSuccess(int status, byte[] outputData) {
-                                            LogUtil.d("Login failed = " + (status + 65536) + ";" + outputData);
-                                        }
-                                    });
-                                }
-
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void fail(String msg) {
-                        LogUtil.d("getExRequestOrderBlock failed:" + msg);
-                        //exchangeSite Logout()
-
-                    }
-                });
 
 
             }
         });
         otp_dialog.show();
     }
-
 }

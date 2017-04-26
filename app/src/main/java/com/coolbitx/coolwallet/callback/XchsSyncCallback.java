@@ -1,6 +1,6 @@
 package com.coolbitx.coolwallet.callback;
 
-import com.coolbitx.coolwallet.entity.XchsSync;
+import com.coolbitx.coolwallet.bean.XchsSync;
 
 import java.util.ArrayList;
 

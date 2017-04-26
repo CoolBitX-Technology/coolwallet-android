@@ -2,7 +2,6 @@ package com.coolbitx.coolwallet.ui;
 
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -29,9 +28,7 @@ public class EraseActivity extends BaseActivity implements View.OnClickListener 
     private Button btnCancel;
     private CmdManager cmdManager;
     private byte[] pinChllenge;
-    private byte currentHostId = 0x01;//当前手机设备uuid对应的hostid
-    private String currentUuid;//当前手机设备uuid
-    private SharedPreferences sharedPreferences;
+    private String currentUuid;
     private ProgressDialog mProgress;
     private CSVReadWrite mLoginCsv;
 
@@ -51,11 +48,7 @@ public class EraseActivity extends BaseActivity implements View.OnClickListener 
         mProgress.show();
 
         genOTP();
-
-        sharedPreferences = getSharedPreferences("card", Context.MODE_PRIVATE);
-        currentUuid = sharedPreferences.getString("uuid", "");
         initViews();
-
     }
 
 
@@ -86,10 +79,11 @@ public class EraseActivity extends BaseActivity implements View.OnClickListener 
     }
 
     private void cleanData() {
-        DatabaseHelper.deleteTable(EraseActivity.this, DbName.DATA_BASE_TXS);
-        DatabaseHelper.deleteTable(EraseActivity.this, DbName.DATA_BASE_ADDR);
-        DatabaseHelper.deleteTable(EraseActivity.this, DbName.DATA_BASE_CURRENT);
-        DatabaseHelper.deleteTable(context, DbName.DATA_BASE_LOGIN);
+        DatabaseHelper.deleteTable(EraseActivity.this, DbName.DB_TABLE_TXS);
+        DatabaseHelper.deleteTable(EraseActivity.this, DbName.DB_TABLE_ADDR);
+        DatabaseHelper.deleteTable(EraseActivity.this, DbName.DB_TABLE_CURRENT);
+        DatabaseHelper.deleteTable(EraseActivity.this, DbName.DB_TABLE_LOGIN);
+        DatabaseHelper.deleteTable(EraseActivity.this, DbName.DB_TABLE_KEYINFO);
     }
 
     @Override

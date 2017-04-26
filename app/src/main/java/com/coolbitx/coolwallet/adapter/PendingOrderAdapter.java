@@ -6,7 +6,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.coolbitx.coolwallet.R;
-import com.coolbitx.coolwallet.entity.ExchangeOrder;
+import com.coolbitx.coolwallet.bean.ExchangeOrder;
 
 import java.text.DecimalFormat;
 import java.util.List;

@@ -1,7 +1,9 @@
 package com.coolbitx.coolwallet.general;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Point;
@@ -15,21 +17,21 @@ import android.widget.Toast;
 
 import com.coolbitx.coolwallet.DataBase.DatabaseHelper;
 import com.coolbitx.coolwallet.R;
-import com.coolbitx.coolwallet.entity.Account;
-import com.coolbitx.coolwallet.entity.Card;
-import com.coolbitx.coolwallet.entity.Constant;
-import com.coolbitx.coolwallet.entity.CwBtcTxs;
-import com.coolbitx.coolwallet.entity.ExchangeOrder;
-import com.coolbitx.coolwallet.entity.ExchangeRate;
-import com.coolbitx.coolwallet.entity.Host;
-import com.coolbitx.coolwallet.entity.Info;
-import com.coolbitx.coolwallet.entity.ParsingAddress;
-import com.coolbitx.coolwallet.entity.PasingWallet;
-import com.coolbitx.coolwallet.entity.Txs;
-import com.coolbitx.coolwallet.entity.UnSpentTxsBean;
-import com.coolbitx.coolwallet.entity.User;
-import com.coolbitx.coolwallet.entity.Wallet;
-import com.coolbitx.coolwallet.entity.socketByAddress;
+import com.coolbitx.coolwallet.bean.Account;
+import com.coolbitx.coolwallet.bean.Card;
+import com.coolbitx.coolwallet.bean.Constant;
+import com.coolbitx.coolwallet.bean.CwBtcTxs;
+import com.coolbitx.coolwallet.bean.ExchangeOrder;
+import com.coolbitx.coolwallet.bean.ExchangeRate;
+import com.coolbitx.coolwallet.bean.Host;
+import com.coolbitx.coolwallet.bean.Info;
+import com.coolbitx.coolwallet.bean.ParsingAddress;
+import com.coolbitx.coolwallet.bean.PasingWallet;
+import com.coolbitx.coolwallet.bean.Txs;
+import com.coolbitx.coolwallet.bean.UnSpentTxsBean;
+import com.coolbitx.coolwallet.bean.User;
+import com.coolbitx.coolwallet.bean.Wallet;
+import com.coolbitx.coolwallet.bean.socketByAddress;
 import com.coolbitx.coolwallet.ui.BleActivity;
 import com.crashlytics.android.Crashlytics;
 import com.google.gson.Gson;
@@ -47,6 +49,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Timer;
 
 /**
  * Created by MyPC on 2015/8/27.
@@ -200,7 +203,7 @@ public class PublicPun {
         }
     }
 
-    public static ArrayList<ExchangeOrder> jsonParserExchange(String jsonString, String mType) {
+    public static ArrayList<ExchangeOrder> jsonParserExchange(String jsonString, String mType, boolean orderBy) {
 
         ArrayList<ExchangeOrder> listExchangeOrder = new ArrayList<>();
         try {
@@ -220,6 +223,17 @@ public class PublicPun {
                 // 15847930 , null , 50 , 3 , 234.56 , null
 
                 listExchangeOrder.add(exchangeOrder);
+
+                if (orderBy) {
+                    Collections.sort(listExchangeOrder, new Comparator<ExchangeOrder>() {
+
+                        @Override
+                        public int compare(ExchangeOrder lhs, ExchangeOrder rhs) {
+                            return lhs.getExpiration().compareTo(rhs.getExpiration());
+                        }
+                    });
+                }
+
             }
         } catch (Exception e) {
             LogUtil.e("JSONException:" + e.toString());
@@ -317,6 +331,7 @@ public class PublicPun {
             JSONObject jsonObject = new JSONObject(jsonString);
             //建立Gson類別並將JSON資料裝入class物件裡
             Gson gson = new Gson();
+            LogUtil.e("jsonParserSocketAddress:" + jsonObject.get("type"));
             if (jsonObject.get("type").equals("address")) {
                 socketAddress = new socketByAddress();
                 JSONObject jsonObjectSocket = jsonObject.getJSONObject("data");
@@ -330,7 +345,7 @@ public class PublicPun {
                 }
             } else {
                 socketAddress = null;
-//                LogUtil.e("jsonParserSocketAddress:" + jsonObject.get("type"));
+
             }
         } catch (Exception e) {
 //            LogUtil.e("recovery GsonEception:" + e.toString());
@@ -422,32 +437,32 @@ public class PublicPun {
     }
 
 
-    public static String jsonParserRawAddress(Context mContext, String jsonString) {
-
-        String mTransationID = "";
-        try {
-            JSONObject jsonObject = new JSONObject(jsonString);
-            //建立Gson類別並將JSON資料裝入class物件裡
-            Gson gson = new Gson();
-
-            //Txs
-            JSONArray jsonArrayTxs = jsonObject.getJSONArray("txs");
-
-            for (int i = 0; i < jsonArrayTxs.length(); i++) {
-                LogUtil.e(jsonArrayTxs.getString(i));
-                JSONObject jsonObjectTxs = jsonArrayTxs.getJSONObject(i);
-                Txs mTxs = gson.fromJson(jsonObjectTxs.toString(), Txs.class);
-                mTransationID = mTxs.getHash();
-            }
-        } catch (Exception e) {
-            LogUtil.e("jsonParserRawAddress:" + e.toString());
-            Crashlytics.log("jsonParserRawAddress failed jSon=" + jsonString);
-            e.printStackTrace();
-
-        } finally {
-        }
-        return mTransationID;
-    }
+//    public static String jsonParserRawAddress(Context mContext, String jsonString) {
+//
+//        String mTransationID = "";
+//        try {
+//            JSONObject jsonObject = new JSONObject(jsonString);
+//            //建立Gson類別並將JSON資料裝入class物件裡
+//            Gson gson = new Gson();
+//
+//            //Txs
+//            JSONArray jsonArrayTxs = jsonObject.getJSONArray("txs");
+//
+//            for (int i = 0; i < jsonArrayTxs.length(); i++) {
+//                LogUtil.e(jsonArrayTxs.getString(i));
+//                JSONObject jsonObjectTxs = jsonArrayTxs.getJSONObject(i);
+//                Txs mTxs = gson.fromJson(jsonObjectTxs.toString(), Txs.class);
+//                mTransationID = mTxs.getHash();
+//            }
+//        } catch (Exception e) {
+//            LogUtil.e("jsonParserRawAddress:" + e.toString());
+//            Crashlytics.log("jsonParserRawAddress failed jSon=" + jsonString);
+//            e.printStackTrace();
+//
+//        } finally {
+//        }
+//        return mTransationID;
+//    }
 
     public static int jsonParserRefresh(Context mContext, String jsonString, int accountID, boolean isAddressesUpdate) {
 
@@ -685,7 +700,18 @@ public class PublicPun {
     /**
      * show Dialog Messahe
      **/
-    public static void showNoticeDialog(Context mContext, String mTitle, String mMessage) {
+    private static Timer mTimer;
+
+    public static void showNoticeDialog(final Context mContext, final String mTitle, final String mMessage) {
+
+        while (mContext == null) {
+            try {
+                Thread.sleep(500);
+                LogUtil.e("showNoticeDialog在睡覺");
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
 
         LayoutInflater inflater = LayoutInflater.from(mContext);
         View alert_view = inflater.inflate(R.layout.edit_dialog, null);//alert為另外做給alert用的layout
@@ -694,6 +720,9 @@ public class PublicPun {
         mDialogTitle.setText(mTitle);
         mDialogMessage.setText(mMessage);
         //-----------產生輸入視窗--------
+        ActivityManager am = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
+        ComponentName cn = am.getRunningTasks(1).get(0).topActivity;
+        LogUtil.e("showNoticeDialog context:" + cn.getShortClassName());
         new AlertDialog.Builder(mContext, AlertDialog.THEME_DEVICE_DEFAULT_LIGHT)//
                 .setView(alert_view)
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -701,10 +730,20 @@ public class PublicPun {
 
                     }
                 }).show();
+
     }
 
 
     public static void showNoticeDialogToFinish(final Context mContext, String mTitle, String mMessage) {
+        while (mContext == null) {
+            try {
+                Thread.sleep(500);
+                LogUtil.e("showNoticeDialogToFinish在睡覺");
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
         LayoutInflater inflater = LayoutInflater.from(mContext);
         View alert_view = inflater.inflate(R.layout.edit_dialog, null);//alert為另外做給alert用的layout
         final EditText mEditText = (EditText) alert_view.findViewById(R.id.etInputLabel);
@@ -759,6 +798,17 @@ public class PublicPun {
         StringBuilder sb = new StringBuilder();
         for (byte b : bytes) {
             sb.append(String.format("%02x ", b));
+        }
+
+        return sb.toString();
+    }
+
+    public static String byte2HexStringNoBlank(byte [] bytes){
+        if(bytes == null) return null;
+
+        StringBuilder sb = new StringBuilder();
+        for(byte b : bytes){
+            sb.append(String.format("%02x", b));
         }
 
         return sb.toString();

@@ -5,8 +5,9 @@ package com.coolbitx.coolwallet.DataBase;
  */
 public class DbName {
 
-    public static final String DATA_BASE_TXS = "TXS";
-    public static final String DATA_BASE_ADDR = "ADDR";
-    public static final String DATA_BASE_CURRENT = "CURRENT";
-    public static final String DATA_BASE_LOGIN = "LOGIN";
+    public static final String DB_TABLE_TXS = "TXS";
+    public static final String DB_TABLE_ADDR = "ADDR";
+    public static final String DB_TABLE_CURRENT = "CURRENT";
+    public static final String DB_TABLE_LOGIN = "LOGIN";
+    public static final String DB_TABLE_KEYINFO = "ACCOUNT_KEY_INFO";
 }

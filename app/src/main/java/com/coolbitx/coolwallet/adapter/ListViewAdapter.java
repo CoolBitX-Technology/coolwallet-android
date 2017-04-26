@@ -13,7 +13,7 @@ import android.widget.ExpandableListView;
 import android.widget.TextView;
 
 import com.coolbitx.coolwallet.R;
-import com.coolbitx.coolwallet.entity.MyDevice;
+import com.coolbitx.coolwallet.bean.MyDevice;
 
 import java.util.ArrayList;
 import java.util.List;

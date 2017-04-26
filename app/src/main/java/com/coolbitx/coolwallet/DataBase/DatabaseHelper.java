@@ -7,8 +7,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.coolbitx.coolwallet.R;
-import com.coolbitx.coolwallet.entity.CwBtcTxs;
-import com.coolbitx.coolwallet.entity.dbAddress;
+import com.coolbitx.coolwallet.bean.CWAccountKeyInfo;
+import com.coolbitx.coolwallet.bean.CwBtcTxs;
+import com.coolbitx.coolwallet.bean.dbAddress;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.crashlytics.android.Crashlytics;
 import com.snscity.egdwlib.utils.LogUtil;
@@ -23,7 +24,7 @@ import java.util.Locale;
  */
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "com.coolbitx.coolwallet.db";
-    private static final int DATABASE_VERSION = 3; //version must be >=1
+    private static final int DATABASE_VERSION = 5; //version must be >=1
     private static String sql = "";
     private static String wid;
     private static boolean isUpgrade = false;
@@ -33,7 +34,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public DatabaseHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
         super(context, name, factory, version);
-        wid = PublicPun.card.getCardId();
+        wid = PublicPun.card.getCardId();//存的是hex
         this.mContext = context;
     }
 
@@ -52,6 +53,110 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return mInstance;
     }
 
+    public static boolean insertAccountKeyInfo(Context context, int account,  int kcid, String pubKey,String chainCode) {
+        DatabaseHelper mOpenHelper = new DatabaseHelper(context);
+//        String nullColumnHack = "WID";
+        boolean mResult = false;
+        long resultID;
+        long updateResultID;
+        // 取出資料庫物件, 並且是可以寫入狀態
+        // 當APP空間不夠時, 該方法會呈唯讀狀態
+
+        SQLiteDatabase mDatabase = mOpenHelper.getWritableDatabase();
+        try {
+            ContentValues values = new ContentValues();
+            values.put("WID", wid);
+            values.put("ACCOUNT_ID", account);
+            values.put("KCID", kcid);
+            values.put("PUBLICKEY", pubKey);
+            values.put("CHAINCODE", chainCode);
+
+            resultID = mDatabase.insert(DbName.DB_TABLE_KEYINFO,null, values);
+
+            if (resultID == -1) {
+//                mResult = false;
+                updateResultID = mDatabase.update(DbName.DB_TABLE_KEYINFO, values, "WID='" + wid + "' AND " + " ACCOUNT_ID=" + account , null);
+                LogUtil.d("update table KEYINFO: " + updateResultID + " ;ACCOUNT_ID:" + account + " ,KCID:" +
+                        kcid+ " ,PUBLICKEY:" + pubKey+ " ,CHAINCODE:" + chainCode);
+                mResult = updateResultID != -1;
+            } else {
+                LogUtil.d("insert table KEYINFO: " + resultID + "; ACCOUNT_ID:" + account + " ,KCID:" +
+                        kcid+ " ,PUBLICKEY:" + pubKey+ " ,CHAINCODE:" + chainCode);
+                mResult = true;
+            }
+
+            return mResult;
+        } catch (Exception e) {
+            LogUtil.d("sql insert KEYINFO Error: " + e.toString());
+            return mResult;
+        } finally {
+            mDatabase.close();
+
+        }
+    }
+
+
+    /**
+     *
+     * @param context
+     * @param accountIndex
+     * @return ArrayList<CWAccountKeyInfo>
+     */
+
+    public static ArrayList<CWAccountKeyInfo> queryAccountKeyInfo(Context context, int accountIndex) {
+        ArrayList<CWAccountKeyInfo> arraylist = new ArrayList<CWAccountKeyInfo>();
+        int mCount = 0;
+        DatabaseHelper mOpenHelper = new DatabaseHelper(context);
+        // 取得唯讀模式資料庫
+        SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+        // 透過query來查詢資料
+        Cursor c = null;
+
+        try {
+            if (accountIndex == -1) {//query all data
+                c = db.query(DbName.DB_TABLE_KEYINFO,                       // 資料表名字
+                        new String[]{"ACCOUNT_ID","KCID", "PUBLICKEY", "CHAINCODE"},     // 要取出的欄位資料
+                        "WID = '" + wid + "'",                              // 查詢條件式
+                        null,                                              // 查詢條件值字串陣列
+                        null,                                              // Group By字串語法
+                        null,                                              // Having字串法
+                        "ACCOUNT_ID",                                 // Order By字串語法(排序)
+                        null);                                             // Limit字串語法
+            } else {
+                c = db.query(DbName.DB_TABLE_KEYINFO,                                 // 資料表名字
+                        new String[]{"ACCOUNT_ID","KCID", "PUBLICKEY", "CHAINCODE"},  // 要取出的欄位資料
+                        "WID = '" + wid + "' AND ACCOUNT_ID=" + accountIndex,                                              // 查詢條件式
+                        null,                                              // 查詢條件值字串陣列
+                        null,                                              // Group By字串語法
+                        null,                                              // Having字串法
+                        "KCID",                                              // Order By字串語法(排序)
+                        null);                                             // Limit字串語法
+            }
+
+
+            while (c.moveToNext()) {
+                CWAccountKeyInfo cw = new CWAccountKeyInfo();
+                cw.setAccId(c.getInt(0));
+                cw.setKcid(c.getInt(1));
+                cw.setPublicKey(c.getString(2));
+                cw.setChainCode(c.getString(3));
+                arraylist.add(cw);
+                LogUtil.i("query " + DbName.DB_TABLE_KEYINFO + " record " + mCount + "=" +
+                        c.getInt(0) + " ;" + c.getInt(1) + " ;" + c.getString(2)+ " ;" + c.getString(3));
+                mCount++;
+            }
+
+        } catch (Exception e) {
+
+        } finally {
+            // 釋放資源
+            c.close();
+            db.close();
+            return arraylist;
+        }
+    }
+
+
     public static boolean insertCurrent(Context context, String country, double rates) {
         DatabaseHelper mOpenHelper = new DatabaseHelper(context);
         String nullColumnHack = "id";
@@ -66,10 +171,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             values.put("WID", wid);
             values.put("COUNTRY", country);
             values.put("RATES", rates);
-            resultID = mDatabase.insert(DbName.DATA_BASE_CURRENT, nullColumnHack, values);
+            resultID = mDatabase.insert(DbName.DB_TABLE_CURRENT, nullColumnHack, values);
             if (resultID == -1) {
 //                mResult = false;
-                updateResultID = mDatabase.update(DbName.DATA_BASE_CURRENT, values, "WID='" + wid + "' AND " + " COUNTRY='" + country + "'", null);
+                updateResultID = mDatabase.update(DbName.DB_TABLE_CURRENT, values, "WID='" + wid + "' AND " + " COUNTRY='" + country + "'", null);
                 LogUtil.d("update CURRENT: " + updateResultID + " ,COUNTRY:" + country + " ,RATES:" + rates);
                 mResult = updateResultID != -1;
             } else {
@@ -98,7 +203,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Cursor c = null;
 
         try {
-            c = db.query(DbName.DATA_BASE_LOGIN,                                 // 資料表名字
+            c = db.query(DbName.DB_TABLE_LOGIN,                                 // 資料表名字
                     new String[]{"WID", "UUID", "OTP"},  // 要取出的欄位資料
                     "WID = '" + wid + "'",                                              // 查詢條件式
                     null,                                              // 查詢條件值字串陣列
@@ -112,7 +217,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 arraylist.add(c.getString(0));
                 arraylist.add(c.getString(1));
                 arraylist.add(c.getString(2));
-                LogUtil.i("query " + DbName.DATA_BASE_LOGIN + " record " + mCount + "=" + c.getString(0) + " ;" + c.getString(1) + " ;" + c.getString(2));
+                LogUtil.i("query " + DbName.DB_TABLE_LOGIN + " record " + mCount + "=" + c.getString(0) + " ;" + c.getString(1) + " ;" + c.getString(2));
             }
 
         } catch (Exception e) {
@@ -135,7 +240,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         LogUtil.d("querySendAddress=" + addr);
         Cursor c = null;
         try {
-            c = db.query(DbName.DATA_BASE_ADDR,                                 // 資料表名字
+            c = db.query(DbName.DB_TABLE_ADDR,                                 // 資料表名字
                     new String[]{"KCID,KID,ADDRESS_BALANCE"},  // 要取出的欄位資料
                     "ADDRESS = '" + addr + "'",                                              // 查詢條件式
                     null,                                              // 查詢條件值字串陣列
@@ -183,8 +288,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             values.put("UUID", uuid);
             values.put("OTP", otp);
 
-            resultID = mDatabase.insert(DbName.DATA_BASE_LOGIN, nullColumnHack, values);
-            LogUtil.i("sql insert " + DbName.DATA_BASE_LOGIN + " :" + resultID + " ,WID:" + wid + " ,DATE:" + saveTempDtString + " ,UUID:" +
+            resultID = mDatabase.insert(DbName.DB_TABLE_LOGIN, nullColumnHack, values);
+            LogUtil.i("sql insert " + DbName.DB_TABLE_LOGIN + " :" + resultID + " ,WID:" + wid + " ,DATE:" + saveTempDtString + " ,UUID:" +
                     uuid + " ,OTP:" + otp);
             if (resultID == -1) {
                 ContentValues values1 = new ContentValues();
@@ -192,8 +297,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 values1.put("UUID", uuid);
                 values1.put("OTP", otp);
 
-                updateResultID = mDatabase.update(DbName.DATA_BASE_LOGIN, values1, "WID='" + wid + "'", null);
-                LogUtil.i("sql update " + DbName.DATA_BASE_LOGIN + " :" + resultID + " ,WID:" + wid + " ,DATE:" + saveTempDtString + " ,UUID:" +
+                updateResultID = mDatabase.update(DbName.DB_TABLE_LOGIN, values1, "WID='" + wid + "'", null);
+                LogUtil.i("sql update " + DbName.DB_TABLE_LOGIN + " :" + resultID + " ,WID:" + wid + " ,DATE:" + saveTempDtString + " ,UUID:" +
                         uuid + " ,OTP:" + otp);
                 mResult = updateResultID != -1;
             } else {
@@ -201,7 +306,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             }
 
         } catch (Exception e) {
-            LogUtil.i("sql insert " + DbName.DATA_BASE_LOGIN + " error: " + e.getMessage());
+            LogUtil.i("sql insert " + DbName.DB_TABLE_LOGIN + " error: " + e.getMessage());
             mResult = false;
         } finally {
             mDatabase.close();
@@ -226,8 +331,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             values.put("N_TX", address_N_tx);
             values.put("ADDRESS_BALANCE", mBalance);
 
-            updateResultID = mDatabase.update(DbName.DATA_BASE_ADDR, values, "WID='" + wid + "' AND ACCOUNT_ID=" + accountID + " AND ADDRESS='" + addr + "'", null);
-            LogUtil.i("sql update " + DbName.DATA_BASE_ADDR + " :" + updateResultID + " ,WID=" + wid +
+            updateResultID = mDatabase.update(DbName.DB_TABLE_ADDR, values, "WID='" + wid + "' AND ACCOUNT_ID=" + accountID + " AND ADDRESS='" + addr + "'", null);
+            LogUtil.i("sql update " + DbName.DB_TABLE_ADDR + " :" + updateResultID + " ,WID=" + wid +
                     "' AND ACCOUNT_ID=" + accountID + " ,ADDR=" + addr + " ,n_tx=" + address_N_tx + " ,ADDRESS_BALANCE=" + mBalance);
 
             mResult = updateResultID != -1;
@@ -254,8 +359,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             ContentValues values = new ContentValues();
             values.put("ADDRESS_LABEL", mLabel);
 
-            updateResultID = mDatabase.update(DbName.DATA_BASE_ADDR, values, "WID='" + wid + "' AND ADDRESS='" + addr + "'", null);
-            LogUtil.i("sql update " + DbName.DATA_BASE_ADDR + " :" + updateResultID + " ,WID=" + wid + " ,ADDR=" + addr + " ,label=" + mLabel);
+            updateResultID = mDatabase.update(DbName.DB_TABLE_ADDR, values, "WID='" + wid + "' AND ADDRESS='" + addr + "'", null);
+            LogUtil.i("sql update " + DbName.DB_TABLE_ADDR + " :" + updateResultID + " ,WID=" + wid + " ,ADDR=" + addr + " ,label=" + mLabel);
 
             mResult = updateResultID != -1;
         } catch (Exception e) {
@@ -288,8 +393,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             values.put("N_TX", n_tx);
             values.put("ADDRESS_BALANCE", balance);
 
-            updateResultID = mDatabase.update(DbName.DATA_BASE_ADDR, values, "WID='" + wid + "' AND ADDRESS='" + addr + "'", null);
-            LogUtil.i("sql update " + DbName.DATA_BASE_ADDR + " :" + updateResultID + " ,WID=" + wid + " ,ADDR=" + addr);
+            updateResultID = mDatabase.update(DbName.DB_TABLE_ADDR, values, "WID='" + wid + "' AND ADDRESS='" + addr + "'", null);
+            LogUtil.i("sql update " + DbName.DB_TABLE_ADDR + " :" + updateResultID + " ,WID=" + wid + " ,ADDR=" + addr);
 
             mResult = updateResultID != -1;
         } catch (Exception e) {
@@ -320,7 +425,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             values.put("N_TX", n_tx);
             values.put("ADDRESS_BALANCE", balance);
 
-            resultID = mDatabase.insert(DbName.DATA_BASE_ADDR, nullColumnHack, values);
+            resultID = mDatabase.insert(DbName.DB_TABLE_ADDR, nullColumnHack, values);
             mResult = resultID != -1;
             LogUtil.i("sql insert: " + resultID + " ,WID:" + wid + " ,ACCOUNT_ID:" + accountID + " ,ADDRESS:" +
                     addr + " ,KCID:" + kcid + " ,KID:" + kid + " ,N_TX:" + n_tx + " ,ADDRESS_BALANCE:" + balance);
@@ -357,9 +462,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             values.put("TX_DATE", mCwBtcTxs.getTxs_Date());
             values.put("TX_CONFIRMATION", mCwBtcTxs.getTxs_Confirmation());
 
-            resultID = mDatabase.insert(DbName.DATA_BASE_TXS, nullColumnHack, values);
+            resultID = mDatabase.insert(DbName.DB_TABLE_TXS, nullColumnHack, values);
             mResult = resultID != -1;
-            LogUtil.i("sql insert " + DbName.DATA_BASE_TXS + "第" + resultID + "筆: " + " ,WID:" + mCwBtcTxs.getWID()
+            LogUtil.i("sql insert " + DbName.DB_TABLE_TXS + "第" + resultID + "筆: " + " ,WID:" + mCwBtcTxs.getWID()
                     + " ,ACCOUNT_ID:" + mCwBtcTxs.getAccount_ID()
                     + " ,ADDRESS:" + mCwBtcTxs.getAddress()
                     + " ,TX_ID:" + mCwBtcTxs.getTxs_TransationID()
@@ -534,7 +639,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
-    public static int queryAddrKid(Context context,String addr){
+    public static int queryAddrKid(Context context, String addr) {
 
         int result = -1;
         DatabaseHelper mOpenHelper = new DatabaseHelper(context);
@@ -807,7 +912,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 tableName = table_array[i];
                 //更新時不變動login file
                 if (isUpgrade) {
-                    if (!tableName.equals(DbName.DATA_BASE_LOGIN)) {
+                    if (!tableName.equals(DbName.DB_TABLE_LOGIN)) {
                         sql = "DROP TABLE  IF  EXISTS " + tableName;
                         db.execSQL(sql);
                     }

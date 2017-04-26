@@ -2,12 +2,10 @@ package com.coolbitx.coolwallet.ui.Fragment;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -29,15 +27,16 @@ import android.widget.Toast;
 import com.coolbitx.coolwallet.DataBase.DatabaseHelper;
 import com.coolbitx.coolwallet.DataBase.DbName;
 import com.coolbitx.coolwallet.R;
-import com.coolbitx.coolwallet.Service.BTConfig;
 import com.coolbitx.coolwallet.Service.BlockSocketHandler;
 import com.coolbitx.coolwallet.Service.socketService;
+import com.coolbitx.coolwallet.bean.Account;
+import com.coolbitx.coolwallet.bean.Address;
+import com.coolbitx.coolwallet.bean.CWAccountKeyInfo;
+import com.coolbitx.coolwallet.bean.Constant;
+import com.coolbitx.coolwallet.bean.XchsSync;
+import com.coolbitx.coolwallet.bean.dbAddress;
+import com.coolbitx.coolwallet.bean.socketByAddress;
 import com.coolbitx.coolwallet.callback.RefreshCallback;
-import com.coolbitx.coolwallet.entity.Account;
-import com.coolbitx.coolwallet.entity.Address;
-import com.coolbitx.coolwallet.entity.Constant;
-import com.coolbitx.coolwallet.entity.dbAddress;
-import com.coolbitx.coolwallet.entity.socketByAddress;
 import com.coolbitx.coolwallet.general.AppPrefrence;
 import com.coolbitx.coolwallet.general.BtcUrl;
 import com.coolbitx.coolwallet.general.CSVReadWrite;
@@ -46,6 +45,7 @@ import com.coolbitx.coolwallet.general.RefreshBlockChainInfo;
 import com.coolbitx.coolwallet.httpRequest.CwBtcNetWork;
 import com.coolbitx.coolwallet.ui.BaseActivity;
 import com.coolbitx.coolwallet.ui.CoolWalletCardActivity;
+import com.coolbitx.coolwallet.ui.ExchangeLogin;
 import com.coolbitx.coolwallet.ui.HostDeviceActivity;
 import com.coolbitx.coolwallet.ui.InitialCreateWalletIIActivity;
 import com.coolbitx.coolwallet.ui.InitialSecuritySettingActivity;
@@ -62,6 +62,8 @@ import com.snscity.egdwlib.cmd.CmdResultCallback;
 import com.snscity.egdwlib.utils.ByteUtil;
 import com.snscity.egdwlib.utils.LogUtil;
 
+import org.json.JSONStringer;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.text.DecimalFormat;
@@ -77,26 +79,28 @@ import java.util.TimerTask;
 //        FragmentActivity
 public class FragMainActivity extends BaseActivity {//implements CompoundButton.OnCheckedChangeListener
 
-//    //左側選單圖片
-//    private static final int[] MENU_ITEMS_PIC = new int[]
-//            {R.mipmap.host, R.mipmap.cwcard, R.mipmap.security, R.mipmap.settings, R.drawable.exchange, R.drawable.exchange, R.mipmap.ic_feedback_white_24dp, R.mipmap.logout, R.mipmap.ic_share_white_24dp};
-//    // 左側選單文字項目
-//    private static final String[] MENU_ITEMS = new String[]{
-//            "Host devices", "CoolWallet card", "Security", "Settings", "Exchange", "Exchange Login", "Issue Feedback", "Logout", "Share address\n(beta)"
-//    };
-
-    private static final int[] MENU_ITEMS_PIC = new int[]
-            {R.mipmap.host, R.mipmap.cwcard, R.mipmap.security, R.mipmap.settings,
-                    R.mipmap.ic_feedback_white_24dp, R.mipmap.logout, R.mipmap.ic_share_white_24dp};
+    //左側選單圖片
+    private static final int[] MENU_ITEMS_PIC = new int[]{
+            R.mipmap.host, R.mipmap.cwcard, R.mipmap.security, R.mipmap.settings, R.drawable.exchange,
+            R.drawable.exchange, R.mipmap.ic_feedback_white_24dp, R.mipmap.logout, R.mipmap.ic_share_white_24dp};
     // 左側選單文字項目
     private static final String[] MENU_ITEMS = new String[]{
-            "Host devices", "CoolWallet card", "Security", "Settings",
-             "Issue Feedback", "Logout", "Share address\n(beta)"
+            "Host devices", "CoolWallet card", "Security", "Settings", "Exchange",
+            "Exchange Login", "Issue Feedback", "Logout", "Share address\n(beta)"
     };
+
+//    private static final int[] MENU_ITEMS_PIC = new int[]
+//            {R.mipmap.host, R.mipmap.cwcard, R.mipmap.security, R.mipmap.settings,
+//                    R.mipmap.ic_feedback_white_24dp, R.mipmap.logout, R.mipmap.ic_share_white_24dp};
+//    // 左側選單文字項目
+//    private static final String[] MENU_ITEMS = new String[]{
+//            "Host devices", "CoolWallet card", "Security", "Settings",
+//            "Issue Feedback", "Logout", "Share address\n(beta)"
+//    };
 
     public static int ACCOUNT_CNT = 0;//這裡要改為抓qryWalletInfo的
     public static boolean refreshFlag = false;
-    public static CmdManager cmdManager;
+    public CmdManager cmdManager;
     public static DecimalFormat BtcFormatter = new DecimalFormat("#.########");
     public static BlockSocketHandler socketHandler;
     public static IntentResult scanningResult;
@@ -116,6 +120,8 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
     int IntExtKey = 0;
     int IntIntKey = 0;
     TabFragment tabFragment;
+
+
     Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -126,28 +132,7 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
             try {
                 if (val != null) {
                     if (identify.equals(BtcUrl.URL_BLICKCHAIN_EXCHANGE_RATE)) {
-                        //使用 Float.floatToRawIntBits 先转成与 int 值相同位结构的 int 类型值，再根据 Big-Endian 或者是 Little-Endian 转成 byte 数组。
-//                        int currRate = Float.floatToIntBits(AppPrefrence.getCurrentRate(mContext));
-//                        float currRate = AppPrefrence.getCurrentRate(mContext)*100;
-                        // byte[] BigcurrData = ByteUtil.intToByteBig(currRate, 4);
 
-//                        int currRate = (int) (AppPrefrence.getCurrentRate(mContext) * 100);
-//                        byte[] BigcurrData = ByteBuffer.allocate(4).putInt(currRate).order(ByteOrder.BIG_ENDIAN).array();
-//
-//                        byte[] currData = new byte[5];
-//                        currData[0] = 0;
-//                        for (int i = 0; i < BigcurrData.length; i++) {
-//                            currData[i + 1] = BigcurrData[i];
-//                        }
-//                        cmdManager.SetCurrencyRate(currData, new CmdResultCallback() {
-//                                    @Override
-//                                    public void onSuccess(int status, byte[] outputData) {
-//                                        if ((status + 65536) == 0x9000) {
-//                                            LogUtil.i("SetCurrencyRate !!!");
-//                                        }
-//                                    }
-//                                }
-//                        );
                         SetCurrencyRate(mContext);
                         //card is not keep the setting.
                         if (AppPrefrence.getCurrency(mContext)) {
@@ -175,8 +160,6 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
     private ListView mLsvDrawerMenu;
     private List<HashMap<String, Object>> mHashMaps;
     private HashMap<String, Object> map;
-    private int getWallteName = 0x01;
-    private int getWalltePointer = 0x02;
     private List<Account> cwAccountList = new ArrayList<>();
     private int getWallteStatus = 0x03;
     private Address address;
@@ -186,7 +169,8 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
     private String mParentActivityName = null;
     private socketService mSocketService = null;
     private Timer mTimer;
-    private socketNotificationReceiver socketSNR;
+    private socketNotificationReceiver brocastNR;
+
     private Handler socketMsgHandler = new Handler() {
 
         @Override
@@ -226,14 +210,14 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_frag_main);
 
-        LogUtil.d("FragMainActivity onCreate");
+        LogUtil.d("lifeCycle FragMainActivity onCreate");
 
         Intent intent = getIntent();
         mSavedInstanceState = savedInstanceState;
         if (intent != null) {
             mParentActivityName = intent.getStringExtra("Parent");
-            if(mParentActivityName!=null){
-                LogUtil.d("mParentActivityName="+mParentActivityName+";getSimpleName=" + RecovWalletActivity.class.getSimpleName());
+            if (mParentActivityName != null) {
+                LogUtil.d("mParentActivityName=" + mParentActivityName + ";getSimpleName=" + RecovWalletActivity.class.getSimpleName());
                 isFromRecovery = mParentActivityName.equals(RecovWalletActivity.class.getSimpleName());
             }
 
@@ -267,7 +251,7 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
                 });
                 mTimer.cancel();
             }
-        }, 15000);////15s沒成功就自動cacel
+        }, 20000);////20s沒成功就自動cacel
 
         try {
             Thread thread = new Thread() {
@@ -285,11 +269,19 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
             getCardName();//獲取卡片名稱
             getCurrRate();
             queryWallteInfo(getWallteStatus);
+//            registerBroadcast();
+
+
         } catch (Exception e) {
             e.printStackTrace();
-            Crashlytics.log("FragMainActivity onCreate failed=" + e.getMessage());
+//            Crashlytics.log("FragMainActivity onCreate failed=" + e.getMessage());
         }
     }
+
+    public CmdManager getCmdManager() {
+        return cmdManager;
+    }
+
 
     private void initView() {
 
@@ -430,8 +422,8 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
                     if (ACCOUNT_CNT == 0) {
                         //没有帳戶,需要去創建帳戶
                         //for 如果是用別支手機reset的case
-                        DatabaseHelper.deleteTable(mContext, DbName.DATA_BASE_TXS);
-                        DatabaseHelper.deleteTable(mContext, DbName.DATA_BASE_ADDR);
+                        DatabaseHelper.deleteTable(mContext, DbName.DB_TABLE_TXS);
+                        DatabaseHelper.deleteTable(mContext, DbName.DB_TABLE_ADDR);
                         isNewUser = true;
                         String accName = "";
                         cmdManager.hdwCreateAccount(ACCOUNT_CNT, accName, new CmdResultCallback() {
@@ -473,11 +465,10 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
                             }
                             initTabFragment(mSavedInstanceState);
                         } else {
-                            //一開始進入只需抓account1 txs
-                            //抓交易資料
+                        //一開始進入只需抓account0抓交易資料
                             final int refreshAccount = 0;
                             final RefreshBlockChainInfo refreshBlockChainInfo = new RefreshBlockChainInfo(mContext, refreshAccount);
-                            refreshBlockChainInfo.FunQueryAccountInfo(new RefreshCallback() {
+                            refreshBlockChainInfo.FunQueryAccountInfo(cmdManager, new RefreshCallback() {
                                 @Override
                                 public void success() {
 
@@ -538,7 +529,7 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
                 }
         );
 
-        //set CW Card
+//set CW Card
         final byte cwHdwAccountInfoName = 0x00;
         final byte cwHdwAccountInfoBalance = 0x01;
         final byte cwHdwAccountInfoExtKeyPtr = 0x02;
@@ -701,7 +692,7 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
     }
 
     private void getCurrRate() {
-        DatabaseHelper.deleteTable(mContext, DbName.DATA_BASE_CURRENT);
+        DatabaseHelper.deleteTable(mContext, DbName.DB_TABLE_CURRENT);
         ContentValues cv = new ContentValues();
         new Thread(new MyRunnable(mHandler, cv, BtcUrl.URL_BLICKCHAIN_EXCHANGE_RATE, 0, 60000 * 30, 0, cwBtcNetWork)).start();//1hr updated
         new Thread(new MyRunnable(mHandler, cv, BtcUrl.RECOMMENDED_TRANSACTION_FEES, 0, 60000 * 30, 0, cwBtcNetWork)).start();//1hr updated
@@ -757,61 +748,61 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
                 intent = new Intent(getApplicationContext(), SettingActivity.class);
                 startActivityForResult(intent, 0);
                 break;
-            case 4:
-                IssueFeedBack();
-                break;
-            case 5:
-                intent = new Intent(getApplicationContext(), LogOutActivity.class);
-                startActivityForResult(intent, 0);
-                break;
-            case 6:
-                //Share address service
-                intent = new Intent(getApplicationContext(), ShareAddress.class);
-                startActivityForResult(intent, 0);
-                break;
-
-            //MARK XCHS
 //            case 4:
-//                intent = new Intent(getApplicationContext(), ExchangeLogin.class);
-//                startActivityForResult(intent, 0);
-//                break;
-//
-//            case 5:
-//                int infoid = 0;
-//                cmdManager.XchsGetOtp(infoid, new CmdResultCallback() {
-//                    @Override
-//                    public void onSuccess(int status, byte[] outputData) {
-//                        if ((status + 65536) == 0x9000) {//-28672//36864
-//                            LogUtil.d("XchsGetOtp ok= " + outputData);
-//                        } else {
-//                            LogUtil.d("XchsGetOtp fail= " + outputData);
-//
-//                        }
-//                    }
-//                });
-//                break;
-//            case 6:
 //                IssueFeedBack();
 //                break;
-//            case 7:
+//            case 5:
 //                intent = new Intent(getApplicationContext(), LogOutActivity.class);
 //                startActivityForResult(intent, 0);
 //                break;
-//            case 8:
+//            case 6:
 //                //Share address service
 //                intent = new Intent(getApplicationContext(), ShareAddress.class);
 //                startActivityForResult(intent, 0);
 //                break;
+
+            //MARK XCHS
+            case 4:
+                intent = new Intent(getApplicationContext(), ExchangeLogin.class);
+                startActivityForResult(intent, 0);
+                break;
+
+            case 5:
+                int infoid = 0;
+                cmdManager.XchsGetOtp(infoid, new CmdResultCallback() {
+                    @Override
+                    public void onSuccess(int status, byte[] outputData) {
+                        if ((status + 65536) == 0x9000) {//-28672//36864
+                            LogUtil.d("XchsGetOtp ok= " + outputData);
+                        } else {
+                            LogUtil.d("XchsGetOtp fail= " + outputData);
+
+                        }
+                    }
+                });
+                break;
+            case 6:
+                IssueFeedBack();
+                break;
+            case 7:
+                intent = new Intent(getApplicationContext(), LogOutActivity.class);
+                startActivityForResult(intent, 0);
+                break;
+            case 8:
+                //Share address service
+                intent = new Intent(getApplicationContext(), ShareAddress.class);
+                startActivityForResult(intent, 0);
+                break;
 
 
         }
         // 關掉 Drawer
         mDrawerLayout.closeDrawer(mLlvDrawerContent);
     }
+
     private void IssueFeedBack() {
         //show Notification
         issueCnt = 0;
-        getAccounts();
         LayoutInflater inflater = LayoutInflater.from(mContext);
         View alert_view = inflater.inflate(R.layout.edit_dialog, null);//alert為另外做給alert用的layout
         final TextView mDialogTitle = (TextView) alert_view.findViewById(R.id.dialog_title);
@@ -822,7 +813,16 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
 
         new AlertDialog.Builder(mContext, AlertDialog.THEME_DEVICE_DEFAULT_LIGHT)
                 .setView(alert_view)
-                .setPositiveButton("OK", null)
+                .setCancelable(false)
+                .setPositiveButton("Send", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        LogUtil.d("feedBack Send");
+                        mProgress.setMessage("Processing...");
+                        mProgress.show();
+                        forceCrash();
+                    }
+                })
                 .setNegativeButton(">>POLICY", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         LayoutInflater inflater = LayoutInflater.from(mContext);
@@ -840,91 +840,88 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
                                 }).show();
                     }
                 }).show();
-        mProgress.setMessage("Processing...");
-        mProgress.show();
+
     }
 
-    private void getAccounts() {
-
-        for (int i = 0; i < ACCOUNT_CNT; i++) {
-            final int accountId = i;
-            for (int j = 0; j < 2; j++) {
-                final byte kcid = (byte) j;
-                cmdManager.hdwQueryAccountInfo(kcid, accountId, new CmdResultCallback() {
-                    @Override
-                    public void onSuccess(int status, byte[] outputData) {
-                        if ((status + 65536) == 0x9000) {
-                            if (outputData != null) {
-                                int Key = Integer.valueOf(PublicPun.byte2HexString(outputData[0]), 16);
-                                getAccountKeyInfo(Constant.CwHdwAccountKeyInfoPubKeyAndChainCd, kcid, accountId, Key);
-                            }
-                        }
-                    }
-                });
-            }
-        }
-    }
-
-    private void getAccountKeyInfo(final int kinfoid, final int kcId, final int accountId, final int kid) {
-        cmdManager.hdwQueryAccountKeyInfo(kinfoid,
-                kcId,
-                accountId,
-                kid,
-                new CmdResultCallback() {
-                    @Override
-                    public void onSuccess(int status, byte[] outputData) {
-                        if ((status + 65536) == 0x9000) {
-                            if (outputData != null) {
-                                byte[] publicKeyBytes = new byte[64];
-                                byte[] chainCodeBytes = new byte[32];
-                                int length = outputData.length;
-                                byte[] extendPub = new byte[33];
-                                if (length >= 96) {
-
-                                    for (int i = 0; i < 64; i++) {
-                                        publicKeyBytes[i] = outputData[i];
-                                    }
-                                    for (int j = 64; j < 96; j++) {
-                                        chainCodeBytes[j - 64] = outputData[j];
-                                    }
-                                    int mFirstKey = Integer.parseInt(PublicPun.byte2HexString(publicKeyBytes[63]), 16);
-//                                    LogUtil.i("public key的最後字元=" + PublicPun.byte2HexString(publicKeyBytes[63]) +
-//                                            ";轉int=" + mFirstKey);
-
-                                    //format last charactors
-                                    if (mFirstKey % 2 == 0) {
-                                        extendPub[0] = 02;
-                                    } else {
-                                        extendPub[0] = 03;
-                                    }
-                                    for (int a = 0; a < 32; a++) {
-                                        extendPub[a + 1] = publicKeyBytes[a];
-                                    }
-                                    //最後兩個字元一起
-                                    LogUtil.d("account=" + accountId + " ;kcid=" + kcId + " ;kid=" + kid + " ;建地址的public key=" + LogUtil.byte2HexString(extendPub) + ";chainCodeBytes=" + LogUtil.byte2HexString(chainCodeBytes));
-                                    Crashlytics.log("account=" + accountId + " ; kcid=" + kcId
-                                            + " ; public key=" + LogUtil.byte2HexStringNoBlank(extendPub) + " ; ChainCodeBytes=" + LogUtil.byte2HexStringNoBlank(chainCodeBytes));
-                                    issueCnt++;
-                                    if (issueCnt == ACCOUNT_CNT * 2) {//external/internal
-                                        LogUtil.d("forceCrash");
-                                        mProgress.dismiss();
-                                        forceCrash();
-                                    }
-                                }
-                            }
-                        }
-                    }
-                });
-    }
 
     private void forceCrash() {
         try {
+            ArrayList<CWAccountKeyInfo> cwList =
+                    DatabaseHelper.queryAccountKeyInfo(mContext, -1);
+            XchsSync mXchsSync = null;
+            ArrayList<XchsSync> listXchsSync = new ArrayList<XchsSync>();
+            for (CWAccountKeyInfo cw : cwList) {
+                ArrayList<dbAddress> listAddress
+                        = DatabaseHelper.queryAddress(mContext, cw.getAccId(), cw.getKcid());
+
+                LogUtil.e("Loop=" + cw.getAccId());
+
+                if (cw.getKcid() == 0) {
+                    mXchsSync = new XchsSync();
+                    mXchsSync.setAccID_ext(cw.getAccId());
+                    mXchsSync.setKeyPointer_ext(cw.getKcid());
+                    mXchsSync.setAccPub_ext(cw.getPublicKey());
+                    mXchsSync.setAccChain_ext(cw.getChainCode());
+                    mXchsSync.setAddNum_ext(listAddress.size());
+
+                } else {
+                    mXchsSync.setAccID_int(cw.getAccId());
+                    mXchsSync.setKeyPointer_int(cw.getKcid());
+                    mXchsSync.setAccPub_int(cw.getPublicKey());
+                    mXchsSync.setAccChain_int(cw.getChainCode());
+                    mXchsSync.setAddNum_int(listAddress.size());
+                    listXchsSync.add(mXchsSync);
+                }
+            }
+
+            String SyncData = createSyncJson(listXchsSync);
+            LogUtil.d("sync jsonString=" + SyncData);
+            Crashlytics.log(SyncData);
             throw new Exception("IssueFeedBack");
         } catch (Exception e) {
-            LogUtil.d("sent issueFeedBack");
+            mProgress.dismiss();
+            LogUtil.d("sent issueFeedBack:");
             e.getStackTrace();
             Crashlytics.logException(e);
+            Toast.makeText(mContext, "Feedback sent successfully.", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private String createSyncJson(ArrayList<XchsSync> listXchsSync) {
+
+        JSONStringer jsonStringer = new JSONStringer();
+        LogUtil.e("createSyncJson");
+        try {
+            jsonStringer.object();  //代表{
+            jsonStringer.key("accounts");   //代表array key
+            jsonStringer.array();    //代表[
+            for (int x = 0; x < listXchsSync.size(); x++) {
+                //Query accountKeyInfo's addr's Num & publicKey & chaincode
+                jsonStringer.object();
+                jsonStringer.key("id").value(listXchsSync.get(x).getAccID_ext());
+                jsonStringer.key("extn");
+                jsonStringer.object();
+                jsonStringer.key("num").value(listXchsSync.get(x).getAddNum_ext());
+                jsonStringer.key("pub").value(listXchsSync.get(x).getAccPub_ext());
+                jsonStringer.key("chaincode").value(listXchsSync.get(x).getAccChain_ext());
+                jsonStringer.endObject();
+                jsonStringer.key("intn");
+                jsonStringer.object();
+                jsonStringer.key("num").value(listXchsSync.get(x).getAddNum_int());
+                jsonStringer.key("pub").value(listXchsSync.get(x).getAccPub_int());
+                jsonStringer.key("chaincode").value(listXchsSync.get(x).getAccChain_int());
+                jsonStringer.endObject();
+                jsonStringer.endObject();
+            }
+            jsonStringer.endArray();
+            jsonStringer.endObject();
+
+
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return jsonStringer.toString();
     }
 
     private List<HashMap<String, Object>> getData() {
@@ -960,23 +957,36 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
 
     @Override
     protected void onResume() {
-        LogUtil.e("onResume");
+        LogUtil.e("lifeCycle FragMainActivity onResume");
         super.onResume();
         if (cmdManager == null) {
             cmdManager = new CmdManager();
         }
-        //註冊監聽
-        if (socketSNR == null) {
-            socketSNR = new socketNotificationReceiver();
-        }
-        registerReceiver(socketSNR, new IntentFilter(BTConfig.SOCKET_ADDRESS_MSG));
-        registerReceiver(socketSNR, new IntentFilter(BTConfig.DISCONN_NOTIFICATION));
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        LogUtil.e("lifeCycle FragMainActivity onStart");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        LogUtil.e("lifeCycle FragMainActivity onPause");
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        LogUtil.e("lifeCycle FragMainActivity onPause");
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        LogUtil.e("onDestroy");
+        LogUtil.e("lifeCycle FragMainActivity onResume");
         if (mProgress.isShowing()) {
             mProgress.dismiss();
         }
@@ -984,15 +994,6 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
             socketHandler.cancelALLTasks();
         }
 
-        try {
-            if (socketSNR != null) {
-                unregisterReceiver(socketSNR);
-                socketSNR = null;
-            }
-        } catch (Exception e) {
-            e.getStackTrace();
-            Crashlytics.logException(e);
-        }
     }
 
     public String getAccountFrag(int id) {
@@ -1004,19 +1005,4 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
 
     }
 
-    //建立廣播接收socket訊息
-    public class socketNotificationReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            // TODO Auto-generated method stub
-            String action = intent.getAction();
-            LogUtil.d("webSocket broadcast recv!");
-            if (action.equals(BTConfig.SOCKET_ADDRESS_MSG)) {
-                socketMsgHandler.sendMessage(socketMsgHandler.obtainMessage(BSConfig.HANDLER_SOCKET,
-                        intent.getExtras().getSerializable("socketAddrMsg")));
-            } else if (action.equals(BTConfig.DISCONN_NOTIFICATION)) {
-                socketMsgHandler.sendMessage(socketMsgHandler.obtainMessage(BSConfig.HANDLER_DISCONN));
-            }
-        }
-    }
 }

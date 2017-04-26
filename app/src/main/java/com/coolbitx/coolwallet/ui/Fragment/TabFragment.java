@@ -2,6 +2,7 @@ package com.coolbitx.coolwallet.ui.Fragment;
 
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -16,14 +17,15 @@ import com.coolbitx.coolwallet.DataBase.DatabaseHelper;
 import com.coolbitx.coolwallet.R;
 import com.coolbitx.coolwallet.adapter.TabFragmentPagerAdapter;
 import com.coolbitx.coolwallet.callback.RefreshCallback;
-import com.coolbitx.coolwallet.entity.Address;
-import com.coolbitx.coolwallet.entity.Constant;
-import com.coolbitx.coolwallet.entity.CwBtcTxs;
-import com.coolbitx.coolwallet.entity.dbAddress;
+import com.coolbitx.coolwallet.bean.Address;
+import com.coolbitx.coolwallet.bean.Constant;
+import com.coolbitx.coolwallet.bean.CwBtcTxs;
+import com.coolbitx.coolwallet.bean.dbAddress;
 import com.coolbitx.coolwallet.general.AppPrefrence;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.coolbitx.coolwallet.general.RefreshBlockChainInfo;
 import com.coolbitx.coolwallet.util.Base58;
+import com.snscity.egdwlib.CmdManager;
 import com.snscity.egdwlib.cmd.CmdResultCallback;
 import com.snscity.egdwlib.utils.ByteUtil;
 import com.snscity.egdwlib.utils.LogUtil;
@@ -70,6 +72,9 @@ public class TabFragment extends Fragment {
     private Boolean isAddFrag = false;
     private ProgressDialog mProgress;
     private Timer mTimer;
+    CmdManager cmdManager ;
+
+
     public static Fragment newInstance() {
         TabFragment f = new TabFragment();
 
@@ -77,12 +82,26 @@ public class TabFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.frag_tab, container, false);
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
     }
 
     @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+
+        FragMainActivity activity = (FragMainActivity) getActivity();
+        cmdManager = activity.getCmdManager();
+
+        return inflater.inflate(R.layout.frag_tab, container, false);
+
+    }
+
+
+    @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
+
+
         //adapter
         //fragments = getFragments();
         mProgress = new ProgressDialog(getActivity(), ProgressDialog.THEME_HOLO_DARK);
@@ -91,6 +110,7 @@ public class TabFragment extends Fragment {
 
         isAddFrag = false;
         mPageType = HOME_PAGE;
+
 
         rbReceive = (RadioButton) getActivity().findViewById(R.id.rb_receive);
         rbSend = (RadioButton) getActivity().findViewById(R.id.rb_send);
@@ -285,7 +305,7 @@ public class TabFragment extends Fragment {
         LogUtil.e("這是Main FunhdwSetAccInfo=" + account);
         byte ByteAccId = (byte) account;
         //for card display
-        FragMainActivity.cmdManager.McuSetAccountState(ByteAccId, new CmdResultCallback() {
+        cmdManager.McuSetAccountState(ByteAccId, new CmdResultCallback() {
                     @Override
                     public void onSuccess(int status, byte[] outputData) {
                         if ((status + 65536) == 0x9000) {
@@ -368,15 +388,15 @@ public class TabFragment extends Fragment {
                     break;
             }
             LogUtil.i("hdwSetAccInfo:" + account + "的 " + setAcctInfoIndex + " =" + PublicPun.byte2HexString(accountInfo));
-            FragMainActivity.cmdManager.hdwSetAccInfo(PublicPun.user.getMacKey(), cwHdwAccountInfo[setAcctInfoIndex], account, accountInfo, new CmdResultCallback() {
+            cmdManager.hdwSetAccInfo(PublicPun.user.getMacKey(), cwHdwAccountInfo[setAcctInfoIndex], account, accountInfo, new CmdResultCallback() {
                         @Override
                         public void onSuccess(int status, byte[] outputData) {
                             if ((status + 65536) == 0x9000) {
                                 flag[setAcctInfoIndex] = true;
 
                                 if (flag[0] && flag[1] && flag[2] && flag[3]) {
-
-                                    FragMainActivity.cmdManager.McuSetAccountState((byte)account, new CmdResultCallback() {
+                                    mProgress.dismiss();
+                                    cmdManager.McuSetAccountState((byte)account, new CmdResultCallback() {
                                                 @Override
                                                 public void onSuccess(int status, byte[] outputData) {
 
@@ -422,12 +442,12 @@ public class TabFragment extends Fragment {
 
     private void CreateNewAccount(final int accountId) {
         String accName = "";
-        FragMainActivity.cmdManager.hdwCreateAccount(accountId, accName, new CmdResultCallback() {
+        cmdManager.hdwCreateAccount(accountId, accName, new CmdResultCallback() {
             @Override
             public void onSuccess(int status, byte[] outputData) {
                 if ((status + 65536) == 0x9000) {
                     byte[] balance = new byte[8];
-                    FragMainActivity.cmdManager.hdwSetAccInfo(PublicPun.user.getMacKey(), (byte) 0x01, accountId, balance, new CmdResultCallback() {
+                    cmdManager.hdwSetAccInfo(PublicPun.user.getMacKey(), (byte) 0x01, accountId, balance, new CmdResultCallback() {
                         @Override
                         public void onSuccess(int status, byte[] outputData) {
                             if ((status + 65536) == 0x9000) {
@@ -449,7 +469,7 @@ public class TabFragment extends Fragment {
 
     public void genChangeAddress(final int keyChainId, int account) {
         final int accountId = account;
-        FragMainActivity.cmdManager.hdwGetNextAddress(keyChainId, accountId, new CmdResultCallback() {
+        cmdManager.hdwGetNextAddress(keyChainId, accountId, new CmdResultCallback() {
             @Override
             public void onSuccess(int status, byte[] outputData) {
                 if ((status + 65536) == 0x9000) {
@@ -577,13 +597,13 @@ public class TabFragment extends Fragment {
                         }
                     }, 15000);////15s沒成功就自動cacel
                     final RefreshBlockChainInfo refreshBlockChainInfo = new RefreshBlockChainInfo(getActivity(), accountID);
-                    refreshBlockChainInfo.FunQueryAccountInfo(new RefreshCallback() {
+                    refreshBlockChainInfo.FunQueryAccountInfo(cmdManager,new RefreshCallback() {
                         @Override
                         public void success() {
                             refreshBlockChainInfo.callTxsRunnable(new RefreshCallback() {
                                 @Override
                                 public void success() {
-                                    mProgress.dismiss();
+
                                     FunhdwSetAccInfo(accountID);
                                 }
                                 @Override
@@ -605,7 +625,7 @@ public class TabFragment extends Fragment {
                 AccountRefresh(accountID);
                 //2.change card display
                 byte ByteAccId = (byte) accountID;
-                FragMainActivity.cmdManager.McuSetAccountState(ByteAccId, new CmdResultCallback() {
+                cmdManager.McuSetAccountState(ByteAccId, new CmdResultCallback() {
                             @Override
                             public void onSuccess(int status, byte[] outputData) {
                                 if ((status + 65536) == 0x9000) {

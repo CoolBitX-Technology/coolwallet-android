@@ -217,6 +217,16 @@ public class CmdManager {
         cmdProcessor.addCmd(cmdPacket);
     }
 
+
+    public void XchsSessionLogout(CmdResultCallback cmdResultCallback){
+        CmdPacket cmdPacket = new CmdPacket.Builder()
+                .setCla(CmdCla.XCHS_SESSION_LOGOUT)
+                .setIns(CmdIns.XCHS_SESSION_LOGOUT)
+                .build();
+        cmdPacket.setCmdResultListener(cmdResultCallback);
+        cmdProcessor.addCmd(cmdPacket);
+    }
+
     public void hdwQryWaInfo(int infoId, CmdResultCallback cmdResultCallback) {
         //P1: infoId 1B (=00 status, 01 name, 02 accountPointer)
         //output:

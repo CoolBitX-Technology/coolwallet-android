@@ -4,22 +4,22 @@ import android.content.Context;
 import android.os.AsyncTask;
 
 import com.coolbitx.coolwallet.DataBase.DatabaseHelper;
+import com.coolbitx.coolwallet.bean.CWAccountKeyInfo;
+import com.coolbitx.coolwallet.bean.TrxBlks;
+import com.coolbitx.coolwallet.bean.XchsSync;
+import com.coolbitx.coolwallet.bean.dbAddress;
 import com.coolbitx.coolwallet.callback.APIResultCallback;
 import com.coolbitx.coolwallet.callback.XchsSyncCallback;
-import com.coolbitx.coolwallet.entity.Constant;
-import com.coolbitx.coolwallet.entity.TrxBlks;
-import com.coolbitx.coolwallet.entity.XchsSync;
-import com.coolbitx.coolwallet.entity.dbAddress;
 import com.coolbitx.coolwallet.general.BtcUrl;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.coolbitx.coolwallet.httpRequest.XchsNetWork;
-import com.coolbitx.coolwallet.ui.Fragment.FragMainActivity;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.snscity.egdwlib.CmdManager;
 import com.snscity.egdwlib.cmd.CmdResultCallback;
 import com.snscity.egdwlib.utils.ByteUtil;
 import com.snscity.egdwlib.utils.LogUtil;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONStringer;
@@ -55,24 +55,14 @@ public class ExchangeAPI {
         exchangeToken = FirebaseInstanceId.getInstance().getToken();
         LogUtil.d("FCM InstanceID token: " + exchangeToken);
 
-//        if (mFirebaseToken != null) {
-//            try {
-//                LogUtil.d("mFirebaseToken=" + mFirebaseToken);
-//                LogUtil.d("token=" + new JSONObject(mFirebaseToken).getString("token"));
-//                exchangeToken = new JSONObject(mFirebaseToken).getString("token");
-//            } catch (Exception e) {
-//                new ValidationException(e);
-//            }
-//        }
-
-        //1.Create Session:get [Challenge] from Server
+        //1.Create Session:get [Challenge](session key) from Server
         LogUtil.d("getSrvInitSession CWID=" + CWID);
         getSrvInitSession(new APIResultCallback() {
             @Override
             public void success(String[] msg) {
                 byte[] srvChlng = PublicPun.hexStringToByteArray(msg[0]);
                 LogUtil.d("srvChlng=" + PublicPun.byte2HexString(srvChlng));
-                //2.transfer [challenge] to the card and get [SERESP] [SECHLNG]
+                //2.transfer [challenge] to the card and get [SRVRSP] [SECHLNG]
                 cmdManager.XchsSessionInit(srvChlng, new CmdResultCallback() {
                     @Override
                     public void onSuccess(int status, byte[] outputData) {
@@ -84,8 +74,8 @@ public class ExchangeAPI {
                             System.arraycopy(outputData, 0, seResponse, 0, 16);
                             System.arraycopy(outputData, 16, seChlng, 0, 16);
 
-                            String seResp = LogUtil.byte2HexStringNoBlank(seResponse);
-                            String seChallenge = LogUtil.byte2HexStringNoBlank(seChlng);
+                            String seResp = PublicPun.byte2HexStringNoBlank(seResponse);
+                            String seChallenge = PublicPun.byte2HexStringNoBlank(seChlng);
 
                             LogUtil.d("getSrvInitSession-seResponse:" + seResp);
                             LogUtil.d("getSrvInitSession-seChlng:" + seChallenge);
@@ -121,6 +111,7 @@ public class ExchangeAPI {
                                                                 public void fail(String msg) {
                                                                     LogUtil.d("getExchangeSync failed:" + msg);
                                                                     //exchangeSite Logout()
+                                                                    mAPIResultCallback.fail(msg);
                                                                 }
                                                             });
                                                         } else {
@@ -137,6 +128,7 @@ public class ExchangeAPI {
                                 @Override
                                 public void fail(String msg) {
                                     LogUtil.d("getSessionEstablish failed:" + msg);
+                                    mAPIResultCallback.fail(msg);
                                     //exchangeSite Logout()
                                 }
                             });
@@ -155,6 +147,7 @@ public class ExchangeAPI {
             @Override
             public void fail(String msg) {
                 LogUtil.d("getSrvInitSession=" + msg);
+                mAPIResultCallback.fail("getExchangeSync failed:" + msg);
             }
         });
     }
@@ -166,83 +159,116 @@ public class ExchangeAPI {
 
     public void querySyncData(final XchsSyncCallback mXchsSyncCallback) {
         listXchsSync = new ArrayList<XchsSync>();
-        int i = 0;
-        while (i < FragMainActivity.ACCOUNT_CNT) {
-            final int accountId = i;
-            int j = 0;
-            while (j <= 1) {
-                final int kcid = j;
 
-                cmdManager.hdwQueryAccountKeyInfo(Constant.CwHdwAccountKeyInfoPubKeyAndChainCd,
-                        j,
-                        i,
-                        0,
-                        new CmdResultCallback() {
-                            @Override
-                            public void onSuccess(int status, byte[] outputData) {
-                                if ((status + 65536) == 0x9000) {
-                                    if (outputData != null) {
+        ArrayList<CWAccountKeyInfo> cwList =
+                DatabaseHelper.queryAccountKeyInfo(mContext, -1);
 
-                                        ArrayList<dbAddress> listAddress
-                                                = DatabaseHelper.queryAddress(mContext, accountId, kcid);
+//        while(cwList.size() != ACCOUNT_CNT*2){
+//
+//        }
 
-                                        byte[] publicKeyBytes = new byte[64];
-                                        byte[] chainCodeBytes = new byte[32];
-                                        int length = outputData.length;
-                                        byte[] extendPub = new byte[33];
-                                        if (length >= 96) {
+        for (CWAccountKeyInfo cw : cwList) {
 
-                                            for (int i = 0; i < 64; i++) {
-                                                publicKeyBytes[i] = outputData[i];
-                                            }
-                                            for (int j = 64; j < 96; j++) {
-                                                chainCodeBytes[j - 64] = outputData[j];
-                                            }
-                                            //最後兩個字元一起
+            ArrayList<dbAddress> listAddress
+                    = DatabaseHelper.queryAddress(mContext, cw.getAccId(), cw.getKcid());
 
-                                            int mFirstKey = Integer.parseInt(PublicPun.byte2HexString(publicKeyBytes[63]), 16);
+            if (cw.getKcid() == 0) {
+                mXchsSync = new XchsSync();
+                mXchsSync.setAccID_ext(cw.getAccId());
+                mXchsSync.setKeyPointer_ext(cw.getKcid());
+                mXchsSync.setAccPub_ext(cw.getPublicKey());
+                mXchsSync.setAccChain_ext(cw.getChainCode());
+                mXchsSync.setAddNum_ext(listAddress.size());
 
-                                            //format last charactors
-                                            if (mFirstKey % 2 == 0) {
-                                                extendPub[0] = 02;
-                                            } else {
-                                                extendPub[0] = 03;
-                                            }
-                                            for (int a = 0; a < 32; a++) {
-                                                extendPub[a + 1] = publicKeyBytes[a];
-                                            }
+            } else {
+                mXchsSync.setAccID_int(cw.getAccId());
+                mXchsSync.setKeyPointer_int(cw.getKcid());
+                mXchsSync.setAccPub_int(cw.getPublicKey());
+                mXchsSync.setAccChain_int(cw.getChainCode());
+                mXchsSync.setAddNum_int(listAddress.size());
 
-                                            if (kcid == 0) {
-                                                mXchsSync = new XchsSync();
-                                                mXchsSync.setAccID_ext(accountId);
-                                                mXchsSync.setKeyPointer_ext(kcid);
-                                                mXchsSync.setAccPub_ext(LogUtil.byte2HexStringNoBlank(extendPub));
-                                                mXchsSync.setAccChain_ext(LogUtil.byte2HexStringNoBlank(chainCodeBytes));
-                                                mXchsSync.setAddNum_ext(listAddress.size());
-
-                                            } else {
-                                                mXchsSync.setAccID_int(accountId);
-                                                mXchsSync.setKeyPointer_int(kcid);
-                                                mXchsSync.setAccPub_int(LogUtil.byte2HexStringNoBlank(extendPub));
-                                                mXchsSync.setAccChain_int(LogUtil.byte2HexStringNoBlank(chainCodeBytes));
-                                                mXchsSync.setAddNum_int(listAddress.size());
-
-                                                listXchsSync.add(mXchsSync);
-                                            }
-
-                                            if (listXchsSync.size() == FragMainActivity.ACCOUNT_CNT) {
-                                                mXchsSyncCallback.onSuccess(listXchsSync);
-                                            }
-                                        }
-                                    }
-                                } else {
-                                }
-                            }
-                        });
-                j++;
+                listXchsSync.add(mXchsSync);
             }
-            i++;
         }
+        mXchsSyncCallback.onSuccess(listXchsSync);
+
+//        int i = 0;
+//        while (i < ACCOUNT_CNT) {
+//            final int accountId = i;
+//            int j = 0;
+//            while (j <= 1) {
+//                final int kcid = j;
+//
+//                cmdManager.hdwQueryAccountKeyInfo(Constant.CwHdwAccountKeyInfoPubKeyAndChainCd,
+//                        j,
+//                        i,
+//                        0,
+//                        new CmdResultCallback() {
+//                            @Override
+//                            public void onSuccess(int status, byte[] outputData) {
+//                                if ((status + 65536) == 0x9000) {
+//                                    if (outputData != null) {
+//
+//                                        ArrayList<dbAddress> listAddress
+//                                                = DatabaseHelper.queryAddress(mContext, accountId, kcid);
+//
+//                                        byte[] publicKeyBytes = new byte[64];
+//                                        byte[] chainCodeBytes = new byte[32];
+//                                        int length = outputData.length;
+//                                        byte[] extendPub = new byte[33];
+//                                        if (length >= 96) {
+//
+//                                            for (int i = 0; i < 64; i++) {
+//                                                publicKeyBytes[i] = outputData[i];
+//                                            }
+//                                            for (int j = 64; j < 96; j++) {
+//                                                chainCodeBytes[j - 64] = outputData[j];
+//                                            }
+//                                            //最後兩個字元一起
+//
+//                                            int mFirstKey = Integer.parseInt(PublicPun.byte2HexString(publicKeyBytes[63]), 16);
+//
+//                                            //format last charactors
+//                                            if (mFirstKey % 2 == 0) {
+//                                                extendPub[0] = 02;
+//                                            } else {
+//                                                extendPub[0] = 03;
+//                                            }
+//                                            for (int a = 0; a < 32; a++) {
+//                                                extendPub[a + 1] = publicKeyBytes[a];
+//                                            }
+//
+//                                            if (kcid == 0) {
+//                                                mXchsSync = new XchsSync();
+//                                                mXchsSync.setAccID_ext(accountId);
+//                                                mXchsSync.setKeyPointer_ext(kcid);
+//                                                mXchsSync.setAccPub_ext(LogUtil.byte2HexStringNoBlank(extendPub));
+//                                                mXchsSync.setAccChain_ext(LogUtil.byte2HexStringNoBlank(chainCodeBytes));
+//                                                mXchsSync.setAddNum_ext(listAddress.size());
+//
+//                                            } else {
+//                                                mXchsSync.setAccID_int(accountId);
+//                                                mXchsSync.setKeyPointer_int(kcid);
+//                                                mXchsSync.setAccPub_int(LogUtil.byte2HexStringNoBlank(extendPub));
+//                                                mXchsSync.setAccChain_int(LogUtil.byte2HexStringNoBlank(chainCodeBytes));
+//                                                mXchsSync.setAddNum_int(listAddress.size());
+//
+//                                                listXchsSync.add(mXchsSync);
+//                                            }
+//
+//                                            if (listXchsSync.size() == ACCOUNT_CNT) {
+//                                                mXchsSyncCallback.onSuccess(listXchsSync);
+//                                            }
+//                                        }
+//                                    }
+//                                } else {
+//                                }
+//                            }
+//                        });
+//                j++;
+//            }
+//            i++;
+//        }
     }
 
     private String createSyncJson(ArrayList<XchsSync> listXchsSync, String exchangeToken) {
@@ -257,7 +283,6 @@ public class ExchangeAPI {
             jsonStringer.array();    //代表[
             for (int x = 0; x < listXchsSync.size(); x++) {
                 //Query accountKeyInfo's addr's Num & publicKey & chaincode
-
                 jsonStringer.object();
                 jsonStringer.key("id").value(listXchsSync.get(x).getAccID_ext());
                 jsonStringer.key("extn");
@@ -355,7 +380,7 @@ public class ExchangeAPI {
     public void getSessionEstablish(final String CWID, String seResp, String seChallenge, final APIResultCallback apiResultCallback) {
         this.apiResultCallback = apiResultCallback;
         this.mResponse = new String[1];//challenge
-        final String failedlMsg = "Session Established fail.";
+        final String failedlMsg = "Failed to establish session.";
         //{ “response”:”xxxxxxxx”, “challenge”:”xxxxxxxxx”}
         String postData = "{\"response\":\"" + seResp + "\", \"challenge\":\"" + seChallenge + "\"}";
 
@@ -387,7 +412,7 @@ public class ExchangeAPI {
     public void getExchangeSync(final String CWID, String syncStr, final APIResultCallback apiResultCallback) {
         this.apiResultCallback = apiResultCallback;
         this.mResponse = new String[1];//challenge
-        final String failedlMsg = "ExchangeSync failed.";
+        final String failedlMsg = "Exchange Sync failed.";
         String postData = syncStr;
 
         new AsyncTask<String, Integer, JSONObject>() {
@@ -529,6 +554,7 @@ public class ExchangeAPI {
             @Override
             protected JSONObject doInBackground(String... param) {
                 String url = "http://xsm.coolbitx.com:8080/api/res/cw/oktoken/" + hexOrder;
+                LogUtil.d("doExWriteOKToken url=" + url);
                 return new XchsNetWork().makeHttpRequestPost(url, param[0]);
             }
 
@@ -562,6 +588,7 @@ public class ExchangeAPI {
             @Override
             protected JSONObject doInBackground(String... param) {
                 String url = "http://xsm.coolbitx.com:8080/api/res/cw/unblock/" + orderId;
+                LogUtil.d("getExUnBlock url=" + url);
                 return new XchsNetWork().makeHttpRequestGet(url, param[0]);
             }
 
@@ -593,16 +620,17 @@ public class ExchangeAPI {
 
 
     //deleteBlockOrder
-    public void delExBlock(final String orderId, final APIResultCallback apiResultCallback) {
+    public void cancelOrder(final String orderId, final APIResultCallback apiResultCallback) {
         this.apiResultCallback = apiResultCallback;
         this.mResponse = new String[1];//challenge
-        final String failedlMsg = "delExBlock fail.";
+        final String failedlMsg = "cancelOrder fail.";
         String postData = "";
-        LogUtil.d("delExBlock in");
+        LogUtil.d("cancelOrder in");
         new AsyncTask<String, Integer, JSONObject>() {
             @Override
             protected JSONObject doInBackground(String... param) {
                 String url = "http://xsm.coolbitx.com:8080/api/res/cw/order/" + orderId;
+                LogUtil.d("cancelOrder url=" + url);
                 return new XchsNetWork().makeHttpDelete(url);
             }
 
@@ -610,7 +638,7 @@ public class ExchangeAPI {
             protected void onPostExecute(JSONObject result) {
                 if (result != null) {
                     try {
-                        LogUtil.d("delExBlock =" + result);
+                        LogUtil.d("cancelOrder =" + result);
                         mResponse[0] = result.getString("response");
                         apiResultCallback.success(mResponse);
                     } catch (Exception e) {
@@ -659,7 +687,7 @@ public class ExchangeAPI {
     }
 
     //ExGetTrxPrepareBlocks
-    public void doExGetTrxPrepareBlocks(ArrayList<TrxBlks> mLisTrxBlks, final APIResultCallback apiResultCallback) {
+    public void doExGetTrxPrepareBlocks(final String orderId, ArrayList<TrxBlks> mLisTrxBlks, final APIResultCallback apiResultCallback) {
         this.apiResultCallback = apiResultCallback;
         this.mResponse = new String[1];//challenge
         final String failedlMsg = "doExGetTrxPrepareBlocks fail.";
@@ -667,7 +695,7 @@ public class ExchangeAPI {
         new AsyncTask<String, Integer, JSONObject>() {
             @Override
             protected JSONObject doInBackground(String... param) {
-                String url = "http://xsm.coolbitx.com:8080/api/res/cw/trxblks/";
+                String url = "http://xsm.coolbitx.com:8080/api/res/cw/trxblks/" + orderId;
 //                XchsNetWork jParser = new XchsNetWork();
                 return new XchsNetWork().makeHttpRequestPost(url, param[0]);
             }
@@ -691,6 +719,12 @@ public class ExchangeAPI {
         }.execute(inputData);
     }
 
+    /**
+     * Call BlockChain API to get the latest transaction ID.
+     *
+     * @param addr
+     * @param apiResultCallback
+     */
 
     public void getBlockChainRawAddress(final String addr, final APIResultCallback apiResultCallback) {
 
@@ -708,8 +742,10 @@ public class ExchangeAPI {
             protected void onPostExecute(JSONObject result) {
                 if (result != null) {
                     try {
-                        LogUtil.d("getBlockChainRawAddress response=" + result);
-                        String response = result.toString();
+                        JSONArray jsonArrayTxs = result.getJSONArray("txs");
+                        JSONObject jsonObjectTxs = jsonArrayTxs.getJSONObject(0);//latest
+                        LogUtil.d("getBlockChainRawAddress response=" + jsonObjectTxs.toString());
+                        String response = jsonObjectTxs.getString("hash");
                         mResponse[0] = response;
                         apiResultCallback.success(mResponse);
 
@@ -724,16 +760,17 @@ public class ExchangeAPI {
     }
 
 
-    public void doTrxSubmit(final String orderId, final String trxId, final String trxReceipt, final APIResultCallback apiResultCallback) {
+    public void doTrxSubmit(final String orderId, final String trxId, final String trxReceipt, String uid, String nonce, final APIResultCallback apiResultCallback) {
         this.apiResultCallback = apiResultCallback;
         this.mResponse = new String[1];//challenge
         final String failedlMsg = "doTrxSubmit fail.";
-        String postData = "{\"bcTrxId\":\"" + trxId + "\", \"trxReceipt\":\"" + trxReceipt + "\"}";
+        String postData = "{\"bcTrxId\":\"" + trxId + "\", \"trxReceipt\":\"" + trxReceipt +
+                "\", \"uid\":\"" + uid + "\", \"nonce\":\"" + nonce + "\"}";
 
         new AsyncTask<String, Integer, JSONObject>() {
             @Override
             protected JSONObject doInBackground(String... param) {
-                String url = "http://xsm.coolbitx.com:8080/api/res/cw/trxblks/" + orderId;
+                String url = "http://xsm.coolbitx.com:8080/api/res/cw/trx/" + orderId;
                 XchsNetWork jParser = new XchsNetWork();
                 return jParser.makeHttpRequestPost(url, param[0]);
             }
@@ -795,38 +832,51 @@ public class ExchangeAPI {
         byte[] out1Addr = mTrxBlks.getOut1Addr();
         byte[] out2Addr = mTrxBlks.getOut2Addr();
         byte[] sigMtrl = mTrxBlks.getSigmtrl();
-
+        byte[] inputData;
 
 //        [ACCID] [KCID] [KID]
 //        [OUT1ADDR] [OUT2ADDR] [SIGMTRL]
 //        byte[] inputData = new byte[4 + 4 + 1 + 4 + 25 + 25 + 32];
-        byte[] inputData = new byte[4 + 1 + 4 + 25 + 25 + 32];
+//        if (out2Addr.length == 0) {
+//            inputData = new byte[4 + 1 + 4 + 25 + 32];
+//        } else {
+        inputData = new byte[4 + 1 + 4 + 25 + 25 + 32];
+//        }
 
         LogUtil.e("input=" + inputData.length);
 
         //(來源陣列，起始索引值，目的陣列，起始索引值，複製長度)
-//        System.arraycopy(trxHandle, 0, inputData, 0, 4);
-//        LogUtil.e("input add handle=" + LogUtil.byte2HexStringNoBlank(inputData));
 
-        System.arraycopy(accBytes, 0, inputData, 0, 4);
-        LogUtil.e("input add acc=" + LogUtil.byte2HexStringNoBlank(inputData));
+        System.arraycopy(accBytes, 0, inputData, 0, accBytes.length);
+        LogUtil.e("input add acc=" + PublicPun.byte2HexStringNoBlank(accBytes) + "\n" + PublicPun.byte2HexStringNoBlank(inputData));
 
         inputData[4] = kcidBytes;
-        LogUtil.e("input add kcid=" + LogUtil.byte2HexStringNoBlank(inputData));
+        LogUtil.e("input add kcid=" + kcidBytes + "\n" + PublicPun.byte2HexStringNoBlank(inputData));
 
-        System.arraycopy(kidBytes, 0, inputData, 4 + 1, 4);
-        LogUtil.e("input add kid=" + LogUtil.byte2HexStringNoBlank(inputData));
+        System.arraycopy(kidBytes, 0, inputData, accBytes.length + 1, kidBytes.length);
+        LogUtil.e("input add kid=" + PublicPun.byte2HexStringNoBlank(kidBytes) + "\n" + PublicPun.byte2HexStringNoBlank(inputData));
 
-        System.arraycopy(out1Addr, 0, inputData, 4 + 1 + 4, 25);
-        LogUtil.e("input add out1Addr=" + LogUtil.byte2HexStringNoBlank(inputData));
+        System.arraycopy(out1Addr, 0, inputData, accBytes.length + 1 + kidBytes.length, out1Addr.length);
+        LogUtil.e("input add out1Addr=" + PublicPun.byte2HexStringNoBlank(out1Addr) + "\n" + PublicPun.byte2HexStringNoBlank(inputData));
 
-        System.arraycopy(out2Addr, 0, inputData, 4 + 1 + 4 + 25, 25);
-        LogUtil.e("input add out2Addr=" + LogUtil.byte2HexStringNoBlank(inputData));
+        if (out2Addr.length != 0) {
+            LogUtil.e("有找零");
+            System.arraycopy(out2Addr, 0, inputData, 4 + 1 + 4 + 25, out2Addr.length);
+            LogUtil.e("input add out2Addr=" + PublicPun.byte2HexStringNoBlank(inputData));
 
-        System.arraycopy(sigMtrl, 0, inputData, 4 + 1 + 4 + 25 + 25, 32);
-        LogUtil.e("input add sigMtrl=" + LogUtil.byte2HexStringNoBlank(inputData));
+            System.arraycopy(sigMtrl, 0, inputData, 4 + 1 + 4 + 25 + 25, 32);
+            LogUtil.e("input add sigMtrl=" + PublicPun.byte2HexStringNoBlank(inputData));
+        } else {
+            LogUtil.e("沒有找零,OUT2給OUT1");
+            System.arraycopy(out1Addr, 0, inputData, 4 + 1 + 4 + 25, out1Addr.length);
+            LogUtil.e("input add out2Addr=" + PublicPun.byte2HexStringNoBlank(inputData));
 
-        result = LogUtil.byte2HexStringNoBlank(inputData);
+            System.arraycopy(sigMtrl, 0, inputData, 4 + 1 + 4 + 25 + 25, 32);
+            LogUtil.e("input add sigMtrl=" + PublicPun.byte2HexStringNoBlank(inputData));
+        }
+
+
+        result = PublicPun.byte2HexStringNoBlank(inputData);
 
         LogUtil.e("blkTrx inputData=" + result);
 

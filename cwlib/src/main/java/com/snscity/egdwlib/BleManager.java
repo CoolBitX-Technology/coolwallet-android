@@ -124,6 +124,7 @@ public class BleManager {
     }
 
     public boolean connectBle(String address, BleStateCallback bleStateCallback) {
+        LogUtil.e("connectBle=" + address+";"+bluetoothAddress+";"+bluetoothGatt);
         this.bleStateCallback = bleStateCallback;
         if (bluetoothAddress != null && address.equals(bluetoothAddress) && bluetoothGatt != null) {
             return bluetoothGatt.connect();
@@ -138,7 +139,8 @@ public class BleManager {
     }
 
     public boolean connectBle(String address) {
-        LogUtil.e("ReConnect="+address);
+        LogUtil.e("ReConnect=" + address);
+
         if (bluetoothAddress != null && address.equals(bluetoothAddress) && bluetoothGatt != null) {
             return bluetoothGatt.connect();
         }
@@ -292,7 +294,7 @@ public class BleManager {
         if (bluetoothGatt == null) {
             return;
         }
-        bluetoothGatt.disconnect();
+        bluetoothGatt.close();
         bluetoothGatt = null;
         gattCharacteristics = null;
         cmdProcessor = null;

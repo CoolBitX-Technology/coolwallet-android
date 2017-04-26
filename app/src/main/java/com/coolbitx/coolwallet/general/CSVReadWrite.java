@@ -5,7 +5,7 @@ import android.content.SharedPreferences;
 import android.os.Environment;
 import android.util.Log;
 
-import com.coolbitx.coolwallet.entity.User;
+import com.coolbitx.coolwallet.bean.User;
 import com.snscity.egdwlib.utils.LogUtil;
 
 import java.io.BufferedReader;

@@ -33,6 +33,7 @@ import android.view.View;
 import android.widget.HorizontalScrollView;
 import android.widget.TextView;
 
+import com.coolbitx.coolwallet.R;
 import com.snscity.egdwlib.utils.LogUtil;
 
 /**
@@ -234,7 +235,7 @@ public class SlidingTabLayout extends HorizontalScrollView {
 //            if (i == mViewPager.getCurrentItem()) {
 //                tabView.setSelected(true);
 //            }
-//            tabTitleView.setBackground(getResources().getDrawable( R.drawable.selector_tabs_stoke));
+//            tabTitleView.setBackgroundResource(R.drawable.selector_tab_stoke);
         }
     }
 

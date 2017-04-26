@@ -8,7 +8,7 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.coolbitx.coolwallet.R;
-import com.coolbitx.coolwallet.entity.Host;
+import com.coolbitx.coolwallet.bean.Host;
 
 import java.util.ArrayList;
 import java.util.List;

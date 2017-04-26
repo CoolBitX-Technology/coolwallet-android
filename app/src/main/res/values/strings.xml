@@ -47,7 +47,7 @@
     <!--ISSUEFEEDBACK-->
     <string name="issue_feedback_title">Issue FeedBack</string>
     <string name="issue_feedback_policy_title">Policy</string>
-    <string name="issue_feedback_message">The current status/log of this app has been sent to CoolBitX. Please email <![CDATA[info@coolbitx.com]]> to follow up the issue.</string>
+    <string name="issue_feedback_message">The current status/log of this app will be sent to CoolBitX. Please email <![CDATA[info@coolbitx.com]]> to follow up the issue.</string>
     <string name="issue_feedback_policy">This issue feedback is used to diagnose problems and improve CoolWallet.
         No sensitive data or private key will be shared. Any personal information you submit whether explicitly or incidentally
         will be protected in accordance with our privacy policies. By submitting this feedback, you agree that
@@ -56,7 +56,8 @@
 
     <!--security layout-->
     <string name="tv_security_otp">Enable One Time Password\n(OTP) on transactions</string>
-    <string name="tv_security_enable_press_button">Enable press the button on the\ncard to complete transactions</string>
+    <string name="tv_security_enable_press_button"
+        >Enable press the button on the\ncard to complete transactions</string>
     <string name="tv_security_dog">Enable Watch dog function</string>
     <string name="tv_security_dog_explain">Set an alert that warms you when CoolWallet\nand your device are certain distance apart</string>
     <string name="tv_security_show_address">Show sending address on card</string>
@@ -138,6 +139,9 @@
     <string name="txt_createHDWallet_alert">IMPORTANT!This is the only time\nyou can make a backup of your\nbitcoins.</string>
     <string name="strCreateWallet">Create Wallet</string>
 
+    <string name="frag_available_str">Available:</string>
+    <string name="frag_reserved_str">Reserved:</string>
+
     <!--send-->
     <string name="send_notification_unable_to_send_with_change_error">Change address equals to recipient address, it is likely an error.</string>
     <string name="send_notification_unable_to_send">Unable to Send</string>
@@ -183,7 +187,17 @@
         <item>TXS</item>
         <item>CURRENT</item>
         <item>LOGIN</item>
+        <item>ACCOUNT_KEY_INFO</item>
+    </string-array>
 
+
+    <string-array name="ACCOUNT_KEY_INFO">
+        <item>WID               TEXT  NOT NULL      </item> <!--WALLET ID(CARD ID)-->
+        <item>ACCOUNT_ID        INTEGER  NOT NULL   </item>
+        <item>KCID              INTEGER  NOT NULL   </item> <!--0:External ; 1:Internal-->
+        <item>PUBLICKEY         TEXT   NOT NULL     </item>
+        <item>CHAINCODE         TEXT   NOT NULL     </item>
+        <item>PRIMARY KEY (WID,ACCOUNT_ID,KCID) </item>
     </string-array>
 
     <!--table-->
@@ -230,22 +244,22 @@
         <item>OTP               TEXT    NOT NULL   </item>
         <item>PRIMARY KEY (WID) </item>
     </string-array>
-    <!--jSon parser-->
-    <string-array name="addressInfo">
-        <item>address</item>
-        <item>is_unknown</item>
-        <item>balance</item>
-        <item>balance_multisig</item>
-        <item>totalreceived</item>
-        <item>nb_txs</item>
-    </string-array>
+    <!--&lt;!&ndash;jSon parser&ndash;&gt;-->
+    <!--<string-array name="addressInfo">-->
+    <!--<item>address</item>-->
+    <!--<item>is_unknown</item>-->
+    <!--<item>balance</item>-->
+    <!--<item>balance_multisig</item>-->
+    <!--<item>totalreceived</item>-->
+    <!--<item>nb_txs</item>-->
+    <!--</string-array>-->
 
-    <string-array name="first_tx">
-        <item>time_utc</item>
-        <item>tx</item>
-        <item>block_nb</item>
-        <item>value</item>
-        <item>confirmations</item>
-    </string-array>
+    <!--<string-array name="first_tx">-->
+    <!--<item>time_utc</item>-->
+    <!--<item>tx</item>-->
+    <!--<item>block_nb</item>-->
+    <!--<item>value</item>-->
+    <!--<item>confirmations</item>-->
+    <!--</string-array>-->
 
 </resources>

@@ -19,7 +19,7 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.telephony.PhoneNumberUtils;
-import com.coolbitx.coolwallet.entity.Contents;
+import com.coolbitx.coolwallet.bean.Contents;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
 import com.google.zxing.MultiFormatWriter;

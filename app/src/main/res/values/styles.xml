@@ -138,13 +138,23 @@
         <item name="android:textSize">12sp</item>
     </style>
 
+    <style name="TextView_Green_14">
+        <item name="android:textColor">@color/md_light_green_A700</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="TextView_Red_14">
+        <item name="android:textColor">@color/md_red_A700</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
     <style name="RadioButton">
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_weight">1</item>
         <item name="android:paddingBottom">10dp</item>
         <item name="android:paddingTop">10dp</item>
-        <item name="android:background">@drawable/default_textview</item>
+        <item name="android:background">@null</item>
         <item name="android:button">@null</item>
         <item name="android:gravity">center_horizontal</item>
         <item name="android:textColor">@android:color/black</item>

@@ -8,19 +8,22 @@ import android.os.Message;
 
 import com.coolbitx.coolwallet.DataBase.DatabaseHelper;
 import com.coolbitx.coolwallet.DataBase.DbName;
+import com.coolbitx.coolwallet.bean.Account;
+import com.coolbitx.coolwallet.bean.CWAccountKeyInfo;
+import com.coolbitx.coolwallet.bean.Constant;
+import com.coolbitx.coolwallet.bean.dbAddress;
 import com.coolbitx.coolwallet.callback.RefreshCallback;
-import com.coolbitx.coolwallet.entity.Account;
-import com.coolbitx.coolwallet.entity.Constant;
-import com.coolbitx.coolwallet.entity.dbAddress;
 import com.coolbitx.coolwallet.httpRequest.CwBtcNetWork;
-import com.coolbitx.coolwallet.ui.Fragment.FragMainActivity;
 import com.coolbitx.coolwallet.util.BTCUtils;
 import com.coolbitx.coolwallet.util.ExtendedKey;
 import com.crashlytics.android.Crashlytics;
+import com.snscity.egdwlib.CmdManager;
 import com.snscity.egdwlib.cmd.CmdResultCallback;
 import com.snscity.egdwlib.utils.LogUtil;
 
 import java.util.ArrayList;
+
+import static com.coolbitx.coolwallet.ui.Fragment.FragMainActivity.ACCOUNT_CNT;
 
 /**
  * Created by ShihYi on 2016/3/10.
@@ -37,6 +40,7 @@ public class RefreshBlockChainInfo {
     boolean isPointerSame;
     int needToRefreshCnt;
     int addrAuccess;
+    CmdManager vCmdmanager;
     private RefreshCallback cmdResultCallback;
     Handler BIP32Handler = new Handler() {
         @Override
@@ -91,9 +95,9 @@ public class RefreshBlockChainInfo {
 
     }
 
-    public void FunQueryAccountInfo(final RefreshCallback cmdResultCallback) {
+    public void FunQueryAccountInfo(final CmdManager cmdManager, final RefreshCallback cmdResultCallback) {
         this.cmdResultCallback = cmdResultCallback;
-
+        this.vCmdmanager = cmdManager;
         final byte cwHdwAccountInfoName = 0x00;
         final byte cwHdwAccountInfoBalance = 0x01;
         final byte cwHdwAccountInfoExtKeyPtr = 0x02;
@@ -131,7 +135,7 @@ public class RefreshBlockChainInfo {
             final int ChkDbExtKey = dbExtKey;
             final int ChkDbIntKey = dbIntKey;
 
-            FragMainActivity.cmdManager.hdwQueryAccountInfo(cwHdwAccountInfo[i], accountID, new CmdResultCallback() {
+            vCmdmanager.hdwQueryAccountInfo(cwHdwAccountInfo[i], accountID, new CmdResultCallback() {
                 @Override
                 public void onSuccess(int status, byte[] outputData) {
                     if ((status + 65536) == 0x9000) {
@@ -175,14 +179,24 @@ public class RefreshBlockChainInfo {
                                     //→ 5.Show data
                                     if (IntExtKey == ChkDbExtKey) {
                                         LogUtil.i("Account " + accountID + " 的卡片externalPointer跟DB一樣!");
-//                                      //query全跑完後作業
+
+                                        ArrayList<CWAccountKeyInfo> cwList =
+                                                DatabaseHelper.queryAccountKeyInfo(mContext, -1);
+                                        LogUtil.e("KEYINFO account cwList.size()="+cwList.size()+"; cnt="+ACCOUNT_CNT);
+                                        if (cwList.size() != ACCOUNT_CNT*2) {
+                                            LogUtil.d("cwList size=" + cwList.size());
+                                            for(int i=0;i<ACCOUNT_CNT;i++){
+
+                                                getAccountKeyInfo(i, IntExtKey, Constant.CwAddressKeyChainExternal, false);
+                                            }
+                                        }
 
                                     } else {
                                         needToRefreshCnt++;
                                         isPointerSame = false;
-                                        LogUtil.i("Account " + accountID + " 的卡片externalPointer跟DB不一樣!");
-                                        DatabaseHelper.deleteTableByAccountAndKcid(mContext, DbName.DATA_BASE_ADDR, accountID, 0);
-                                        getAccountKeyInfo(accountID, IntExtKey, Constant.CwAddressKeyChainExternal);
+                                        LogUtil.d("Account " + accountID + " 的卡片externalPointer跟DB不一樣!");
+                                        DatabaseHelper.deleteTableByAccountAndKcid(mContext, DbName.DB_TABLE_ADDR, accountID, Constant.CwAddressKeyChainExternal);
+                                        getAccountKeyInfo(accountID, IntExtKey, Constant.CwAddressKeyChainExternal, true);
                                     }
                                     flag[2] = true;
                                     break;
@@ -191,7 +205,7 @@ public class RefreshBlockChainInfo {
 
                                     String intKey = PublicPun.byte2HexString(BTCUtils.reverse(outputData)).replace(" ", "");
                                     IntIntKey = Integer.valueOf(intKey, 16);
-                                    LogUtil.i("hdwQueryAccountInfo accID=" + accountID + "; key=" + cwHdwAccountInfoIntKeyPtr + "; intKey pointer=" + IntIntKey);
+                                    LogUtil.d("hdwQueryAccountInfo accID=" + accountID + "; key=" + cwHdwAccountInfoIntKeyPtr + "; intKey pointer=" + IntIntKey);
                                     account.setInputIndex(IntIntKey);
 
                                     //卡片的地址數跟DB裡的資料不一樣,要重抓資料
@@ -202,23 +216,29 @@ public class RefreshBlockChainInfo {
                                     //→ 5.Show data (progress dismiss)
 
                                     if (IntIntKey == ChkDbIntKey) {
-                                        LogUtil.i("Account " + accountID + " 的卡片internalPointer跟DB一樣!");
+                                        LogUtil.d("Account " + accountID + " 的卡片internalPointer跟DB一樣!");
                                         //query全跑完後作業
-
+                                        ArrayList<CWAccountKeyInfo> cwList =
+                                                DatabaseHelper.queryAccountKeyInfo(mContext, -1);
+                                        if (cwList.size() != ACCOUNT_CNT*2) {
+                                            for(int i=0;i<ACCOUNT_CNT;i++) {
+                                                getAccountKeyInfo(i, IntIntKey, Constant.CwAddressKeyChainInternal, false);
+                                            }
+                                        }
                                     } else {
                                         needToRefreshCnt++;
                                         isPointerSame = false;
-                                        LogUtil.i("Account " + accountID + " 的卡片internalPointer跟DB不一樣!");
-                                        DatabaseHelper.deleteTableByAccountAndKcid(mContext, DbName.DATA_BASE_ADDR, accountID, 1);
-                                        getAccountKeyInfo(accountID, IntIntKey, Constant.CwAddressKeyChainInternal);
+                                        LogUtil.d("Account " + accountID + " 的卡片internalPointer跟DB不一樣!");
+                                        DatabaseHelper.deleteTableByAccountAndKcid(mContext, DbName.DB_TABLE_ADDR, accountID, Constant.CwAddressKeyChainInternal);
+                                        getAccountKeyInfo(accountID, IntIntKey, Constant.CwAddressKeyChainInternal, true);
                                     }
                                     flag[3] = true;
                                     break;
 
                                 case cwHdwAccountInfoBlockAmount:
 
-//                                    String blockAmount = PublicPun.byte2HexString(outputData).replace(" ", "");
-//                                    LogUtil.i("blockAmount=" + blockAmount);
+                                    String blockAmount = PublicPun.byte2HexString(outputData).replace(" ", "");
+                                    LogUtil.e("blockAmount=" + blockAmount);
 //                                    account.setBlockAmount(Double.parseDouble(blockAmount));
                                     flag[4] = true;
                                     break;
@@ -238,9 +258,9 @@ public class RefreshBlockChainInfo {
         }
     }
 
-    private void getAccountKeyInfo(final int accountId, final int kid, final byte kcId) {
+    private void getAccountKeyInfo(final int accountId, final int kid, final byte kcId, final boolean runBIP32) {
 //        getAccountKeyInfo(accountID, IntIntKey, Constant.CwAddressKeyChainInternal);
-        FragMainActivity.cmdManager.hdwQueryAccountKeyInfo(Constant.CwHdwAccountKeyInfoPubKeyAndChainCd,
+        vCmdmanager.hdwQueryAccountKeyInfo(Constant.CwHdwAccountKeyInfoPubKeyAndChainCd,
                 kcId,
                 accountId,
                 kid,
@@ -279,93 +299,27 @@ public class RefreshBlockChainInfo {
                                         extendPub[a + 1] = publicKeyBytes[a];
                                     }
                                 }
-                                LogUtil.i("go BIP32Runnable account=" + accountId +"; KCID="+kcId+"; kid=" + kid);
-                                ContentValues cv = new ContentValues();
-                                cv.put("URL", BtcUrl.URL_BLICKCHAIN_TXS_MULTIADDR);
-                                cv.put("ACCOUNT_ID", accountId);
-                                cv.put("KID", kid);
-                                cv.put("KCID", kcId);
-                                cv.put("PUBLIC_KEY", extendPub);
-                                cv.put("CHAIN_CODE", chainCodeBytes);
-                                //getAddressesTxs
 
-                                new Thread(new BIP32Runnable(BIP32Handler, cv, 0, 0)).start();
+                                DatabaseHelper.insertAccountKeyInfo(mContext, accountId, kcId,
+                                        PublicPun.byte2HexStringNoBlank(extendPub), PublicPun.byte2HexStringNoBlank(chainCodeBytes));
+
+                                if (runBIP32) {
+                                    LogUtil.i("go BIP32Runnable account=" + accountId + "; KCID=" + kcId + "; kid=" + kid);
+                                    ContentValues cv = new ContentValues();
+                                    cv.put("URL", BtcUrl.URL_BLICKCHAIN_TXS_MULTIADDR);
+                                    cv.put("ACCOUNT_ID", accountId);
+                                    cv.put("KID", kid);
+                                    cv.put("KCID", kcId);
+                                    cv.put("PUBLIC_KEY", extendPub);
+                                    cv.put("CHAIN_CODE", chainCodeBytes);
+                                    //getAddressesTxs
+
+                                    new Thread(new BIP32Runnable(BIP32Handler, cv, 0, 0)).start();
+                                }
                             }
                         }
                     }
                 });
-    }
-
-    public void callTxsRunnable(RefreshCallback cmdResultCallback) {
-        this.cmdResultCallback = cmdResultCallback;
-        ContentValues cv = new ContentValues();
-        cv.put("ACCOUNT_ID", accountID);
-        new Thread(new GetTxsRunnable(txsHandler, cv, 0, 0)).start();
-    }
-
-    private void getTxsFromBlockchain(final int mAccount) {
-        LogUtil.i("refresh跑account:" + mAccount);
-        //分5個account跑addr的txs.
-        ArrayList<dbAddress> listAddress = new ArrayList<dbAddress>();
-
-        String mTxsAddresses = "";
-        listAddress = DatabaseHelper.queryAddress(mContext, mAccount, -1);//ext+int
-        for (int j = 0; j < listAddress.size(); j++) {
-            mTxsAddresses += listAddress.get(j).getAddress() + '|';
-        }
-        final ContentValues cv = new ContentValues();
-        cv.put("addresses", mTxsAddresses);
-
-        String result = null;
-        int msgResult = -1;
-        try {
-            result = cwBtcNetWork.doGet(cv, BtcUrl.URL_BLICKCHAIN_TXS_MULTIADDR, null);
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            msgResult = -1;
-            e.printStackTrace();
-            cmdResultCallback.fail("Account:" + mAccount + " get transaction data from BLOCKCHAIN failed, Please do again later.");
-        }
-
-        //使用Handler和Message把資料丟給主UI去後續處理
-        Message msg = txsHandler.obtainMessage();
-
-        if (result != null && !result.contains("errorCode")) {
-            LogUtil.i("return 200");
-            DatabaseHelper.deleteTableByAccount(mContext, DbName.DATA_BASE_TXS, mAccount);
-//            int mWalletTxsN = PublicPun.jsonParserRecoveryTxs(mContext, result, PublicPun.card.getCardId(), mAccount);
-            int mWalletTxsN = PublicPun.jsonParserRefresh(mContext, result, mAccount, true);
-            if (mWalletTxsN > 50) {
-                int mRunTxsCnt = (int) Math.round((mWalletTxsN / 50) + 0.5);
-                LogUtil.i("refresh超過50筆,要跑幾次=" + mRunTxsCnt);
-                for (int i = 1; i < mRunTxsCnt; i++) {
-                    int param = i * 50 + 1;
-                    try {
-                        //https://blockchain.info/multiaddr?offset=51&active=
-                        LogUtil.i("refresh超過50筆,跑param=" + param);
-                        result = cwBtcNetWork.doGet(cv, BtcUrl.URL_BLICKCHAIN_TXS_MULTIADDR, String.valueOf(param));
-                        PublicPun.jsonParserRefresh(mContext, result, mAccount, false);
-
-                    } catch (Exception e) {
-                        // TODO Auto-generated catch block
-                        msgResult = -1;
-                        e.printStackTrace();
-                        Crashlytics.logException(e);
-                    }
-                }
-            }
-            msgResult = 1;
-        } else {
-            LogUtil.e("return 非 200");
-            msgResult = -1;
-        }
-        Bundle data = new Bundle();
-        data.putInt("accountID", mAccount);
-        data.putString("msg", result);
-        msg.setData(data);
-        msg.what = msgResult;
-        txsHandler.sendMessage(msg);
-
     }
 
     private class BIP32Runnable implements Runnable {
@@ -406,7 +360,7 @@ public class RefreshBlockChainInfo {
         public void run() {
             String result = "";
             for (int i = 0; i < kid; i++) {
-                LogUtil.i("kcid="+kcId + ", 產地址的serializepub=" + km.serializepub(true));
+                LogUtil.i("kcid=" + kcId + ", 產地址的serializepub=" + km.serializepub(true));
                 ExtendedKey k = null;
                 String addr = "";
                 try {
@@ -440,6 +394,13 @@ public class RefreshBlockChainInfo {
         }
     }
 
+    public void callTxsRunnable(RefreshCallback cmdResultCallback) {
+        this.cmdResultCallback = cmdResultCallback;
+        ContentValues cv = new ContentValues();
+        cv.put("ACCOUNT_ID", accountID);
+        new Thread(new GetTxsRunnable(txsHandler, cv, 0, 0)).start();
+    }
+
     private class GetTxsRunnable implements Runnable {
 
         ContentValues cv;
@@ -455,4 +416,70 @@ public class RefreshBlockChainInfo {
             getTxsFromBlockchain(AccountID);
         }
     }
+
+    private void getTxsFromBlockchain(final int mAccount) {
+        LogUtil.i("refresh跑account:" + mAccount);
+        //分5個account跑addr的txs.
+        ArrayList<dbAddress> listAddress = new ArrayList<dbAddress>();
+
+        String mTxsAddresses = "";
+        listAddress = DatabaseHelper.queryAddress(mContext, mAccount, -1);//ext+int
+        for (int j = 0; j < listAddress.size(); j++) {
+            mTxsAddresses += listAddress.get(j).getAddress() + '|';
+        }
+        final ContentValues cv = new ContentValues();
+        cv.put("addresses", mTxsAddresses);
+
+        String result = null;
+        int msgResult = -1;
+        try {
+            result = cwBtcNetWork.doGet(cv, BtcUrl.URL_BLICKCHAIN_TXS_MULTIADDR, null);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            msgResult = -1;
+            e.printStackTrace();
+            cmdResultCallback.fail("Account:" + mAccount + " get transaction data from BLOCKCHAIN failed, Please do again later.");
+        }
+
+        //使用Handler和Message把資料丟給主UI去後續處理
+        Message msg = txsHandler.obtainMessage();
+
+        if (result != null && !result.contains("errorCode")) {
+            LogUtil.i("return 200");
+            DatabaseHelper.deleteTableByAccount(mContext, DbName.DB_TABLE_TXS, mAccount);
+//            int mWalletTxsN = PublicPun.jsonParserRecoveryTxs(mContext, result, PublicPun.card.getCardId(), mAccount);
+            int mWalletTxsN = PublicPun.jsonParserRefresh(mContext, result, mAccount, true);
+            if (mWalletTxsN > 50) {
+                int mRunTxsCnt = (int) Math.round((mWalletTxsN / 50) + 0.5);
+                LogUtil.i("refresh超過50筆,要跑幾次=" + mRunTxsCnt);
+                for (int i = 1; i < mRunTxsCnt; i++) {
+                    int param = i * 50 + 1;
+                    try {
+                        //https://blockchain.info/multiaddr?offset=51&active=
+                        LogUtil.i("refresh超過50筆,跑param=" + param);
+                        result = cwBtcNetWork.doGet(cv, BtcUrl.URL_BLICKCHAIN_TXS_MULTIADDR, String.valueOf(param));
+                        PublicPun.jsonParserRefresh(mContext, result, mAccount, false);
+
+                    } catch (Exception e) {
+                        // TODO Auto-generated catch block
+                        msgResult = -1;
+                        e.printStackTrace();
+                        Crashlytics.logException(e);
+                    }
+                }
+            }
+            msgResult = 1;
+        } else {
+            LogUtil.e("return 非 200");
+            msgResult = -1;
+        }
+        Bundle data = new Bundle();
+        data.putInt("accountID", mAccount);
+        data.putString("msg", result);
+        msg.setData(data);
+        msg.what = msgResult;
+        txsHandler.sendMessage(msg);
+
+    }
+
 }

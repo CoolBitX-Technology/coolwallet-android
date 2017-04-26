@@ -11,8 +11,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.coolbitx.coolwallet.R;
-import com.coolbitx.coolwallet.entity.Contents;
-import com.coolbitx.coolwallet.entity.dbAddress;
+import com.coolbitx.coolwallet.bean.Contents;
+import com.coolbitx.coolwallet.bean.dbAddress;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.coolbitx.coolwallet.util.QRCodeEncoder;
 import com.google.zxing.BarcodeFormat;

@@ -9,7 +9,7 @@ import android.view.View;
 import android.widget.Button;
 
 import com.coolbitx.coolwallet.R;
-import com.coolbitx.coolwallet.entity.Constant;
+import com.coolbitx.coolwallet.bean.Constant;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.snscity.egdwlib.CmdManager;
 import com.snscity.egdwlib.cmd.CmdResultCallback;

@@ -2,8 +2,9 @@ package com.coolbitx.coolwallet.Service;
 
 import android.content.Context;
 import android.content.Intent;
+import android.support.v4.content.LocalBroadcastManager;
 
-import com.coolbitx.coolwallet.entity.socketByAddress;
+import com.coolbitx.coolwallet.bean.socketByAddress;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.snscity.egdwlib.utils.LogUtil;
 
@@ -124,6 +125,6 @@ public class BlockWebSocketClient extends org.java_websocket.client.WebSocketCli
         Intent SocketIntent = new Intent(BTConfig.SOCKET_ADDRESS_MSG);
         LogUtil.d("put broadcast from webSocket =" + socketAddress.getAddress());
         SocketIntent.putExtra("socketAddrMsg", socketAddress);
-        mContext.sendBroadcast(SocketIntent);
+        LocalBroadcastManager.getInstance(mContext).sendBroadcast(SocketIntent);
     }
 }

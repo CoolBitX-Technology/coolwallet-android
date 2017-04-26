@@ -80,7 +80,7 @@ public class CwBtcNetWork {
             }
 
             LogUtil.i(extraUrl + ":URL地址 = " + url);
-            Crashlytics.log("doGet url=" + url);
+//            Crashlytics.log("doGet url=" + url);
 
             URL getUrl = new URL(url);
             connection = (HttpURLConnection) getUrl.openConnection();

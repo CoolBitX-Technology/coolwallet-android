@@ -16,7 +16,7 @@ import android.widget.TextView;
 
 import com.coolbitx.coolwallet.R;
 import com.coolbitx.coolwallet.callback.TransactionConfirmCallback;
-import com.coolbitx.coolwallet.entity.TxsConfirm;
+import com.coolbitx.coolwallet.bean.TxsConfirm;
 import com.coolbitx.coolwallet.general.AppPrefrence;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.snscity.egdwlib.utils.LogUtil;

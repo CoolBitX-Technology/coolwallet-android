@@ -46,28 +46,28 @@
     <!-- 底部tab -->
 
 
+    <View
+        android:id="@+id/line"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_above="@id/ll_bottom_tab"/>
+
     <RadioGroup
         android:id="@+id/ll_bottom_tab"
         android:layout_width="match_parent"
         android:layout_height="35dp"
-        android:layout_alignParentBottom="true"
         android:background="@android:color/black"
         android:orientation="horizontal"
         android:baselineAligned="true"
         android:gravity="center_vertical"
-        android:weightSum="9">
+        android:weightSum="9"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true">
 
         <Space
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1.5" />
-
-        <!--<LinearLayout-->
-        <!--android:layout_width="0dp"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:orientation="vertical"-->
-        <!--android:layout_weight="1"-->
-        <!--&gt;-->
 
         <RadioButton
             android:id="@+id/rb_send"
@@ -111,11 +111,5 @@
             android:layout_height="match_parent"
             android:layout_weight="1.5" />
     </RadioGroup>
-
-    <View
-        android:id="@+id/line"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_above="@id/ll_bottom_tab"/>
 
 </RelativeLayout>

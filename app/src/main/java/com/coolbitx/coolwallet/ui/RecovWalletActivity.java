@@ -31,10 +31,10 @@ import com.coolbitx.coolwallet.DataBase.DatabaseHelper;
 import com.coolbitx.coolwallet.DataBase.DbName;
 import com.coolbitx.coolwallet.R;
 import com.coolbitx.coolwallet.callback.RefreshCallback;
-import com.coolbitx.coolwallet.entity.Account;
-import com.coolbitx.coolwallet.entity.Constant;
-import com.coolbitx.coolwallet.entity.CwBtcTxs;
-import com.coolbitx.coolwallet.entity.dbAddress;
+import com.coolbitx.coolwallet.bean.Account;
+import com.coolbitx.coolwallet.bean.Constant;
+import com.coolbitx.coolwallet.bean.CwBtcTxs;
+import com.coolbitx.coolwallet.bean.dbAddress;
 import com.coolbitx.coolwallet.general.BtcUrl;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.coolbitx.coolwallet.general.RefreshBlockChainInfo;
@@ -291,9 +291,9 @@ public class RecovWalletActivity extends BaseActivity implements View.OnClickLis
         if (view == btnCreateWallet) {
 
             if (checkSeedLength()) {
-                DatabaseHelper.deleteTable(mContext, DbName.DATA_BASE_TXS);
-                DatabaseHelper.deleteTable(mContext, DbName.DATA_BASE_ADDR);
-                DatabaseHelper.deleteTable(mContext, DbName.DATA_BASE_CURRENT);
+                DatabaseHelper.deleteTable(mContext, DbName.DB_TABLE_TXS);
+                DatabaseHelper.deleteTable(mContext, DbName.DB_TABLE_ADDR);
+                DatabaseHelper.deleteTable(mContext, DbName.DB_TABLE_CURRENT);
                 SetSecpo(true);
                 InitWallet();
             }

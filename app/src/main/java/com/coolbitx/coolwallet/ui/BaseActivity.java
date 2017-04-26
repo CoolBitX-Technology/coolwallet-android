@@ -10,6 +10,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -21,11 +22,11 @@ import android.widget.Toast;
 import com.coolbitx.coolwallet.DataBase.DatabaseHelper;
 import com.coolbitx.coolwallet.R;
 import com.coolbitx.coolwallet.Service.BTConfig;
+import com.coolbitx.coolwallet.bean.Constant;
+import com.coolbitx.coolwallet.bean.Host;
+import com.coolbitx.coolwallet.bean.dbAddress;
+import com.coolbitx.coolwallet.bean.socketByAddress;
 import com.coolbitx.coolwallet.callback.RefreshCallback;
-import com.coolbitx.coolwallet.entity.Constant;
-import com.coolbitx.coolwallet.entity.Host;
-import com.coolbitx.coolwallet.entity.dbAddress;
-import com.coolbitx.coolwallet.entity.socketByAddress;
 import com.coolbitx.coolwallet.general.AppPrefrence;
 import com.coolbitx.coolwallet.general.BtcUrl;
 import com.coolbitx.coolwallet.general.PublicPun;
@@ -43,141 +44,45 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 
+import io.fabric.sdk.android.Fabric;
+
+import static com.coolbitx.coolwallet.ui.BleActivity.bleManager;
+
 /**
  * Created by ShihYi on 2016/4/8.
  * 所有activity需要做的事
  * for disconn 廣播
  */
 public class BaseActivity extends AppCompatActivity {
-    public static disconnNotificationReceiver brocastNR = null;
+
     public static CmdManager cmdManager;
-    public boolean isShowDisconnAlert = true;
     Context mContext;
     public static boolean[] settingOptions = new boolean[4];
-    LocalBroadcastManager mLocalBroadcastManager = null;
-    //for Exchange test.
-    BroadcastReceiver ExchangeReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String message = intent.getStringExtra("ExchangeMessage");
-            String data = intent.getStringExtra("ExchangeData");
-            if (message != null) {
-                //Receive message from Exchange site
-                LogUtil.d("ExchangeMessage=" + message);
-
-                if (data.contains("matchOrder")) {
-                    PublicPun.showNoticeDialog(mContext, "Exchange Message",
-                            "Congrats!! Your sell order has a match. Please connect with CoolWallet CW000522 to complete the trade.");
-                } else {
-                    PublicPun.showNoticeDialog(mContext, "Exchange Message",
-                            "You placed a sell order on CoolBitX. Please connect with CoolWallet <cwid>, look at the OTP on card, type it in the app to confirm the order.");
-                }
-                //complete order 尚未完成
-            }
-        }
-    };
-    private Handler brocastMsgHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            // TODO Auto-generated method stub
-            switch (msg.what) {
-                case BSConfig.HANDLER_SOCKET:
-                    final socketByAddress socket = (socketByAddress) msg.obj;
-                    final int mAccount = DatabaseHelper.queryAccountByAddress(mContext, socket.getAddress());
-                    if (socket.getTx_type().equals("Received") && socket.getConfirmations() == 1) {//
-                        // do your work right here
-                        String socketTitle = "BitCoin Received";
-                        String socketMsg = "Account " + (mAccount + 1) + "\n"
-                                + "Address:" + "\n"
-                                + socket.getAddress() + "\n"
-                                + socket.getTx_type() + " Amount:" + TabFragment.BtcFormatter.format(socket.getBtc_amount()) + " BTC" + "\n"
-                                + "Confirmations: " + socket.getConfirmations();
-//                        PublicPun.showNoticeDialog(mContext, socketTitle, socketMsg);
-                        systemNotificationBTC(socket, mAccount);
-                    }
-
-                    //refresh the transaction data when balance updated.
-                    if (mAccount >= 0) {
-                        RefreshBlockChainInfo refreshBlockChainInfo = new RefreshBlockChainInfo(mContext, mAccount);
-                        refreshBlockChainInfo.callTxsRunnable(new RefreshCallback() {
-                            @Override
-                            public void success() {
-                                RefreshSetAccInfo(mAccount);
-                            }
-
-                            @Override
-                            public void fail(String msg) {
-                                Toast.makeText(mContext, "Unstable internet connection", Toast.LENGTH_LONG);
-                            }
-                        });
-                    }
-                    break;
-
-                case BSConfig.HANDLER_DISCONN:
-
-                    String title = "CoolWallet Disconnected";
-                    ActivityManager am = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-                    ComponentName cn = am.getRunningTasks(1).get(0).topActivity;
-                    int ind = cn.getShortClassName().lastIndexOf(".")+1;//.ui.EraseActivity → EraseActivity
-                    String act = cn.getShortClassName().substring(ind);
-
-                    LogUtil.e("BaseActivity HANDLER_DISCONN actitvity="+act);
-//                    if(act.equals("BleActivity")){
-//                        SharedPreferences settings = getSharedPreferences("Preference", 0);
-//                        //取出name屬性的字串
-//                        String address = settings.getString("connAddress", "");
-//                        bleManager.connectBle(address);
-//
-//                    }else{
-//                        LogUtil.e("not BleActivity");
-//                        String noteMsg;
-//                        if (PublicPun.card.getCardName() == null) {
-//                            noteMsg = "CoolWallet Disconnected";
-//                        } else {
-//                            noteMsg = PublicPun.card.getCardName() + " Disconnected";
-//                        }
-//                        PublicPun.showNoticeDialogToFinish(mContext, title, noteMsg);
-//                        systemNotification(title, noteMsg);
-//                    }
-                    String noteMsg;
-                    if (PublicPun.card.getCardName() == null) {
-                        noteMsg = "CoolWallet Disconnected";
-                    } else {
-                        noteMsg = PublicPun.card.getCardName() + " Disconnected";
-                    }
-                    PublicPun.showNoticeDialogToFinish(mContext, title, noteMsg);
-                    systemNotification(title, noteMsg);
-
-                    break;
-            }
-            super.handleMessage(msg);
-        }
-    };
+    LocalBroadcastManager mLocalBroadcastManager;
+    private socketNotificationReceiver brocastNR;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        LogUtil.d("BaseActivity onCreate");
+        LogUtil.d("lifeCycle BaseActivity onCreate");
         mContext = this;
+        Fabric.with(this, new Crashlytics());
+        //註冊監聽
+        registerBroadcast();
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        LogUtil.d("lifeCycle BaseActivity onStart");
 
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        //註冊監聽
-        if (brocastNR == null) {
-            brocastNR = new disconnNotificationReceiver();
-            //註冊廣播
-            LogUtil.d("BaseActivity registerReceiver brocastNR");
-            registerReceiver(brocastNR, new IntentFilter(BTConfig.SOCKET_ADDRESS_MSG));
-            registerReceiver(brocastNR, new IntentFilter(BTConfig.DISCONN_NOTIFICATION));
-        }
-        if (mLocalBroadcastManager == null) {
-            mLocalBroadcastManager = LocalBroadcastManager.getInstance(this);
-            mLocalBroadcastManager.registerReceiver(ExchangeReceiver,
-                    new IntentFilter("ExchangeSiteReceiver"));
-        }
+        LogUtil.d("lifeCycle BaseActivity onResume");
 
         if (cmdManager == null) {
             cmdManager = new CmdManager();
@@ -186,33 +91,38 @@ public class BaseActivity extends AppCompatActivity {
 
     @Override
     protected void onPause() {
-
         super.onPause();
+        LogUtil.d("lifeCycle BaseActivity onPause");
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        LogUtil.d("lifeCycle BaseActivity onStop");
+
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        LogUtil.e("BaseActivity onDestroy");
+        LogUtil.e("lifeCycle BaseActivity onDestroy");
+
         try {
+            LogUtil.d("BaseActivity unregisterReceiver");
             if (brocastNR != null) {
                 unregisterReceiver(brocastNR);
                 brocastNR = null;
             }
-            if (ExchangeReceiver != null) {
-                mLocalBroadcastManager.unregisterReceiver(ExchangeReceiver);
-                ExchangeReceiver = null;
-            }
         } catch (Exception e) {
-//            Crashlytics.logException(e);
+            LogUtil.e("error:" + e.getMessage());
         }
     }
 
     public void getSecpo() {
-         final byte CwSecurityPolicyMaskOtp = 0x01;
-         final byte CwSecurityPolicyMaskBtn = 0x02;
-         final byte CwSecurityPolicyMaskWatchDog = 0x10;
-         final byte CwSecurityPolicyMaskAddress = 0x20;
+        final byte CwSecurityPolicyMaskOtp = 0x01;
+        final byte CwSecurityPolicyMaskBtn = 0x02;
+        final byte CwSecurityPolicyMaskWatchDog = 0x10;
+        final byte CwSecurityPolicyMaskAddress = 0x20;
 
         cmdManager.getSecpo(new CmdResultCallback() {
             @Override
@@ -414,42 +324,6 @@ public class BaseActivity extends AppCompatActivity {
         });
     }
 
-    /**
-     * show on Status Bar
-     * foe btc recv
-     */
-    private void systemNotificationBTC(socketByAddress socket, int mAccount) {
-        final int notifyID = mAccount; // 通知的識別號碼
-
-        String socketTitle = "BitCoin Received";
-        final NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE); // 取得系統的通知服務
-        final Notification notification = new Notification.Builder(getApplicationContext())
-                .setSmallIcon(R.mipmap.ic_launcher_cw)
-                .setStyle(new Notification.InboxStyle()
-                        .setBigContentTitle(socketTitle)
-                        .addLine("Account " + (mAccount + 1))
-                        .addLine("Address:")
-                        .addLine(socket.getAddress())
-                        .addLine(socket.getTx_type() + " Amount:" + TabFragment.BtcFormatter.format(socket.getBtc_amount()) + " BTC")
-                        .addLine("Confirmations: " + socket.getConfirmations())).build();
-//                .setContentIntent(PendingIntent.getActivity(getApplicationContext(), notifyID, new Intent(getApplicationContext(), BleActivity.class), PendingIntent.FLAG_UPDATE_CURRENT)).build();
-        notificationManager.notify(notifyID, notification); // 發送通知
-    }
-
-    /**
-     * show on Status Bar
-     * foe ble disconn
-     */
-    private void systemNotification(String title, String msg) {
-        final int notifyID = 999; // 通知的識別號碼
-        final NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE); // 取得系統的通知服務
-        final Notification notification = new Notification.Builder(getApplicationContext())
-                .setSmallIcon(R.mipmap.ic_launcher_cw)
-                .setContentTitle(title)
-                .setContentText(msg) // 建立通知
-                .setContentIntent(PendingIntent.getActivity(getApplicationContext(), notifyID, new Intent(getApplicationContext(), BleActivity.class), PendingIntent.FLAG_UPDATE_CURRENT)).build();
-        notificationManager.notify(notifyID, notification); // 發送通知
-    }
 
     public void RefreshSetAccInfo(int account) {
 
@@ -547,24 +421,6 @@ public class BaseActivity extends AppCompatActivity {
         }
     }
 
-    //建立廣播接收socket訊息
-    public class disconnNotificationReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            // TODO Auto-generated method stub
-            String action = intent.getAction();
-
-            if (action.equals(BTConfig.SOCKET_ADDRESS_MSG)) {
-                LogUtil.i("webSocket BaseActivity broadcast recv!");
-                brocastMsgHandler.sendMessage(brocastMsgHandler.obtainMessage(BSConfig.HANDLER_SOCKET,
-                        intent.getExtras().getSerializable("socketAddrMsg")));
-            } else if (action.equals(BTConfig.DISCONN_NOTIFICATION)) {
-                if (isShowDisconnAlert) {
-                    brocastMsgHandler.sendMessage(brocastMsgHandler.obtainMessage(BSConfig.HANDLER_DISCONN));
-                }
-            }
-        }
-    }
 
     /**
      * used to refresh rate by interval
@@ -631,5 +487,165 @@ public class BaseActivity extends AppCompatActivity {
                 }, interval);
             }
         }
+    }
+
+    private void registerBroadcast() {
+        LogUtil.e("registerBroadcast");
+        //註冊監聽
+        if (brocastNR == null) {
+            brocastNR = new socketNotificationReceiver();
+            //註冊廣播
+            mLocalBroadcastManager = LocalBroadcastManager.getInstance(this);
+            LogUtil.d("MainActivity registerReceiver brocastNR");
+            mLocalBroadcastManager.registerReceiver(brocastNR, new IntentFilter(BTConfig.SOCKET_ADDRESS_MSG));
+            mLocalBroadcastManager.registerReceiver(brocastNR, new IntentFilter(BTConfig.DISCONN_NOTIFICATION));
+            LogUtil.d("MainActivity registerReceiver XchsReceiver");
+            mLocalBroadcastManager.registerReceiver(brocastNR, new IntentFilter(BTConfig.XCHS_NOTIFICATION));
+        }
+    }
+
+    //建立廣播接收socket訊息
+    public class socketNotificationReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // TODO Auto-generated method stub
+            String action = intent.getAction();
+            LogUtil.d("webSocket broadcast recv!");
+
+            if (action.equals(BTConfig.SOCKET_ADDRESS_MSG)) {
+                LogUtil.d("webSocket BaseActivity broadcast recv!");
+                brocastMsgHandler.sendMessage(brocastMsgHandler.obtainMessage(BSConfig.HANDLER_SOCKET,
+                        intent.getExtras().getSerializable("socketAddrMsg")));
+            } else if (action.equals(BTConfig.DISCONN_NOTIFICATION)) {
+                brocastMsgHandler.sendMessage(brocastMsgHandler.obtainMessage(BSConfig.HANDLER_DISCONN));
+            } else if (action.equals(BTConfig.XCHS_NOTIFICATION)) {
+                LogUtil.d("XCHS BaseActivity broadcast recv!");
+                Message msg = new Message();
+                Bundle data = new Bundle();
+                data.putString("handlerMessage", intent.getExtras().getString("ExchangeMessage"));
+                msg.setData(data);
+                msg.what = BSConfig.HANDLER_XCHS;
+                brocastMsgHandler.sendMessage(msg);
+            }
+        }
+
+    }
+
+    private Handler brocastMsgHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            // TODO Auto-generated method stub
+            switch (msg.what) {
+                case BSConfig.HANDLER_SOCKET:
+                    final socketByAddress socket = (socketByAddress) msg.obj;
+                    final int mAccount = DatabaseHelper.queryAccountByAddress(mContext, socket.getAddress());
+                    if (socket.getTx_type().equals("Received") && socket.getConfirmations() == 1) {//
+                        // do your work right here
+                        String socketTitle = "BitCoin Received";
+                        String socketMsg = "Account " + (mAccount + 1) + "\n"
+                                + "Address:" + "\n"
+                                + socket.getAddress() + "\n"
+                                + socket.getTx_type() + " Amount:" + TabFragment.BtcFormatter.format(socket.getBtc_amount()) + " BTC" + "\n"
+                                + "Confirmations: " + socket.getConfirmations();
+                        PublicPun.showNoticeDialog(mContext, socketTitle, socketMsg);
+                        systemNotificationBTC(socket, mAccount);
+                    }
+
+                    //refresh the transaction data when balance updated.
+                    if (mAccount >= 0) {
+                        RefreshBlockChainInfo refreshBlockChainInfo = new RefreshBlockChainInfo(mContext, mAccount);
+                        refreshBlockChainInfo.callTxsRunnable(new RefreshCallback() {
+                            @Override
+                            public void success() {
+                                RefreshSetAccInfo(mAccount);
+                            }
+
+                            @Override
+                            public void fail(String msg) {
+                                Toast.makeText(mContext, "Unstable internet connection", Toast.LENGTH_LONG);
+                            }
+                        });
+                    }
+                    break;
+
+                case BSConfig.HANDLER_DISCONN:
+
+                    String title = "CoolWallet Disconnected";
+                    ActivityManager am = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+                    ComponentName cn = am.getRunningTasks(1).get(0).topActivity;
+                    int ind = cn.getShortClassName().lastIndexOf(".") + 1;//.ui.EraseActivity → EraseActivity
+                    String act = cn.getShortClassName().substring(ind);
+
+                    LogUtil.e("BaseActivity HANDLER_DISCONN actitvity=" + act);
+
+                    String noteMsg;
+                    if (PublicPun.card.getCardName() == null) {
+                        noteMsg = "CoolWallet Disconnected";
+                    } else {
+                        noteMsg = PublicPun.card.getCardName() + " Disconnected";
+                    }
+                    if (act.equals("BleActivity")) {
+                        LogUtil.e("BleActivity disconnected,reconnected.");
+                        SharedPreferences settings = getSharedPreferences("Preference", 0);
+                        //取出name屬性的字串
+                        String address = settings.getString("connAddress", "");
+                        bleManager.connectBle(address);
+
+                    } else {
+                        LogUtil.e("not BleActivity");
+                        PublicPun.showNoticeDialogToFinish(mContext, title, noteMsg);
+                        systemNotification(title, noteMsg);
+                    }
+
+                    break;
+
+                case BSConfig.HANDLER_XCHS:
+                    String message = msg.getData().getString("handlerMessage");
+                    LogUtil.e("XCHS 廣播:" + message);
+                    if (message != null) {
+                        //Receive message from Exchange site
+                        LogUtil.d("ExchangeMessage=" + message);
+                        PublicPun.showNoticeDialog(mContext, "CoolWallet Exchange Message", message);
+                    }
+            }
+            super.handleMessage(msg);
+        }
+    };
+
+    /**
+     * show on Status Bar
+     * foe btc recv
+     */
+    private void systemNotificationBTC(socketByAddress socket, int mAccount) {
+        final int notifyID = mAccount; // 通知的識別號碼
+
+        String socketTitle = "BitCoin Received";
+        final NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE); // 取得系統的通知服務
+        final Notification notification = new Notification.Builder(getApplicationContext())
+                .setSmallIcon(R.mipmap.ic_launcher_cw)
+                .setStyle(new Notification.InboxStyle()
+                        .setBigContentTitle(socketTitle)
+                        .addLine("Account " + (mAccount + 1))
+                        .addLine("Address:")
+                        .addLine(socket.getAddress())
+                        .addLine(socket.getTx_type() + " Amount:" + TabFragment.BtcFormatter.format(socket.getBtc_amount()) + " BTC")
+                        .addLine("Confirmations: " + socket.getConfirmations())).build();
+//                .setContentIntent(PendingIntent.getActivity(getApplicationContext(), notifyID, new Intent(getApplicationContext(), BleActivity.class), PendingIntent.FLAG_UPDATE_CURRENT)).build();
+        notificationManager.notify(notifyID, notification); // 發送通知
+    }
+
+    /**
+     * show on Status Bar
+     * foe ble disconn
+     */
+    private void systemNotification(String title, String msg) {
+        final int notifyID = 999; // 通知的識別號碼
+        final NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE); // 取得系統的通知服務
+        final Notification notification = new Notification.Builder(getApplicationContext())
+                .setSmallIcon(R.mipmap.ic_launcher_cw)
+                .setContentTitle(title)
+                .setContentText(msg) // 建立通知
+                .setContentIntent(PendingIntent.getActivity(getApplicationContext(), notifyID, new Intent(getApplicationContext(), BleActivity.class), PendingIntent.FLAG_UPDATE_CURRENT)).build();
+        notificationManager.notify(notifyID, notification); // 發送通知
     }
 }

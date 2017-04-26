@@ -21,15 +21,13 @@ import android.widget.TextView;
 import com.coolbitx.coolwallet.DataBase.DatabaseHelper;
 import com.coolbitx.coolwallet.R;
 import com.coolbitx.coolwallet.adapter.ReceiveListViewAdapter;
-import com.coolbitx.coolwallet.entity.Account;
-import com.coolbitx.coolwallet.entity.Address;
-import com.coolbitx.coolwallet.entity.Constant;
-import com.coolbitx.coolwallet.entity.Contents;
+import com.coolbitx.coolwallet.bean.Account;
+import com.coolbitx.coolwallet.bean.Address;
+import com.coolbitx.coolwallet.bean.Constant;
+import com.coolbitx.coolwallet.bean.Contents;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.coolbitx.coolwallet.util.Base58;
-import com.coolbitx.coolwallet.util.ExtendedKey;
 import com.coolbitx.coolwallet.util.QRCodeEncoder;
-import com.coolbitx.coolwallet.util.ValidationException;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 import com.snscity.egdwlib.CmdManager;
@@ -132,16 +130,8 @@ public class ReceiveFragment extends BaseFragment implements View.OnClickListene
         initView(view);
         cmdManager = new CmdManager();
         intputAddressList = new ArrayList<>();
-////        mStringList.add("1GYrLeeFtf32NRDAae21UEUkMgdwSYXTAq");
 
-//        intputAddressList = PublicPun.account.getInputAddressList();
-//        if (lisCwBtcAdd.size()==0) {
-//            lisCwBtcAdd = new ArrayList<>();
-//            syncFromCard();
         refresh(false);
-//        } else {
-//            Refresh(false);
-//        }
 
         return view;
     }
@@ -149,7 +139,7 @@ public class ReceiveFragment extends BaseFragment implements View.OnClickListene
     private void syncFromCard() {
 
         //infoId 1B (=00 status, 01 name, 02 accountPointer)
-        queryWallteInfo(getWalltePointer);
+//        queryWallteInfo(getWalltePointer);
     }
 
     private void ClickFunction(String mTitle, final int position, String mMessage, View v) {
@@ -214,124 +204,6 @@ public class ReceiveFragment extends BaseFragment implements View.OnClickListene
             }
         });
         builder.show();
-    }
-
-    private void queryWallteInfo(int infoId) {
-        //infoId 1B (=00 status, 01 name, 02 accountPointer)
-
-        cmdManager.hdwQryWaInfo(getWalltePointer, new CmdResultCallback() {
-            @Override
-            public void onSuccess(int status, byte[] outputData) {
-                if ((status + 65536) == 0x9000) {
-                    if (outputData != null) {
-                        hdwAccountPointer = outputData;
-                        int accountIndex = Integer.valueOf(PublicPun.byte2HexString(outputData).replace(" ", ""));
-                        LogUtil.i("hdwAccountPointer=" + accountIndex);
-                        PublicPun.wallet.setAccountIndex(accountIndex);
-
-                        if (hdwAccountPointer != null && hdwAccountPointer.length == 4) {
-                            accountId = Integer.parseInt(PublicPun.byte2HexString(hdwAccountPointer[0]));
-                            LogUtil.i("accountId=" + accountId);
-
-                            LogUtil.i("有" + accountId + "個帳戶" + "依序讀取帳戶訊息");
-                            for (int i = 0; i < accountId; i++) {
-                                getAccounts(i);
-                            }
-                        }
-                    }
-                }
-            }
-        });
-    }
-
-    private void getAccounts(final int accountId) {
-        byte cwHdwAccountInfoExtKeyPtr = 0x02;
-        LogUtil.e("getAccounts accountId=" + accountId);
-        final Account account = new Account();
-        account.setId(accountId);
-
-        cmdManager.hdwQueryAccountInfo(cwHdwAccountInfoExtKeyPtr, accountId, new CmdResultCallback() {
-            @Override
-            public void onSuccess(int status, byte[] outputData) {
-                if ((status + 65536) == 0x9000) {
-                    if (outputData != null) {
-                        String extKey = PublicPun.byte2HexString(outputData[0]);
-
-                        account.setOutputIndex(Integer.valueOf(extKey, 16));
-//                        genKid = Integer.valueOf(extKey, 16) + 1;
-                        LogUtil.e("ExtKey=" + Integer.valueOf(extKey, 16));
-//                        cntAdd += Integer.valueOf(extKey, 16);
-                        getAccountKeyInfo(accountId, Integer.valueOf(extKey, 16), Constant.CwAddressKeyChainExternal);
-                        cwAccountList.add(account);
-                    }
-                }
-            }
-        });
-
-    }
-
-    private void getAccountKeyInfo(final int accountId, final int kid, final byte kcId) {
-
-        cmdManager.hdwQueryAccountKeyInfo(Constant.CwHdwAccountKeyInfoPubKeyAndChainCd,
-                kcId,
-                accountId,
-                kid,
-                new CmdResultCallback() {
-                    @Override
-                    public void onSuccess(int status, byte[] outputData) {
-                        if ((status + 65536) == 0x9000) {
-                            if (outputData != null) {
-                                byte[] publicKeyBytes = new byte[64];
-                                byte[] chainCodeBytes = new byte[32];
-                                int length = outputData.length;
-                                byte[] extendPub = new byte[33];
-                                if (length >= 96) {
-
-                                    for (int i = 0; i < 64; i++) {
-                                        publicKeyBytes[i] = outputData[i];
-                                    }
-                                    for (int j = 64; j < 96; j++) {
-                                        chainCodeBytes[j - 64] = outputData[j];
-                                    }
-                                    if (Integer.parseInt(PublicPun.byte2HexString(publicKeyBytes[63]), 16) / 2 == 0) {
-                                        extendPub[0] = 02;
-                                    } else {
-                                        extendPub[0] = 03;
-                                    }
-
-                                    for (int a = 0; a < 32; a++) {
-                                        extendPub[a + 1] = publicKeyBytes[a];
-                                    }
-                                }
-                                LogUtil.i("keyinfo的pub key=" + LogUtil.byte2HexString(publicKeyBytes));
-                                LogUtil.i("keyinfo的chainCodeBytes=" + LogUtil.byte2HexString(chainCodeBytes));
-                                LogUtil.i("keyinfo的=" + LogUtil.byte2HexString(extendPub));
-                                ExtendedKey km = ExtendedKey.createCwEk(extendPub, chainCodeBytes);
-                                LogUtil.i("serializepub=" + km.serializepub(true));
-                                for (int i = 0; i < kid; i++) {
-                                    ExtendedKey k = null;
-                                    String addr = null;
-                                    address = new Address();
-                                    try {
-//                                        address.setPublickey(PublicPun.byte2HexString(publicKeyBytes));
-//                                        address.setPublickey(publicKeyBytes);
-                                        k = km.getChild(i);
-                                        LogUtil.i("ExtendedKey addr=" + String.valueOf(i) + ":" + k.getAddress());
-                                        addr = k.getAddress();
-                                        address.setAddress(addr);
-                                        address.setBCAddress(addr + "?amount=0");
-                                        intputAddressList.add(address);
-                                    } catch (ValidationException e) {
-                                        LogUtil.i("ExtendedKey i=" + String.valueOf(i) + ",error:" + e.getMessage());
-                                        e.printStackTrace();
-                                    }
-                                }
-                                PublicPun.account.setInputAddressList(intputAddressList);
-                                Refresh(false);
-                            }
-                        }
-                    }
-                });
     }
 
     private void Refresh(boolean isAddData) {
@@ -514,5 +386,125 @@ public class ReceiveFragment extends BaseFragment implements View.OnClickListene
             }
         }
     }
+
+
+//    private void queryWallteInfo(int infoId) {
+//        //infoId 1B (=00 status, 01 name, 02 accountPointer)
+//
+//        cmdManager.hdwQryWaInfo(getWalltePointer, new CmdResultCallback() {
+//            @Override
+//            public void onSuccess(int status, byte[] outputData) {
+//                if ((status + 65536) == 0x9000) {
+//                    if (outputData != null) {
+//                        hdwAccountPointer = outputData;
+//                        int accountIndex = Integer.valueOf(PublicPun.byte2HexString(outputData).replace(" ", ""));
+//                        LogUtil.i("hdwAccountPointer=" + accountIndex);
+//                        PublicPun.wallet.setAccountIndex(accountIndex);
+//
+//                        if (hdwAccountPointer != null && hdwAccountPointer.length == 4) {
+//                            accountId = Integer.parseInt(PublicPun.byte2HexString(hdwAccountPointer[0]));
+//                            LogUtil.i("accountId=" + accountId);
+//
+//                            LogUtil.i("有" + accountId + "個帳戶" + "依序讀取帳戶訊息");
+//                            for (int i = 0; i < accountId; i++) {
+//                                getAccounts(i);
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        });
+//    }
+//
+//    private void getAccounts(final int accountId) {
+//        byte cwHdwAccountInfoExtKeyPtr = 0x02;
+//        LogUtil.e("getAccounts accountId=" + accountId);
+//        final Account account = new Account();
+//        account.setId(accountId);
+//
+//        cmdManager.hdwQueryAccountInfo(cwHdwAccountInfoExtKeyPtr, accountId, new CmdResultCallback() {
+//            @Override
+//            public void onSuccess(int status, byte[] outputData) {
+//                if ((status + 65536) == 0x9000) {
+//                    if (outputData != null) {
+//                        String extKey = PublicPun.byte2HexString(outputData[0]);
+//
+//                        account.setOutputIndex(Integer.valueOf(extKey, 16));
+////                        genKid = Integer.valueOf(extKey, 16) + 1;
+//                        LogUtil.e("ExtKey=" + Integer.valueOf(extKey, 16));
+////                        cntAdd += Integer.valueOf(extKey, 16);
+//                        getAccountKeyInfo(accountId, Integer.valueOf(extKey, 16), Constant.CwAddressKeyChainExternal);
+//                        cwAccountList.add(account);
+//                    }
+//                }
+//            }
+//        });
+//
+//    }
+//
+//    private void getAccountKeyInfo(final int accountId, final int kid, final byte kcId) {
+//
+//        cmdManager.hdwQueryAccountKeyInfo(Constant.CwHdwAccountKeyInfoPubKeyAndChainCd,
+//                kcId,
+//                accountId,
+//                kid,
+//                new CmdResultCallback() {
+//                    @Override
+//                    public void onSuccess(int status, byte[] outputData) {
+//                        if ((status + 65536) == 0x9000) {
+//                            if (outputData != null) {
+//                                byte[] publicKeyBytes = new byte[64];
+//                                byte[] chainCodeBytes = new byte[32];
+//                                int length = outputData.length;
+//                                byte[] extendPub = new byte[33];
+//                                if (length >= 96) {
+//
+//                                    for (int i = 0; i < 64; i++) {
+//                                        publicKeyBytes[i] = outputData[i];
+//                                    }
+//                                    for (int j = 64; j < 96; j++) {
+//                                        chainCodeBytes[j - 64] = outputData[j];
+//                                    }
+//                                    if (Integer.parseInt(PublicPun.byte2HexString(publicKeyBytes[63]), 16) / 2 == 0) {
+//                                        extendPub[0] = 02;
+//                                    } else {
+//                                        extendPub[0] = 03;
+//                                    }
+//
+//                                    for (int a = 0; a < 32; a++) {
+//                                        extendPub[a + 1] = publicKeyBytes[a];
+//                                    }
+//                                }
+//                                LogUtil.i("keyinfo的pub key=" + LogUtil.byte2HexString(publicKeyBytes));
+//                                LogUtil.i("keyinfo的chainCodeBytes=" + LogUtil.byte2HexString(chainCodeBytes));
+//                                LogUtil.i("keyinfo的=" + LogUtil.byte2HexString(extendPub));
+//                                ExtendedKey km = ExtendedKey.createCwEk(extendPub, chainCodeBytes);
+//                                LogUtil.i("serializepub=" + km.serializepub(true));
+//                                for (int i = 0; i < kid; i++) {
+//                                    ExtendedKey k = null;
+//                                    String addr = null;
+//                                    address = new Address();
+//                                    try {
+////                                        address.setPublickey(PublicPun.byte2HexString(publicKeyBytes));
+////                                        address.setPublickey(publicKeyBytes);
+//                                        k = km.getChild(i);
+//                                        LogUtil.i("ExtendedKey addr=" + String.valueOf(i) + ":" + k.getAddress());
+//                                        addr = k.getAddress();
+//                                        address.setAddress(addr);
+//                                        address.setBCAddress(addr + "?amount=0");
+//                                        intputAddressList.add(address);
+//                                    } catch (ValidationException e) {
+//                                        LogUtil.i("ExtendedKey i=" + String.valueOf(i) + ",error:" + e.getMessage());
+//                                        e.printStackTrace();
+//                                    }
+//                                }
+//                                PublicPun.account.setInputAddressList(intputAddressList);
+//                                Refresh(false);
+//                            }
+//                        }
+//                    }
+//                });
+//    }
+
 }
 

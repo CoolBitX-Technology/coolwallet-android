@@ -2,8 +2,9 @@ package com.coolbitx.coolwallet.util;
 
 import android.content.Context;
 
-import com.coolbitx.coolwallet.entity.UnSpentTxsBean;
+import com.coolbitx.coolwallet.bean.UnSpentTxsBean;
 import com.coolbitx.coolwallet.general.AppPrefrence;
+import com.coolbitx.coolwallet.general.PublicPun;
 import com.snscity.egdwlib.utils.LogUtil;
 
 import org.spongycastle.asn1.ASN1InputStream;
@@ -359,7 +360,7 @@ public class BTCUtils {
     public static byte[] doubleSha256(byte[] bytes) {
         try {
             MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
-            LogUtil.i("doubleSha256 unSign hex=" + LogUtil.byte2HexStringNoBlank(sha256.digest(sha256.digest(bytes))));
+            LogUtil.i("doubleSha256 unSign hex=" + PublicPun.byte2HexStringNoBlank(sha256.digest(sha256.digest(bytes))));
             return sha256.digest(sha256.digest(bytes));
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);

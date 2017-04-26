@@ -94,7 +94,7 @@ public class CmdCla {
     public static final int XCHS_REG_STATUS = ClaType.KEEP_MEMORY_SET_FLASH;
     public static final int XCHS_GET_OTP = ClaType.KEEP_MEMORY_SET_FLASH;
     public static final int XCHS_SESSION_ESTAB = ClaType.KEEP_MEMORY_SET_FLASH; //?
-    public static final int XCHS_SESSION_LOGOUT = ClaType.KEEP_MEMORY_SET_FLASH; //?
+    public static final int XCHS_SESSION_LOGOUT = ClaType.KEEP_MEMORY_GET_FLASH; //?
     public static final int XCHS_BLOCK_INFO = ClaType.KEEP_MEMORY_SET_FLASH; //?
     public static final int XCHS_BLOCK_BTC = ClaType.KEEP_MEMORY_SET_FLASH; //?
     public static final int XCHS_BLOCK_CANCEL = ClaType.KEEP_MEMORY_SET_FLASH; //?

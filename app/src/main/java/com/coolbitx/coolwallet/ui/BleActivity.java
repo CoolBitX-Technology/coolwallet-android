@@ -12,6 +12,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.TextUtils;
 import android.view.Menu;
@@ -24,8 +25,8 @@ import com.coolbitx.coolwallet.DataBase.DatabaseHelper;
 import com.coolbitx.coolwallet.R;
 import com.coolbitx.coolwallet.Service.BTConfig;
 import com.coolbitx.coolwallet.adapter.ListViewAdapter;
-import com.coolbitx.coolwallet.entity.Constant;
-import com.coolbitx.coolwallet.entity.MyDevice;
+import com.coolbitx.coolwallet.bean.Constant;
+import com.coolbitx.coolwallet.bean.MyDevice;
 import com.coolbitx.coolwallet.general.CSVReadWrite;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.coolbitx.coolwallet.ui.Fragment.FragMainActivity;
@@ -167,7 +168,6 @@ public class BleActivity extends BaseActivity {
                             if (PublicPun.card.getMode().equals("NOHOST")) {
                                 mProgress.dismiss();
                                 PublicPun.toast(mContext, "Initial Success");
-                                isShowDisconnAlert = false;
                                 BleActivity.bleManager.disConnectBle();
                                 bleManager.startScanBle(bleScanCallback);
                                 isScanning = true;
@@ -423,7 +423,6 @@ public class BleActivity extends BaseActivity {
                     thread.start();
 
 
-
                 }
             }
         };
@@ -665,10 +664,7 @@ public class BleActivity extends BaseActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-
-        LogUtil.i("onActivityResult");
-        //不要出diconn alert
-        isShowDisconnAlert = false;
+        LogUtil.d("onActivityResult");
         if (bleManager == null) {
             bleManager = new BleManager(this);
         }
@@ -702,7 +698,7 @@ public class BleActivity extends BaseActivity {
     private void disconnBroadCast() {
         Intent SocketIntent = new Intent(BTConfig.DISCONN_NOTIFICATION);
         LogUtil.i("DISCONN_NOTIFICATION");
-        mContext.sendBroadcast(SocketIntent);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(SocketIntent);
     }
 
     private class BluetoothStateListener extends BroadcastReceiver {

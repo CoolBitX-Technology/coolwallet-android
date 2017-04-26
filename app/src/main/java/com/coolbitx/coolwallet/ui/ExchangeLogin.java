@@ -78,29 +78,34 @@ public class ExchangeLogin extends BaseActivity implements View.OnClickListener 
 //            public void success(String[] msg) {
 //                LogUtil.d("First Exchange Logout success");
 
-                mExchangeAPI.exchangeLogin(new APIResultCallback() {
-                    @Override
-                    public void success(String[] msg) {
-                        LogUtil.e("Exchange Login success");
+        mExchangeAPI.exchangeLogin(new APIResultCallback() {
+            @Override
+            public void success(String[] msg) {
+                LogUtil.e("Exchange Login success");
 
-                        //for test
+                //for test
 //                        byte[]info =PublicPun.hexStringToByteArray("00000000000800000000f47735829815e622697c472f25f5cb00ce5c099deb1c688000c0dd84477e5f2ad9fbcfd27c129dc40975f0bd8540cdca871195860e9ba04264345ccb5e7201449b2ade2c530cdb8182737399e49b5f8e6a");
 //                        byte[]macKey = PublicPun.hexStringToByteArray("edd164b19857ca6429fe8150723f432f454f6b9960baa3ad966a41fc3ca557cc");
 //                        byte[] mac = HMAC.getSignature(info, macKey);
 //                        LogUtil.e("mac value="+LogUtil.byte2HexStringNoBlank(mac));
 
-                        isLoginSuccess=true;
-                        mProgress.dismiss();
-                        startActivity(new Intent(getApplicationContext(), ExchangeActivity.class));
-                    }
+                isLoginSuccess = true;
+                mProgress.dismiss();
+//                        startActivity(new Intent(getApplicationContext(), ExchangeActivity.class));
+                Intent intent;
+                intent = new Intent(ExchangeLogin.this, ExchangeActivity.class);
+                startActivityForResult(intent, 0);
 
-                    @Override
-                    public void fail(String msg) {
-                        isLoginSuccess=true;
-                        PublicPun.showNoticeDialog(mContext, "Notification", "Exchange Login failed.");
-                        ExchangeLogout();
-                    }
-                });
+            }
+
+            @Override
+            public void fail(String msg) {
+                isLoginSuccess = true;
+                mProgress.dismiss();
+                PublicPun.showNoticeDialog(mContext,"Exchange Error",msg+ "\nPlease check your Exchange Account Verification and try again later.");
+                ExchangeLogout();
+            }
+        });
 //            }
 
 //            @Override

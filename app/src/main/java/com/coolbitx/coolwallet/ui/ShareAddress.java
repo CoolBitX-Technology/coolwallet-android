@@ -15,10 +15,9 @@ import android.widget.TextView;
 
 import com.coolbitx.coolwallet.R;
 import com.coolbitx.coolwallet.callback.APIResultCallback;
-import com.coolbitx.coolwallet.entity.Constant;
+import com.coolbitx.coolwallet.bean.Constant;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.coolbitx.coolwallet.httpRequest.AddressSharingAPI;
-import com.coolbitx.coolwallet.ui.Fragment.FragMainActivity;
 import com.snscity.egdwlib.CmdManager;
 import com.snscity.egdwlib.cmd.CmdResultCallback;
 import com.snscity.egdwlib.utils.LogUtil;
@@ -118,7 +117,7 @@ public class ShareAddress extends BaseActivity implements View.OnClickListener {
                 if ((status + 65536) == 0x9000) {
                     if (outputData != null) {
                         loginChallenge = outputData;//16LEN,用來當api Response的subUrl
-                        String subAddr = "/" + cwid + "/" + LogUtil.byte2HexStringNoBlank(loginChallenge);
+                        String subAddr = "/" + cwid + "/" + PublicPun.byte2HexStringNoBlank(loginChallenge);
                         LogUtil.i("subAddr=" + subAddr);
 
                         mAddressSharingAPI.GenRspForChallenge(subAddr, new APIResultCallback() {
@@ -159,14 +158,14 @@ public class ShareAddress extends BaseActivity implements View.OnClickListener {
     }
 
     private void getAccountKeyInfo(final String cwid, final byte kInfoId, final byte kcId, final int accountId, final int kid) {
-        FragMainActivity.cmdManager.hdwQueryAccountKeyInfo(kInfoId, kcId, accountId, kid,
+        cmdManager.hdwQueryAccountKeyInfo(kInfoId, kcId, accountId, kid,
                 new CmdResultCallback() {
                     @Override
                     public void onSuccess(int status, byte[] outputData) {
                         if ((status + 65536) == 0x9000) {
                             if (outputData != null) {
 
-                                String KeyInfo = LogUtil.byte2HexStringNoBlank(outputData);
+                                String KeyInfo = PublicPun.byte2HexStringNoBlank(outputData);
                                 LogUtil.d("getAccountKeyInfo success=" + KeyInfo);
                                 mAddressSharingAPI.ShareAddress(cwid, PublicPun.card.getCardId(), KeyInfo, new APIResultCallback() {
                                     @Override

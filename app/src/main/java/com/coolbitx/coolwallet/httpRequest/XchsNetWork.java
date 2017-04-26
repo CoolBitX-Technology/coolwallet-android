@@ -348,14 +348,14 @@ public class XchsNetWork {
 
             int responseCode = conn.getResponseCode();
 
-            LogUtil.d("makeHttpRequestGet responseCode=" + String.valueOf(responseCode));
+            LogUtil.d("makeHttpDelete responseCode=" + String.valueOf(responseCode));
 
             if (responseCode == HttpsURLConnection.HTTP_OK) {
 
                 Map<String, List<String>> headerFields = conn.getHeaderFields();
                 List<String> cookiesHeader = headerFields.get(COOKIES_HEADER);
 
-                LogUtil.d("makeHttpRequestGet cookiesHeader=" + cookiesHeader);
+                LogUtil.d("makeHttpDelete cookiesHeader=" + cookiesHeader);
 
                 String line;
                 BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));

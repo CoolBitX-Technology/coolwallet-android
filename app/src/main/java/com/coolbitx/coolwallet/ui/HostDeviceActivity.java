@@ -15,7 +15,7 @@ import android.widget.ListView;
 
 import com.coolbitx.coolwallet.R;
 import com.coolbitx.coolwallet.adapter.HostAdapter;
-import com.coolbitx.coolwallet.entity.Host;
+import com.coolbitx.coolwallet.bean.Host;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.snscity.egdwlib.CmdManager;
 import com.snscity.egdwlib.cmd.CmdResultCallback;

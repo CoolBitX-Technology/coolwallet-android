@@ -144,14 +144,5 @@ public class LogUtil {
         return sb.toString();
     }
 
-    public static String byte2HexStringNoBlank(byte [] bytes){
-        if(bytes == null) return null;
 
-        StringBuilder sb = new StringBuilder();
-        for(byte b : bytes){
-            sb.append(String.format("%02x", b));
-        }
-
-        return sb.toString();
-    }
 }  

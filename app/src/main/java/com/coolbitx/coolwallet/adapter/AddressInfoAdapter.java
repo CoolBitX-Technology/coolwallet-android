@@ -8,7 +8,7 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.coolbitx.coolwallet.R;
-import com.coolbitx.coolwallet.entity.CwBtcTxs;
+import com.coolbitx.coolwallet.bean.CwBtcTxs;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.snscity.egdwlib.utils.LogUtil;
 

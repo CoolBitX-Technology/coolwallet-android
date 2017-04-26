@@ -74,8 +74,8 @@ public class ConfirmOtpActivity extends BaseActivity implements View.OnClickList
 
 
         if (isRegistered) {
-            DatabaseHelper.deleteTable(getApplicationContext(), DbName.DATA_BASE_ADDR);
-            DatabaseHelper.deleteTable(getApplicationContext(), DbName.DATA_BASE_TXS);
+            DatabaseHelper.deleteTable(getApplicationContext(), DbName.DB_TABLE_ADDR);
+            DatabaseHelper.deleteTable(getApplicationContext(), DbName.DB_TABLE_TXS);
             PublicPun.showNoticeDialogToFinish(context, "Waiting for authorization from paired device", "");
         } else {
             genOTP();
@@ -199,8 +199,8 @@ public class ConfirmOtpActivity extends BaseActivity implements View.OnClickList
                                                     } else {
                                                         //show alert 等授權
                                                         LogUtil.i("bindRegFinish2 isConfirm:" + isConfirm + ", uuid:" + currentUuid + ",hostId" + hostId);
-                                                        DatabaseHelper.deleteTable(getApplicationContext(), DbName.DATA_BASE_ADDR);
-                                                        DatabaseHelper.deleteTable(getApplicationContext(), DbName.DATA_BASE_TXS);
+                                                        DatabaseHelper.deleteTable(getApplicationContext(), DbName.DB_TABLE_ADDR);
+                                                        DatabaseHelper.deleteTable(getApplicationContext(), DbName.DB_TABLE_TXS);
                                                         PublicPun.showNoticeDialogToFinish(context, "Waiting for authorization from paired device", "");
                                                     }
                                                 }

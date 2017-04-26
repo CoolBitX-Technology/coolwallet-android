@@ -17,8 +17,8 @@ import com.coolbitx.coolwallet.DataBase.DatabaseHelper;
 import com.coolbitx.coolwallet.R;
 import com.coolbitx.coolwallet.adapter.AddressInfoAdapter;
 import com.coolbitx.coolwallet.callback.RefreshCallback;
-import com.coolbitx.coolwallet.entity.CwBtcTxs;
-import com.coolbitx.coolwallet.entity.dbAddress;
+import com.coolbitx.coolwallet.bean.CwBtcTxs;
+import com.coolbitx.coolwallet.bean.dbAddress;
 import com.coolbitx.coolwallet.general.AppPrefrence;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.coolbitx.coolwallet.general.RefreshBlockChainInfo;
@@ -51,6 +51,8 @@ public class HomeFragment extends BaseFragment implements AdapterView.OnItemClic
     TextView txtSubTitl_country;
     ListView lsvInfo;
     CwBtcNetWork cwBtcNetWork;
+    TextView mtv_frag_available_value;
+    TextView mtv_frag_reserved_value;
     private String value = "";
     private String title = "";
     private SwipeRefreshLayout swipeRefreshLayout;
@@ -113,6 +115,8 @@ public class HomeFragment extends BaseFragment implements AdapterView.OnItemClic
         txtSubTitl_country = (TextView) view.findViewById(R.id.tv_subtitle_country);
         lsvInfo = (ListView) view.findViewById(R.id.lsv_frag1_info);
         lsvInfo.setOnItemClickListener(this);
+        mtv_frag_available_value = (TextView)view.findViewById(R.id.tv_frag_available_value);
+        mtv_frag_reserved_value = (TextView)view.findViewById(R.id.tv_frag_reserved_value);
         cwBtcNetWork = new CwBtcNetWork();
         //can't use mContext,but Activity.this.
         mProgress = new ProgressDialog(getActivity(), ProgressDialog.THEME_HOLO_DARK);
@@ -281,6 +285,7 @@ public class HomeFragment extends BaseFragment implements AdapterView.OnItemClic
             txtSubTiltle.setText(TabFragment.currentFormatter.format(currRate));
             txtSubTitl_country.setText(AppPrefrence.getCurrentCountry(mContext));
             lsvInfo.setAdapter(new AddressInfoAdapter(mContext, TabFragment.lisCwBtcTxs));
+
         } catch (Exception e) {
 
         }
