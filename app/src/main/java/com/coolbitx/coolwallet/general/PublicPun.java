@@ -42,6 +42,8 @@ import org.json.JSONObject;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -49,6 +51,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Timer;
 
 /**
@@ -652,6 +655,20 @@ public class PublicPun {
         return bytes;
     }
 
+    public static float parseStringToFloatInternational(String str)
+    {
+        NumberFormat format = NumberFormat.getInstance(Locale.getDefault());
+        Number number = null;
+        try {
+            number = format.parse(str);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            LogUtil.e("edtFee parsing error! "+e.getMessage());
+        }
+        return number.floatValue();
+    }
+
+
 //    public static void showNoticeDialog(Context mContext, String mTitle, String mMessage) {
 //        LayoutInflater inflater = LayoutInflater.from(mContext);
 //        View alert_view = inflater.inflate(R.layout.edit_dialog, null);//alert為另外做給alert用的layout
@@ -744,26 +761,30 @@ public class PublicPun {
             }
         }
 
-        LayoutInflater inflater = LayoutInflater.from(mContext);
-        View alert_view = inflater.inflate(R.layout.edit_dialog, null);//alert為另外做給alert用的layout
-        final EditText mEditText = (EditText) alert_view.findViewById(R.id.etInputLabel);
-        final TextView mDialogTitle = (TextView) alert_view.findViewById(R.id.dialog_title);
-        final TextView mDialogMessage = (TextView) alert_view.findViewById(R.id.dialog_message);
+        try {
+            LayoutInflater inflater = LayoutInflater.from(mContext);
+            View alert_view = inflater.inflate(R.layout.edit_dialog, null);//alert為另外做給alert用的layout
+            final EditText mEditText = (EditText) alert_view.findViewById(R.id.etInputLabel);
+            final TextView mDialogTitle = (TextView) alert_view.findViewById(R.id.dialog_title);
+            final TextView mDialogMessage = (TextView) alert_view.findViewById(R.id.dialog_message);
 //        mEditText.setVisibility(View.INVISIBLE);
-        //-----------產生輸入視窗--------ProgressDialog.THEME_DEVICE_DEFAULT_LIGHT
-        AlertDialog.Builder builder = new AlertDialog.Builder(mContext, AlertDialog.THEME_DEVICE_DEFAULT_LIGHT);
-        builder.setCancelable(false);
-        mDialogTitle.setText(mTitle);
-        mDialogMessage.setText(mMessage);
-        builder.setView(alert_view);
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-                BleActivity.bleManager.disConnectBle();
-                ((Activity) mContext).finish(); // 離開程式
-                System.exit(0);
-            }
-        });
-        builder.show();
+            //-----------產生輸入視窗--------ProgressDialog.THEME_DEVICE_DEFAULT_LIGHT
+            AlertDialog.Builder builder = new AlertDialog.Builder(mContext, AlertDialog.THEME_DEVICE_DEFAULT_LIGHT);
+            builder.setCancelable(false);
+            mDialogTitle.setText(mTitle);
+            mDialogMessage.setText(mMessage);
+            builder.setView(alert_view);
+            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    BleActivity.bleManager.disConnectBle();
+                    ((Activity) mContext).finish(); // 離開程式
+                    System.exit(0);
+                }
+            });
+            builder.show();
+        }catch(Exception e){
+            LogUtil.e("showNoticeDialogToFinish 錯誤：" + e.getMessage());
+        }
     }
 
     /**

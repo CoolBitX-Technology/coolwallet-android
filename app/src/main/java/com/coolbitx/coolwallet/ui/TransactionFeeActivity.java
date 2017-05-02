@@ -25,6 +25,7 @@ import com.snscity.egdwlib.utils.LogUtil;
 import java.text.DecimalFormat;
 
 import static com.coolbitx.coolwallet.general.PublicPun.SATOSHI_RATE;
+import static com.coolbitx.coolwallet.general.PublicPun.jsonParserUnspent;
 
 /**
  * Created by ShihYi on 2016/2/2.
@@ -128,14 +129,17 @@ public class TransactionFeeActivity extends BaseActivity implements CheckBox.OnC
                 PublicPun.showNoticeDialog(context, "Notification", "Please enter the transaction fee.");
                 return;
             } else {
-                if (Float.valueOf(edtFee.getText().toString()) < estimatedFeeBTC) {
+//                if (Float.valueOf(edtFee.getText().toString()) < estimatedFeeBTC) {
+                if (PublicPun.parseStringToFloatInternational(edtFee.getText().toString()) < estimatedFeeBTC) {
                     showNoticeDialogToFinish(context, "Notification", "Your fee is below average and may take longer than 30 minutes to confirm.");
                 }
-                if (Float.valueOf(edtFee.getText().toString()) > 0.1) {
-                    showNoticeDialogToFinish(context, "Notification", "Your fee is higher than 0.1 BTC.");
+                if (PublicPun.parseStringToFloatInternational(edtFee.getText().toString()) > 1) {
+                    if (Float.valueOf(edtFee.getText().toString()) > 1) {
+                        showNoticeDialogToFinish(context, "Notification", "Your fee is higher than 1 BTC.");
+                    }
                 }
             }
-        }else{
+        } else {
             finish();
         }
     }
