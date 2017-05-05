@@ -67,8 +67,7 @@ public class BaseActivity extends AppCompatActivity {
         LogUtil.d("lifeCycle BaseActivity onCreate");
         mContext = this;
         Fabric.with(this, new Crashlytics());
-        //註冊監聽
-        registerBroadcast();
+
 
     }
 
@@ -87,6 +86,8 @@ public class BaseActivity extends AppCompatActivity {
         if (cmdManager == null) {
             cmdManager = new CmdManager();
         }
+        //註冊監聽
+        registerBroadcast();
     }
 
     @Override
@@ -100,13 +101,6 @@ public class BaseActivity extends AppCompatActivity {
         super.onStop();
         LogUtil.d("lifeCycle BaseActivity onStop");
 
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        LogUtil.e("lifeCycle BaseActivity onDestroy");
-
         try {
             LogUtil.d("BaseActivity unregisterReceiver");
             if (brocastNR != null) {
@@ -114,8 +108,17 @@ public class BaseActivity extends AppCompatActivity {
                 brocastNR = null;
             }
         } catch (Exception e) {
+            brocastNR = null;
             LogUtil.e("error:" + e.getMessage());
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        LogUtil.e("lifeCycle BaseActivity onDestroy");
+
+
     }
 
     public void getSecpo() {
@@ -492,7 +495,7 @@ public class BaseActivity extends AppCompatActivity {
     private void registerBroadcast() {
         LogUtil.e("registerBroadcast");
         //註冊監聽
-        if (brocastNR == null) {
+//        if (brocastNR == null) {
             brocastNR = new socketNotificationReceiver();
             //註冊廣播
             mLocalBroadcastManager = LocalBroadcastManager.getInstance(this);
@@ -501,7 +504,7 @@ public class BaseActivity extends AppCompatActivity {
             mLocalBroadcastManager.registerReceiver(brocastNR, new IntentFilter(BTConfig.DISCONN_NOTIFICATION));
             LogUtil.d("MainActivity registerReceiver XchsReceiver");
             mLocalBroadcastManager.registerReceiver(brocastNR, new IntentFilter(BTConfig.XCHS_NOTIFICATION));
-        }
+//        }
     }
 
     //建立廣播接收socket訊息
@@ -547,7 +550,7 @@ public class BaseActivity extends AppCompatActivity {
                                 + socket.getAddress() + "\n"
                                 + socket.getTx_type() + " Amount:" + TabFragment.BtcFormatter.format(socket.getBtc_amount()) + " BTC" + "\n"
                                 + "Confirmations: " + socket.getConfirmations();
-                        PublicPun.showNoticeDialog(mContext, socketTitle, socketMsg);
+//                        PublicPun.showNoticeDialog(mContext, socketTitle, socketMsg);
                         systemNotificationBTC(socket, mAccount);
                     }
 

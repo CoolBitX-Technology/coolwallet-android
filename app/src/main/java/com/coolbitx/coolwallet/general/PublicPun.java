@@ -33,6 +33,7 @@ import com.coolbitx.coolwallet.bean.User;
 import com.coolbitx.coolwallet.bean.Wallet;
 import com.coolbitx.coolwallet.bean.socketByAddress;
 import com.coolbitx.coolwallet.ui.BleActivity;
+import com.coolbitx.coolwallet.util.ByteUtils;
 import com.crashlytics.android.Crashlytics;
 import com.google.gson.Gson;
 import com.snscity.egdwlib.utils.LogUtil;
@@ -42,6 +43,7 @@ import org.json.JSONObject;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -54,9 +56,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Timer;
 
+
 /**
  * Created by MyPC on 2015/8/27.
- * 公共方法和公共变量类
+ * public function
  */
 public class PublicPun {
 
@@ -247,20 +250,20 @@ public class PublicPun {
         }
     }
 
-    public static ArrayList<UnSpentTxsBean> jsonParserUnspent(String jsonString) {
 
-//      JSONObject  json = RestManager.getJSONfromURL(myuri); // retrieve the entire json stream
-        ArrayList<UnSpentTxsBean> lisUnSpentTxs = new ArrayList<UnSpentTxsBean>();
+    public static ArrayList<UnSpentTxsBean> jsonParseBlockrUnspent(String jsonString) {
+
         Gson gson = new Gson();
         String UnSpentTxsAddr;
         Object jsonData;
         JSONArray jsonDataJsonArray;
         JSONObject jsonDataJsonObject;
-
+        ArrayList<UnSpentTxsBean> lisUnSpentTxs = new ArrayList<UnSpentTxsBean>();
         try {
-            LogUtil.e("jsonString=" + jsonString);
+            LogUtil.d("jsonString=" + jsonString);
             jsonData = new JSONObject(jsonString).get("data");
-            LogUtil.e("JSONObject" + jsonData.toString());
+
+            UnSpentTxsBean mUnSpentTxsBean = new UnSpentTxsBean();
 
             if (jsonData instanceof JSONArray) {
                 // It's an array
@@ -269,15 +272,14 @@ public class PublicPun {
                 for (int i = 0; i < jsonDataJsonArray.length(); i++) {
                     JSONObject jsonObjectDate = jsonDataJsonArray.getJSONObject(i);
                     UnSpentTxsAddr = jsonObjectDate.getString("address");
-                    LogUtil.e("JSONArray1" + UnSpentTxsAddr.toString());
                     JSONArray jsonArrayUnspentData = jsonObjectDate.getJSONArray("unspent");
-                    LogUtil.e("JSONArray2" + jsonArrayUnspentData.toString());
                     for (int j = 0; j < jsonArrayUnspentData.length(); j++) {
                         JSONObject jsonObjectUnspentData = jsonArrayUnspentData.getJSONObject(j);
-                        UnSpentTxsBean mUnSpentTxsBean = gson.fromJson(jsonObjectUnspentData.toString(), UnSpentTxsBean.class);
+                        mUnSpentTxsBean = gson.fromJson(jsonObjectUnspentData.toString(), UnSpentTxsBean.class);
                         mUnSpentTxsBean.setAddress(UnSpentTxsAddr);
-                        LogUtil.d("mUnSpentTxsBean第" + String.valueOf(j) + " 筆= " + mUnSpentTxsBean.getAddress() + " ; " + String.valueOf(mUnSpentTxsBean.getAmount()) + ";" + mUnSpentTxsBean.getTx());
-                        //skip the data of confirmation=0
+                        LogUtil.d("mUnSpentTxsBean第" + String.valueOf(i) + " 筆= " + mUnSpentTxsBean.getAddress() + " ; " + String.valueOf(mUnSpentTxsBean.getAmount()) + ";" + mUnSpentTxsBean.getTx());
+//                        //skip the data of confirmation=0
+
                         if (mUnSpentTxsBean.getConfirmations() != 0) {
                             lisUnSpentTxs.add(mUnSpentTxsBean);
                         }
@@ -287,18 +289,18 @@ public class PublicPun {
                 // It's an object
                 jsonDataJsonObject = (JSONObject) jsonData;
                 UnSpentTxsAddr = jsonDataJsonObject.getString("address");
-                LogUtil.e("JSONObject1" + UnSpentTxsAddr.toString());
                 JSONArray jsonArrayUnspentData = jsonDataJsonObject.getJSONArray("unspent");
-                LogUtil.e("JSONObject2" + jsonArrayUnspentData.toString());
                 for (int j = 0; j < jsonArrayUnspentData.length(); j++) {
                     JSONObject jsonObjectUnspentData = jsonArrayUnspentData.getJSONObject(j);
-                    UnSpentTxsBean mUnSpentTxsBean = gson.fromJson(jsonObjectUnspentData.toString(), UnSpentTxsBean.class);
+                    mUnSpentTxsBean = gson.fromJson(jsonObjectUnspentData.toString(), UnSpentTxsBean.class);
                     mUnSpentTxsBean.setAddress(UnSpentTxsAddr);
-                    LogUtil.d("mUnSpentTxsBean第" + String.valueOf(j) + " 筆= " + mUnSpentTxsBean.getAddress() + " ; " + String.valueOf(mUnSpentTxsBean.getAmount()) + ";" + mUnSpentTxsBean.getTx());
-                    //skip the data of confirmation=0
+                    LogUtil.d("mUnSpentTxsBean第" + String.valueOf(j) + " 筆= " + mUnSpentTxsBean.getAddress() + " ; " +
+                            new DecimalFormat("#.########").format(mUnSpentTxsBean.getAmount()) + ";" + mUnSpentTxsBean.getTx());
+
                     if (mUnSpentTxsBean.getConfirmations() != 0) {
                         lisUnSpentTxs.add(mUnSpentTxsBean);
                     }
+
                 }
             } else {
                 LogUtil.e("jSon type wrong");
@@ -327,6 +329,69 @@ public class PublicPun {
         }
     }
 
+    public static ArrayList<UnSpentTxsBean> jsonParseBlockChainInfoUnspent(String jsonString) {
+
+//      JSONObject  json = RestManager.getJSONfromURL(myuri); // retrieve the entire json stream
+        ArrayList<UnSpentTxsBean> lisUnSpentTxs = new ArrayList<UnSpentTxsBean>();
+        Object jsonData;
+        JSONArray jsonDataJsonArray;
+
+        try {
+            LogUtil.d("jsonString=" + jsonString);
+            jsonData = new JSONObject(jsonString).get("unspent_outputs");
+
+            jsonDataJsonArray = (JSONArray) jsonData;
+
+            for (int i = 0; i < jsonDataJsonArray.length(); i++) {
+                JSONObject jsonObjectUnspentData = jsonDataJsonArray.getJSONObject(i);
+
+                UnSpentTxsBean mUnSpentTxsBean = new UnSpentTxsBean();
+                mUnSpentTxsBean.setTx(jsonObjectUnspentData.getString("tx_hash_big_endian"));
+                mUnSpentTxsBean.setAmount(jsonObjectUnspentData.getInt("value") * SATOSHI_RATE);
+                mUnSpentTxsBean.setN(jsonObjectUnspentData.getInt("tx_output_n"));
+                mUnSpentTxsBean.setConfirmations(jsonObjectUnspentData.getInt("confirmations"));
+                mUnSpentTxsBean.setAddress(getAddressFromScript(jsonObjectUnspentData.getString("script")));
+                mUnSpentTxsBean.setScript(jsonObjectUnspentData.getString("script"));
+                LogUtil.d("address=" + mUnSpentTxsBean.getAddress() + ";value:" + new DecimalFormat("#.########").format(mUnSpentTxsBean.getAmount()) +
+                        ";N=" + mUnSpentTxsBean.getN() + ";confirm=" + mUnSpentTxsBean.getConfirmations() + ";script=" + jsonObjectUnspentData.getString("script") + "tx=" + mUnSpentTxsBean.getTx()
+                );
+
+                if (mUnSpentTxsBean.getConfirmations() != 0) {
+                    lisUnSpentTxs.add(mUnSpentTxsBean);
+                }
+            }
+
+        } catch (Exception e) {
+            LogUtil.e("JSONException:" + e.toString());
+            e.printStackTrace();
+        } finally {
+
+            //put the amount in descending order
+            Collections.sort(lisUnSpentTxs, new Comparator<UnSpentTxsBean>() {
+                @Override
+                public int compare(UnSpentTxsBean lhs, UnSpentTxsBean rhs) {
+//                    return (int)(lhs.getAmount()*100000000)-(int)(rhs.getAmount()*100000000);//ASC order
+                    return ((int) (lhs.getAmount() * 100000000) < (int) (rhs.getAmount() * 100000000) ? 1 :
+                            ((int) (lhs.getAmount() * 100000000) == (int) (rhs.getAmount() * 100000000) ? 0 : -1));
+                }
+            });
+
+            return lisUnSpentTxs;
+        }
+    }
+
+    private static String getAddressFromScript(String script) {
+        byte[] bareAddress = new byte[20];
+        //(來源陣列，起始索引值，目的陣列，起始索引值，複製長度)
+//        System.arraycopy( PublicPun.hexStringToByteArray("76a914934abe98a533cab0946a85d3bad409778a077c7088ac"),3,bareAddress, 0, bareAddress.length);
+        System.arraycopy(PublicPun.hexStringToByteArray(script), 3, bareAddress, 0, bareAddress.length);
+        LogUtil.e("bare2=" + PublicPun.byte2HexStringNoBlank(bareAddress));
+        byte[] baddr = new byte[bareAddress.length + 1];
+        baddr[0] = 0;
+        System.arraycopy(bareAddress, 0, baddr, 1, bareAddress.length);
+        LogUtil.e("bare3=" + PublicPun.byte2HexStringNoBlank(baddr));
+        return ByteUtils.toBase58WithChecksum(baddr);
+    }
 
     public static socketByAddress jsonParserSocketAddress(String jsonString) {
         socketByAddress socketAddress = null;
@@ -655,16 +720,15 @@ public class PublicPun {
         return bytes;
     }
 
-    public static float parseStringToFloatInternational(String str)
-    {
+    public static float parseStringToFloatInternational(String str) throws ParseException {
         NumberFormat format = NumberFormat.getInstance(Locale.getDefault());
         Number number = null;
-        try {
+//        try {
             number = format.parse(str);
-        } catch (ParseException e) {
-            e.printStackTrace();
-            LogUtil.e("edtFee parsing error! "+e.getMessage());
-        }
+//        } catch (ParseException e) {
+//            e.printStackTrace();
+//            LogUtil.e("edtFee parsing error! " + e.getMessage());
+//        }
         return number.floatValue();
     }
 
@@ -782,7 +846,7 @@ public class PublicPun {
                 }
             });
             builder.show();
-        }catch(Exception e){
+        } catch (Exception e) {
             LogUtil.e("showNoticeDialogToFinish 錯誤：" + e.getMessage());
         }
     }
@@ -824,11 +888,11 @@ public class PublicPun {
         return sb.toString();
     }
 
-    public static String byte2HexStringNoBlank(byte [] bytes){
-        if(bytes == null) return null;
+    public static String byte2HexStringNoBlank(byte[] bytes) {
+        if (bytes == null) return null;
 
         StringBuilder sb = new StringBuilder();
-        for(byte b : bytes){
+        for (byte b : bytes) {
             sb.append(String.format("%02x", b));
         }
 

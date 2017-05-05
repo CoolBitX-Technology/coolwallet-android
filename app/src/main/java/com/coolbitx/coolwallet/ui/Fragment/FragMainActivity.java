@@ -80,23 +80,23 @@ import java.util.TimerTask;
 public class FragMainActivity extends BaseActivity {//implements CompoundButton.OnCheckedChangeListener
 
     //左側選單圖片
-    private static final int[] MENU_ITEMS_PIC = new int[]{
-            R.mipmap.host, R.mipmap.cwcard, R.mipmap.security, R.mipmap.settings, R.drawable.exchange,
-            R.drawable.exchange, R.mipmap.ic_feedback_white_24dp, R.mipmap.logout, R.mipmap.ic_share_white_24dp};
-    // 左側選單文字項目
-    private static final String[] MENU_ITEMS = new String[]{
-            "Host devices", "CoolWallet card", "Security", "Settings", "Exchange",
-            "Exchange Login", "Issue Feedback", "Logout", "Share address\n(beta)"
-    };
-
-//    private static final int[] MENU_ITEMS_PIC = new int[]
-//            {R.mipmap.host, R.mipmap.cwcard, R.mipmap.security, R.mipmap.settings,
-//                    R.mipmap.ic_feedback_white_24dp, R.mipmap.logout, R.mipmap.ic_share_white_24dp};
+//    private static final int[] MENU_ITEMS_PIC = new int[]{
+//            R.mipmap.host, R.mipmap.cwcard, R.mipmap.security, R.mipmap.settings, R.drawable.exchange,
+//            R.drawable.exchange, R.mipmap.ic_feedback_white_24dp, R.mipmap.logout, R.mipmap.ic_share_white_24dp};
 //    // 左側選單文字項目
 //    private static final String[] MENU_ITEMS = new String[]{
-//            "Host devices", "CoolWallet card", "Security", "Settings",
-//            "Issue Feedback", "Logout", "Share address\n(beta)"
+//            "Host devices", "CoolWallet card", "Security", "Settings", "Exchange",
+//            "Exchange Login", "Issue Feedback", "Logout", "Share address\n(beta)"
 //    };
+
+    private static final int[] MENU_ITEMS_PIC = new int[]
+            {R.mipmap.host, R.mipmap.cwcard, R.mipmap.security, R.mipmap.settings,
+                    R.mipmap.ic_feedback_white_24dp, R.mipmap.logout, R.mipmap.ic_share_white_24dp};
+    // 左側選單文字項目
+    private static final String[] MENU_ITEMS = new String[]{
+            "Host devices", "CoolWallet card", "Security", "Settings",
+            "Issue Feedback", "Logout", "Share address\n(beta)"
+    };
 
     public static int ACCOUNT_CNT = 0;//這裡要改為抓qryWalletInfo的
     public static boolean refreshFlag = false;
@@ -131,7 +131,7 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
             String val = data.getString("result");
             try {
                 if (val != null) {
-                    if (identify.equals(BtcUrl.URL_BLICKCHAIN_EXCHANGE_RATE)) {
+                    if (identify.equals(BtcUrl.URL_BLOCKCHAIN_EXCHANGE_RATE)) {
 
                         SetCurrencyRate(mContext);
                         //card is not keep the setting.
@@ -694,7 +694,7 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
     private void getCurrRate() {
         DatabaseHelper.deleteTable(mContext, DbName.DB_TABLE_CURRENT);
         ContentValues cv = new ContentValues();
-        new Thread(new MyRunnable(mHandler, cv, BtcUrl.URL_BLICKCHAIN_EXCHANGE_RATE, 0, 60000 * 30, 0, cwBtcNetWork)).start();//1hr updated
+        new Thread(new MyRunnable(mHandler, cv, BtcUrl.URL_BLOCKCHAIN_EXCHANGE_RATE, 0, 60000 * 30, 0, cwBtcNetWork)).start();//1hr updated
         new Thread(new MyRunnable(mHandler, cv, BtcUrl.RECOMMENDED_TRANSACTION_FEES, 0, 60000 * 30, 0, cwBtcNetWork)).start();//1hr updated
     }
 
@@ -748,51 +748,51 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
                 intent = new Intent(getApplicationContext(), SettingActivity.class);
                 startActivityForResult(intent, 0);
                 break;
-//            case 4:
-//                IssueFeedBack();
-//                break;
-//            case 5:
-//                intent = new Intent(getApplicationContext(), LogOutActivity.class);
-//                startActivityForResult(intent, 0);
-//                break;
-//            case 6:
-//                //Share address service
-//                intent = new Intent(getApplicationContext(), ShareAddress.class);
-//                startActivityForResult(intent, 0);
-//                break;
-
-            //MARK XCHS
             case 4:
-                intent = new Intent(getApplicationContext(), ExchangeLogin.class);
-                startActivityForResult(intent, 0);
-                break;
-
-            case 5:
-                int infoid = 0;
-                cmdManager.XchsGetOtp(infoid, new CmdResultCallback() {
-                    @Override
-                    public void onSuccess(int status, byte[] outputData) {
-                        if ((status + 65536) == 0x9000) {//-28672//36864
-                            LogUtil.d("XchsGetOtp ok= " + outputData);
-                        } else {
-                            LogUtil.d("XchsGetOtp fail= " + outputData);
-
-                        }
-                    }
-                });
-                break;
-            case 6:
                 IssueFeedBack();
                 break;
-            case 7:
+            case 5:
                 intent = new Intent(getApplicationContext(), LogOutActivity.class);
                 startActivityForResult(intent, 0);
                 break;
-            case 8:
+            case 6:
                 //Share address service
                 intent = new Intent(getApplicationContext(), ShareAddress.class);
                 startActivityForResult(intent, 0);
                 break;
+
+            //MARK XCHS
+//            case 4:
+//                intent = new Intent(getApplicationContext(), ExchangeLogin.class);
+//                startActivityForResult(intent, 0);
+//                break;
+//
+//            case 5:
+//                int infoid = 0;
+//                cmdManager.XchsGetOtp(infoid, new CmdResultCallback() {
+//                    @Override
+//                    public void onSuccess(int status, byte[] outputData) {
+//                        if ((status + 65536) == 0x9000) {//-28672//36864
+//                            LogUtil.d("XchsGetOtp ok= " + outputData);
+//                        } else {
+//                            LogUtil.d("XchsGetOtp fail= " + outputData);
+//
+//                        }
+//                    }
+//                });
+//                break;
+//            case 6:
+//                IssueFeedBack();
+//                break;
+//            case 7:
+//                intent = new Intent(getApplicationContext(), LogOutActivity.class);
+//                startActivityForResult(intent, 0);
+//                break;
+//            case 8:
+//                //Share address service
+//                intent = new Intent(getApplicationContext(), ShareAddress.class);
+//                startActivityForResult(intent, 0);
+//                break;
 
 
         }

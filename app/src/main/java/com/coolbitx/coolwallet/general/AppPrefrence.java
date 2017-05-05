@@ -14,15 +14,18 @@ public class AppPrefrence {
     /**
      * Unspent info
      */
-    public static void saveUnspent(Context context, String val) {
+
+
+    public static void saveIsBlockrApi(Context context,boolean var){
         SharedPreferences mSP = PreferenceManager.getDefaultSharedPreferences(context);
-        mSP.edit().putString("Unspent", val).commit();
+        mSP.edit().putBoolean("IsBlockrApi", var).commit();
     }
 
-    public static String getUnspent(Context context) {
+    public static boolean getIsBlockrApi(Context context) {
         SharedPreferences mSP = PreferenceManager.getDefaultSharedPreferences(context);
-        return mSP.getString("Unspent", "");
+        return mSP.getBoolean("IsBlockrApi",false);
     }
+
 
     /**
      * Current Rate

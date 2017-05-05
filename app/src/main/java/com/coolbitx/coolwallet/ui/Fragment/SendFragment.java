@@ -131,7 +131,8 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
     private byte CwSecurityPolicyMaskBtn = 0x02;
     private byte CwSecurityPolicyMaskWatchDog = 0x10;
     private byte CwSecurityPolicyMaskAddress = 0x20;
-
+    private boolean isBlockr ;
+    String UrlUnspent;
     private Handler mHandler = new Handler() {
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
@@ -174,9 +175,9 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
             int postPushResult = -1;
             int hadlerMsg = 0;
 
-            postDecodeResult = cwBtcNetWork.doPost(BtcUrl.URL_BLOCKR_SERVER_SITE + BtcUrl.URL_BLICKR_DECODE, currUnsignedTx);
+            postDecodeResult = cwBtcNetWork.doPost(BtcUrl.URL_BLOCKR_SERVER_SITE + BtcUrl.URL_BLOCKR_DECODE, currUnsignedTx);
             if (postDecodeResult == 200) {
-                postPushResult = cwBtcNetWork.doPost(BtcUrl.URL_BLOCKR_SERVER_SITE + BtcUrl.URL_BLICKR_PUSH, currUnsignedTx);
+                postPushResult = cwBtcNetWork.doPost(BtcUrl.URL_BLOCKR_SERVER_SITE + BtcUrl.URL_BLOCKR_PUSH, currUnsignedTx);
                 if (postPushResult == 200) {
                     hadlerMsg = HANDLER_SEND_BTC_FINISH;
                 } else {
@@ -248,6 +249,8 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
 
     @Override
     public void onClick(View v) {
+
+        isBlockr = AppPrefrence.getIsBlockrApi(mContext);
 
         if (v == btnSend) {
             isTrxSuccess = false;
@@ -338,29 +341,44 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
 //                    unSpentTxsAsyncTask.execute(InAddress);
 //                }
 //            } else {s
+        String v_separator;
+        if (!isBlockr) {
+            UrlUnspent = BtcUrl.URL_BLOCKCHAIN_UNSPENT;
+            v_separator = "|";
+        } else {
+            UrlUnspent = BtcUrl.URL_BLOCKR_UNSPENT;
+            v_separator = ",";
+        }
+
         for (int i = 0; i < lisCwBtcAdd.size(); i++) {
             if (lisCwBtcAdd.get(i).getBalance() > 0) {
                 LogUtil.i("call unspent的地址: " + i + " =" + lisCwBtcAdd.get(i).getAddress());
                 if (i == 0) {
                     InAddress += lisCwBtcAdd.get(i).getAddress();
                 } else {
-                    InAddress += "," + lisCwBtcAdd.get(i).getAddress();
+                    InAddress += v_separator + lisCwBtcAdd.get(i).getAddress();
                 }
             }
+
         }
-//        }
-        InAddress += "?unconfirmed=1";
+
+        //Including unconfirmed (zero confirmation) transactions.
+
+        if(isBlockr) {
+            InAddress += "?unconfirmed=1";
+        }
         LogUtil.i("InAddress=" + InAddress);
+
         unSpentTxsAsyncTask = new UnSpentTxsAsyncTask();
         unSpentTxsAsyncTask.execute(InAddress);
     }
 
-    public List<UnSpentTxsBean> getUnspentTxsByAddr(String mAddr) {
+    public ArrayList<UnSpentTxsBean> getHandleUnspentTxsByAddr(String mAddr) {
 
-        List<UnSpentTxsBean> UnSpentTxsBeanList = null;
+        ArrayList<UnSpentTxsBean> UnSpentTxsBeanList =new ArrayList<UnSpentTxsBean>();
         ContentValues cv = new ContentValues();
         cv.put("addresses", mAddr);
-        final String result = cwBtcNetWork.doGet(cv, BtcUrl.URL_BLOCKR_UNSPENT, null);
+        final String result = cwBtcNetWork.doGet(cv, UrlUnspent, null);
         if (!TextUtils.isEmpty(result)) {
 //            if (result.equals("{\"errorCode\": 404}") || result.equals("{\"errorCode\": 400}") || result.equals("{\"errorCode\": 500}")) {
             if (result.contains("errorCode")) {
@@ -387,7 +405,11 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
                 }
             } else {
                 Crashlytics.log(getString(R.string.send_call_unspent_success) + getString(R.string.send_call_unspent_list_addresses) + InAddress);
-                UnSpentTxsBeanList = PublicPun.jsonParserUnspent(result);
+                if(isBlockr) {
+                    UnSpentTxsBeanList = PublicPun.jsonParseBlockrUnspent(result);
+                }else{
+                    UnSpentTxsBeanList = PublicPun.jsonParseBlockChainInfoUnspent(result);
+                }
             }
         }
         return UnSpentTxsBeanList;
@@ -421,7 +443,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
         } else {
             cmdManager.hdwGetNextAddress(keyChainId, accountId, new CmdResultCallback() {
                 @Override
-                public void onSuccess(int status, byte[] outputData)  {
+                public void onSuccess(int status, byte[] outputData) {
                     if ((status + 65536) == 0x9000) {
                         if (outputData != null) {
                             Address address = new Address();
@@ -479,6 +501,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
         long availableAmount = 0;
         for (UnSpentTxsBean unSpentTxsBean : unSpentTxsBeanList) {
 //            availableAmount += (long) (unSpentTxsBean.getAmount() * SATOSHIS_PER_COIN);
+            LogUtil.d("unspent:"+unSpentTxsBean.getAddress()+";"+ new DecimalFormat("#.########").format(unSpentTxsBean.getAmount()));
             /**
              *  DecimalFormat  can format a number in a customized format for a particular locale,ex. 0.5=>0,5(Europe).
              */
@@ -601,7 +624,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
             }
         });
 
-        try {
+//        try {
             //計算出了手續費和找零後的 UnspentInputList未花费的交易,input=要拿來發送$的地址
             LogUtil.e(" processedTxData.outputsToSpend.size():" + processedTxData.outputsToSpend.size());
             signedInputs = new Transaction.Input[processedTxData.outputsToSpend.size()];//
@@ -743,11 +766,12 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
                             }
                         });
             }
-        } catch (Exception e) {
-            PublicPun.showNoticeDialog(mContext, "Notification", "Unable to Send");
-            cancelTrx();
-            Crashlytics.logException(e);
-        }
+//        } catch (Exception e) {
+//            PublicPun.showNoticeDialog(mContext, "Notification", "Unable to Send");
+//            LogUtil.e("prepareTransaction error="+e.getMessage());
+//            cancelTrx();
+//            Crashlytics.logException(e);
+//        }
     }
 
     private void TimeOutCheck() {
@@ -1334,6 +1358,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
         btcAmt = final_balance * PublicPun.SATOSHI_RATE;
         tvSendTitle.setText(TabFragment.BtcFormatter.format(btcAmt));
         tvSendSubtitle_country.setText(AppPrefrence.getCurrentCountry(mContext));
+        tvSendAmountTop.setText(AppPrefrence.getCurrentCountry(mContext));
         double currRate = btcAmt * AppPrefrence.getCurrentRate(mContext);
         tvSendSubtitle.setText(TabFragment.currentFormatter.format(currRate));
 
@@ -1345,7 +1370,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
         @Override
         protected List<UnSpentTxsBean> doInBackground(String... strings) {
             LogUtil.i("doInBackground!!!!");
-            unSpentTxsBeanList = getUnspentTxsByAddr(strings[0]);
+            unSpentTxsBeanList = getHandleUnspentTxsByAddr(strings[0]);
             return unSpentTxsBeanList;
         }
 

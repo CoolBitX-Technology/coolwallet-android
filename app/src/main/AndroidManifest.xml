@@ -2,7 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.coolbitx.coolwallet">
-    <!--1.1.4-->
+
+    <!-- 1.1.4 -->
     <!-- Socket網路權限 -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -14,106 +15,105 @@
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-    <!--<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />-->
-    <!--<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />-->
-<!--for XCHS Notification-->
-    <permission android:name="com.coolbitx.coolwallet.permission.C2D_MESSAGE"
+    <!-- <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" /> -->
+    <!-- <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /> -->
+    <!-- for XCHS Notification -->
+    <permission
+        android:name="com.coolbitx.coolwallet.permission.C2D_MESSAGE"
         android:protectionLevel="signature" />
+
     <uses-permission android:name="com.coolbitx.coolwallet.permission.C2D_MESSAGE" />
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher_cw"
         android:label="@string/app_name"
         android:theme="@style/AppTheme"
         tools:replace="android:icon">
-        <!--InitialSecuritySettingActivity-->
-        <!--BleActivity-->
+
+        <!-- InitialSecuritySettingActivity -->
+        <!-- BleActivity -->
         <activity
             android:name=".ui.BleActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
             android:name=".ui.ConfirmOtpActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme"></activity>
-
+            android:theme="@style/AppTheme" />
         <activity
             android:name=".ui.InitialCreateWalletActivity"
-            android:screenOrientation="portrait"></activity>
+            android:screenOrientation="portrait" />
         <activity
             android:name=".ui.InitialCreateWalletIIActivity"
-            android:screenOrientation="portrait"></activity>
+            android:screenOrientation="portrait" />
         <activity
             android:name=".ui.InitialCreateWalletWords"
-            android:screenOrientation="portrait"></activity>
+            android:screenOrientation="portrait" />
         <activity
             android:name=".ui.RecovWalletActivity"
-            android:screenOrientation="portrait"></activity>
+            android:screenOrientation="portrait" />
         <activity
             android:name=".ui.InitialCreateHDWallet"
-            android:screenOrientation="portrait"></activity>
+            android:screenOrientation="portrait" />
         <activity
             android:name=".ui.InitialSecuritySettingActivity"
             android:parentActivityName=".ui.Fragment.FragMainActivity"
-            android:screenOrientation="portrait"></activity>
+            android:screenOrientation="portrait" />
         <activity
             android:name=".ui.InitialPairSuccessfulActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme"></activity>
+            android:theme="@style/AppTheme" />
         <activity
             android:name=".ui.Fragment.FragMainActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
             android:theme="@style/MyMaterialTheme"
-            android:windowSoftInputMode="adjustPan"></activity>
+            android:windowSoftInputMode="adjustPan" />
         <activity
             android:name=".ui.EraseActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme"></activity>
-
+            android:theme="@style/AppTheme" />
         <activity
             android:name=".ui.CoolWalletCardActivity"
             android:parentActivityName=".ui.Fragment.FragMainActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme"></activity>
+            android:theme="@style/AppTheme" />
         <activity
             android:name=".ui.LogOutActivity"
             android:parentActivityName=".ui.Fragment.FragMainActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme"></activity>
-
+            android:theme="@style/AppTheme" />
         <activity
             android:name=".ui.ShareAddress"
             android:parentActivityName=".ui.Fragment.FragMainActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme"></activity>
+            android:theme="@style/AppTheme" />
         <activity
             android:name=".ui.HostDeviceActivity"
             android:parentActivityName=".ui.Fragment.FragMainActivity"
-            android:screenOrientation="portrait"></activity>
-
+            android:screenOrientation="portrait" />
         <activity
             android:name=".ui.SettingActivity"
             android:parentActivityName=".ui.Fragment.FragMainActivity"
-            android:screenOrientation="portrait"></activity>
+            android:screenOrientation="portrait" />
         <activity
             android:name=".ui.ExchangeRateActivity"
             android:parentActivityName=".ui.Fragment.FragMainActivity"
-            android:screenOrientation="portrait"></activity>
-
+            android:screenOrientation="portrait" />
         <activity
             android:name=".ui.ExchangeVerificationActivity"
             android:parentActivityName=".ui.Fragment.FragMainActivity"
             android:screenOrientation="portrait" />
-
         <activity
             android:name=".ui.ExchangeActivity"
             android:parentActivityName=".ui.Fragment.FragMainActivity"
@@ -122,21 +122,22 @@
             android:name=".ui.ExchangeOrderActivity"
             android:parentActivityName=".ui.Fragment.FragMainActivity"
             android:screenOrientation="portrait" />
-
         <activity
             android:name=".ui.ExchangeLogin"
             android:parentActivityName=".ui.Fragment.FragMainActivity"
             android:screenOrientation="portrait" />
-
         <activity
             android:name=".ui.TxsActivity"
             android:parentActivityName=".ui.Fragment.FragMainActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme"></activity>
-
+            android:theme="@style/AppTheme" />
         <activity
             android:name=".ui.TransactionFeeActivity"
             android:parentActivityName=".ui.Fragment.FragMainActivity"
+            android:screenOrientation="portrait" />
+
+        <activity android:name=".ui.Fragment.ServiceProviderActivity"
+            android:parentActivityName=".ui.SettingActivity"
             android:screenOrientation="portrait"></activity>
 
         <service android:name=".Service.socketService" />
@@ -177,6 +178,7 @@
                 <category android:name="com.coolbitx.coolwallet" />
             </intent-filter>
         </receiver>
+
     </application>
 
 </manifest>

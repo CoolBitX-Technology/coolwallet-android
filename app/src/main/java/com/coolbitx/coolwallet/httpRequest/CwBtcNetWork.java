@@ -19,6 +19,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import static com.coolbitx.coolwallet.general.BtcUrl.URL_BLOCKCHAIN_UNSPENT;
+
 /**
  * Created by wmgs_01 on 15/9/25.
  */
@@ -64,16 +66,17 @@ public class CwBtcNetWork {
         try {
             if (extraUrl.equals(BtcUrl.URL_BLOCKR_UNSPENT)) {
                 url = BtcUrl.URL_BLOCKR_SERVER_SITE + extraUrl + cv.getAsString("addresses");
-//                url="http://btc.blockr.io/api/v1/address/unspent/16PGKxt3H96TzKPHSWFDSiqxWPPxm4p6G5";
-            } else if (extraUrl.equals(BtcUrl.URL_BLICKCHAIN_EXCHANGE_RATE)) {
-                url = BtcUrl.URL_BLICKCHAIN_SERVER_SITE + extraUrl;
+            }else if(extraUrl.equals(URL_BLOCKCHAIN_UNSPENT)){
+                url = BtcUrl.URL_BLOCKCHAIN_SERVER_SITE + extraUrl + cv.getAsString("addresses");
+            } else if (extraUrl.equals(BtcUrl.URL_BLOCKCHAIN_EXCHANGE_RATE)) {
+                url = BtcUrl.URL_BLOCKCHAIN_SERVER_SITE + extraUrl;
             } else if (extraUrl.equals(BtcUrl.RECOMMENDED_TRANSACTION_FEES)) {
                 url = extraUrl;
             } else if (extraUrl.equals(BtcUrl.URL_BLICKCHAIN_TXS_MULTIADDR)) {
                 if (params == null) {
-                    url = BtcUrl.URL_BLICKCHAIN_SERVER_SITE + extraUrl + cv.getAsString("addresses");
+                    url = BtcUrl.URL_BLOCKCHAIN_SERVER_SITE + extraUrl + cv.getAsString("addresses");
                 } else {
-                    url = BtcUrl.URL_BLICKCHAIN_SERVER_SITE + "multiaddr?offset=" + params + "&active=" + cv.getAsString("addresses");
+                    url = BtcUrl.URL_BLOCKCHAIN_SERVER_SITE + "multiaddr?offset=" + params + "&active=" + cv.getAsString("addresses");
                 }
             } else {
                 url = extraUrl;
@@ -90,7 +93,7 @@ public class CwBtcNetWork {
             connection.setDoOutput(false);
             connection.setDoInput(true);
             int code = connection.getResponseCode();
-            LogUtil.i("URL_BLOCK_CHAIN code = " + code);
+            LogUtil.i("http response code = " + code);
 
             switch (code) {
                 case 200:

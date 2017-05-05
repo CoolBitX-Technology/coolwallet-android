@@ -3,6 +3,9 @@ package com.coolbitx.coolwallet.bean;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.coolbitx.coolwallet.util.BTCUtils;
 import com.coolbitx.coolwallet.util.BitcoinOutputStream;
+import com.coolbitx.coolwallet.util.ByteUtils;
+import com.coolbitx.coolwallet.util.ECPublicKey;
+import com.coolbitx.coolwallet.util.Hash;
 import com.coolbitx.coolwallet.util.ValidationException;
 import com.snscity.egdwlib.utils.LogUtil;
 
@@ -12,6 +15,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Stack;
+
+import static com.coolbitx.coolwallet.util.ByteUtils.toBase58;
 
 /**
  * Created by wmgs_01 on 15/10/6.
@@ -281,7 +286,9 @@ public class Transaction {
         public static Script buildOutput(String address) throws ValidationException, NoSuchAlgorithmException, IOException {
             //noinspection TryWithIdenticalCatches
 //            try {
+            LogUtil.e("out address="+address);
             byte[] addressWithCheckSumAndNetworkCode = BTCUtils.decodeBase58(address);
+            LogUtil.e("addressWithCheckSumAndNetworkCode="+PublicPun.byte2HexStringNoBlank(addressWithCheckSumAndNetworkCode));
 //                if (addressWithCheckSumAndNetworkCode[0] != 0 ||  addressWithCheckSumAndNetworkCode[0]!=5) {
             if (addressWithCheckSumAndNetworkCode[0] != 0 && addressWithCheckSumAndNetworkCode[0] != 5) {
                 LogUtil.e("Unknown address type: " + addressWithCheckSumAndNetworkCode[0] + ";addr=" + address);
@@ -296,11 +303,11 @@ public class Transaction {
             }
             byte[] bareAddress = new byte[20];
             System.arraycopy(addressWithCheckSumAndNetworkCode, 1, bareAddress, 0, bareAddress.length);
-            LogUtil.d("addressWithCheckSumAndNetworkCode=" + PublicPun.byte2HexString(addressWithCheckSumAndNetworkCode) + "\n" + "bareAddress=" + PublicPun.byte2HexString(bareAddress));
+            LogUtil.d("addressWithCheckSumAndNetworkCode=" + PublicPun.byte2HexString(addressWithCheckSumAndNetworkCode) + "\n" + "bareAddress=" + PublicPun.byte2HexStringNoBlank(bareAddress));
             MessageDigest digestSha = MessageDigest.getInstance("SHA-256");
             digestSha.update(addressWithCheckSumAndNetworkCode, 0, addressWithCheckSumAndNetworkCode.length - 4);
             byte[] calculatedDigest = digestSha.digest(digestSha.digest());
-            LogUtil.d("calculatedDigest=" + PublicPun.byte2HexString(calculatedDigest));
+//            LogUtil.d("calculatedDigest=" + PublicPun.byte2HexString(calculatedDigest));
             for (int i = 0; i < 4; i++) {
                 if (calculatedDigest[i] != addressWithCheckSumAndNetworkCode[addressWithCheckSumAndNetworkCode.length - 4 + i]) {
 //                        LogUtil.e("Bad address " + address);
@@ -326,6 +333,7 @@ public class Transaction {
                 ScriptAdd = buf.toByteArray();
             }
             LogUtil.d("產生script的output地址=" + LogUtil.byte2HexString(ScriptAdd));
+//            LogUtil.e("toBase58="+getAddressFromScript());
             return new Script(buf.toByteArray());
         }
 

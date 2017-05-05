@@ -1,5 +1,7 @@
 package com.coolbitx.coolwallet.bean;
 
+import com.google.gson.annotations.SerializedName;
+
 /**
  * Created by wmgs_01 on 15/10/7.
  */
@@ -16,21 +18,22 @@ public class UnSpentTxsBean {
     /**
      *  for blockr
      */
+
     private String tx;
     private double amount;//value
     private int n;//outputIndex
     private int confirmations;//confirmations
     private String script;//script
     private String address;
-    private String publickey;
+//    private String publickey;
 
-    public String getPublickey() {
-        return publickey;
-    }
-
-    public void setPublickey(String publickey) {
-        this.publickey = publickey;
-    }
+//    public String getPublickey() {
+//        return publickey;
+//    }
+//
+//    public void setPublickey(String publickey) {
+//        this.publickey = publickey;
+//    }
 
     public String getAddress() {
         return address;

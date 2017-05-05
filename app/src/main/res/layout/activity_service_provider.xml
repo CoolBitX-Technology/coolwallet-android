@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black"
+    android:orientation="vertical"
+    tools:context="com.coolbitx.coolwallet.ui.Fragment.ServiceProviderActivity">
+
+    <include layout="@layout/toolbar" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_horizontal"
+        android:layout_margin="@dimen/activity_horizontal_margin">
+    <Switch
+        android:id="@+id/switch_api"
+        android:layout_width="200dp"
+        android:layout_height="80dp"
+        android:text="Blockchain.info"
+
+        style="@style/TextView_White_20"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Blockr.io"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        style="@style/TextView_White_20"/>
+    </LinearLayout>
+</LinearLayout>

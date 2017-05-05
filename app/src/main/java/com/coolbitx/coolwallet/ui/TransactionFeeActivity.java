@@ -23,9 +23,9 @@ import com.coolbitx.coolwallet.general.PublicPun;
 import com.snscity.egdwlib.utils.LogUtil;
 
 import java.text.DecimalFormat;
+import java.text.ParseException;
 
 import static com.coolbitx.coolwallet.general.PublicPun.SATOSHI_RATE;
-import static com.coolbitx.coolwallet.general.PublicPun.jsonParserUnspent;
 
 /**
  * Created by ShihYi on 2016/2/2.
@@ -130,13 +130,19 @@ public class TransactionFeeActivity extends BaseActivity implements CheckBox.OnC
                 return;
             } else {
 //                if (Float.valueOf(edtFee.getText().toString()) < estimatedFeeBTC) {
-                if (PublicPun.parseStringToFloatInternational(edtFee.getText().toString()) < estimatedFeeBTC) {
-                    showNoticeDialogToFinish(context, "Notification", "Your fee is below average and may take longer than 30 minutes to confirm.");
-                }
-                if (PublicPun.parseStringToFloatInternational(edtFee.getText().toString()) > 1) {
-                    if (Float.valueOf(edtFee.getText().toString()) > 1) {
-                        showNoticeDialogToFinish(context, "Notification", "Your fee is higher than 1 BTC.");
+                try {
+                    if (PublicPun.parseStringToFloatInternational(edtFee.getText().toString()) < estimatedFeeBTC) {
+                        showNoticeDialogToFinish(context, "Notification", "Your fee is below average and may take longer than 30 minutes to confirm.");
                     }
+
+                    if (PublicPun.parseStringToFloatInternational(edtFee.getText().toString()) > 1) {
+                        if (Float.valueOf(edtFee.getText().toString()) > 1) {
+                            showNoticeDialogToFinish(context, "Notification", "Your fee is higher than 1 BTC.");
+                        }
+                    }
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                    showNoticeDialogToFinish(context, "Notification", "Fees format is wrong.");
                 }
             }
         } else {

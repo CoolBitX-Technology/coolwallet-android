@@ -10,8 +10,9 @@ public class BtcUrl {
 //  Exchange Rates API : https://blockchain.info/ticker
 
 
-    public static final String URL_BLICKCHAIN_RAW_ADDRESS="https://blockchain.info/rawaddr/";
-    public static final String URL_BLICKCHAIN_SERVER_SITE = "https://blockchain.info/";
+    public static final String URL_BLOCKCHAIN_RAW_ADDRESS ="https://blockchain.info/rawaddr/";
+    public static final String URL_BLOCKCHAIN_SERVER_SITE = "https://blockchain.info/";
+    public static final String URL_BLOCKCHAIN_UNSPENT = "unspent?active=";
     public static final String URL_BLICKCHAIN_TXS_MULTIADDR ="multiaddr?active=";
 
     public static final String URL_BLOCKR_SERVER_SITE = "http://btc.blockr.io/api/v1/";
@@ -19,10 +20,10 @@ public class BtcUrl {
     public static final String URL_BLOCKR_UNCONFIRMED = "unconfirmed/address";
     public static final String URL_BLOCKR_INFO = "info/address";
     public static final String URL_BLOCKR_EXCHANGE_RATE = "exchangerate/current";
-    public static final String URL_BLICKCHAIN_EXCHANGE_RATE = "ticker";
+    public static final String URL_BLOCKCHAIN_EXCHANGE_RATE = "ticker";
 
-    public static final String URL_BLICKR_DECODE="tx/decode";
-    public static final String URL_BLICKR_PUSH="tx/push";
+    public static final String URL_BLOCKR_DECODE ="tx/decode";
+    public static final String URL_BLOCKR_PUSH ="tx/push";
 
     public static final String RECOMMENDED_TRANSACTION_FEES = "https://bitcoinfees.21.co/api/v1/fees/recommended";
 

@@ -734,7 +734,7 @@ public class ExchangeAPI {
         new AsyncTask<String, Integer, JSONObject>() {
             @Override
             protected JSONObject doInBackground(String... param) {
-                String url = BtcUrl.URL_BLICKCHAIN_RAW_ADDRESS + addr;
+                String url = BtcUrl.URL_BLOCKCHAIN_RAW_ADDRESS + addr;
                 return new XchsNetWork().doGetRawAddress(url);
             }
 

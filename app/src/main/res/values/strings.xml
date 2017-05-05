@@ -56,8 +56,7 @@
 
     <!--security layout-->
     <string name="tv_security_otp">Enable One Time Password\n(OTP) on transactions</string>
-    <string name="tv_security_enable_press_button"
-        >Enable press the button on the\ncard to complete transactions</string>
+    <string name="tv_security_enable_press_button">Enable press the button on the\ncard to complete transactions</string>
     <string name="tv_security_dog">Enable Watch dog function</string>
     <string name="tv_security_dog_explain">Set an alert that warms you when CoolWallet\nand your device are certain distance apart</string>
     <string name="tv_security_show_address">Show sending address on card</string>

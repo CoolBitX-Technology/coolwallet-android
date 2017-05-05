@@ -53,6 +53,7 @@ import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Formatter;
 import java.util.List;
 import java.util.Random;
 import java.util.Timer;
@@ -324,6 +325,7 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
             /**
              *  DecimalFormat  can format a number in a customized format for a particular locale,ex. 0.5=>0,5(Europe).
              */
+
             availableAmount += BTCUtils.BTCconvertToSatoshisValue(unSpentTxsBean.getAmount());
         }
         long extraFee = BTCUtils.parseValue("0.0");
@@ -1015,9 +1017,9 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
             int postPushResult = -1;
             int hadlerMsg = 0;
 
-            postDecodeResult = cwBtcNetWork.doPost(BtcUrl.URL_BLOCKR_SERVER_SITE + BtcUrl.URL_BLICKR_DECODE, currUnsignedTx);
+            postDecodeResult = cwBtcNetWork.doPost(BtcUrl.URL_BLOCKR_SERVER_SITE + BtcUrl.URL_BLOCKR_DECODE, currUnsignedTx);
             if (postDecodeResult == 200) {
-                postPushResult = cwBtcNetWork.doPost(BtcUrl.URL_BLOCKR_SERVER_SITE + BtcUrl.URL_BLICKR_PUSH, currUnsignedTx);
+                postPushResult = cwBtcNetWork.doPost(BtcUrl.URL_BLOCKR_SERVER_SITE + BtcUrl.URL_BLOCKR_PUSH, currUnsignedTx);
                 if (postPushResult == 200) {
                     hadlerMsg = HANDLER_SEND_BTC_FINISH;
                 } else {
@@ -1235,7 +1237,7 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
                     unSpentTxsAsyncTask.cancel(true);
                 }
             } else {
-                UnSpentTxsBeanList = PublicPun.jsonParserUnspent(result);
+                UnSpentTxsBeanList = PublicPun.jsonParseBlockrUnspent(result);
                 errorCnt = 0;
             }
         }

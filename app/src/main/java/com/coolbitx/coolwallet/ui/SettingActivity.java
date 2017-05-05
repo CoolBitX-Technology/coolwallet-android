@@ -11,6 +11,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.coolbitx.coolwallet.R;
+import com.coolbitx.coolwallet.ui.Fragment.ServiceProviderActivity;
 
 /**
  * Created by ShihYi on 2017/1/23.
@@ -52,7 +53,7 @@ public class SettingActivity extends BaseActivity implements AdapterView.OnItemC
     @Override
     protected void onResume() {
         super.onResume();
-        String[] item = new String[]{"Exchange Rate","Transaction Fees"};
+        String[] item = new String[]{"Exchange Rate","Transaction Fees","Payment Service Provider"};
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_expandable_list_item_1, item);
         lvSetting.setAdapter(adapter);
         lvSetting.setOnItemClickListener(this);
@@ -83,6 +84,10 @@ public class SettingActivity extends BaseActivity implements AdapterView.OnItemC
                 break;
             case 1:
                 intent = new Intent(this, TransactionFeeActivity.class);
+                startActivity(intent);
+                break;
+            case 2:
+                intent = new Intent(this, ServiceProviderActivity.class);
                 startActivity(intent);
                 break;
 

@@ -173,6 +173,7 @@ public class BTCUtils {
      * @param valueStr
      * @return
      * @throws NumberFormatException
+     * Float formatting is different for countries
      */
     public static long convertToSatoshisValueForDIsplay(String valueStr) throws NumberFormatException {
         String satoshisStr = String.valueOf(SATOSHIS_PER_COIN);
