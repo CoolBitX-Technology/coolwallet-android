@@ -44,7 +44,7 @@ public class InitialCreateWalletIIActivity extends BaseActivity implements SeekB
     private Spinner seedSpinner;
     private TextView edtHdWord;
     private TextView tvHdwSeedLength;
-    private String[] strSeed = {"Card (numbers)", "App (words)"};
+    private String[] strSeed = {"App (words)","Card (numbers)"};
     private Button hdwConfirm;
     private LinearLayout hdwSumLin;
     private TableLayout tlCcreate;
@@ -207,7 +207,7 @@ public class InitialCreateWalletIIActivity extends BaseActivity implements SeekB
             changeLayout(128);
 
         } else if (newProgress > 70) {
-            //设置lastProgress 要放在setProgress之前，否则可能导致执行多次onProgressChanged 改变了原值
+            //設置lastProgress 放在setProgress之前，否則可能導致執行多次onProgressChanged，改變了原值
             lastProgress = 100;
             newProgress = 100;
             hdwSeedLength.setProgress(100);
@@ -231,13 +231,14 @@ public class InitialCreateWalletIIActivity extends BaseActivity implements SeekB
 
         if (parent == seedSpinner) {
             if (position == 0) {
+                //by soft create seed(BIP32)
+                isSeedOn = false;
+                tvSeedType.setText("App");
+            } else {
+
                 //by card create seed
                 isSeedOn = true;
                 tvSeedType.setText("Card");
-            } else {
-                //by soft create seed
-                isSeedOn = false;
-                tvSeedType.setText("App");
             }
 
             if (newProgress < 30) {
@@ -248,7 +249,7 @@ public class InitialCreateWalletIIActivity extends BaseActivity implements SeekB
                 changeLayout(128);
 
             } else if (newProgress > 70) {
-                //设置lastProgress 要放在setProgress之前，否则可能导致执行多次onProgressChanged 改变了原值
+                //設置lastProgress 放在setProgress之前，否則可能導致執行多次onProgressChanged，改變了原值
                 lastProgress = 100;
                 newProgress = 100;
                 hdwSeedLength.setProgress(100);

@@ -79,7 +79,7 @@ public class RecovWalletActivity extends BaseActivity implements View.OnClickLis
 //    private Button btnCreateWallet2;
     private Spinner seedSpinner;
     private EditText edtHdWord;
-    private String[] strSeed = {"Numbers", "Words"};
+    private String[] strSeed = { "Words","Numbers"};
     private boolean isSeedOn = true;
     private CmdManager cmdManager;
     private ArrayAdapter<String> listSeed;
@@ -553,6 +553,8 @@ public class RecovWalletActivity extends BaseActivity implements View.OnClickLis
                                         extendPub[a + 1] = publicKeyBytes[a];
                                     }
                                 }
+                                DatabaseHelper.insertAccountKeyInfo(mContext, accountId, kcId,
+                                        PublicPun.byte2HexStringNoBlank(extendPub), PublicPun.byte2HexStringNoBlank(chainCodeBytes));
 
                                 ContentValues cv = new ContentValues();
                                 cv.put("URL", BtcUrl.URL_BLICKCHAIN_TXS_MULTIADDR);
@@ -742,17 +744,19 @@ public class RecovWalletActivity extends BaseActivity implements View.OnClickLis
 
         if (parent == seedSpinner) {
             if (position == 0) {
-                //by numbers gen seed
-//                edtHdWord.setInputType(InputType.TYPE_NUMBER_FLAG_SIGNED);
-                isSeedOn = true;
-                edtHdWord.setText("");
-            } else {
-                //by words gen seed
+
+                //by words gen seed(BIP32)
 //                edtHdWord.setInputType(InputType.TYPE_CLASS_TEXT);
                 isSeedOn = false;
                 edtHdWord.setText("");
+            } else {
+
+                //by numbers gen seed
+                // edtHdWord.setInputType(InputType.TYPE_NUMBER_FLAG_SIGNED);
+                isSeedOn = true;
+                edtHdWord.setText("");
             }
-            LogUtil.i("choose seed type:" + position + "=" + (isSeedOn ? "numbers" : "words"));
+            LogUtil.i("choose seed type:" + position + "=" + (isSeedOn ? "words" : "numbers" ));
         }
     }
 

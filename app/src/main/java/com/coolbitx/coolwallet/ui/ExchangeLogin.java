@@ -102,7 +102,7 @@ public class ExchangeLogin extends BaseActivity implements View.OnClickListener 
             public void fail(String msg) {
                 isLoginSuccess = true;
                 mProgress.dismiss();
-                PublicPun.showNoticeDialog(mContext,"Exchange Error",msg+ "\nPlease check your Exchange Account Verification and try again later.");
+                PublicPun.showNoticeDialog(mContext,"Login failed",msg+ "\nPlease check your Exchange Account Verification and try again later.");
                 ExchangeLogout();
             }
         });

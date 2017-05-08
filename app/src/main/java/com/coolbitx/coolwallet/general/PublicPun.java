@@ -260,7 +260,7 @@ public class PublicPun {
         JSONObject jsonDataJsonObject;
         ArrayList<UnSpentTxsBean> lisUnSpentTxs = new ArrayList<UnSpentTxsBean>();
         try {
-            LogUtil.d("jsonString=" + jsonString);
+            System.out.print("jsonString=" + jsonString);
             jsonData = new JSONObject(jsonString).get("data");
 
             UnSpentTxsBean mUnSpentTxsBean = new UnSpentTxsBean();
@@ -337,7 +337,7 @@ public class PublicPun {
         JSONArray jsonDataJsonArray;
 
         try {
-            LogUtil.d("jsonString=" + jsonString);
+            System.out.print("jsonString=" + jsonString);
             jsonData = new JSONObject(jsonString).get("unspent_outputs");
 
             jsonDataJsonArray = (JSONArray) jsonData;
@@ -385,11 +385,11 @@ public class PublicPun {
         //(來源陣列，起始索引值，目的陣列，起始索引值，複製長度)
 //        System.arraycopy( PublicPun.hexStringToByteArray("76a914934abe98a533cab0946a85d3bad409778a077c7088ac"),3,bareAddress, 0, bareAddress.length);
         System.arraycopy(PublicPun.hexStringToByteArray(script), 3, bareAddress, 0, bareAddress.length);
-        LogUtil.e("bare2=" + PublicPun.byte2HexStringNoBlank(bareAddress));
+
         byte[] baddr = new byte[bareAddress.length + 1];
         baddr[0] = 0;
         System.arraycopy(bareAddress, 0, baddr, 1, bareAddress.length);
-        LogUtil.e("bare3=" + PublicPun.byte2HexStringNoBlank(baddr));
+
         return ByteUtils.toBase58WithChecksum(baddr);
     }
 
@@ -399,7 +399,7 @@ public class PublicPun {
             JSONObject jsonObject = new JSONObject(jsonString);
             //建立Gson類別並將JSON資料裝入class物件裡
             Gson gson = new Gson();
-            LogUtil.e("jsonParserSocketAddress:" + jsonObject.get("type"));
+            System.out.print("jsonParserSocketAddress:" + jsonObject.get("type"));
             if (jsonObject.get("type").equals("address")) {
                 socketAddress = new socketByAddress();
                 JSONObject jsonObjectSocket = jsonObject.getJSONObject("data");
@@ -457,7 +457,7 @@ public class PublicPun {
     public static boolean jsonParsingFeeaRate(Context mContext, String jsonString) {
         boolean mResult = false;
         try {
-            LogUtil.d("jsonParsingFeeRate=" + jsonString);
+            System.out.print("jsonParsingFeeRate=" + jsonString);
             JSONObject jsonObjectFeesRate = new JSONObject(jsonString);
 
             AppPrefrence.saveRecommendedFastestFee(mContext, jsonObjectFeesRate.getInt("fastestFee"));
@@ -557,13 +557,13 @@ public class PublicPun {
             JSONObject jsonObjectInfo = jsonObject.getJSONObject("info");
             Info mInfo = gson.fromJson(jsonObjectInfo.toString(), Info.class);
             latest_block = mInfo.getLatest_block().getHeight();
-            LogUtil.d("Info getLatest_block.height: " + latest_block);
+            System.out.print("Info getLatest_block.height: " + latest_block);
 
 
             //wallet
             JSONObject jsonObjectWallet = jsonObject.getJSONObject("wallet");
             PasingWallet mWallet = gson.fromJson(jsonObjectWallet.toString(), PasingWallet.class);
-            LogUtil.d("Wallet N_tx: " + mWallet.getN_tx());
+            System.out.print("Wallet N_tx: " + mWallet.getN_tx());
             wallet_txs_cnt = mWallet.getN_tx();
 
             if (isAddressesUpdate) {
@@ -724,7 +724,7 @@ public class PublicPun {
         NumberFormat format = NumberFormat.getInstance(Locale.getDefault());
         Number number = null;
 //        try {
-            number = format.parse(str);
+        number = format.parse(str);
 //        } catch (ParseException e) {
 //            e.printStackTrace();
 //            LogUtil.e("edtFee parsing error! " + e.getMessage());
@@ -788,7 +788,7 @@ public class PublicPun {
         while (mContext == null) {
             try {
                 Thread.sleep(500);
-                LogUtil.e("showNoticeDialog在睡覺");
+                LogUtil.e("showNoticeDialog");
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -804,6 +804,7 @@ public class PublicPun {
         ActivityManager am = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
         ComponentName cn = am.getRunningTasks(1).get(0).topActivity;
         LogUtil.e("showNoticeDialog context:" + cn.getShortClassName());
+
         new AlertDialog.Builder(mContext, AlertDialog.THEME_DEVICE_DEFAULT_LIGHT)//
                 .setView(alert_view)
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {

@@ -116,6 +116,7 @@ public class ExchangeAPI {
                                                             });
                                                         } else {
                                                             LogUtil.e("lisXchsSync no data found:");
+                                                            mAPIResultCallback.fail("lisXchsSync no data found");
                                                         }
                                                     }
                                                 });

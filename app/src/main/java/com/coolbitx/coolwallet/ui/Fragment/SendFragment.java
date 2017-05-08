@@ -132,7 +132,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
     private byte CwSecurityPolicyMaskWatchDog = 0x10;
     private byte CwSecurityPolicyMaskAddress = 0x20;
     private boolean isBlockr ;
-    String UrlUnspent;
+    private String UrlUnspent;
     private Handler mHandler = new Handler() {
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
@@ -367,8 +367,8 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
         if(isBlockr) {
             InAddress += "?unconfirmed=1";
         }
-        LogUtil.i("InAddress=" + InAddress);
 
+        System.out.print("InAddress=" + InAddress);
         unSpentTxsAsyncTask = new UnSpentTxsAsyncTask();
         unSpentTxsAsyncTask.execute(InAddress);
     }
@@ -404,7 +404,6 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
                     });
                 }
             } else {
-                Crashlytics.log(getString(R.string.send_call_unspent_success) + getString(R.string.send_call_unspent_list_addresses) + InAddress);
                 if(isBlockr) {
                     UnSpentTxsBeanList = PublicPun.jsonParseBlockrUnspent(result);
                 }else{

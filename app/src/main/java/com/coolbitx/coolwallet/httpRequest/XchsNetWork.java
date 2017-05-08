@@ -78,6 +78,7 @@ public class XchsNetWork {
         HttpURLConnection conn = null;
         try {
             URL url = new URL(temp_url);
+            LogUtil.d("makeHttpRequestInit url=" + temp_url);
             conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.setDoInput(true);

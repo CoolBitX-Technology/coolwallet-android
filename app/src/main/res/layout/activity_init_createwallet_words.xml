@@ -36,9 +36,9 @@
 
         <Button
             android:id="@+id/btn_seedWords_next"
-            style="@style/TextView_Black_16"
+            style="@style/TextView_Brown_16"
             android:layout_width="200dp"
-            android:layout_height="40dp"
+            android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginTop="60dp"
             android:background="@drawable/selector_button"

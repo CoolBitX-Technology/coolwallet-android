@@ -32,8 +32,8 @@ android {
         applicationId "com.coolbitx.coolwallet"
         minSdkVersion 18
         targetSdkVersion 22
-        versionCode 24
-        versionName "1.5.5" //1.5.3 previous(1.5.4 beta failed)
+        versionCode 27
+        versionName "1.5.8" //1.5.7
         multiDexEnabled = true
     }
 //    compileOptions {
@@ -51,12 +51,15 @@ android {
         mavenCentral()
         maven { url "http://dl.bintray.com/journeyapps/maven" }
     }
+    sourceSets{
+        instrumentTest.setRoot('src/androidTest')
+    }
 }
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile project(':cwlib')
-    compile('com.crashlytics.sdk.android:crashlytics:2.6.6@aar') {
+    compile('com.crashlytics.sdk.android:crashlytics:2.6.8@aar') {
         transitive = true;
     }
 

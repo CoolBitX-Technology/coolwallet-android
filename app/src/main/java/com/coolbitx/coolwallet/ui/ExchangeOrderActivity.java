@@ -33,6 +33,7 @@ import com.coolbitx.coolwallet.bean.dbAddress;
 import com.coolbitx.coolwallet.callback.APIResultCallback;
 import com.coolbitx.coolwallet.callback.GetExchangeAddrCallback;
 import com.coolbitx.coolwallet.callback.TransactionConfirmCallback;
+import com.coolbitx.coolwallet.general.AppPrefrence;
 import com.coolbitx.coolwallet.general.BtcUrl;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.coolbitx.coolwallet.httpRequest.CwBtcNetWork;
@@ -106,7 +107,8 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
     String currUnsignedTx;
     private String otpCode;
     byte[] nonce;
-
+    private boolean isBlockr ;
+    private String UrlUnspent;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -117,6 +119,7 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
         initValues();
 
         cwBtcNetWork = new CwBtcNetWork();
+
     }
 
     private void initViews() {
@@ -174,7 +177,7 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
     @Override
     public void onClick(View v) {
         LogUtil.d("before complete");
-
+        isBlockr = AppPrefrence.getIsBlockrApi(mContext);
         if (v == btnCompleteOrder) {
             mProgress.setMessage("Preparing to complete order...");
             mProgress.show();
@@ -277,17 +280,28 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
         LogUtil.i("run XchsTrxSignPrepare");
         lisCwBtcAdd = DatabaseHelper.queryAddress(this, accountID, -1);
 
+        String v_separator;
+        if (!isBlockr) {
+            UrlUnspent = BtcUrl.URL_BLOCKCHAIN_UNSPENT;
+            v_separator = "|";
+        } else {
+            UrlUnspent = BtcUrl.URL_BLOCKR_UNSPENT;
+            v_separator = ",";
+        }
+
         for (int i = 0; i < lisCwBtcAdd.size(); i++) {
             if (lisCwBtcAdd.get(i).getBalance() > 0) {
                 if (i == 0) {
                     InAddress += lisCwBtcAdd.get(i).getAddress();
                 } else {
-                    InAddress += "," + lisCwBtcAdd.get(i).getAddress();
+                    InAddress += v_separator + lisCwBtcAdd.get(i).getAddress();
                 }
             }
         }
-        InAddress += "?unconfirmed=1";
-        LogUtil.d("unSpent addresses=" + InAddress);
+        if(isBlockr) {
+            InAddress += "?unconfirmed=1";
+        }
+        System.out.print("unSpent addresses=" + InAddress);
 //        unSpentTxsAsyncTask = new UnSpentTxsAsyncTask();
 //        unSpentTxsAsyncTask.execute(InAddress);
 
@@ -1237,7 +1251,12 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
                     unSpentTxsAsyncTask.cancel(true);
                 }
             } else {
-                UnSpentTxsBeanList = PublicPun.jsonParseBlockrUnspent(result);
+//                UnSpentTxsBeanList = PublicPun.jsonParseBlockrUnspent(result);
+                if(isBlockr) {
+                    UnSpentTxsBeanList = PublicPun.jsonParseBlockrUnspent(result);
+                }else{
+                    UnSpentTxsBeanList = PublicPun.jsonParseBlockChainInfoUnspent(result);
+                }
                 errorCnt = 0;
             }
         }
