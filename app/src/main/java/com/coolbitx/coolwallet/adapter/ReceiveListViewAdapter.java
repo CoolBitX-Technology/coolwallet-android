@@ -93,15 +93,15 @@ public class ReceiveListViewAdapter extends BaseAdapter {
         if (AddressList != null && !AddressList.isEmpty()) {
             mAddr = AddressList.get(position).getAddress();
             mLabel = AddressList.get(position).getAddLabel();
-            LogUtil.i("adapter mAddr:" + position + " = " + mAddr);
+            LogUtil.i("adapter mAddr:" + position + " = "+mLabel+ " ; " + mAddr);
             holder.item1.setText(mAddr);
 
             holder.item_lable.setText(mLabel);
             mBCaddr ="bitcoin:"+ mAddr + "?amount=0.0000";
-            if(mLabel!=null){
-                holder.item_num.setText("");
+            if(mLabel==null || mLabel.isEmpty()){
+                holder.item_num.setText(String.valueOf(position+1));
             }else{
-                holder.item_num.setText(String.valueOf(position));
+                holder.item_num.setText("");
             }
             if (AddressList.get(position).getN_tx() == 0) {
                 holder.item_num.setTextColor(mContext.getResources().getColor(R.color.md_white_1000));

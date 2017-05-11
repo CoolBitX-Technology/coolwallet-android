@@ -17,6 +17,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.coolbitx.coolwallet.DataBase.DatabaseHelper;
 import com.coolbitx.coolwallet.R;
@@ -59,7 +60,6 @@ public class ReceiveFragment extends BaseFragment implements View.OnClickListene
     private int trxStatus;
     private int getWalltePointer = 0x02;
     private int accountId = -1;
-    private Address address;
     private List<Account> cwAccountList = new ArrayList<>();
     private Button item_btn_edit;
     private Button item_btn_request;
@@ -118,7 +118,7 @@ public class ReceiveFragment extends BaseFragment implements View.OnClickListene
         super.onCreate(savedInstanceState);
 
         title = getArguments().getString(DATA_NAME);
-        id = getArguments().getInt(DATA_ID);
+        id = getArguments().getInt(DATA_ID);//account id
         value = ((FragMainActivity) mContext).getAccountFrag(id);
     }
 
@@ -184,37 +184,28 @@ public class ReceiveFragment extends BaseFragment implements View.OnClickListene
                             TabFragment.lisCwBtcAdd.get(mPosition).setAddLabel(mLable);
                         }
 
-                        Refresh(false);
+                        Refresh(false, null);
                         break;
                     case R.id.btn_request:
+                        String amount;
                         if (mEditText.getText().toString().isEmpty()) {
-
+                            amount = "0.000";
                         } else {
-                            String mBCaddress;
-                            mBCaddress = "bitcoin:" + TabFragment.lisCwBtcAdd.get(position).getAddress()
-                                    + "?amount="
-                                    + mEditText.getText().toString().trim();
-                            TabFragment.lisCwBtcAdd.get(position).setBCAddress(mBCaddress);
-                            LogUtil.i(mBCaddress);
-                            Refresh(false);
-                            EncoderQRcode(mBCaddress);
+                            amount = mEditText.getText().toString().trim();
                         }
+                        String mBCaddress;
+                        mBCaddress = "bitcoin:" + TabFragment.lisCwBtcAdd.get(position).getAddress()
+                                + "?amount="
+                                + amount;
+                        TabFragment.lisCwBtcAdd.get(position).setBCAddress(mBCaddress);
+                        LogUtil.i(mBCaddress);
+//                        Refresh(false, null);
+                        EncoderQRcode(mBCaddress);
                 }
 
             }
         });
         builder.show();
-    }
-
-    private void Refresh(boolean isAddData) {
-
-        if (isAddData) {
-            intputAddressList.add(address);
-            PublicPun.account.setInputAddressList(intputAddressList);
-            TabFragment.lisCwBtcAdd = DatabaseHelper.queryAddress(mContext, id - 1, 0);
-        }
-        intputAddressList = PublicPun.account.getInputAddressList();
-        refresh(isAddData);
     }
 
     private void initView(View view) {
@@ -248,11 +239,12 @@ public class ReceiveFragment extends BaseFragment implements View.OnClickListene
                 PublicPun.FindScreenSize(mContext));
         try {
             Bitmap bitmap = qrCodeEncoder.encodeAsBitmap();
-            LogUtil.i("EncoderQRcode 111");
+            LogUtil.i("EncoderQRcode bitmap");
             imgQRcode.setImageBitmap(bitmap);
 
         } catch (WriterException e) {
             LogUtil.i("EncoderQRcode error=" + e.getMessage());
+            Toast.makeText(mContext, "QR code write error:" + e.getMessage(), Toast.LENGTH_SHORT).show();
             e.printStackTrace();
         }
     }
@@ -310,7 +302,7 @@ public class ReceiveFragment extends BaseFragment implements View.OnClickListene
                 public void onSuccess(int status, byte[] outputData) {
                     if ((status + 65536) == 0x9000) {
                         if (outputData != null) {
-                            address = new Address();
+                            Address address = new Address();
                             address.setAccountId(id);
                             address.setKeyChainId(keyChainId);
 
@@ -342,7 +334,7 @@ public class ReceiveFragment extends BaseFragment implements View.OnClickListene
 //                        intputAddressList.add(address);
 //                        PublicPun.account.setInputAddressList(intputAddressList);
                             DatabaseHelper.insertAddress(mContext, id - 1, addr, 0, keyId, 0, 0);
-                            Refresh(true);
+                            Refresh(true, address);
                             mProgress.dismiss();
                             PublicPun.account.setInputIndex(PublicPun.account.getInputIndex() + 1);
                         }
@@ -350,6 +342,18 @@ public class ReceiveFragment extends BaseFragment implements View.OnClickListene
                 }
             });
         }
+    }
+
+    private void Refresh(boolean isAddData, Address address) {
+
+        if (isAddData && address != null) {
+            System.out.print("add address");
+            intputAddressList.add(address);
+            PublicPun.account.setInputAddressList(intputAddressList);
+            TabFragment.lisCwBtcAdd = DatabaseHelper.queryAddress(mContext, id - 1, 0);
+        }
+        intputAddressList = PublicPun.account.getInputAddressList();
+        refresh(isAddData);
     }
 
     public void refresh(boolean isGenAddress) {
@@ -386,125 +390,6 @@ public class ReceiveFragment extends BaseFragment implements View.OnClickListene
             }
         }
     }
-
-
-//    private void queryWallteInfo(int infoId) {
-//        //infoId 1B (=00 status, 01 name, 02 accountPointer)
-//
-//        cmdManager.hdwQryWaInfo(getWalltePointer, new CmdResultCallback() {
-//            @Override
-//            public void onSuccess(int status, byte[] outputData) {
-//                if ((status + 65536) == 0x9000) {
-//                    if (outputData != null) {
-//                        hdwAccountPointer = outputData;
-//                        int accountIndex = Integer.valueOf(PublicPun.byte2HexString(outputData).replace(" ", ""));
-//                        LogUtil.i("hdwAccountPointer=" + accountIndex);
-//                        PublicPun.wallet.setAccountIndex(accountIndex);
-//
-//                        if (hdwAccountPointer != null && hdwAccountPointer.length == 4) {
-//                            accountId = Integer.parseInt(PublicPun.byte2HexString(hdwAccountPointer[0]));
-//                            LogUtil.i("accountId=" + accountId);
-//
-//                            LogUtil.i("有" + accountId + "個帳戶" + "依序讀取帳戶訊息");
-//                            for (int i = 0; i < accountId; i++) {
-//                                getAccounts(i);
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        });
-//    }
-//
-//    private void getAccounts(final int accountId) {
-//        byte cwHdwAccountInfoExtKeyPtr = 0x02;
-//        LogUtil.e("getAccounts accountId=" + accountId);
-//        final Account account = new Account();
-//        account.setId(accountId);
-//
-//        cmdManager.hdwQueryAccountInfo(cwHdwAccountInfoExtKeyPtr, accountId, new CmdResultCallback() {
-//            @Override
-//            public void onSuccess(int status, byte[] outputData) {
-//                if ((status + 65536) == 0x9000) {
-//                    if (outputData != null) {
-//                        String extKey = PublicPun.byte2HexString(outputData[0]);
-//
-//                        account.setOutputIndex(Integer.valueOf(extKey, 16));
-////                        genKid = Integer.valueOf(extKey, 16) + 1;
-//                        LogUtil.e("ExtKey=" + Integer.valueOf(extKey, 16));
-////                        cntAdd += Integer.valueOf(extKey, 16);
-//                        getAccountKeyInfo(accountId, Integer.valueOf(extKey, 16), Constant.CwAddressKeyChainExternal);
-//                        cwAccountList.add(account);
-//                    }
-//                }
-//            }
-//        });
-//
-//    }
-//
-//    private void getAccountKeyInfo(final int accountId, final int kid, final byte kcId) {
-//
-//        cmdManager.hdwQueryAccountKeyInfo(Constant.CwHdwAccountKeyInfoPubKeyAndChainCd,
-//                kcId,
-//                accountId,
-//                kid,
-//                new CmdResultCallback() {
-//                    @Override
-//                    public void onSuccess(int status, byte[] outputData) {
-//                        if ((status + 65536) == 0x9000) {
-//                            if (outputData != null) {
-//                                byte[] publicKeyBytes = new byte[64];
-//                                byte[] chainCodeBytes = new byte[32];
-//                                int length = outputData.length;
-//                                byte[] extendPub = new byte[33];
-//                                if (length >= 96) {
-//
-//                                    for (int i = 0; i < 64; i++) {
-//                                        publicKeyBytes[i] = outputData[i];
-//                                    }
-//                                    for (int j = 64; j < 96; j++) {
-//                                        chainCodeBytes[j - 64] = outputData[j];
-//                                    }
-//                                    if (Integer.parseInt(PublicPun.byte2HexString(publicKeyBytes[63]), 16) / 2 == 0) {
-//                                        extendPub[0] = 02;
-//                                    } else {
-//                                        extendPub[0] = 03;
-//                                    }
-//
-//                                    for (int a = 0; a < 32; a++) {
-//                                        extendPub[a + 1] = publicKeyBytes[a];
-//                                    }
-//                                }
-//                                LogUtil.i("keyinfo的pub key=" + LogUtil.byte2HexString(publicKeyBytes));
-//                                LogUtil.i("keyinfo的chainCodeBytes=" + LogUtil.byte2HexString(chainCodeBytes));
-//                                LogUtil.i("keyinfo的=" + LogUtil.byte2HexString(extendPub));
-//                                ExtendedKey km = ExtendedKey.createCwEk(extendPub, chainCodeBytes);
-//                                LogUtil.i("serializepub=" + km.serializepub(true));
-//                                for (int i = 0; i < kid; i++) {
-//                                    ExtendedKey k = null;
-//                                    String addr = null;
-//                                    address = new Address();
-//                                    try {
-////                                        address.setPublickey(PublicPun.byte2HexString(publicKeyBytes));
-////                                        address.setPublickey(publicKeyBytes);
-//                                        k = km.getChild(i);
-//                                        LogUtil.i("ExtendedKey addr=" + String.valueOf(i) + ":" + k.getAddress());
-//                                        addr = k.getAddress();
-//                                        address.setAddress(addr);
-//                                        address.setBCAddress(addr + "?amount=0");
-//                                        intputAddressList.add(address);
-//                                    } catch (ValidationException e) {
-//                                        LogUtil.i("ExtendedKey i=" + String.valueOf(i) + ",error:" + e.getMessage());
-//                                        e.printStackTrace();
-//                                    }
-//                                }
-//                                PublicPun.account.setInputAddressList(intputAddressList);
-//                                Refresh(false);
-//                            }
-//                        }
-//                    }
-//                });
-//    }
 
 }
 

@@ -2,6 +2,7 @@ package com.coolbitx.coolwallet.ui.Fragment;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.Context;
@@ -9,9 +10,12 @@ import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
+import android.support.annotation.UiThread;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -42,6 +46,7 @@ import com.coolbitx.coolwallet.ui.TransactionConfirmDialog;
 import com.coolbitx.coolwallet.util.BTCUtils;
 import com.coolbitx.coolwallet.util.Base58;
 import com.coolbitx.coolwallet.util.ECKey;
+import com.coolbitx.coolwallet.util.ExtendedKey;
 import com.coolbitx.coolwallet.util.ValidationException;
 import com.crashlytics.android.Crashlytics;
 import com.google.zxing.integration.android.IntentIntegrator;
@@ -57,6 +62,7 @@ import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -83,7 +89,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
     UnSpentTxsAsyncTask unSpentTxsAsyncTask;
     Transaction.Input[] signedInputs;
     Transaction.Output[] outputs;
-    UnSpentTxsBean outputToSpend = new UnSpentTxsBean();
+
     String InAddress;
     String currUnsignedTx;
     CwBtcNetWork cwBtcNetWork;
@@ -131,8 +137,9 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
     private byte CwSecurityPolicyMaskBtn = 0x02;
     private byte CwSecurityPolicyMaskWatchDog = 0x10;
     private byte CwSecurityPolicyMaskAddress = 0x20;
-    private boolean isBlockr ;
+    private boolean isBlockr;
     private String UrlUnspent;
+    TransactionConfirmDialog trxDialog;
     private Handler mHandler = new Handler() {
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
@@ -256,6 +263,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
             isTrxSuccess = false;
             errorCnt = 0;
 
+
             if (editSendAddress.getText().toString().isEmpty()) {
                 PublicPun.showNoticeDialog(mContext, "Unable to send", "You didn't enter an address.");
                 return;
@@ -291,6 +299,10 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
                 PublicPun.showNoticeDialog(mContext, "Unable to send", "Please enter a valid address.");
                 return;
             }
+
+            mProgress.setMessage("Get unspent transaction...");
+            mProgress.show();
+            btnSend.setEnabled(false);
 
             getSecpo();
             FunGetUnspentAddresses(currentAccount);
@@ -363,19 +375,18 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
         }
 
         //Including unconfirmed (zero confirmation) transactions.
-
-        if(isBlockr) {
+        if (isBlockr) {
             InAddress += "?unconfirmed=1";
         }
 
-        System.out.print("InAddress=" + InAddress);
+
         unSpentTxsAsyncTask = new UnSpentTxsAsyncTask();
         unSpentTxsAsyncTask.execute(InAddress);
     }
 
     public ArrayList<UnSpentTxsBean> getHandleUnspentTxsByAddr(String mAddr) {
 
-        ArrayList<UnSpentTxsBean> UnSpentTxsBeanList =new ArrayList<UnSpentTxsBean>();
+        ArrayList<UnSpentTxsBean> UnSpentTxsBeanList = new ArrayList<UnSpentTxsBean>();
         ContentValues cv = new ContentValues();
         cv.put("addresses", mAddr);
         final String result = cwBtcNetWork.doGet(cv, UrlUnspent, null);
@@ -404,9 +415,9 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
                     });
                 }
             } else {
-                if(isBlockr) {
+                if (isBlockr) {
                     UnSpentTxsBeanList = PublicPun.jsonParseBlockrUnspent(result);
-                }else{
+                } else {
                     UnSpentTxsBeanList = PublicPun.jsonParseBlockChainInfoUnspent(result);
                 }
             }
@@ -492,24 +503,26 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
 //        return genChangeAddressResult;
     }
 
+    String changeAddr = "";
+
     //    private void PreviousPrepareTransaction(final String outputAddress, final String changeAddress, final long amountToSend) {
     private void PreviousPrepareTransaction(final String outputAddress, final long amountToSend) {
 
+        TxsConfirm mTxsConfirm;
         trxStatus = Constant.TrxStatusBegin;
         String changeAddress = "";
         long availableAmount = 0;
         for (UnSpentTxsBean unSpentTxsBean : unSpentTxsBeanList) {
 //            availableAmount += (long) (unSpentTxsBean.getAmount() * SATOSHIS_PER_COIN);
-            LogUtil.d("unspent:"+unSpentTxsBean.getAddress()+";"+ new DecimalFormat("#.########").format(unSpentTxsBean.getAmount()));
+            LogUtil.d("unspent:" + unSpentTxsBean.getAddress() + ";" + new DecimalFormat("#.########").format(unSpentTxsBean.getAmount()));
             /**
              *  DecimalFormat  can format a number in a customized format for a particular locale,ex. 0.5=>0,5(Europe).
              */
             availableAmount += BTCUtils.BTCconvertToSatoshisValue(unSpentTxsBean.getAmount());
         }
         long extraFee = BTCUtils.parseValue("0.0");
-        LogUtil.e("帳戶 " + currentAccount + " 地址下有的餘額=" + availableAmount);
-        LogUtil.e("帳戶 " + currentAccount + " 要發出的金額=" + amountToSend);
-
+        LogUtil.e("帳戶 " + currentAccount + " 地址下有的餘額=" + availableAmount + " 要發出的金額=" + amountToSend);
+        Crashlytics.log("帳戶 " + currentAccount + " 地址下有的餘額=" + availableAmount + " 要發出的金額=" + amountToSend);
         try {
             processedTxData =
                     BTCUtils.calcFeeChangeAndSelectOutputsToSpend(mContext, unSpentTxsBeanList, amountToSend, extraFee, true);
@@ -520,6 +533,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
                 return;
             }
 
+            //--------------- process change address.---------------------
             if (processedTxData.change == 0) {
                 LogUtil.d("發送不用找零,發送地址=" + outputAddress);
                 outputs = new Transaction.Output[]{
@@ -540,6 +554,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
                             LogUtil.d("發送要找零=" + processedTxData.change + "; 發送金額=" +
                                     processedTxData.amountForRecipient + "; 發送地址=" +
                                     outputAddress + "; 找零地址=" + addr);
+
                             //its legal that Change address equals to recipient's address
                             if (outputAddress.equals(addr)) {
                                 cancelTrx();
@@ -547,47 +562,61 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
                                 return;
                             }
 
+                            changeAddr = addr;
                             //the outputs of transation
 
                             outputs = new Transaction.Output[]{
                                     new Transaction.Output(processedTxData.amountForRecipient, Transaction.Script.buildOutput(outputAddress)),
                                     new Transaction.Output(processedTxData.change, Transaction.Script.buildOutput(addr)),
                             };
-
-
-                            LogUtil.e("outputs length=" + outputs.length);
-                            TxsConfirm mTxsConfirm = new TxsConfirm(outputAddress, processedTxData.amountForRecipient, processedTxData.fee,
-                                    processedTxData.outputsToSpend.size(), processedTxData.valueOfUnspentOutputs, addr, processedTxData.change, processedTxData.isDust);
-
-                            if (mTxsConfirm == null) {
-                                return;
-                            }
-
-                            // Ask if ready to send.
-                            new TransactionConfirmDialog(mContext, mTxsConfirm, new TransactionConfirmCallback() {
-                                @Override
-                                public void TransactionConfirm(String outputAddr, String changeAddr, long spendAmount) {
-                                    mProgress.show();
-                                    TimeOutCheck();
-                                    prepareTransaction(outputAddr, changeAddr, spendAmount);
-                                }
-
-                                @Override
-                                public void TransactionCancel() {
-                                    cancelTrx();
-                                }
-                            }).show();
-
                         }
 
                         @Override
                         public void onFailed(String msg) {
 
+                            cancelTrx();
+                            PublicPun.showNoticeDialog(mContext, "Unable to send:", msg);
+
+                        }
+                    });
+                }
+            }
+            //--------------- process change address end.---------------------
+
+            LogUtil.e("outputs length=" + outputs.length);
+
+            if (mProgress.isShowing()) {
+                mProgress.dismiss();
+            }
+            mTxsConfirm = new TxsConfirm(outputAddress, processedTxData.amountForRecipient, processedTxData.fee,
+                    processedTxData.outputsToSpend.size(), processedTxData.valueOfUnspentOutputs, changeAddr, processedTxData.change, processedTxData.isDust);
+
+            // Ask if ready to send
+            trxDialog = new TransactionConfirmDialog(mContext, mTxsConfirm, new TransactionConfirmCallback() {
+                @Override
+                public void TransactionConfirm(String outputAddr, String changeAddr, long spendAmount) {
+
+
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mProgress.setMessage("Prepare transaction...");
+                            mProgress.show();
                         }
                     });
 
+                    prepareTransaction(outputAddr, changeAddr, spendAmount);
+                    btnSend.setEnabled(true);
+
                 }
-            }
+
+                @Override
+                public void TransactionCancel() {
+                    btnSend.setEnabled(true);
+
+                }
+            });
+            trxDialog.show();
 
         } catch (ValidationException ve) {
             cancelTrx();
@@ -608,6 +637,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
 
     private void prepareTransaction(final String outputAddress, String changeAddress, long amountToSend) {
 
+
         //close transaction if exists
         cmdManager.trxFinish(new CmdResultCallback() {
             @Override
@@ -624,147 +654,156 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
         });
 
 //        try {
-            //計算出了手續費和找零後的 UnspentInputList未花费的交易,input=要拿來發送$的地址
-            LogUtil.e(" processedTxData.outputsToSpend.size():" + processedTxData.outputsToSpend.size());
-            signedInputs = new Transaction.Input[processedTxData.outputsToSpend.size()];//
-            LogUtil.e("要拿來發送$的地址length:" + signedInputs.length);
+        //計算出了手續費和找零後的 UnspentInputList未花费的交易,input=要拿來發送$的地址
+        LogUtil.e(" processedTxData.outputsToSpend.size():" + processedTxData.outputsToSpend.size());
+        Crashlytics.log(" processedTxData.outputsToSpend.size():" + processedTxData.outputsToSpend.size());
+        signedInputs = new Transaction.Input[processedTxData.outputsToSpend.size()];//
+        LogUtil.e("要拿來簽章的input地址length:" + signedInputs.length);
 
-            inputAddressList = new ArrayList<>();
+        inputAddressList = new ArrayList<>();
 
-            final boolean[] prepRsult = new boolean[signedInputs.length];
+        final boolean[] prepRsult = new boolean[signedInputs.length];
 
-            for (int i = 0; i < signedInputs.length; i++) {
-                Transaction.Input[] unsignedInputs = new Transaction.Input[signedInputs.length];
-                for (int j = 0; j < unsignedInputs.length; j++) { //有幾個input
-                    outputToSpend = processedTxData.outputsToSpend.get(j);
-                    //dora modify
-                    LogUtil.e("跑hash " + i + "-" + j + "次");
-                    byte[] byteTx = PublicPun.hexStringToByteArray(outputToSpend.getTx());//outputToSpend.getTx().getBytes()
+        for (int i = 0; i < signedInputs.length; i++) {
+            Transaction.Input[] unsignedInputs = new Transaction.Input[signedInputs.length];
+            LogUtil.d("signedInputs loop " + i + " begin =" + new Date().toLocaleString());
+            for (int j = 0; j < unsignedInputs.length; j++) { //有幾個input
+                UnSpentTxsBean outputToSpend = processedTxData.outputsToSpend.get(j);
+                //dora modify
+//                LogUtil.e("跑hash " + i + "-" + j + "次");
+                byte[] byteTx = PublicPun.hexStringToByteArray(outputToSpend.getTx());//outputToSpend.getTx().getBytes()
 
-                    //my send addr
-                    LogUtil.d("Transaction.OutPoint:" + outputToSpend.getAddress() + "的HEX=" + LogUtil.byte2HexString(byteTx) + ";outputToSpend.getN()=" + outputToSpend.getN());
+                //my send addr
+//                LogUtil.d("Transaction.OutPoint:" + outputToSpend.getAddress() + "的HEX=" +
+//                        PublicPun.byte2HexStringNoBlank(byteTx) + ";outputToSpend.getN()=" + outputToSpend.getN());
 
-                    Transaction.OutPoint outPoint = new Transaction.OutPoint(byteTx, outputToSpend.getN());//outputToSpend.getN
+                Transaction.OutPoint outPoint = new Transaction.OutPoint(byteTx, outputToSpend.getN());//outputToSpend.getN
 
-                    byte[] mScripts = PublicPun.hexStringToByteArray(outputToSpend.getScript());//outputToSpend.getScript().getBytes()
-                    LogUtil.i("第" + j + "個input=" + " tx:" + outputToSpend.getTx() + " ; " + outputToSpend.getN() + "; Script:" + LogUtil.byte2HexString((mScripts)));
+                byte[] mScripts = PublicPun.hexStringToByteArray(outputToSpend.getScript());//outputToSpend.getScript().getBytes()
+//                LogUtil.i("第" + j + "個input=" + " tx:" + outputToSpend.getTx() + " ; " + outputToSpend.getN()
+//                        + "; Script:" + PublicPun.byte2HexStringNoBlank((mScripts)));
 
-                    if (j == i) {
-                        //this input we are going to sign (remove the part of sig and filled in the Scripts)
-                        unsignedInputs[j] = new Transaction.Input(outPoint,
-                                //dora modify
-                                new Transaction.Script(mScripts),
-                                0xffffffff);
-                    } else {
-                        unsignedInputs[j] = new Transaction.Input(outPoint, null, 0xffffffff);
-                    }
-                }
-                Transaction spendTxToSign = new Transaction(unsignedInputs, outputs, 0);
-                byte[] tempHash = null;
-                try {
-                    tempHash = Transaction.Script.hashTransactionForSigning(spendTxToSign);
-                } catch (ValidationException e) {
-                    e.printStackTrace();
-                    LogUtil.e(e.getMessage());
-                }
-
-                final byte[] hash = tempHash;
-                final int finalI = i;
-                LogUtil.i("inputId=" + String.valueOf(finalI));
-                dbAddress d = DatabaseHelper.querySendAddress(mContext, processedTxData.outputsToSpend.get(i).getAddress());
-                if (d == null) {
-                    cancelTrx();
-                    PublicPun.showNoticeDialog(mContext, getString(R.string.send_notification_unable_to_send), "Can't find Unspent addresses.");
-                }
-
-                final int dbKid = d.getKid();
-                final int dbKcid = d.getKcid();
-                final long unspentBalance = BTCUtils.BTCconvertToSatoshisValue(processedTxData.outputsToSpend.get(i).getAmount());
-
-                final byte CwAddressKeyChainExternal;
-                if (dbKcid == 0) {
-                    CwAddressKeyChainExternal = 0x00;
+                if (j == i) {
+                    //this input we are going to sign (remove the part of sig and filled in the Scripts)
+                    unsignedInputs[j] = new Transaction.Input(outPoint,
+                            new Transaction.Script(mScripts), //dora modify
+                            0xffffffff);
                 } else {
-                    CwAddressKeyChainExternal = 0x01;
+                    unsignedInputs[j] = new Transaction.Input(outPoint, null, 0xffffffff);
                 }
+            }
+            LogUtil.d("signedInputs loop " + i + " end =" + new Date().toLocaleString());
+            Transaction spendTxToSign = new Transaction(unsignedInputs, outputs, 0);
+            byte[] tempHash = null;
+            try {
+                tempHash = Transaction.Script.hashTransactionForSigning(spendTxToSign);
+            } catch (ValidationException e) {
+                e.printStackTrace();
+                LogUtil.e(e.getMessage());
+            }
 
-                final byte[] mPublicKey = new byte[32];
-                // 1.QUERY KEY 2.PREP TRX 3. TRX BEGIN
-                cmdManager.hdwQueryAccountKeyInfo(Constant.CwHdwAccountKeyInfoPubKey,
-                        dbKcid,
-                        currentAccount,
-                        dbKid,
-                        new CmdResultCallback() {
-                            @Override
-                            public void onSuccess(int status, byte[] outputData) {
-                                if ((status + 65536) == 0x9000) {
-                                    if (outputData != null) {
-                                        byte[] publicKeyBytes = new byte[64];
-                                        int length = outputData.length;
+            final byte[] hash = tempHash;
+            final int finalI = i;
 
-                                        if (length >= 64) {
-                                            for (int i = 0; i < 64; i++) {
-                                                publicKeyBytes[i] = outputData[i];
-                                                if (i < 32) {
-                                                    mPublicKey[i] = outputData[i];
-                                                }
+            LogUtil.d("inputId=" + String.valueOf(finalI));
+
+
+            dbAddress d = DatabaseHelper.querySendAddress(mContext, processedTxData.outputsToSpend.get(i).getAddress());
+            if (d == null) {
+                cancelTrx();
+                PublicPun.showNoticeDialog(mContext, getString(R.string.send_notification_unable_to_send), "Can't find Unspent addresses.");
+                return;
+            }
+
+            final int dbKid = d.getKid();
+            final int dbKcid = d.getKcid();
+            final long unspentBalance = BTCUtils.BTCconvertToSatoshisValue(processedTxData.outputsToSpend.get(i).getAmount());
+
+            final byte CwAddressKeyChainExternal;
+            if (dbKcid == 0) {
+                CwAddressKeyChainExternal = 0x00;
+            } else {
+                CwAddressKeyChainExternal = 0x01;
+            }
+
+            final byte[] mPublicKey = new byte[32];
+            // 1.QUERY KEY 2.PREP TRX 3. TRX BEGIN
+            cmdManager.hdwQueryAccountKeyInfo(Constant.CwHdwAccountKeyInfoPubKey,
+                    dbKcid,
+                    currentAccount,
+                    dbKid,
+                    new CmdResultCallback() {
+                        @Override
+                        public void onSuccess(int status, byte[] outputData) {
+                            if ((status + 65536) == 0x9000) {
+                                if (outputData != null) {
+                                    byte[] publicKeyBytes = new byte[64];
+                                    int length = outputData.length;
+
+                                    if (length >= 64) {
+                                        for (int i = 0; i < 64; i++) {
+                                            publicKeyBytes[i] = outputData[i];
+                                            if (i < 32) {
+                                                mPublicKey[i] = outputData[i];
                                             }
-                                            LogUtil.i("hdwQueryAccountKeyInfo publicKey =" + LogUtil.byte2HexString(outputData));
                                         }
+                                        LogUtil.i("hdwQueryAccountKeyInfo publicKey =" + LogUtil.byte2HexString(outputData));
+                                    }
 
-                                        final Address address = new Address();
-                                        address.setAccountId(currentAccount);
-                                        address.setKeyChainId(dbKcid);
-                                        address.setAddress(processedTxData.outputsToSpend.get(finalI).getAddress()); //account 0 的 internal地址之一
-                                        address.setKeyId(dbKid);
-                                        address.setPublickey(publicKeyBytes);
-                                        LogUtil.d("run " + finalI + ": getAddressInfo=" + processedTxData.outputsToSpend.get(finalI).getAddress() +
-                                                " ;publicKey=" + LogUtil.byte2HexString(address.getPublickey()));
-                                        inputAddressList.add(address);
+                                    final Address address = new Address();
+                                    address.setAccountId(currentAccount);
+                                    address.setKeyChainId(dbKcid);
+                                    address.setAddress(processedTxData.outputsToSpend.get(finalI).getAddress()); //account 0 的 internal地址之一
+                                    address.setKeyId(dbKid);
+                                    address.setPublickey(publicKeyBytes);
+//                                    LogUtil.d("run " + finalI + ": getAddressInfo=" + processedTxData.outputsToSpend.get(finalI).getAddress() +
+//                                            " ;publicKey=" + PublicPun.byte2HexStringNoBlank(address.getPublickey()));
+                                    inputAddressList.add(address);
 
-                                        LogUtil.e("prepare trx getMacKey=" + PublicPun.byte2HexStringNoBlank(PublicPun.user.getMacKey()) + ";input id=" + finalI + ";" + ";KeyChainExternal=" + (int) CwAddressKeyChainExternal +
-                                                ";account=" + currentAccount + ";dbKid=" + dbKid + ";dbBalance=" + unspentBalance + ";hash=" + PublicPun.byte2HexStringNoBlank(hash));
+//                                    LogUtil.e("prepare trx getMacKey=" + PublicPun.byte2HexStringNoBlank(PublicPun.user.getMacKey()) + ";input id=" + finalI + ";" + ";KeyChainExternal=" + (int) CwAddressKeyChainExternal +
+//                                            ";account=" + currentAccount + ";dbKid=" + dbKid + ";dbBalance=" + unspentBalance + ";hash=" + PublicPun.byte2HexStringNoBlank(hash));
 
-                                        //         big endian  ex:("0000000000002710");
-                                        cmdManager.cwCmdHdwPrepTrxSign(PublicPun.user.getMacKey(),
-                                                finalI,
-                                                CwAddressKeyChainExternal,
-                                                currentAccount,
-                                                dbKid,
-                                                unspentBalance,
-                                                hash,
-                                                new CmdResultCallback() {
-                                                    @Override
-                                                    public void onSuccess(int status, byte[] outputData) {
-                                                        if ((status + 65536) == 0x9000) {
+                                    //         big endian  ex:("0000000000002710");
+                                    cmdManager.cwCmdHdwPrepTrxSign(PublicPun.user.getMacKey(),
+                                            finalI,
+                                            CwAddressKeyChainExternal,
+                                            currentAccount,
+                                            dbKid,
+                                            unspentBalance,
+                                            hash,
+                                            new CmdResultCallback() {
+                                                @Override
+                                                public void onSuccess(int status, byte[] outputData) {
+                                                    if ((status + 65536) == 0x9000) {
 
-                                                            LogUtil.i("cwCmdHdwPrepTrxSign 成功!");
-                                                            LogUtil.i("Address=" + processedTxData.outputsToSpend.get(finalI).getAddress());
-                                                            LogUtil.i("balance=" + String.valueOf(unspentBalance));
+                                                        LogUtil.i("cwCmdHdwPrepTrxSign 成功!"+"Address=" +
+                                                                processedTxData.outputsToSpend.get(finalI).getAddress()+
+                                                                "; balance=" + String.valueOf(unspentBalance));
 
-                                                            prepRsult[finalI] = true;
-                                                            boolean isdidPrepareTransaction = false;
-                                                            for (int i = 0; i < prepRsult.length; i++) {
-                                                                if (prepRsult[i]) {
-                                                                    isdidPrepareTransaction = true;
-                                                                } else {
-                                                                    isdidPrepareTransaction = false;
-                                                                    break;
-                                                                }
-                                                            }
-                                                            LogUtil.i("length=" + prepRsult.length + " check prep=" + isdidPrepareTransaction);
-
-                                                            if (isdidPrepareTransaction) {
-                                                                doTrxBegin(outputAddress);
+                                                        prepRsult[finalI] = true;
+                                                        boolean isdidPrepareTransaction = false;
+                                                        for (int i = 0; i < prepRsult.length; i++) {
+                                                            if (prepRsult[i]) {
+                                                                isdidPrepareTransaction = true;
+                                                            } else {
+                                                                isdidPrepareTransaction = false;
+                                                                break;
                                                             }
                                                         }
+                                                        LogUtil.i("length=" + prepRsult.length + " check prep=" + isdidPrepareTransaction);
+
+                                                        if (isdidPrepareTransaction) {
+                                                            trxDialog.dismiss();
+                                                            doTrxBegin(outputAddress);
+                                                        }
                                                     }
-                                                });
-                                    }
+                                                }
+                                            });
                                 }
                             }
-                        });
-            }
+                        }
+                    });
+        }
 //        } catch (Exception e) {
 //            PublicPun.showNoticeDialog(mContext, "Notification", "Unable to Send");
 //            LogUtil.e("prepareTransaction error="+e.getMessage());
@@ -824,7 +863,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
             doTrxSignSuccessCnt = 0;
             scriptSigs = new ArrayList();
             for (int i = 0; i < signedInputs.length; i++) {
-                LogUtil.i("input :addr 第" + i + "筆 " + inputAddressList.get(i).getAddress() + ";publickey =" + LogUtil.byte2HexString(inputAddressList.get(i).getPublickey()));
+                LogUtil.d("input :addr 第" + i + "筆 " + inputAddressList.get(i).getAddress() + ";publickey =" + LogUtil.byte2HexString(inputAddressList.get(i).getPublickey()));
                 doTrxSign(i, inputAddressList.get(i).getPublickey());
             }
         } catch (Exception e) {
@@ -835,6 +874,9 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
     }
 
     private void doTrxBegin(String outputAddress) {
+        if (mProgress.isShowing()) {
+            mProgress.dismiss();
+        }
 
         if (!settingOptions[0] && settingOptions[1]) {
             didGetButton();
@@ -992,6 +1034,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
                                         LogUtil.e("取得 currUnsignedTx=" + currUnsignedTx + ";length=" + currUnsignedTx.length());
                                         LogUtil.e("byte長度=" + PublicPun.hexStringToByteArray(currUnsignedTx).length);
                                         PublishToNetwork(currUnsignedTx);
+                                        cancelTrx();
                                     }
                                 }
                             }

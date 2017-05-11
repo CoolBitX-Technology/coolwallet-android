@@ -127,10 +127,13 @@ public class TransactionConfirmDialog extends AlertDialog implements View.OnClic
         switch (id) {
             case R.id.btn_confirm:
                 //confirm to send
+
                 if (mConfirmListener != null) {
+                    btnConfrim.setEnabled(false);
                     mConfirmListener.TransactionConfirm(mTxsConfirm.getOutput_addrese(),
                             mTxsConfirm.getChange_address(),mTxsConfirm.getOutput_amount());
                 }
+
                 dismiss();
                 break;
             case R.id.btn_cancel:
@@ -168,6 +171,11 @@ public class TransactionConfirmDialog extends AlertDialog implements View.OnClic
         // 打開  "<"
 //        actionBar.setDisplayHomeAsUpEnabled(true);
 //        actionBar.setHomeButtonEnabled(true);
+    }
+
+    @Override
+    public void dismiss() {
+        super.dismiss();
     }
 
     private void findViews() {

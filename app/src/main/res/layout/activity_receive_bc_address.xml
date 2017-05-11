@@ -9,9 +9,9 @@
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="0dp"
-        android:orientation="vertical"
+        android:layout_weight="4.5"
         android:background="@drawable/linearlayout_stroke"
-        android:layout_weight="4.5">
+        android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="fill_parent"
@@ -26,11 +26,11 @@
                 android:layout_width="170dp"
                 android:layout_height="170dp"
                 android:layout_gravity="center"
+                android:layout_marginBottom="5dp"
+                android:layout_marginTop="5dp"
                 android:contentDescription="@string/img_logo1"
                 android:gravity="center_horizontal"
-                android:src="@mipmap/x"
-                android:layout_marginBottom="5dp"
-                android:layout_marginTop="5dp"/>
+                android:src="@mipmap/x" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -41,6 +41,7 @@
 
                 <Button
                     android:id="@+id/btn_copy"
+                    style="@style/TextView_Strong_yellowte_10"
                     android:layout_width="wrap_content"
                     android:layout_height="0dp"
                     android:layout_marginTop="8dp"
@@ -48,12 +49,11 @@
                     android:background="@null"
                     android:drawableTop="@mipmap/receive_copy"
                     android:text="@string/btn_str_copy"
-                    style="@style/TextView_Strong_yellowte_10"
-                    android:textAllCaps="false"
-                     />
+                    android:textAllCaps="false" />
 
                 <Button
                     android:id="@+id/btn_edit_label"
+                    style="@style/TextView_Strong_yellowte_10"
                     android:layout_width="wrap_content"
                     android:layout_height="0dp"
                     android:layout_marginTop="8dp"
@@ -61,11 +61,11 @@
                     android:background="@null"
                     android:drawableTop="@mipmap/receive_label"
                     android:text="@string/btn_str_edit"
-                    style="@style/TextView_Strong_yellowte_10"
-                    android:textAllCaps="false"/>
+                    android:textAllCaps="false" />
 
                 <Button
                     android:id="@+id/btn_request"
+                    style="@style/TextView_Strong_yellowte_10"
                     android:layout_width="wrap_content"
                     android:layout_height="0dp"
                     android:layout_marginTop="8dp"
@@ -73,8 +73,7 @@
                     android:background="@null"
                     android:drawableTop="@drawable/receive_request"
                     android:text="@string/btn_str_request"
-                    style="@style/TextView_Strong_yellowte_10"
-                    android:textAllCaps="false"/>
+                    android:textAllCaps="false" />
             </LinearLayout>
         </LinearLayout>
 
@@ -85,8 +84,9 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/img_qrcode"
             android:layout_centerHorizontal="true"
-            android:layout_gravity="center"
-            android:singleLine="true" />
+            android:layout_gravity="center_horizontal"
+            android:singleLine="true"
+            android:visibility="gone" />
 
         <TextView
             android:id="@+id/receive_click_label"
@@ -96,8 +96,9 @@
             android:layout_below="@+id/img_qrcode"
             android:layout_centerHorizontal="true"
             android:layout_gravity="center"
-            android:layout_marginBottom="10dp"
-            android:singleLine="true" />
+            android:layout_marginBottom="5dp"
+            android:singleLine="true"
+            android:text="QR code's address" />
     </LinearLayout>
 
 
@@ -107,9 +108,9 @@
         android:layout_height="0dp"
         android:layout_gravity="center_horizontal"
         android:layout_marginBottom="5dp"
+        android:layout_weight="5.5"
         android:dividerHeight="1dp"
-        android:listSelector="@android:color/transparent"
-        android:layout_weight="5.5"/>
+        />
 
 
     <Button
@@ -122,6 +123,7 @@
         android:layout_marginRight="50dp"
         android:background="@drawable/selector_button"
         android:text="@string/btn_str_create_new_address" />
+
 
 </LinearLayout>
 

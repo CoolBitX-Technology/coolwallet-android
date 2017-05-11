@@ -5,6 +5,7 @@ import android.content.Context;
 import com.coolbitx.coolwallet.bean.UnSpentTxsBean;
 import com.coolbitx.coolwallet.general.AppPrefrence;
 import com.coolbitx.coolwallet.general.PublicPun;
+import com.crashlytics.android.Crashlytics;
 import com.snscity.egdwlib.utils.LogUtil;
 
 import org.spongycastle.asn1.ASN1InputStream;
@@ -130,6 +131,8 @@ public class BTCUtils {
             }
 
             LogUtil.i("總計寄出資料=" + outputsToSpend.size() + "筆input,餘額=" +
+                    valueOfUnspentOutputs + ",fee=" + fee + ",amountToSend=" + amountToSend + ",change=" + change);
+            Crashlytics.log("總計寄出資料=" + outputsToSpend.size() + "筆input,餘額=" +
                     valueOfUnspentOutputs + ",fee=" + fee + ",amountToSend=" + amountToSend + ",change=" + change);
         }
 

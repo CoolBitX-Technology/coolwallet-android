@@ -58,9 +58,9 @@ public class LogUtil {
 
 
     private static void getElementAttributes(StackTraceElement[] sElements) {
-        fileName = sElements[1].getFileName();
-        methodName = sElements[1].getMethodName();
-        lineNumber = sElements[1].getLineNumber();
+        fileName = sElements[2].getFileName(); //sElements[1]=LogUtil.java
+        methodName = sElements[2].getMethodName();//sElements[1]=i,d,v,w
+        lineNumber = sElements[2].getLineNumber();////sElements[1]=LogUtil's lineNumber
     }
 
     private static String createLog(String log) {

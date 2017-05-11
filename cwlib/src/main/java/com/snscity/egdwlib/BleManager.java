@@ -67,7 +67,16 @@ public class BleManager {
 
     public boolean isOpen() {
 
-        return bluetoothAdapter.isEnabled();
+        boolean result ;
+        if (bluetoothAdapter == null) {
+            try {
+                initialize();
+            } catch (ValidationException ve) {
+                Toast.makeText(context, ve.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        }
+        result =bluetoothAdapter.isEnabled();
+        return result;
     }
 
     public boolean openBluetooth() {
@@ -124,7 +133,7 @@ public class BleManager {
     }
 
     public boolean connectBle(String address, BleStateCallback bleStateCallback) {
-        LogUtil.e("connectBle=" + address+";"+bluetoothAddress+";"+bluetoothGatt);
+        LogUtil.e("connectBle=" + address + ";" + bluetoothAddress + ";" + bluetoothGatt);
         this.bleStateCallback = bleStateCallback;
         if (bluetoothAddress != null && address.equals(bluetoothAddress) && bluetoothGatt != null) {
             return bluetoothGatt.connect();

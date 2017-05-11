@@ -6,6 +6,8 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -83,7 +85,7 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
 //    private static final int[] MENU_ITEMS_PIC = new int[]{
 //            R.mipmap.host, R.mipmap.cwcard, R.mipmap.security, R.mipmap.settings, R.drawable.exchange,
 //            R.drawable.exchange, R.mipmap.ic_feedback_white_24dp, R.mipmap.logout, R.mipmap.ic_share_white_24dp};
-//    // 左側選單文字項目
+    // 左側選單文字項目
 //    private static final String[] MENU_ITEMS = new String[]{
 //            "Host devices", "CoolWallet card", "Security", "Settings", "Exchange",
 //            "Exchange Login", "Issue Feedback", "Logout", "Share address\n(beta)"
@@ -170,7 +172,7 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
     private socketService mSocketService = null;
     private Timer mTimer;
     private socketNotificationReceiver brocastNR;
-
+    private TextView tvVer;
     private Handler socketMsgHandler = new Handler() {
 
         @Override
@@ -286,8 +288,14 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
     private void initView() {
 
         swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.cw_refresh);
+//        tvVer = (TextView) findViewById(R.id.main_tvVer);
 
-        //can't use mContext,but Activity.this.
+//        try {
+//            PackageInfo info = this.getPackageManager().getPackageInfo(this.getPackageName(), 0);
+//            tvVer.setText("V" + info.versionName);
+//        } catch (PackageManager.NameNotFoundException e) {
+//            e.printStackTrace();
+//        }
         mProgress = new ProgressDialog(FragMainActivity.this, ProgressDialog.THEME_HOLO_DARK);
         mProgress.setCancelable(false);
         mProgress.setIndeterminate(true);
@@ -465,7 +473,7 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
                             }
                             initTabFragment(mSavedInstanceState);
                         } else {
-                        //一開始進入只需抓account0抓交易資料
+                            //一開始進入只需抓account0抓交易資料
                             final int refreshAccount = 0;
                             final RefreshBlockChainInfo refreshBlockChainInfo = new RefreshBlockChainInfo(mContext, refreshAccount);
                             refreshBlockChainInfo.FunQueryAccountInfo(cmdManager, new RefreshCallback() {
