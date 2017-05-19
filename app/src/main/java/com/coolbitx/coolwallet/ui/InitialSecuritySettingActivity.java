@@ -198,14 +198,20 @@ public class InitialSecuritySettingActivity extends BaseActivity implements Comp
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
+    protected void onResume() {
+
+        super.onResume();
+        //註冊監聽
+        registerBroadcast(this, cmdManager);
+
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
+    protected void onPause() {
+        super.onPause();
+        unRegisterBroadcast(this);
     }
+
 
     private void initViews() {
         switchOtp = (Switch) findViewById(R.id.switchOtp);

@@ -17,6 +17,7 @@ import com.coolbitx.coolwallet.general.AppPrefrence;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.snscity.egdwlib.CmdManager;
 import com.snscity.egdwlib.cmd.CmdResultCallback;
+import com.snscity.egdwlib.utils.LogUtil;
 
 /**
  * Created by ShihYi on 2015/12/25.
@@ -68,6 +69,23 @@ public class CoolWalletCardActivity extends BaseActivity implements View.OnClick
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setHomeButtonEnabled(true);
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (cmdManager == null) {
+            cmdManager = new CmdManager();
+        }
+        //註冊監聽
+        registerBroadcast(this, cmdManager);
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unRegisterBroadcast(this);
     }
 
     @Override

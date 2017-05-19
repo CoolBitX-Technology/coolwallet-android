@@ -23,7 +23,7 @@ import com.snscity.egdwlib.utils.LogUtil;
 /**
  * Created by ShihYi on 2015/10/20.
  */
-public class InitialCreateWalletWords extends AppCompatActivity implements View.OnClickListener {
+public class InitialCreateWalletWords extends BaseActivity implements View.OnClickListener {
 
     private Button btnNext;
     private TextView tvHdWord;
@@ -174,13 +174,19 @@ public class InitialCreateWalletWords extends AppCompatActivity implements View.
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
+    protected void onResume() {
+
+        super.onResume();
+        //註冊監聽
+        registerBroadcast(this, cmdManager);
+
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
+    protected void onPause() {
+        super.onPause();
+        unRegisterBroadcast(this);
     }
+
 }
 

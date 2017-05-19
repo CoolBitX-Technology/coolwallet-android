@@ -17,6 +17,7 @@ import com.coolbitx.coolwallet.R;
 import com.coolbitx.coolwallet.adapter.HostAdapter;
 import com.coolbitx.coolwallet.bean.Host;
 import com.coolbitx.coolwallet.general.PublicPun;
+import com.coolbitx.coolwallet.ui.Fragment.FragMainActivity;
 import com.snscity.egdwlib.CmdManager;
 import com.snscity.egdwlib.cmd.CmdResultCallback;
 import com.snscity.egdwlib.utils.LogUtil;
@@ -61,6 +62,22 @@ public class HostDeviceActivity extends BaseActivity implements AdapterView.OnIt
 
         updataViews();
 
+    }
+
+
+    @Override
+    protected void onResume() {
+
+        super.onResume();
+        //註冊監聽
+        registerBroadcast(this, cmdManager);
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unRegisterBroadcast(this);
     }
 
     @Override

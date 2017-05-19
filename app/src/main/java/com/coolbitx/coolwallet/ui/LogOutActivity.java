@@ -13,6 +13,7 @@ import com.coolbitx.coolwallet.R;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.snscity.egdwlib.CmdManager;
 import com.snscity.egdwlib.cmd.CmdResultCallback;
+import com.snscity.egdwlib.utils.LogUtil;
 
 /**
  * Created by ShihYi on 2015/12/25.
@@ -41,6 +42,22 @@ public class LogOutActivity extends BaseActivity implements View.OnClickListener
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (cmdManager == null) {
+            cmdManager = new CmdManager();
+        }
+        //註冊監聽
+        registerBroadcast(this, cmdManager);
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unRegisterBroadcast(this);
+    }
     private void initViews() {
         btnLogout = (Button) findViewById(R.id.btn_logout);
         btnLogout.setOnClickListener(this);

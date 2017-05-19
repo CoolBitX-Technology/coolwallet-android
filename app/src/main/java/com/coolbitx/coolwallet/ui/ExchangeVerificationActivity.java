@@ -53,6 +53,23 @@ public class ExchangeVerificationActivity extends BaseActivity implements View.O
         GetUnclarifyOrder();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (cmdManager == null) {
+            cmdManager = new CmdManager();
+        }
+        //註冊監聽
+        registerBroadcast(this, cmdManager);
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unRegisterBroadcast(this);
+    }
+
     private void GetUnclarifyOrder() {
         mProgress.show();
         mExchangeAPI.getUnclarifyOrder(new APIResultCallback() {

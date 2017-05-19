@@ -116,11 +116,6 @@ public class TxsActivity extends BaseActivity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-    }
-
-    @Override
     protected void onStop() {
         super.onStop();
     }
@@ -131,9 +126,17 @@ public class TxsActivity extends BaseActivity {
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
+    protected void onResume() {
+        super.onResume();
+        //註冊監聽
+        registerBroadcast(this, cmdManager);
+
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unRegisterBroadcast(this);
+    }
 
 }

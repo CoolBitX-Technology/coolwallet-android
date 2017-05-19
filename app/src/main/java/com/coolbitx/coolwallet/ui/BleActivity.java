@@ -15,6 +15,7 @@ import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.ExpandableListView;
@@ -86,7 +87,7 @@ public class BleActivity extends BaseActivity {
     private Runnable Disconnrunnable = new Runnable() {
         @Override
         public void run() {
-            LogUtil.i("xxx Disconnrunnable=" + getPackageName());
+            LogUtil.i("Disconnrunnable=" + getPackageName());
             isConnected = false;
             disconnBroadCast();
         }
@@ -645,9 +646,15 @@ public class BleActivity extends BaseActivity {
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        LogUtil.d("BleActivity onStart");
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
-        LogUtil.d("onResume");
+        LogUtil.d("BleActivity onResume");
 
         if (bleManager == null) {
             bleManager = new BleManager(this);
@@ -659,8 +666,9 @@ public class BleActivity extends BaseActivity {
             bleManager.openBluetooth();
         }
 
-
+        registerBroadcast(BleActivity.this, cmdManager);
     }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -681,6 +689,8 @@ public class BleActivity extends BaseActivity {
     @Override
     protected void onPause() {
         super.onPause();
+        LogUtil.d("BleActivity onPause");
+        unRegisterBroadcast(this);
     }
 
     @Override

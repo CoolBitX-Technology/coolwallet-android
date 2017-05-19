@@ -55,6 +55,22 @@ public class TransactionFeeActivity extends BaseActivity implements CheckBox.OnC
 
     }
 
+    @Override
+    protected void onResume() {
+
+        super.onResume();
+        //註冊監聽
+        registerBroadcast(this, cmdManager);
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unRegisterBroadcast(this);
+    }
+
+
     private void initView() {
 
 //        seekBarFee = (SeekBar) findViewById(R.id.see);

@@ -6,9 +6,11 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
@@ -27,6 +29,7 @@ import android.widget.Toast;
 import com.coolbitx.coolwallet.DataBase.DatabaseHelper;
 import com.coolbitx.coolwallet.DataBase.DbName;
 import com.coolbitx.coolwallet.R;
+import com.coolbitx.coolwallet.Service.BTConfig;
 import com.coolbitx.coolwallet.Service.BlockSocketHandler;
 import com.coolbitx.coolwallet.bean.Account;
 import com.coolbitx.coolwallet.bean.Address;
@@ -39,6 +42,7 @@ import com.coolbitx.coolwallet.callback.RefreshCallback;
 import com.coolbitx.coolwallet.general.AppPrefrence;
 import com.coolbitx.coolwallet.general.BtcUrl;
 import com.coolbitx.coolwallet.general.CSVReadWrite;
+import com.coolbitx.coolwallet.general.NotificationReceiver;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.coolbitx.coolwallet.general.RefreshBlockChainInfo;
 import com.coolbitx.coolwallet.httpRequest.CwBtcNetWork;
@@ -120,6 +124,7 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
     int IntIntKey = 0;
     TabFragment tabFragment;
 
+    private NotificationReceiver brocastNR;
 
     Handler mHandler = new Handler() {
         @Override
@@ -167,7 +172,6 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
     private ProgressDialog mProgress;
     private String mParentActivityName = null;
     private Timer mTimer;
-    private socketNotificationReceiver brocastNR;
     private TextView tvVer;
     private Handler socketMsgHandler = new Handler() {
 
@@ -966,6 +970,8 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
         if (cmdManager == null) {
             cmdManager = new CmdManager();
         }
+        //註冊監聽
+        registerBroadcast(this, cmdManager);
 
     }
 
@@ -979,6 +985,7 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
     protected void onPause() {
         super.onPause();
         LogUtil.e("lifeCycle FragMainActivity onPause");
+        unRegisterBroadcast(this);
     }
 
     @Override
@@ -999,6 +1006,8 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
         }
 
     }
+
+
 
     public String getAccountFrag(int id) {
         return "Account" + id;

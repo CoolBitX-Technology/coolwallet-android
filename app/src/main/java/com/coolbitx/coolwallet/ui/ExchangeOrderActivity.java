@@ -110,6 +110,7 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
     private String UrlUnspent;
     TransactionConfirmDialog trxDialog;
     TxsConfirm mTxsConfirm;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -121,6 +122,26 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
 
         cwBtcNetWork = new CwBtcNetWork();
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (cmdManager == null) {
+            cmdManager = new CmdManager();
+        }
+        if (cwBtcNetWork == null) {
+            cwBtcNetWork = new CwBtcNetWork();
+        }
+        //註冊監聽
+        registerBroadcast(this, cmdManager);
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unRegisterBroadcast(this);
     }
 
     private void initViews() {

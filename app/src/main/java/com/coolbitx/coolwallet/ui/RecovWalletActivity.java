@@ -802,14 +802,20 @@ public class RecovWalletActivity extends BaseActivity implements View.OnClickLis
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
+    protected void onResume() {
+
+        super.onResume();
+        //註冊監聽
+        registerBroadcast(this, cmdManager);
+
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
+    protected void onPause() {
+        super.onPause();
+        unRegisterBroadcast(this);
     }
+
 
     private class MyRunnable implements Runnable {
         ContentValues cv;
@@ -907,5 +913,7 @@ public class RecovWalletActivity extends BaseActivity implements View.OnClickLis
             }
         }
     }
+
+
 
 }

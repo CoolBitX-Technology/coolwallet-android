@@ -83,6 +83,7 @@ public class InitialCreateWalletIIActivity extends BaseActivity implements SeekB
         GetSecpo();
     }
 
+
     @Override
     public void onClick(View view) {
 
@@ -396,12 +397,18 @@ public class InitialCreateWalletIIActivity extends BaseActivity implements SeekB
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
+    protected void onResume() {
+
+        super.onResume();
+        //註冊監聽
+        registerBroadcast(this, cmdManager);
+
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
+    protected void onPause() {
+        super.onPause();
+        unRegisterBroadcast(this);
     }
+
 }

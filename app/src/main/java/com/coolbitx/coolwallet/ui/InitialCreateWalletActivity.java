@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.TableRow;
 
 import com.coolbitx.coolwallet.R;
+import com.snscity.egdwlib.CmdManager;
 
 /**
  * Created by ShihYi on 2015/10/20.
@@ -49,15 +50,19 @@ public class InitialCreateWalletActivity extends BaseActivity implements View.On
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
+    protected void onResume() {
+        super.onResume();
+
+        //註冊監聽
+        registerBroadcast(this, cmdManager);
+
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
+    protected void onPause() {
+        super.onPause();
+        unRegisterBroadcast(this);
     }
-
     @Override
     public void onBackPressed() {
         BleActivity.bleManager.disConnectBle();

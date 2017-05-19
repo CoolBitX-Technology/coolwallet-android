@@ -65,14 +65,19 @@ public class InitialPairSuccessfulActivity extends BaseActivity implements View.
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
+    protected void onResume() {
+
+        super.onResume();
+        //註冊監聽
+        registerBroadcast(this, cmdManager);
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
+    protected void onPause() {
+        super.onPause();
+        unRegisterBroadcast(this);
     }
+
 
     @Override
     public void onBackPressed() {

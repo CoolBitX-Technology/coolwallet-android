@@ -54,6 +54,23 @@ public class ExchangeRateActivity extends BaseActivity implements AdapterView.On
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        if (cmdManager == null) {
+            cmdManager = new CmdManager();
+        }
+        //註冊監聽
+        registerBroadcast(this, cmdManager);
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unRegisterBroadcast(this);
+    }
+
+    @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         if (rateData != null && !rateData.isEmpty()) {
             AppPrefrence.saveCurrentCountry(context, rateData.get(position));

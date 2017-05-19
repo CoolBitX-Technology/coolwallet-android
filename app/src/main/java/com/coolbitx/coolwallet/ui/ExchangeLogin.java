@@ -156,8 +156,20 @@ public class ExchangeLogin extends BaseActivity implements View.OnClickListener 
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        if (cmdManager == null) {
+            cmdManager = new CmdManager();
+        }
+        //註冊監聽
+        registerBroadcast(this, cmdManager);
+
+    }
+
+    @Override
     protected void onPause() {
         super.onPause();
+        unRegisterBroadcast(this);
     }
 
     @Override
@@ -165,10 +177,6 @@ public class ExchangeLogin extends BaseActivity implements View.OnClickListener 
         super.onDestroy();
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-    }
 
     @Override
     public Intent getSupportParentActivityIntent() {

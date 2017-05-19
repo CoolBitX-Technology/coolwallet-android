@@ -51,6 +51,22 @@ public class EraseActivity extends BaseActivity implements View.OnClickListener 
         initViews();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (cmdManager == null) {
+            cmdManager = new CmdManager();
+        }
+        //註冊監聽
+        registerBroadcast(this, cmdManager);
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unRegisterBroadcast(this);
+    }
 
     private void genOTP(){
         //新版reset,如果出6601代表是舊版

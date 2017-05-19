@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.coolbitx.coolwallet.R;
+import com.snscity.egdwlib.CmdManager;
 
 /**
  * Created by ShihYi on 2015/10/20.
@@ -35,6 +36,23 @@ public class InitialCreateHDWallet extends BaseActivity implements View.OnClickL
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        if (cmdManager == null) {
+            cmdManager = new CmdManager();
+        }
+        //註冊監聽
+        registerBroadcast(this, cmdManager);
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unRegisterBroadcast(this);
+    }
+
+    @Override
     protected void onStart() {
         super.onStart();
     }
@@ -49,15 +67,6 @@ public class InitialCreateHDWallet extends BaseActivity implements View.OnClickL
         super.onDestroy();
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-    }
 
     private void findViews() {
         edtCreateHD = (EditText)findViewById( R.id.edt_createHD );

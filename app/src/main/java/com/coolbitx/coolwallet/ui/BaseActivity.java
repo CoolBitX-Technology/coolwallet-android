@@ -29,6 +29,7 @@ import com.coolbitx.coolwallet.bean.socketByAddress;
 import com.coolbitx.coolwallet.callback.RefreshCallback;
 import com.coolbitx.coolwallet.general.AppPrefrence;
 import com.coolbitx.coolwallet.general.BtcUrl;
+import com.coolbitx.coolwallet.general.NotificationReceiver;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.coolbitx.coolwallet.general.RefreshBlockChainInfo;
 import com.coolbitx.coolwallet.httpRequest.CwBtcNetWork;
@@ -58,59 +59,48 @@ public class BaseActivity extends AppCompatActivity {
     public static CmdManager cmdManager;
     Context mContext;
     public static boolean[] settingOptions = new boolean[4];
-    LocalBroadcastManager mLocalBroadcastManager;
-    private socketNotificationReceiver brocastNR;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        LogUtil.d("lifeCycle BaseActivity onCreate");
+        LogUtil.e("lifeCycle BaseActivity onCreate");
         mContext = this;
-        Fabric.with(this, new Crashlytics());
-
+//        Fabric.with(this, new Crashlytics());
 
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        LogUtil.d("lifeCycle BaseActivity onStart");
+        LogUtil.e("lifeCycle BaseActivity onStart");
 
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        LogUtil.d("lifeCycle BaseActivity onResume");
+        LogUtil.e("lifeCycle BaseActivity onResume");
 
         if (cmdManager == null) {
             cmdManager = new CmdManager();
         }
-        //註冊監聽
-        registerBroadcast();
+//        //註冊監聽
+//        registerBroadcast(mContext,cmdManager);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        LogUtil.d("lifeCycle BaseActivity onPause");
+        LogUtil.e("lifeCycle BaseActivity onPause");
+//        unRegisterBroadcast(this);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        LogUtil.d("lifeCycle BaseActivity onStop");
+        LogUtil.e("lifeCycle BaseActivity onStop");
 
-        try {
-            LogUtil.d("BaseActivity unregisterReceiver");
-            if (brocastNR != null) {
-                unregisterReceiver(brocastNR);
-                brocastNR = null;
-            }
-        } catch (Exception e) {
-            brocastNR = null;
-            LogUtil.e("error:" + e.getMessage());
-        }
     }
 
     @Override
@@ -118,7 +108,40 @@ public class BaseActivity extends AppCompatActivity {
         super.onDestroy();
         LogUtil.e("lifeCycle BaseActivity onDestroy");
 
+    }
 
+    static NotificationReceiver brocastNR;
+
+    public void registerBroadcast(Context context, CmdManager cmdManager) {
+        LogUtil.e("registerBroadcast");
+        //註冊監聽
+        LocalBroadcastManager mLocalBroadcastManager;
+//        if (brocastNR == null) {
+        brocastNR = new NotificationReceiver(context, cmdManager);
+        //註冊廣播
+        mLocalBroadcastManager = LocalBroadcastManager.getInstance(context);
+        mLocalBroadcastManager.registerReceiver(brocastNR, new IntentFilter(BTConfig.SOCKET_ADDRESS_MSG));
+        mLocalBroadcastManager.registerReceiver(brocastNR, new IntentFilter(BTConfig.DISCONN_NOTIFICATION));
+        mLocalBroadcastManager.registerReceiver(brocastNR, new IntentFilter(BTConfig.XCHS_NOTIFICATION));
+    }
+
+    public void unRegisterBroadcast(Context context) {
+        try {
+            if (brocastNR == null)
+            {
+                LogUtil.e("Do not unregister receiver as it was never registered");
+            }
+            else
+            {
+                LogUtil.e("Unregister receiver");
+                LocalBroadcastManager.getInstance(context).unregisterReceiver(brocastNR);
+                brocastNR = null;
+            }
+
+        } catch (Exception e) {
+            brocastNR = null;
+            LogUtil.e("error:" + e.getMessage());
+        }
     }
 
     public void getSecpo() {
@@ -149,7 +172,6 @@ public class BaseActivity extends AppCompatActivity {
             }
         });
     }
-
 
 
     public void getUniqueId() {
@@ -330,102 +352,103 @@ public class BaseActivity extends AppCompatActivity {
     }
 
 
-    public void RefreshSetAccInfo(int account) {
-
-        LogUtil.e("這是Main FunhdwSetAccInfo=" + account);
-        byte ByteAccId = (byte) account;
-
-        //for card display
-
-        cmdManager.McuSetAccountState(ByteAccId, new CmdResultCallback() {
-                    @Override
-                    public void onSuccess(int status, byte[] outputData) {
-                        if ((status + 65536) == 0x9000) {
-                        }
-                    }
-                }
-        );
-
-        //set CW Card
-        final byte cwHdwAccountInfoName = 0x00;
-        final byte cwHdwAccountInfoBalance = 0x01;
-        final byte cwHdwAccountInfoExtKeyPtr = 0x02;
-        final byte cwHdwAccountInfoIntKeyPtr = 0x03;
-
-        byte[] accountInfo = new byte[32];
-        long TotalBalance = 0;
-        int extKey = 0;
-        int intKey = 0;
-        ArrayList<dbAddress> listAddress = new ArrayList<dbAddress>();
-        listAddress = DatabaseHelper.queryAddress(mContext, account, -1);//ext+int
-
-        LogUtil.i("before set socket account=" + PublicPun.accountSocketReg[account]);
-
-        for (int i = 0; i < listAddress.size(); i++) {
-            TotalBalance += listAddress.get(i).getBalance();
-            if (listAddress.get(i).getKcid() == 0) {
-                extKey++;
-            }
-            if (listAddress.get(i).getKcid() == 1) {
-                intKey++;
-            }
-        }
-
-        final boolean[] flag = new boolean[4];
-
-        final byte[] cwHdwAccountInfo = new byte[]{cwHdwAccountInfoName, cwHdwAccountInfoBalance,
-                cwHdwAccountInfoExtKeyPtr, cwHdwAccountInfoIntKeyPtr};
-
-        for (int i = 0; i < cwHdwAccountInfo.length; i++) {
-            final int setAcctInfoIndex = i;
-            LogUtil.i("SWITCH=" + cwHdwAccountInfo[setAcctInfoIndex]);
-            switch (cwHdwAccountInfo[setAcctInfoIndex]) {
-                case cwHdwAccountInfoName:
-                    //00h: Account name (32 bytes)
-                    accountInfo = new byte[32];
-                    break;
-
-                case cwHdwAccountInfoBalance:
-                    accountInfo = new byte[8];
-                    //204E000000000000
-//                    byte[] newBalanceBytes = ByteUtil.intToByteLittle(TotalBalance, 8);
-                    byte[] newBalanceBytes =
-                            ByteBuffer.allocate(8).order(ByteOrder.BIG_ENDIAN).putLong(TotalBalance).array();
-                    accountInfo = newBalanceBytes;
-                    break;
-
-                case cwHdwAccountInfoExtKeyPtr:
-                    accountInfo = new byte[4];
-                    accountInfo = ByteUtil.intToByteLittle(extKey, 4);
-//                    accountInfo = ByteUtil.intToByteLittle(5, 4);
-                    break;
-
-                case cwHdwAccountInfoIntKeyPtr:
-                    accountInfo = new byte[4];
-                    accountInfo = ByteUtil.intToByteLittle(intKey, 4);
-//                    accountInfo = ByteUtil.intToByteLittle(10, 4);
-                    break;
-            }
-            LogUtil.i("hdwSetAccInfo:" + account + "的 " + setAcctInfoIndex + " =" + PublicPun.byte2HexString(accountInfo));
-            cmdManager.hdwSetAccInfo(PublicPun.user.getMacKey(), cwHdwAccountInfo[setAcctInfoIndex], account, accountInfo, new CmdResultCallback() {
-                        @Override
-                        public void onSuccess(int status, byte[] outputData) {
-                            if ((status + 65536) == 0x9000) {
-                                flag[setAcctInfoIndex] = true;
-
-                                if (flag[0] && flag[1] && flag[2] && flag[3]) {
-//                                    PublicPun.toast(mContext, "Data synced.");
-                                }
-
-                            } else {
-//                                PublicPun.toast(mContext, "Data synced failed!");
-                            }
-                        }
-                    }
-            );
-        }
-    }
-
+//    public void RefreshSetAccInfo(int account) {
+//
+//        LogUtil.e("這是Main FunhdwSetAccInfo=" + account);
+//        byte ByteAccId = (byte) account;
+//
+//        //for card display
+//
+//        cmdManager.McuSetAccountState(ByteAccId, new CmdResultCallback() {
+//                    @Override
+//                    public void onSuccess(int status, byte[] outputData) {
+//                        if ((status + 65536) == 0x9000) {
+//                        }
+//                    }
+//                }
+//        );
+//
+//        //set CW Card
+//        final byte cwHdwAccountInfoName = 0x00;
+//        final byte cwHdwAccountInfoBalance = 0x01;
+//        final byte cwHdwAccountInfoExtKeyPtr = 0x02;
+//        final byte cwHdwAccountInfoIntKeyPtr = 0x03;
+//
+//        byte[] accountInfo = new byte[32];
+//        long TotalBalance = 0;
+//        int extKey = 0;
+//        int intKey = 0;
+//        ArrayList<dbAddress> listAddress = new ArrayList<dbAddress>();
+//        listAddress = DatabaseHelper.queryAddress(mContext, account, -1);//ext+int
+//
+//        LogUtil.i("before set socket account=" + PublicPun.accountSocketReg[account]);
+//
+//        for (int i = 0; i < listAddress.size(); i++) {
+//            TotalBalance += listAddress.get(i).getBalance();
+//            if (listAddress.get(i).getKcid() == 0) {
+//                extKey++;
+//            }
+//            if (listAddress.get(i).getKcid() == 1) {
+//                intKey++;
+//            }
+//        }
+//
+//        final boolean[] flag = new boolean[4];
+//
+//        final byte[] cwHdwAccountInfo = new byte[]{cwHdwAccountInfoName, cwHdwAccountInfoBalance,
+//                cwHdwAccountInfoExtKeyPtr, cwHdwAccountInfoIntKeyPtr};
+//
+//        for (int i = 0; i < cwHdwAccountInfo.length; i++) {
+//            final int setAcctInfoIndex = i;
+//            LogUtil.i("SWITCH=" + cwHdwAccountInfo[setAcctInfoIndex]);
+//            switch (cwHdwAccountInfo[setAcctInfoIndex]) {
+//                case cwHdwAccountInfoName:
+//                    //00h: Account name (32 bytes)
+//                    accountInfo = new byte[32];
+//                    break;
+//
+//                case cwHdwAccountInfoBalance:
+//                    accountInfo = new byte[8];
+//                    //204E000000000000
+////                    byte[] newBalanceBytes = ByteUtil.intToByteLittle(TotalBalance, 8);
+//                    byte[] newBalanceBytes =
+//                            ByteBuffer.allocate(8).order(ByteOrder.BIG_ENDIAN).putLong(TotalBalance).array();
+//                    accountInfo = newBalanceBytes;
+//                    break;
+//
+//                case cwHdwAccountInfoExtKeyPtr:
+//                    accountInfo = new byte[4];
+//                    accountInfo = ByteUtil.intToByteLittle(extKey, 4);
+////                    accountInfo = ByteUtil.intToByteLittle(5, 4);
+//                    break;
+//
+//                case cwHdwAccountInfoIntKeyPtr:
+//                    accountInfo = new byte[4];
+//                    accountInfo = ByteUtil.intToByteLittle(intKey, 4);
+////                    accountInfo = ByteUtil.intToByteLittle(10, 4);
+//                    break;
+//            }
+//            LogUtil.i("hdwSetAccInfo:" + account + "的 " + setAcctInfoIndex + " =" + PublicPun.byte2HexString(accountInfo));
+//            cmdManager.hdwSetAccInfo(PublicPun.user.getMacKey(), cwHdwAccountInfo[setAcctInfoIndex], account, accountInfo, new CmdResultCallback() {
+//                        @Override
+//                        public void onSuccess(int status, byte[] outputData) {
+//                            if ((status + 65536) == 0x9000) {
+//                                flag[setAcctInfoIndex] = true;
+//
+//                                if (flag[0] && flag[1] && flag[2] && flag[3]) {
+////                                    PublicPun.toast(mContext, "Data synced.");
+//                                }
+//
+//                            } else {
+////                                PublicPun.toast(mContext, "Data synced failed!");
+//                            }
+//                        }
+//                    }
+//            );
+//        }
+//    }
+//
+//
 
     /**
      * used to refresh rate by interval
@@ -494,163 +517,150 @@ public class BaseActivity extends AppCompatActivity {
         }
     }
 
-    private void registerBroadcast() {
-        LogUtil.e("registerBroadcast");
-        //註冊監聽
-//        if (brocastNR == null) {
-            brocastNR = new socketNotificationReceiver();
-            //註冊廣播
-            mLocalBroadcastManager = LocalBroadcastManager.getInstance(this);
-            LogUtil.d("MainActivity registerReceiver brocastNR");
-            mLocalBroadcastManager.registerReceiver(brocastNR, new IntentFilter(BTConfig.SOCKET_ADDRESS_MSG));
-            mLocalBroadcastManager.registerReceiver(brocastNR, new IntentFilter(BTConfig.DISCONN_NOTIFICATION));
-            LogUtil.d("MainActivity registerReceiver XchsReceiver");
-            mLocalBroadcastManager.registerReceiver(brocastNR, new IntentFilter(BTConfig.XCHS_NOTIFICATION));
-//        }
-    }
+
 
     //建立廣播接收socket訊息
-    public class socketNotificationReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            // TODO Auto-generated method stub
-            String action = intent.getAction();
-            LogUtil.d("webSocket broadcast recv!");
-
-            if (action.equals(BTConfig.SOCKET_ADDRESS_MSG)) {
-                LogUtil.d("webSocket BaseActivity broadcast recv!");
-                brocastMsgHandler.sendMessage(brocastMsgHandler.obtainMessage(BSConfig.HANDLER_SOCKET,
-                        intent.getExtras().getSerializable("socketAddrMsg")));
-            } else if (action.equals(BTConfig.DISCONN_NOTIFICATION)) {
-                brocastMsgHandler.sendMessage(brocastMsgHandler.obtainMessage(BSConfig.HANDLER_DISCONN));
-            } else if (action.equals(BTConfig.XCHS_NOTIFICATION)) {
-                LogUtil.d("XCHS BaseActivity broadcast recv!");
-                Message msg = new Message();
-                Bundle data = new Bundle();
-                data.putString("handlerMessage", intent.getExtras().getString("ExchangeMessage"));
-                msg.setData(data);
-                msg.what = BSConfig.HANDLER_XCHS;
-                brocastMsgHandler.sendMessage(msg);
-            }
-        }
-
-    }
-
-    private Handler brocastMsgHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            // TODO Auto-generated method stub
-            switch (msg.what) {
-                case BSConfig.HANDLER_SOCKET:
-                    final socketByAddress socket = (socketByAddress) msg.obj;
-                    final int mAccount = DatabaseHelper.queryAccountByAddress(mContext, socket.getAddress());
-                    if (socket.getTx_type().equals("Received") && socket.getConfirmations() <= 1) {//
-                        // do your work right here
-                        String socketTitle = "BitCoin Received";
-                        String socketMsg = "Account " + (mAccount + 1) + "\n"
-                                + "Address:" + "\n"
-                                + socket.getAddress() + "\n"
-                                + socket.getTx_type() + " Amount:" + TabFragment.BtcFormatter.format(socket.getBtc_amount()) + " BTC" + "\n"
-                                + "Confirmations: " + socket.getConfirmations();
-                        PublicPun.showNoticeDialog(mContext, socketTitle, socketMsg);
-                        systemNotificationBTC(socket, mAccount);
-                    }
-
-                    //refresh the transaction data when balance updated.
-                    if (mAccount >= 0) {
-                        RefreshBlockChainInfo refreshBlockChainInfo = new RefreshBlockChainInfo(mContext, mAccount);
-                        refreshBlockChainInfo.callTxsRunnable(new RefreshCallback() {
-                            @Override
-                            public void success() {
-                                RefreshSetAccInfo(mAccount);
-                            }
-
-                            @Override
-                            public void fail(String msg) {
-                                Toast.makeText(mContext, "Unstable internet connection", Toast.LENGTH_LONG);
-                            }
-                        });
-                    }
-                    break;
-
-                case BSConfig.HANDLER_DISCONN:
-
-                    String title = "CoolWallet Disconnected";
-                    ActivityManager am = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-                    ComponentName cn = am.getRunningTasks(1).get(0).topActivity;
-                    int ind = cn.getShortClassName().lastIndexOf(".") + 1;//.ui.EraseActivity → EraseActivity
-                    String act = cn.getShortClassName().substring(ind);
-
-                    LogUtil.e("BaseActivity HANDLER_DISCONN actitvity=" + act);
-
-                    String noteMsg;
-                    if (PublicPun.card.getCardName() == null) {
-                        noteMsg = "CoolWallet Disconnected";
-                    } else {
-                        noteMsg = PublicPun.card.getCardName() + " Disconnected";
-                    }
-                    if (act.equals("BleActivity")) {
-                        LogUtil.e("BleActivity disconnected,reconnected.");
-                        SharedPreferences settings = getSharedPreferences("Preference", 0);
-                        //取出name屬性的字串
-                        String address = settings.getString("connAddress", "");
-                        bleManager.connectBle(address);
-
-                    } else {
-                        LogUtil.e("not BleActivity");
-                        PublicPun.showNoticeDialogToFinish(mContext, title, noteMsg);
-                        systemNotification(title, noteMsg);
-                    }
-
-                    break;
-
-                case BSConfig.HANDLER_XCHS:
-                    String message = msg.getData().getString("handlerMessage");
-                    LogUtil.e("XCHS 廣播:" + message);
-                    if (message != null) {
-                        //Receive message from Exchange site
-                        LogUtil.d("ExchangeMessage=" + message);
-                        PublicPun.showNoticeDialog(mContext, "CoolWallet Exchange Message", message);
-                    }
-            }
-            super.handleMessage(msg);
-        }
-    };
-
-    /**
-     * show on Status Bar
-     * foe btc recv
-     */
-    private void systemNotificationBTC(socketByAddress socket, int mAccount) {
-        final int notifyID = mAccount; // 通知的識別號碼
-
-        String socketTitle = "BitCoin Received";
-        final NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE); // 取得系統的通知服務
-        final Notification notification = new Notification.Builder(getApplicationContext())
-                .setSmallIcon(R.mipmap.ic_launcher_cw)
-                .setStyle(new Notification.InboxStyle()
-                        .setBigContentTitle(socketTitle)
-                        .addLine("Account " + (mAccount + 1))
-                        .addLine("Address:")
-                        .addLine(socket.getAddress())
-                        .addLine(socket.getTx_type() + " Amount:" + TabFragment.BtcFormatter.format(socket.getBtc_amount()) + " BTC")
-                        .addLine("Confirmations: " + socket.getConfirmations())).build();
+//    public class socketNotificationReceiver extends BroadcastReceiver {
+//        @Override
+//        public void onReceive(Context context, Intent intent) {
+//            // TODO Auto-generated method stub
+//            String action = intent.getAction();
+//            LogUtil.d("webSocket broadcast recv!");
+//
+//            if (action.equals(BTConfig.SOCKET_ADDRESS_MSG)) {
+//                LogUtil.d("webSocket BaseActivity broadcast recv!");
+//                brocastMsgHandler.sendMessage(brocastMsgHandler.obtainMessage(BSConfig.HANDLER_SOCKET,
+//                        intent.getExtras().getSerializable("socketAddrMsg")));
+//            } else if (action.equals(BTConfig.DISCONN_NOTIFICATION)) {
+//                brocastMsgHandler.sendMessage(brocastMsgHandler.obtainMessage(BSConfig.HANDLER_DISCONN));
+//            } else if (action.equals(BTConfig.XCHS_NOTIFICATION)) {
+//                LogUtil.d("XCHS BaseActivity broadcast recv!");
+//                Message msg = new Message();
+//                Bundle data = new Bundle();
+//                data.putString("handlerMessage", intent.getExtras().getString("ExchangeMessage"));
+//                msg.setData(data);
+//                msg.what = BSConfig.HANDLER_XCHS;
+//                brocastMsgHandler.sendMessage(msg);
+//            }
+//        }
+//
+//    }
+//
+//    private Handler brocastMsgHandler = new Handler() {
+//        @Override
+//        public void handleMessage(Message msg) {
+//            // TODO Auto-generated method stub
+//            switch (msg.what) {
+//                case BSConfig.HANDLER_SOCKET:
+//                    final socketByAddress socket = (socketByAddress) msg.obj;
+//                    final int mAccount = DatabaseHelper.queryAccountByAddress(mContext, socket.getAddress());
+//                    if (socket.getTx_type().equals("Received") && socket.getConfirmations() <= 1) {//
+//                        // do your work right here
+//                        String socketTitle = "BitCoin Received";
+//                        String socketMsg = "Account " + (mAccount + 1) + "\n"
+//                                + "Address:" + "\n"
+//                                + socket.getAddress() + "\n"
+//                                + socket.getTx_type() + " Amount:" + TabFragment.BtcFormatter.format(socket.getBtc_amount()) + " BTC" + "\n"
+//                                + "Confirmations: " + socket.getConfirmations();
+//                        PublicPun.showNoticeDialog(mContext, socketTitle, socketMsg);
+//                        systemNotificationBTC(socket, mAccount);
+//                    }
+//
+//                    //refresh the transaction data when balance updated.
+//                    if (mAccount >= 0) {
+//                        RefreshBlockChainInfo refreshBlockChainInfo = new RefreshBlockChainInfo(mContext, mAccount);
+//                        refreshBlockChainInfo.callTxsRunnable(new RefreshCallback() {
+//                            @Override
+//                            public void success() {
+//                                RefreshSetAccInfo(mAccount);
+//                            }
+//
+//                            @Override
+//                            public void fail(String msg) {
+//                                Toast.makeText(mContext, "Unstable internet connection", Toast.LENGTH_LONG);
+//                            }
+//                        });
+//                    }
+//                    break;
+//
+//                case BSConfig.HANDLER_DISCONN:
+//
+//                    String title = "CoolWallet Disconnected";
+//                    ActivityManager am = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+//                    ComponentName cn = am.getRunningTasks(1).get(0).topActivity;
+//                    int ind = cn.getShortClassName().lastIndexOf(".") + 1;//.ui.EraseActivity → EraseActivity
+//                    String act = cn.getShortClassName().substring(ind);
+//
+//                    LogUtil.e("BaseActivity HANDLER_DISCONN actitvity=" + act);
+//
+//                    String noteMsg;
+//                    if (PublicPun.card.getCardName() == null) {
+//                        noteMsg = "CoolWallet Disconnected";
+//                    } else {
+//                        noteMsg = PublicPun.card.getCardName() + " Disconnected";
+//                    }
+//                    if (act.equals("BleActivity")) {
+//                        LogUtil.e("BleActivity disconnected,reconnected.");
+//                        SharedPreferences settings = getSharedPreferences("Preference", 0);
+//                        //取出name屬性的字串
+//                        String address = settings.getString("connAddress", "");
+//                        bleManager.connectBle(address);
+//
+//                    } else {
+//                        LogUtil.e("not BleActivity");
+//                        PublicPun.showNoticeDialogToFinish(mContext, title, noteMsg);
+//                        systemNotification(title, noteMsg);
+//                    }
+//
+//                    break;
+//
+//                case BSConfig.HANDLER_XCHS:
+//                    String message = msg.getData().getString("handlerMessage");
+//                    LogUtil.e("XCHS 廣播:" + message);
+//                    if (message != null) {
+//                        //Receive message from Exchange site
+//                        LogUtil.d("ExchangeMessage=" + message);
+//                        PublicPun.showNoticeDialog(mContext, "CoolWallet Exchange Message", message);
+//                    }
+//            }
+//            super.handleMessage(msg);
+//        }
+//    };
+//
+//    /**
+//     * show on Status Bar
+//     * foe btc recv
+//     */
+//    private void systemNotificationBTC(socketByAddress socket, int mAccount) {
+//        final int notifyID = mAccount; // 通知的識別號碼
+//
+//        String socketTitle = "BitCoin Received";
+//        final NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE); // 取得系統的通知服務
+//        final Notification notification = new Notification.Builder(getApplicationContext())
+//                .setSmallIcon(R.mipmap.ic_launcher_cw)
+//                .setStyle(new Notification.InboxStyle()
+//                        .setBigContentTitle(socketTitle)
+//                        .addLine("Account " + (mAccount + 1))
+//                        .addLine("Address:")
+//                        .addLine(socket.getAddress())
+//                        .addLine(socket.getTx_type() + " Amount:" + TabFragment.BtcFormatter.format(socket.getBtc_amount()) + " BTC")
+//                        .addLine("Confirmations: " + socket.getConfirmations())).build();
+////                .setContentIntent(PendingIntent.getActivity(getApplicationContext(), notifyID, new Intent(getApplicationContext(), BleActivity.class), PendingIntent.FLAG_UPDATE_CURRENT)).build();
+//        notificationManager.notify(notifyID, notification); // 發送通知
+//    }
+//
+//    /**
+//     * show on Status Bar
+//     * foe ble disconn
+//     */
+//    private void systemNotification(String title, String msg) {
+//        final int notifyID = 999; // 通知的識別號碼
+//        final NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE); // 取得系統的通知服務
+//        final Notification notification = new Notification.Builder(getApplicationContext())
+//                .setSmallIcon(R.mipmap.ic_launcher_cw)
+//                .setContentTitle(title)
+//                .setContentText(msg) // 建立通知
 //                .setContentIntent(PendingIntent.getActivity(getApplicationContext(), notifyID, new Intent(getApplicationContext(), BleActivity.class), PendingIntent.FLAG_UPDATE_CURRENT)).build();
-        notificationManager.notify(notifyID, notification); // 發送通知
-    }
-
-    /**
-     * show on Status Bar
-     * foe ble disconn
-     */
-    private void systemNotification(String title, String msg) {
-        final int notifyID = 999; // 通知的識別號碼
-        final NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE); // 取得系統的通知服務
-        final Notification notification = new Notification.Builder(getApplicationContext())
-                .setSmallIcon(R.mipmap.ic_launcher_cw)
-                .setContentTitle(title)
-                .setContentText(msg) // 建立通知
-                .setContentIntent(PendingIntent.getActivity(getApplicationContext(), notifyID, new Intent(getApplicationContext(), BleActivity.class), PendingIntent.FLAG_UPDATE_CURRENT)).build();
-        notificationManager.notify(notifyID, notification); // 發送通知
-    }
+//        notificationManager.notify(notifyID, notification); // 發送通知
+//    }
 }

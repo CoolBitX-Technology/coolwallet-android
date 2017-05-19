@@ -12,6 +12,8 @@ import android.widget.ListView;
 
 import com.coolbitx.coolwallet.R;
 import com.coolbitx.coolwallet.ui.Fragment.ServiceProviderActivity;
+import com.snscity.egdwlib.CmdManager;
+import com.snscity.egdwlib.utils.LogUtil;
 
 /**
  * Created by ShihYi on 2017/1/23.
@@ -31,6 +33,7 @@ public class SettingActivity extends BaseActivity implements AdapterView.OnItemC
         lvSetting = (ListView) findViewById(R.id.lv_setting);
 
     }
+
 
     @Override
     public Intent getSupportParentActivityIntent() {
@@ -57,11 +60,16 @@ public class SettingActivity extends BaseActivity implements AdapterView.OnItemC
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_expandable_list_item_1, item);
         lvSetting.setAdapter(adapter);
         lvSetting.setOnItemClickListener(this);
+
+        //註冊監聽
+        registerBroadcast(this, cmdManager);
+
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        unRegisterBroadcast(this);
     }
 
     @Override

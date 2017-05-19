@@ -290,6 +290,7 @@ public class ExchangeActivity extends BaseActivity implements
 
     }
 
+
     private void isShowOrders(boolean isShow) {
         if (isShow) {
             lin_orders.setVisibility(View.VISIBLE);
@@ -422,7 +423,18 @@ public class ExchangeActivity extends BaseActivity implements
     @Override
     protected void onResume() {
         super.onResume();
-//        GetPendingOrder();
+        if (cmdManager == null) {
+            cmdManager = new CmdManager();
+        }
+        //註冊監聽
+        registerBroadcast(this, cmdManager);
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unRegisterBroadcast(this);
     }
 
     @Override
