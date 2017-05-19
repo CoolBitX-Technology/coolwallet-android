@@ -133,22 +133,27 @@ public class BleManager {
     }
 
     public boolean connectBle(String address, BleStateCallback bleStateCallback) {
-        LogUtil.e("connectBle=" + address + ";" + bluetoothAddress + ";" + bluetoothGatt);
+        LogUtil.e("connectBle=" + address + ";" + bluetoothAddress );
         this.bleStateCallback = bleStateCallback;
-        if (bluetoothAddress != null && address.equals(bluetoothAddress) && bluetoothGatt != null) {
-            return bluetoothGatt.connect();
-        }
+
         BluetoothDevice device = bluetoothAdapter.getRemoteDevice(address);
         if (device == null) {
             return false;
         }
         bluetoothGatt = device.connectGatt(context.getApplicationContext(), false, mGattCallback);
         bluetoothAddress = address;
+
+        if (bluetoothAddress != null && address.equals(bluetoothAddress) && bluetoothGatt != null) {
+            LogUtil.d("Enter bluetoothGatt.connect()");
+            return bluetoothGatt.connect();
+        }
+
         return true;
     }
 
     public boolean connectBle(String address) {
-        LogUtil.e("ReConnect=" + address);
+
+//        LogUtil.e("ReConnect=" + address + ";" + bluetoothAddress + ";" + bluetoothGatt.getDevice());
 
         if (bluetoothAddress != null && address.equals(bluetoothAddress) && bluetoothGatt != null) {
             return bluetoothGatt.connect();

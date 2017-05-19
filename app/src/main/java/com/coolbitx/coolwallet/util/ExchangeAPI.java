@@ -736,12 +736,14 @@ public class ExchangeAPI {
             @Override
             protected JSONObject doInBackground(String... param) {
                 String url = BtcUrl.URL_BLOCKCHAIN_RAW_ADDRESS + addr;
-                return new XchsNetWork().doGetRawAddress(url);
+//                return new XchsNetWork().doGetRawAddress(url);
+                return  new XchsNetWork().makeHttpRequestGet(url, param[0]);
             }
 
             @Override
             protected void onPostExecute(JSONObject result) {
                 if (result != null) {
+                    LogUtil.d("getBlockChainRawAddress:"+result.toString());
                     try {
                         JSONArray jsonArrayTxs = result.getJSONArray("txs");
                         JSONObject jsonObjectTxs = jsonArrayTxs.getJSONObject(0);//latest

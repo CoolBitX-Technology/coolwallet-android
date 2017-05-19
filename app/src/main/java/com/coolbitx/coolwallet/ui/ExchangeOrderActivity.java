@@ -99,7 +99,6 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
     byte[] trxHandle;
     String orderID = "";
     boolean isTrxSuccess;
-    TxsConfirm mTxsConfirm;
     AlertDialog btnTxBuilder;
     final byte[] successBtnPressesData = {0x54, 0x52, 0x58, 0x2d};
     int doTrxSignSuccessCnt;
@@ -107,8 +106,10 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
     String currUnsignedTx;
     private String otpCode;
     byte[] nonce;
-    private boolean isBlockr ;
+    private boolean isBlockr;
     private String UrlUnspent;
+    TransactionConfirmDialog trxDialog;
+    TxsConfirm mTxsConfirm;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -298,7 +299,7 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
                 }
             }
         }
-        if(isBlockr) {
+        if (isBlockr) {
             InAddress += "?unconfirmed=1";
         }
         System.out.print("unSpent addresses=" + InAddress);
@@ -331,9 +332,10 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
         }
     }
 
+    String changeAddr = "";
+
     private void PreviousPrepareTransaction(final String outputAddress, final long amountToSend) {
 
-        String changeAddress = "";
         long availableAmount = 0;
         for (UnSpentTxsBean unSpentTxsBean : unSpentTxsBeanList) {
             /**
@@ -344,10 +346,9 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
         }
         long extraFee = BTCUtils.parseValue("0.0");
         LogUtil.e("帳戶 " + xchsOrder.getAccount() + " 地址下有的餘額=" + availableAmount + " 要發出的金額=" + amountToSend);
-        mTxsConfirm = null;
         try {
             processedTxData =
-                    BTCUtils.calcFeeChangeAndSelectOutputsToSpend(mContext, unSpentTxsBeanList, amountToSend, extraFee, true);
+                    BTCUtils.calcFeeChangeAndSelectOutputsToSpendii(mContext, unSpentTxsBeanList, amountToSend, extraFee, true);
 
             if (processedTxData == null) {
                 cancelTrx();
@@ -355,12 +356,13 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
                 return;
             }
 
-            if (processedTxData.change == 0) {
-                LogUtil.d("發送不用找零,發送地址=" + outputAddress + "; 發送金額=" +
-                        processedTxData.amountForRecipient);
+            //--------------- process change address.---------------------
+            if (processedTxData.isDust) {
+                LogUtil.d("發送不用找零,發送地址=" + outputAddress + "零錢地址＝" + changeAddr);
                 outputs = new Transaction.Output[]{
                         new Transaction.Output(processedTxData.amountForRecipient, Transaction.Script.buildOutput(outputAddress)),
                 };
+                transactionConfirm(outputAddress);
             } else {
                 genChangeAddress(Constant.CwAddressKeyChainInternal, new GetExchangeAddrCallback() {
                     @Override
@@ -368,7 +370,6 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
                         LogUtil.d("發送要找零=" + processedTxData.change + "; 發送金額=" +
                                 processedTxData.amountForRecipient + "; 發送地址=" +
                                 outputAddress + "; 找零地址=" + addr);
-                        //the outputs of transation
 
                         //its legal that Change address equals to recipient's address
                         if (outputAddress.equals(addr)) {
@@ -377,44 +378,27 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
                             return;
                         }
 
+                        changeAddr = addr;
+                        //the outputs of transation
+
                         outputs = new Transaction.Output[]{
                                 new Transaction.Output(processedTxData.amountForRecipient, Transaction.Script.buildOutput(outputAddress)),
                                 new Transaction.Output(processedTxData.change, Transaction.Script.buildOutput(addr)),
                         };
-                        LogUtil.e("outputs length=" + outputs.length);
-                        mTxsConfirm = new TxsConfirm(outputAddress, processedTxData.amountForRecipient, processedTxData.fee,
-                                processedTxData.outputsToSpend.size(), processedTxData.valueOfUnspentOutputs, addr, processedTxData.change, processedTxData.isDust);
+                        transactionConfirm(outputAddress);
 
-
-                        if (mProgress.isShowing()) {
-                            mProgress.dismiss();
-                        }
-                        // Ask if ready to send.
-                        new TransactionConfirmDialog(mContext, mTxsConfirm, new TransactionConfirmCallback() {
-                            @Override
-                            public void TransactionConfirm(String outputAddr, String changeAddr, long spendAmount) {
-
-                                mProgress.setMessage("Complete order...");
-                                mProgress.show();
-                                PrepXchsTrxSign(mTxsConfirm);
-                                LogUtil.e("confirm ok. input count=" + mTxsConfirm.getInput_count());
-                            }
-
-                            @Override
-                            public void TransactionCancel() {
-                                cancelTrx();
-                            }
-                        }).show();
                     }
 
                     @Override
                     public void onFailed(String msg) {
-                        PublicPun.showNoticeDialog(ExchangeOrderActivity.this, "Error", msg);
+
+                        cancelTrx();
+                        PublicPun.showNoticeDialog(mContext, "Unable to send:", msg);
+
                     }
                 });
-
+//                }
             }
-
         } catch (ValidationException ve) {
             cancelTrx();
             PublicPun.showNoticeDialog(mContext, "Unable to send:", ve.getMessage());
@@ -434,6 +418,41 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
 
     }
 
+    private void transactionConfirm(String mOutputAddress) {
+        //--------------- process change address end.---------------------
+
+        LogUtil.e("outputs length=" + outputs.length);
+
+        if (mProgress.isShowing()) {
+            mProgress.dismiss();
+        }
+        mTxsConfirm = new TxsConfirm(mOutputAddress, processedTxData.amountForRecipient, processedTxData.fee,
+                processedTxData.outputsToSpend.size(), processedTxData.valueOfUnspentOutputs, changeAddr, processedTxData.change, processedTxData.isDust);
+
+        // Ask if ready to send
+        trxDialog = new TransactionConfirmDialog(mContext, mTxsConfirm, new TransactionConfirmCallback() {
+            @Override
+            public void TransactionConfirm(String outputAddr, String changeAddr, long spendAmount) {
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mProgress.setMessage("Prepare transaction...");
+                        mProgress.show();
+                    }
+                });
+
+                PrepXchsTrxSign(mTxsConfirm);
+
+            }
+
+            @Override
+            public void TransactionCancel() {
+
+            }
+        });
+        trxDialog.show();
+    }
 
     Transaction.Input[] signedInputs;
     ArrayList<TrxBlks> lisTrxBlks;
@@ -1236,7 +1255,7 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
         ContentValues cv = new ContentValues();
         cv.put("addresses", mAddr);
         LogUtil.d("addressesXX=" + cv.getAsString("addresses"));
-        String result = cwBtcNetWork.doGet(cv, BtcUrl.URL_BLOCKR_UNSPENT, null);
+        String result = cwBtcNetWork.doGet(cv, UrlUnspent, null);
         if (!TextUtils.isEmpty(result)) {
             if (result.equals("{\"errorCode\": 404}") || result.equals("{\"errorCode\": 400}") || result.equals("{\"errorCode\": 500}")) {
                 errorCnt++;
@@ -1252,9 +1271,9 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
                 }
             } else {
 //                UnSpentTxsBeanList = PublicPun.jsonParseBlockrUnspent(result);
-                if(isBlockr) {
+                if (isBlockr) {
                     UnSpentTxsBeanList = PublicPun.jsonParseBlockrUnspent(result);
-                }else{
+                } else {
                     UnSpentTxsBeanList = PublicPun.jsonParseBlockChainInfoUnspent(result);
                 }
                 errorCnt = 0;

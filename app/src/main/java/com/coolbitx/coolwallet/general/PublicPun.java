@@ -3,6 +3,7 @@ package com.coolbitx.coolwallet.general;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -768,6 +769,7 @@ public class PublicPun {
 
         return new AlertDialog.Builder(mContext, AlertDialog.THEME_DEVICE_DEFAULT_LIGHT)
                 .setView(alert_view);
+//                .setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
 //                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
 //                    public void onClick(DialogInterface dialog, int whichButton) {
 //
@@ -784,15 +786,15 @@ public class PublicPun {
     private static Timer mTimer;
 
     public static void showNoticeDialog(final Context mContext, final String mTitle, final String mMessage) {
-
-        while (mContext == null) {
-            try {
-                Thread.sleep(500);
-                LogUtil.e("showNoticeDialog");
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
+        LogUtil.d("showNoticeDialog");
+//        while (mContext == null) {
+//            try {
+//                Thread.sleep(500);
+//                LogUtil.e("showNoticeDialog");
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+//        }
 
         LayoutInflater inflater = LayoutInflater.from(mContext);
         View alert_view = inflater.inflate(R.layout.edit_dialog, null);//alert為另外做給alert用的layout
@@ -805,18 +807,32 @@ public class PublicPun {
         ComponentName cn = am.getRunningTasks(1).get(0).topActivity;
         LogUtil.e("showNoticeDialog context:" + cn.getShortClassName());
 
-        new AlertDialog.Builder(mContext, AlertDialog.THEME_DEVICE_DEFAULT_LIGHT)//
-                .setView(alert_view)
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
 
-                    }
-                }).show();
+        AlertDialog.Builder builder = new AlertDialog.Builder(mContext, AlertDialog.THEME_DEVICE_DEFAULT_LIGHT);
+        builder.setView(alert_view);
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+
+            }
+        });
+//        builder.show();
+        Dialog dialog=builder.create();
+        dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        dialog.show();
+//        new AlertDialog.Builder(mContext, AlertDialog.THEME_DEVICE_DEFAULT_LIGHT)//
+//                .setView(alert_view)
+//                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+//                    public void onClick(DialogInterface dialog, int whichButton) {
+//
+//                    }
+//                }).show();
+
 
     }
 
 
     public static void showNoticeDialogToFinish(final Context mContext, String mTitle, String mMessage) {
+        LogUtil.d("showNoticeDialogToFinish");
         while (mContext == null) {
             try {
                 Thread.sleep(500);

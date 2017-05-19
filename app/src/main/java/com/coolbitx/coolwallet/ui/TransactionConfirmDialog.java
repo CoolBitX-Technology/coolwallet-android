@@ -60,14 +60,6 @@ public class TransactionConfirmDialog extends AlertDialog implements View.OnClic
         initToolbar();
         DiasplayValue();
 
-
-        if(!AppPrefrence.getAutoFeeCheckBox(mContext)){
-            if (mTxsConfirm.getFees() < AppPrefrence.getRecommendedDefaultFee(mContext)) {
-                imgAlert.setVisibility(View.VISIBLE);
-            } else {
-                imgAlert.setVisibility(View.GONE);
-            }
-        }
     }
 
     private void setDialogView() {
@@ -109,12 +101,23 @@ public class TransactionConfirmDialog extends AlertDialog implements View.OnClic
         tvChangeAmount.setText("฿" + String.valueOf(new DecimalFormat("#.########").format(
                 mTxsConfirm.getChange_amount() * PublicPun.SATOSHI_RATE)));
 
-        if(mTxsConfirm.isDust()){
+
+        //show dust message
+        if(mTxsConfirm.isDust() && mTxsConfirm.getChange_amount()!=0){
             tv_dust.setVisibility(View.VISIBLE);
             tv_dust.setText( String.format(mContext.getString(R.string.note_dust),
                     mTxsConfirm.getChange_amount() * PublicPun.SATOSHI_RATE));
         }else{
             tv_dust.setVisibility(View.INVISIBLE);
+        }
+
+        //show fee warming
+        if(!AppPrefrence.getAutoFeeCheckBox(mContext)){
+            if (mTxsConfirm.getFees() < AppPrefrence.getRecommendedDefaultFee(mContext)) {
+                imgAlert.setVisibility(View.VISIBLE);
+            } else {
+                imgAlert.setVisibility(View.GONE);
+            }
         }
     }
 

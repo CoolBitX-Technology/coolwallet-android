@@ -26,7 +26,7 @@ import static com.coolbitx.coolwallet.general.BtcUrl.URL_BLOCKCHAIN_UNSPENT;
  */
 public class CwBtcNetWork {
 
-    private int httpTimeOut = 30000;
+    private int httpTimeOut = 60000;
 
 //    private byte[] hexStringToBytes(String hexStr) {
 //        return null;

@@ -153,13 +153,6 @@ public class TabFragment extends Fragment {
             }
         });
 
-        //等待所有的view建好後go AccountRefresh
-        tabs.post(new Runnable() {
-            @Override
-            public void run() {
-                AccountRefresh(0);
-            }
-        });
 
         tabs.setBackgroundResource(R.color.md_grey_900);
         tabs.setViewPager(pager);
@@ -185,6 +178,14 @@ public class TabFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
+        //更新畫面
+        tabs.post(new Runnable() {
+            @Override
+            public void run() {
+                AccountRefresh(0);
+            }
+        });
 
     }
 
