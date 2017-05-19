@@ -800,7 +800,7 @@ public class PublicPun {
         ActivityManager am = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
         ComponentName cn = am.getRunningTasks(1).get(0).topActivity;
         LogUtil.e("ooshowNoticeDialog context:" + cn.getShortClassName());
-        
+
         try {
             new AlertDialog.Builder(mContext, AlertDialog.THEME_DEVICE_DEFAULT_LIGHT)//
                     .setView(alert_view)
