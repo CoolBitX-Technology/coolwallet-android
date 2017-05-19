@@ -544,7 +544,7 @@ public class BaseActivity extends AppCompatActivity {
                 case BSConfig.HANDLER_SOCKET:
                     final socketByAddress socket = (socketByAddress) msg.obj;
                     final int mAccount = DatabaseHelper.queryAccountByAddress(mContext, socket.getAddress());
-                    if (socket.getTx_type().equals("Received") && socket.getConfirmations() == 1) {//
+                    if (socket.getTx_type().equals("Received") && socket.getConfirmations() <= 1) {//
                         // do your work right here
                         String socketTitle = "BitCoin Received";
                         String socketMsg = "Account " + (mAccount + 1) + "\n"
@@ -552,7 +552,7 @@ public class BaseActivity extends AppCompatActivity {
                                 + socket.getAddress() + "\n"
                                 + socket.getTx_type() + " Amount:" + TabFragment.BtcFormatter.format(socket.getBtc_amount()) + " BTC" + "\n"
                                 + "Confirmations: " + socket.getConfirmations();
-//                        PublicPun.showNoticeDialog(mContext, socketTitle, socketMsg);
+                        PublicPun.showNoticeDialog(mContext, socketTitle, socketMsg);
                         systemNotificationBTC(socket, mAccount);
                     }
 

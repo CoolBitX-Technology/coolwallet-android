@@ -7,6 +7,7 @@ import android.app.Dialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Point;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -34,6 +35,7 @@ import com.coolbitx.coolwallet.bean.User;
 import com.coolbitx.coolwallet.bean.Wallet;
 import com.coolbitx.coolwallet.bean.socketByAddress;
 import com.coolbitx.coolwallet.ui.BleActivity;
+import com.coolbitx.coolwallet.ui.EraseActivity;
 import com.coolbitx.coolwallet.util.ByteUtils;
 import com.crashlytics.android.Crashlytics;
 import com.google.gson.Gson;
@@ -787,14 +789,6 @@ public class PublicPun {
 
     public static void showNoticeDialog(final Context mContext, final String mTitle, final String mMessage) {
         LogUtil.d("showNoticeDialog");
-//        while (mContext == null) {
-//            try {
-//                Thread.sleep(500);
-//                LogUtil.e("showNoticeDialog");
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-//        }
 
         LayoutInflater inflater = LayoutInflater.from(mContext);
         View alert_view = inflater.inflate(R.layout.edit_dialog, null);//alert為另外做給alert用的layout
@@ -805,42 +799,30 @@ public class PublicPun {
         //-----------產生輸入視窗--------
         ActivityManager am = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
         ComponentName cn = am.getRunningTasks(1).get(0).topActivity;
-        LogUtil.e("showNoticeDialog context:" + cn.getShortClassName());
+        LogUtil.e("ooshowNoticeDialog context:" + cn.getShortClassName());
+        
+        try {
+            new AlertDialog.Builder(mContext, AlertDialog.THEME_DEVICE_DEFAULT_LIGHT)//
+                    .setView(alert_view)
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
 
+                        }
+                    }).show();
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(mContext, AlertDialog.THEME_DEVICE_DEFAULT_LIGHT);
-        builder.setView(alert_view);
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-
-            }
-        });
-//        builder.show();
-        Dialog dialog=builder.create();
-        dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
-        dialog.show();
-//        new AlertDialog.Builder(mContext, AlertDialog.THEME_DEVICE_DEFAULT_LIGHT)//
-//                .setView(alert_view)
-//                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-//                    public void onClick(DialogInterface dialog, int whichButton) {
-//
-//                    }
-//                }).show();
-
+        }catch (Exception e){
+            LogUtil.e("showNoticeDialog錯誤＝"+e.getMessage());
+        }
+//        Dialog dialog=builder.create();
+//        dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+//        dialog.show();
 
     }
 
 
     public static void showNoticeDialogToFinish(final Context mContext, String mTitle, String mMessage) {
         LogUtil.d("showNoticeDialogToFinish");
-        while (mContext == null) {
-            try {
-                Thread.sleep(500);
-                LogUtil.e("showNoticeDialogToFinish在睡覺");
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
+
 
         try {
             LayoutInflater inflater = LayoutInflater.from(mContext);
@@ -858,8 +840,11 @@ public class PublicPun {
             builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
                     BleActivity.bleManager.disConnectBle();
-                    ((Activity) mContext).finish(); // 離開程式
-                    System.exit(0);
+//                    ((Activity) mContext).finish(); // 離開程式
+                    Intent intent = new Intent(mContext, BleActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);//它可以關掉所要到的介面中間的activity
+                    mContext.startActivity(intent);
+
                 }
             });
             builder.show();

@@ -6,8 +6,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -30,7 +28,6 @@ import com.coolbitx.coolwallet.DataBase.DatabaseHelper;
 import com.coolbitx.coolwallet.DataBase.DbName;
 import com.coolbitx.coolwallet.R;
 import com.coolbitx.coolwallet.Service.BlockSocketHandler;
-import com.coolbitx.coolwallet.Service.socketService;
 import com.coolbitx.coolwallet.bean.Account;
 import com.coolbitx.coolwallet.bean.Address;
 import com.coolbitx.coolwallet.bean.CWAccountKeyInfo;
@@ -169,7 +166,6 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
     private CSVReadWrite mLoginCsv;
     private ProgressDialog mProgress;
     private String mParentActivityName = null;
-    private socketService mSocketService = null;
     private Timer mTimer;
     private socketNotificationReceiver brocastNR;
     private TextView tvVer;
@@ -190,13 +186,13 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
                                 + socket.getAddress() + "\n"
                                 + socket.getTx_type() + " Amount:" + TabFragment.BtcFormatter.format(socket.getBtc_amount()) + " BTC" + "\n"
                                 + "Confirmations: " + socket.getConfirmations();
-                        PublicPun.showNoticeDialog(mContext, socketTitle, socketMsg);
+//                        PublicPun.showNoticeDialog(mContext, socketTitle, socketMsg);
                     }
                     break;
                 case BSConfig.HANDLER_DISCONN:
                     String title = "CoolWallet Disconnected";
                     String noteMsg = PublicPun.card.getCardName() + " Disconnected";
-                    PublicPun.showNoticeDialogToFinish(mContext, title, noteMsg);
+//                    PublicPun.showNoticeDialogToFinish(mContext, title, noteMsg);
                     break;
             }
             super.handleMessage(msg);
