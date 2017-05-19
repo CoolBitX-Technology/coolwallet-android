@@ -12,6 +12,7 @@ import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Handler;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.snscity.egdwlib.ble.BleGattCallback;
@@ -67,7 +68,7 @@ public class BleManager {
 
     public boolean isOpen() {
 
-        boolean result ;
+        boolean result;
         if (bluetoothAdapter == null) {
             try {
                 initialize();
@@ -75,7 +76,7 @@ public class BleManager {
                 Toast.makeText(context, ve.getMessage(), Toast.LENGTH_LONG).show();
             }
         }
-        result =bluetoothAdapter.isEnabled();
+        result = bluetoothAdapter.isEnabled();
         return result;
     }
 
@@ -128,41 +129,93 @@ public class BleManager {
         }
     };
 
-    public boolean connectBle(BluetoothDevice device, BleStateCallback bleStateCallback) {
-        return connectBle(device.getAddress(), bleStateCallback);
-    }
 
     public boolean connectBle(String address, BleStateCallback bleStateCallback) {
-        LogUtil.e("connectBle=" + address + ";" + bluetoothAddress );
+        LogUtil.e("connectBle=" + address);
         this.bleStateCallback = bleStateCallback;
 
-        BluetoothDevice device = bluetoothAdapter.getRemoteDevice(address);
-        if (device == null) {
+//        BluetoothDevice device = bluetoothAdapter.getRemoteDevice(address);
+//        if (device == null) {
+//            return false;
+//        }
+//        bluetoothGatt = device.connectGatt(context.getApplicationContext(), false, mGattCallback);
+//        bluetoothAddress = address;
+//
+//        if (bluetoothAddress != null && address.equals(bluetoothAddress) && bluetoothGatt != null) {
+//            LogUtil.d("Enter bluetoothGatt.connect()");
+//            return bluetoothGatt.connect();
+//        }
+//        return true;
+
+        if (bluetoothAdapter == null || address == null) {
+            LogUtil.e("BluetoothAdapter not initialized or unspecified address.");
             return false;
         }
-        bluetoothGatt = device.connectGatt(context.getApplicationContext(), false, mGattCallback);
-        bluetoothAddress = address;
 
+        // Previously connected device.  Try to reconnect.
         if (bluetoothAddress != null && address.equals(bluetoothAddress) && bluetoothGatt != null) {
-            LogUtil.d("Enter bluetoothGatt.connect()");
-            return bluetoothGatt.connect();
+            LogUtil.e("Trying to use an existing mBluetoothGatt for connection.");
+            if (bluetoothGatt.connect()) {
+//                mConnectionState = STATE_CONNECTING;
+                return true;
+            } else {
+                return false;
+            }
         }
 
+        final BluetoothDevice device = bluetoothAdapter.getRemoteDevice(address);
+        if (device == null) {
+            LogUtil.e("Device not found.  Unable to connect.");
+            return false;
+        }
+        // We want to directly connect to the device, so we are setting the autoConnect
+        // parameter to false.
+        bluetoothGatt = device.connectGatt(context.getApplicationContext(), false, mGattCallback);
+        LogUtil.e("Trying to create a new connection.");
+        bluetoothAddress = address;
+//        mConnectionState = STATE_CONNECTING;
         return true;
     }
 
     public boolean connectBle(String address) {
 
 //        LogUtil.e("ReConnect=" + address + ";" + bluetoothAddress + ";" + bluetoothGatt.getDevice());
+//        if (bluetoothAddress != null && address.equals(bluetoothAddress) && bluetoothGatt != null) {
+//            return bluetoothGatt.connect();
+//        }
+//        BluetoothDevice device = bluetoothAdapter.getRemoteDevice(address);
+//        if (device == null) {
+//            return false;
+//        }
+//        bluetoothGatt = device.connectGatt(context.getApplicationContext(), false, mGattCallback);
+//        bluetoothAddress = address;
+//
+//
+//        if (bluetoothAdapter == null || address == null) {
+//            LogUtil.e("BluetoothAdapter not initialized or unspecified address.");
+//            return false;
+//        }
 
+        // Previously connected device.  Try to reconnect.
         if (bluetoothAddress != null && address.equals(bluetoothAddress) && bluetoothGatt != null) {
-            return bluetoothGatt.connect();
+            LogUtil.e("Trying to use an existing mBluetoothGatt for connection.");
+            if (bluetoothGatt.connect()) {
+//                mConnectionState = STATE_CONNECTING;
+                return true;
+            } else {
+                return false;
+            }
         }
-        BluetoothDevice device = bluetoothAdapter.getRemoteDevice(address);
+
+        final BluetoothDevice device = bluetoothAdapter.getRemoteDevice(address);
         if (device == null) {
+            LogUtil.e("Device not found.  Unable to connect.");
             return false;
         }
+        // We want to directly connect to the device, so we are setting the autoConnect
+        // parameter to false.
         bluetoothGatt = device.connectGatt(context.getApplicationContext(), false, mGattCallback);
+        LogUtil.e("Trying to create a new connection.");
         bluetoothAddress = address;
         return true;
     }
