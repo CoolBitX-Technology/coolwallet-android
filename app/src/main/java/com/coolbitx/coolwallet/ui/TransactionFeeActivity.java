@@ -33,8 +33,6 @@ import static com.coolbitx.coolwallet.general.PublicPun.SATOSHI_RATE;
 public class TransactionFeeActivity extends BaseActivity implements CheckBox.OnCheckedChangeListener {//SeekBar.OnSeekBarChangeListener,
 
     private Context context;
-    //    private SeekBar seekBarFee;
-//    private TextView tv_recommendedFeeLength;
     private TextView tv_recommendedFeeDesc;
     private CheckBox chkAutoFee;
     private LinearLayout autoFeeLayout;
@@ -57,8 +55,19 @@ public class TransactionFeeActivity extends BaseActivity implements CheckBox.OnC
 
     @Override
     protected void onResume() {
-
         super.onResume();
+
+        chkAutoFee.setChecked(AppPrefrence.getAutoFeeCheckBox(this));
+
+        if (chkAutoFee.isChecked()) {
+            autoFeeEstimated.setVisibility(View.VISIBLE);
+            edtFee.setBackgroundResource(R.drawable.edit_format_unabled);
+            edtFee.setEnabled(false);
+        } else {
+            autoFeeEstimated.setVisibility(View.INVISIBLE);
+            edtFee.setBackgroundResource(R.drawable.edit_format);
+            edtFee.setEnabled(true);
+        }
         //註冊監聽
         registerBroadcast(this, cmdManager);
 

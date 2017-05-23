@@ -19,23 +19,24 @@
     <string name="BLOCKR_ADDRESS_INFO_API">http://btc.blockr.io/api/v1/address/info/</string>
 
     <!--Exchange-->
-
     <string name="msg_xchs_get_raw_addr">Get transaction data failed.</string>
     <string name="tv_exchange_sell_str">Matched sell orders</string>
     <string name="tv_exchange_buy_str">Matched buy orders</string>
     <string name="tv_exchange_verification_str">Verify OTP to place your sell orders</string>
     <string name="tv_order_notice_str">Your order will be cancelled automatically after this time</string>
     <string name="btn_complete_order_str">Complete order</string>
-    <string name="btn_str_login">Sign up now</string>
+    <string name="btn_str_sign_in">Sign in</string>
+    <string name="btn_str_sign_up">Sign up</string>
     <string name="str_login_title">Trade wih other CoolWallet holders\non CoolBitx Exchange</string>
     <string name="btn_place_order">Place an order now</string>
     <string name="tv_no_matched_order">No matched orders yet</string>
+    <string name="url_exchange_site">http://xsm.coolbitx.com:8080/signup</string>
+
 
     <!--Preference-->
     <string name="pref_title_security_otp">Enable One Time Password\n(OTP) on transactions</string>
     <string name="pref_title_security_crad_transaction">Enable press the button on the\ncard to complete transactions</string>
     <string name="pref_title_security_watch_dog">Enable Watch dig function</string>
-
     <string name="strPairSuccessfulDetail">CoolWallet allows you to pair up to\n3 devices,This device will be able to authenticate the second device.</string>
     <string name="strCancel">Cancel</string>
     <string name="strReset">Reset</string>

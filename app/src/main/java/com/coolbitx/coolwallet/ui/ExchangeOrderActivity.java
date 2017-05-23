@@ -839,7 +839,9 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
                                         currUnsignedTx = genRawTxData(scriptSigs);
                                         LogUtil.e("取得 currUnsignedTx=" + currUnsignedTx + ";length=" + currUnsignedTx.length());
                                         LogUtil.e("byte長度=" + PublicPun.hexStringToByteArray(currUnsignedTx).length);
-                                        PublishToNetwork(currUnsignedTx);
+
+                                        FunApiSubmit(PublicPun.hexStringToByteArray(currUnsignedTx));
+
                                     }
                                 }
                             }
@@ -1320,8 +1322,8 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
         PublicPun.showNoticeDialog(mContext, getString(R.string.send_notification_str_failed_title), getString(R.string.msg_xchs_get_raw_addr));
     }
 
-    private void FunTrxFinish() {
-//        end transaction if exists
+
+    private void FunApiSubmit(final byte[] txHash) {
 
         cmdManager.XchsTrxsignLogout(trxHandle, nonce, new CmdResultCallback() {
             @Override
@@ -1333,56 +1335,74 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
                 //API Single Address
                 //CALL XCHS SUBMIT API
 
-                mProgress.setMessage("Synchronizing to Exchange Site...");
-                mProgress.show();
+//                mProgress.setMessage("Synchronizing to Exchange Site...");
+//                mProgress.show();
 
-//        String addr = "1Jan75oAX8Hv9Nzt5zU4uW9W61abf52Sg6";
-                mExchangeAPI.getBlockChainRawAddress(xchsOrder.getAddr(), new APIResultCallback() {
+//                mExchangeAPI.getBlockChainRawAddress(xchsOrder.getAddr(), new APIResultCallback() {
+//                    @Override
+//                    public void success(String[] msg) {
+//                        String trxId = msg[0];
+//                        LogUtil.e("trxID=" + trxId);
+//
+//                        if (trxId == "" || trxId == null) {
+//                            failedTrx();
+//                        } else {
+
+//                            if(trxId!=txId){
+//                                failedTrx();
+//                                return;
+//                            }
+
+                byte[] doubleSha256TxHash = PublicPun.encryptSHA256(PublicPun.encryptSHA256(txHash));
+                String txId = PublicPun.byte2HexStringNoBlank(BTCUtils.reverse(doubleSha256TxHash));
+                String out2Addr = mTxsConfirm.getChange_address();
+
+                mExchangeAPI.doTrxSubmit(mTxsConfirm.getInput_count(), xchsOrder.getOrderId(), txId, out2Addr, trxReceipt, PublicPun.uid, PublicPun.byte2HexStringNoBlank(nonce), new APIResultCallback() {
                     @Override
                     public void success(String[] msg) {
-                        String trxId = msg[0];
-                        LogUtil.e("trxID=" + trxId);
-
-                        if (trxId == "" || trxId == null) {
-                            failedTrx();
-                        } else {
-                            mExchangeAPI.doTrxSubmit(xchsOrder.getOrderId(), trxId, trxReceipt, PublicPun.uid, PublicPun.byte2HexStringNoBlank(nonce), new APIResultCallback() {
-                                @Override
-                                public void success(String[] msg) {
-                                    if (mProgress.isShowing()) {
-                                        mProgress.dismiss();
-                                    }
-
-                                    cmdManager.trxFinish(new CmdResultCallback() {
-                                        @Override
-                                        public void onSuccess(int status, byte[] outputData) {
-                                            if ((status + 65536) == 0x9000) {
-                                                LogUtil.i("trxFinish成功");
-                                            }
-                                        }
-                                    });
-
-                                    finish();
-                                }
-
-                                @Override
-                                public void fail(String msg) {
-                                    failedTrx();
-
-                                }
-                            });
+                        if (mProgress.isShowing()) {
+                            mProgress.dismiss();
                         }
+
+//                        PublishToNetwork(currUnsignedTx);
+
                     }
 
                     @Override
                     public void fail(String msg) {
                         failedTrx();
+
                     }
                 });
+//                        }
+//                    }
+//
+//                    @Override
+//                    public void fail(String msg) {
+//                        failedTrx();
+//                    }
+//                });
             }
         });
 
     }
+
+    private void FunTrxFinish() {
+//        end transaction if exists
+
+
+        cmdManager.trxFinish(new CmdResultCallback() {
+            @Override
+            public void onSuccess(int status, byte[] outputData) {
+                if ((status + 65536) == 0x9000) {
+                    LogUtil.i("trxFinish成功");
+                }
+            }
+        });
+
+        finish();
+    }
+
 
     private void TimeOutCheck() {
         mTimer = new Timer();

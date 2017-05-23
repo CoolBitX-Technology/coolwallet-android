@@ -3,47 +3,64 @@
     android:layout_height="match_parent"
     android:background="@android:color/black"
     android:orientation="vertical">
-
+    
     <include layout="@layout/toolbar" />
 
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:weightSum="10"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:weightSum="10">
 
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="0dp"
-            android:src="@drawable/exlogo"
             android:layout_gravity="center"
             android:layout_weight="3"
-            />
+            android:src="@drawable/exlogo" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="0dp"
-            android:text="@string/str_login_title"
             android:layout_gravity="center"
+            android:layout_weight="3"
             android:gravity="center_horizontal"
+            android:text="@string/str_login_title"
             android:textColor="@color/bottomtab_normal"
-            android:textSize="20dp"
-            android:layout_weight="3"/>
+            android:textSize="20dp" />
 
 
-
-        <Button
-            android:id="@+id/btn_ex_login"
-            style="@style/TextView_Brown_16"
-            android:layout_width="350dp"
-            android:layout_height="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
             android:layout_alignParentBottom="true"
-            android:layout_gravity="center"
             android:layout_marginTop="20dp"
-            android:background="@drawable/selector_button"
-            android:text="@string/btn_str_login"
-            android:textAllCaps="false"/>
+            android:layout_weight="4"
+            android:orientation="vertical">
+
+            <Button
+                android:id="@+id/btn_ex_sign_in"
+                style="@style/TextView_Brown_16"
+                android:layout_width="350dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:background="@drawable/selector_button"
+                android:text="@string/btn_str_sign_in"
+                android:textAllCaps="false" />
+
+
+            <Button
+                android:id="@+id/btn_ex_sign_up"
+                style="@style/TextView_Brown_16"
+                android:layout_width="350dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:background="@drawable/selector_button"
+                android:text="@string/btn_str_sign_up"
+                android:textAllCaps="false" />
+
+        </LinearLayout>
 
     </LinearLayout>
 

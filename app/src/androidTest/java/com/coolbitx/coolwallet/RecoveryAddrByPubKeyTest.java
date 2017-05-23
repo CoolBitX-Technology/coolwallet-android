@@ -17,15 +17,14 @@ public class RecoveryAddrByPubKeyTest extends ApplicationTest {
 //    ExtendedKey km;
 
 
-
-    public RecoveryAddrByPubKeyTest(){
+    public void test() {
 
 //        LogUtil.e("scriptToAddr="+getAddressFromScript("76a91473eed41ea058b31e556fa7f3d56e763612f4c48b88ac"));
-        System.out.print(";scriptToAddr="+getAddressFromScript("76a914f4f440d102e02adb9768f96e68095fc4dd28e44588ac"));
-
+//        System.out.print(";scriptToAddr="+getAddressFromScript("76a914f4f440d102e02adb9768f96e68095fc4dd28e44588ac"));
+        getAddressFromScript("76a914f4f440d102e02adb9768f96e68095fc4dd28e44588ac");
     }
 
-    private  String getAddressFromScript(String script) {
+    private String getAddressFromScript(String script) {
         byte[] bareAddress = new byte[20];
         //(來源陣列，起始索引值，目的陣列，起始索引值，複製長度)
 //        System.arraycopy( PublicPun.hexStringToByteArray("76a914934abe98a533cab0946a85d3bad409778a077c7088ac"),3,bareAddress, 0, bareAddress.length);

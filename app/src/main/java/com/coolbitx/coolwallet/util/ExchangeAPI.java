@@ -737,13 +737,13 @@ public class ExchangeAPI {
             protected JSONObject doInBackground(String... param) {
                 String url = BtcUrl.URL_BLOCKCHAIN_RAW_ADDRESS + addr;
 //                return new XchsNetWork().doGetRawAddress(url);
-                return  new XchsNetWork().makeHttpRequestGet(url, param[0]);
+                return new XchsNetWork().makeHttpRequestGet(url, param[0]);
             }
 
             @Override
             protected void onPostExecute(JSONObject result) {
                 if (result != null) {
-                    LogUtil.d("getBlockChainRawAddress:"+result.toString());
+                    LogUtil.d("getBlockChainRawAddress:" + result.toString());
                     try {
                         JSONArray jsonArrayTxs = result.getJSONArray("txs");
                         JSONObject jsonObjectTxs = jsonArrayTxs.getJSONObject(0);//latest
@@ -763,11 +763,12 @@ public class ExchangeAPI {
     }
 
 
-    public void doTrxSubmit(final String orderId, final String trxId, final String trxReceipt, String uid, String nonce, final APIResultCallback apiResultCallback) {
+    public void doTrxSubmit(final int inputs, final String orderId, final String trxId, final String changeAddr, final String trxReceipt, String uid, String nonce, final APIResultCallback apiResultCallback) {
         this.apiResultCallback = apiResultCallback;
         this.mResponse = new String[1];//challenge
         final String failedlMsg = "doTrxSubmit fail.";
-        String postData = "{\"bcTrxId\":\"" + trxId + "\", \"trxReceipt\":\"" + trxReceipt +
+
+        String postData = "{\"inputs\":" + inputs + ",\"bcTrxId\":\"" + trxId + "\",\"changeAddr\":\"" + changeAddr + "\", \"trxReceipt\":\"" + trxReceipt +
                 "\", \"uid\":\"" + uid + "\", \"nonce\":\"" + nonce + "\"}";
 
         new AsyncTask<String, Integer, JSONObject>() {

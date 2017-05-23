@@ -866,8 +866,8 @@ public class PublicPun {
     public static String printBytes(byte[] bytes) {
         if (bytes == null) return null;
         StringBuilder sb = new StringBuilder();
-        sb.append("byte[]=" + Arrays.toString(bytes));
-        sb.append("/n");
+//        sb.append("byte[]=" + Arrays.toString(bytes));
+//        sb.append("/n");
         sb.append("byte[]_hash=" + byte2HexString(bytes));
         return sb.toString();
         //handle=byte[]=[121, -42, -36, -26]/nbyte[]_hash=79 d6 dc e6
