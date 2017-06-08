@@ -23,6 +23,7 @@ import com.coolbitx.coolwallet.general.PublicPun;
 import com.snscity.egdwlib.utils.LogUtil;
 
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.text.ParseException;
 
 import static com.coolbitx.coolwallet.general.PublicPun.SATOSHI_RATE;
@@ -179,7 +180,14 @@ public class TransactionFeeActivity extends BaseActivity implements CheckBox.OnC
     protected void onDestroy() {
         super.onDestroy();
 
-        AppPrefrence.saveManual(context, Float.valueOf(edtFee.getText().toString()));
+        NumberFormat format = NumberFormat.getInstance();
+
+        try {
+            AppPrefrence.saveManual(context,format.parse(edtFee.getText().toString()).floatValue());
+        } catch (ParseException e) {
+            e.printStackTrace();
+            showNoticeDialogToFinish(context, "Notification", "Fees format is wrong.");
+        }
 
         LogUtil.e("Exit: manual fee=" + edtFee.getText().toString()
                 + ";" + String.valueOf(new DecimalFormat("#.########").format(AppPrefrence.getManualFee(context))));

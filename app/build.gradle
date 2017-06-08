@@ -32,8 +32,8 @@ android {
         applicationId "com.coolbitx.coolwallet"
         minSdkVersion 18
         targetSdkVersion 22
-        versionCode 32
-        versionName "1.6.4(TEST)" //1.6.3
+        versionCode 34
+        versionName "1.6.6" //1.6.5
         multiDexEnabled = true
     }
 //    compileOptions {

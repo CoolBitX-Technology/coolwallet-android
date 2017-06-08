@@ -153,7 +153,7 @@ public class BaseActivity extends AppCompatActivity {
         cmdManager.getSecpo(new CmdResultCallback() {
             @Override
             public void onSuccess(int status, byte[] outputData) {
-                if ((status + 65536) == 0x9000) {
+//                if ((status + 65536) == 0x9000) {
                     if (outputData != null && outputData.length > 0) {
                         settingOptions[0] = (outputData[0] & CwSecurityPolicyMaskOtp) >= 1;
 
@@ -168,7 +168,7 @@ public class BaseActivity extends AppCompatActivity {
                                 ";dog=" + InitialSecuritySettingActivity.settingOptions[3]);
 //                        SetSecpo(true);
                     }
-                }
+//                }
             }
         });
     }

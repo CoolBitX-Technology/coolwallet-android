@@ -47,6 +47,9 @@ public class NotificationReceiver extends BroadcastReceiver {
     private Context mContext;
     private CmdManager mCmdManager;
 
+    public NotificationReceiver(){
+
+    }
     public NotificationReceiver(Context context, CmdManager cmdManager) {
         this.mContext = context;
         this.mCmdManager = cmdManager;

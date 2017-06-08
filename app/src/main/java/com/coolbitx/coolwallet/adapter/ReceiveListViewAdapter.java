@@ -41,7 +41,11 @@ public class ReceiveListViewAdapter extends BaseAdapter {
 
     //    public ReceiveListViewAdapter(Context context, List<String> AddressList, ExpandableListView exvBleDevice, ImageView imgQRcode) {
     public ReceiveListViewAdapter(Context context, List<dbAddress> mAddressList, ImageView imgQRcode) {
-        layoutInflater = LayoutInflater.from(context);
+       //android.content.Context.getSystemService(java.lang.String)' on a null
+        if(context!=null){
+            layoutInflater = LayoutInflater.from(context);
+        }
+
 //        this.exvBleDevice = exvBleDevice;
         this.mContext = context;
         this.imgQRcode = imgQRcode;

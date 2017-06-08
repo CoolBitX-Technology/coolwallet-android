@@ -234,6 +234,7 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
             @Override
             public void success(final String[] msg) {
                 LogUtil.d("doExGetTrxInfo ok " + msg[0]);
+                //order id, oktoken, unblock token,accid,send amount, mac
                 //{"loginblk":"3488162291780ad0c38e7ebbc44406347d770086fc2c54da0300000000000000000027100ba5ea57e799ef00e33dcb58836c6fbee9820ce0616b26dff7c51c3bdd89eb08",
                 // "out1addr":"1PHcgbVxMCNsB5RnfvKdUC7hidzSdovL2s"}
 
@@ -1319,6 +1320,7 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
 
     private void failedTrx() {
         mProgress.dismiss();
+        FunTrxFinish();
         PublicPun.showNoticeDialog(mContext, getString(R.string.send_notification_str_failed_title), getString(R.string.msg_xchs_get_raw_addr));
     }
 

@@ -102,14 +102,20 @@ public class BleActivity extends BaseActivity {
             if (!TextUtils.isEmpty(address)) {
                 if (!contains(address)) {
                     String name = device.getName();
-                    if (name == null || !name.startsWith("CoolWallet")) {
+
+                    //remove the filter condition because user might change card's name.
+                    //mod by Dorac,170607.
+//                    if (name == null || !name.startsWith("CoolWallet")) {
+
+                    if (name == null ) {
                         return;
                     }
+
 
                     imgSearch.setVisibility(View.INVISIBLE);
                     txtSearch.setVisibility(View.INVISIBLE);
                     txtSearchDetail.setVisibility(View.INVISIBLE);
-                    //列表中没有该蓝牙设备，添加设备到列表中
+                    //列表中沒有該藍牙設備，添加設備到列表中
 
                     MyDevice myDevice = new MyDevice();
                     myDevice.setName(name == null ? "unknown device" : name);
