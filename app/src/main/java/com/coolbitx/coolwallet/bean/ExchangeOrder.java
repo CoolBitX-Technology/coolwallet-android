@@ -8,11 +8,38 @@ import java.io.Serializable;
 public class ExchangeOrder implements Serializable {
 
     String orderId;
+    String cworderId;
     String addr;
     double amount; //BTC
     int account;
     double price;   //美金
     String expiration;
+    String type ;
+    boolean submitted;
+
+    public boolean isSubmitted() {
+        return submitted;
+    }
+
+    public void setSubmitted(boolean submitted) {
+        this.submitted = submitted;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getCworderId() {
+        return cworderId;
+    }
+
+    public void setCworderId(String cworderId) {
+        this.cworderId = cworderId;
+    }
 
     public String getOrderId() {
         return orderId;

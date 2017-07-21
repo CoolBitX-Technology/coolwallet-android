@@ -72,11 +72,11 @@ public class ExchangeVerificationActivity extends BaseActivity implements View.O
 
     private void GetUnclarifyOrder() {
         mProgress.show();
-        mExchangeAPI.getUnclarifyOrder(new APIResultCallback() {
+        mExchangeAPI.getOrderInfo(new APIResultCallback() {
             @Override
             public void success(String[] msg) {
                 mProgress.dismiss();
-                LogUtil.d("getUnclarifyOrder ok " + msg[0]);
+                LogUtil.d("getOrderInfo ok " + msg[0]);
 
                 listExchangeOrder = new ArrayList<>();
                 listExchangeOrder = PublicPun.jsonParserExchange(msg[0], "response", false);
@@ -90,7 +90,7 @@ public class ExchangeVerificationActivity extends BaseActivity implements View.O
             @Override
             public void fail(String msg) {
                 mProgress.dismiss();
-                LogUtil.d("getUnclarifyOrder failed:" + msg);
+                LogUtil.d("getOrderInfo failed:" + msg);
                 clickToFinish("Unable to get Unverified Orders", "Error:" + msg);
             }
         });
@@ -146,29 +146,62 @@ public class ExchangeVerificationActivity extends BaseActivity implements View.O
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         int infoid = 1;
         final int itemPos = position;
-        cmdManager.XchsGetOtp(infoid, new CmdResultCallback() {
-            byte[] handle;
 
-            @Override
-            public void onSuccess(int status, byte[] outputData) {
-                if ((status + 65536) == 0x9000) {
-                    XchsVerifyOtp(itemPos);
-                    //16進制的9000在10進制是36864;6645是26181;status=91717
-                } else if ((status + 65536) == 0x16645) {
-                    PublicPun.showNoticeDialog(mContext, "Unable to generate OTP", "Please try again.");
-                } else {
-//                    LogUtil.i("status="+String.valueOf(status));
-                    PublicPun.showNoticeDialog(mContext, "Unable to generate OTP", "Error:" + Integer.toHexString(status));
-                }
+        final String orderID = listExchangeOrder.get(position).getOrderId();
+
+        AlertDialog.Builder mBuilder =
+                PublicPun.CustomNoticeDialog(mContext, getString(R.string.btn_cancel_order_str), getString(R.string.str_cancel_order_msg));
+        mBuilder.setPositiveButton(getString(R.string.str_yes), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                // cancel order
+
+                mExchangeAPI.cancelOrder(orderID, new APIResultCallback() {
+                    @Override
+                    public void success(String[] msg) {
+
+                        LogUtil.e("cancel order ok:"+msg[0]);
+
+                        GetUnclarifyOrder();
+
+                    }
+                    @Override
+                    public void fail(String msg) {
+                        PublicPun.showNoticeDialog(mContext, "Unable to Cancel Order", "Reason:" + msg);
+                    }
+                });
+
             }
-        });
+        }).setNegativeButton(getString(R.string.str_no), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+        })
+         .show();
+
+
+//        cmdManager.XchsGetOtp(infoid, new CmdResultCallback() {
+//            byte[] handle;
+//
+//            @Override
+//            public void onSuccess(int status, byte[] outputData) {
+//                if ((status + 65536) == 0x9000) {
+//                    XchsVerifyOtp(itemPos);
+//                    //16進制的9000在10進制是36864;6645是26181;status=91717
+//                } else if ((status + 65536) == 0x16645) {
+//                    PublicPun.showNoticeDialog(mContext, "Unable to generate OTP", "Please try again.");
+//                } else {
+////                    LogUtil.i("status="+String.valueOf(status));
+//                    PublicPun.showNoticeDialog(mContext, "Unable to generate OTP", "Error:" + Integer.toHexString(status));
+//                }
+//            }
+//        });
     }
 
     EditText editText;
     byte[] cancelBlkInfo = new byte[72];
     byte[] okTkn = new byte[4];
     byte[] unblockTkn = new byte[16];
-    byte[] OrderBlock;
 
 
     private void XchsVerifyOtp(final int item) {
@@ -191,32 +224,37 @@ public class ExchangeVerificationActivity extends BaseActivity implements View.O
                 LogUtil.d("orderID=" + listExchangeOrder.get(item).getOrderId() + ";blockOtp=" + blockOtp);
 
 
-                mExchangeAPI.getExRequestOrderBlock(orderID, blockOtp, new APIResultCallback() {
+                mExchangeAPI.getTrxBlock(orderID, blockOtp, new APIResultCallback() {
                     @Override
                     public void success(String[] msg) {
-                        LogUtil.d("getExRequestOrderBlock ok " + msg[0]);//orderId(4B)/accId(4B)/amount(8B)/mac1(32B)/nonce(16B)
-
-                        //orderId/okTkn/encUblkTkn/mac1/nonce
-                        OrderBlock = PublicPun.hexStringToByteArray(msg[0]);
+                        LogUtil.d("getTrxBlock ok " + msg[0]);//orderId(4B)/accId(4B)/amount(8B)/mac1(32B)/nonce(16B)
 
                         // 2.SE cmd (F9)
-                        byte[] svrResp = PublicPun.hexStringToByteArray(msg[0]);
-
-                        cmdManager.XchsBlockBtc(svrResp, new CmdResultCallback() {
+                        byte[] srvOrderBlock = PublicPun.hexStringToByteArray(msg[0]);
+                        cmdManager.XchsBlockBtc(srvOrderBlock, new CmdResultCallback() {
                             @Override
                             public void onSuccess(int status, byte[] outputData) {
 
                                 if ((status + 65536) == 0x9000) {//-28672//36864
                                     LogUtil.d("XchsBlockBtc  success = " + PublicPun.byte2HexStringNoBlank(outputData));
 
+                                    //blockSignature(32B)/okTkn(4B)/encUblkTkn(16B)/mac2(32B)/nonce(16B)
+
                                     System.arraycopy(outputData, 32, okTkn, 0, 4);
                                     System.arraycopy(outputData, 36, unblockTkn, 0, 16);
+
+                                    cmdManager.XchsBlockInfo(okTkn, new CmdResultCallback() {
+                                        @Override
+                                        public void onSuccess(int status, byte[] outputData) {
+                                            LogUtil.d("Block資料=" + PublicPun.byte2HexString(outputData));
+                                        }
+                                    });
 
                                     mExchangeAPI.doExWriteOKToken(orderID, PublicPun.byte2HexStringNoBlank(okTkn), PublicPun.byte2HexStringNoBlank(unblockTkn),
                                             new APIResultCallback() {
                                                 @Override
                                                 public void success(String[] msg) {
-                                                    LogUtil.d("ExWriteOKToken " + msg[0]);//orderId(4B)/accId(4B)/amount(8B)/mac1(32B)/nonce(16B)
+                                                    LogUtil.d("ExWriteOKToken " + msg[0]);
 //                                                    finish();
                                                     GetUnclarifyOrder();
                                                     mProgress.dismiss();
@@ -241,7 +279,7 @@ public class ExchangeVerificationActivity extends BaseActivity implements View.O
 
                     @Override
                     public void fail(String msg) {
-                        LogUtil.d("getExRequestOrderBlock failed:" + msg);
+                        LogUtil.d("getTrxBlock failed:" + msg);
                         mProgress.dismiss();
                         PublicPun.showNoticeDialog(mContext, "Unable to Block", msg);
 

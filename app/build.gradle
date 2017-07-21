@@ -8,6 +8,7 @@ buildscript {
 
     dependencies {
         classpath 'io.fabric.tools:gradle:1.+'
+
     }
 }
 
@@ -32,8 +33,8 @@ android {
         applicationId "com.coolbitx.coolwallet"
         minSdkVersion 18
         targetSdkVersion 22
-        versionCode 34
-        versionName "1.6.6" //1.6.5
+        versionCode 38
+        versionName "1.7.0" //1.6.7
         multiDexEnabled = true
     }
 //    compileOptions {
@@ -86,7 +87,17 @@ dependencies {
     compile 'com.microsoft.azure:notification-hubs-android-sdk:0.4@aar'
     compile 'com.microsoft.azure:azure-notifications-handler:1.0.1@aar'
     compile 'com.android.support:multidex:1.0.0'
+    //FCM add
+    compile 'com.google.android.gms:play-services-gcm:9.0.2'
 //    compile 'com.android.support.constraint:constraint-layout:+'
+
+//    repositories {
+//        maven {
+//            url "http://dl.bintray.com/microsoftazuremobile/SDK"
+//        }
+//    }
 }
+
+
 
 apply plugin: 'com.google.gms.google-services'

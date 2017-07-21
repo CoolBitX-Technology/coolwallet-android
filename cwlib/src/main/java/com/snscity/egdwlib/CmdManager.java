@@ -138,6 +138,16 @@ public class CmdManager {
         cmdProcessor.addCmd(cmdPacket);
     }
 
+
+    public void XchsBlockInfo(byte[] okToken, CmdResultCallback cmdResultCallback) {
+        CmdPacket cmdPacket = new CmdPacket.Builder()
+                .setCla(CmdCla.XCHS_BLOCK_INFO)
+                .setIns(CmdIns.XCHS_BLOCK_INFO)
+                .setInputData(okToken)
+                .build();
+        cmdPacket.setCmdResultListener(cmdResultCallback);
+        cmdProcessor.addCmd(cmdPacket);
+    }
     //trxID,byte[]accID,byte[] Acount,byte[] mac, byte[]nonce,
     public void XchsBlockBtc(byte[] svrResp, CmdResultCallback cmdResultCallback) {
         CmdPacket cmdPacket = new CmdPacket.Builder()
@@ -965,6 +975,9 @@ public class CmdManager {
             byte[] devkey = encryptSHA256(oldPin.getBytes(Charset.forName(CHARSETNAME)));
             pinResp = AES.getAESEncrypt(pinChllenge, devkey);
         }
+
+        LogUtil.e("old pin="+oldPin);
+        LogUtil.e("new pin="+newPin);
 
         int length1 = pinResp.length;
         int length2 = newPinHash.length;

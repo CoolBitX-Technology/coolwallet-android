@@ -11,9 +11,12 @@ import android.support.v4.content.LocalBroadcastManager;
 
 import com.coolbitx.coolwallet.R;
 import com.coolbitx.coolwallet.ui.Fragment.FragMainActivity;
+import com.crashlytics.android.Crashlytics;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.snscity.egdwlib.utils.LogUtil;
+
+import io.fabric.sdk.android.Fabric;
 
 public class CwFirebaseMessagingService extends FirebaseMessagingService {
 
@@ -22,7 +25,7 @@ public class CwFirebaseMessagingService extends FirebaseMessagingService {
      *
      * @param remoteMessage Object representing the message received from Firebase Cloud Messaging.
      */
-    // [START receive_message]P
+    // [START receive_message]
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         // Handle FCM messages here.
@@ -30,9 +33,21 @@ public class CwFirebaseMessagingService extends FirebaseMessagingService {
         // Also if you intend on generating your own notifications as a result of a received FCM
         // message, here is where that should be initiated. See sendNotification method below.
         LogUtil.e("Notification=" + remoteMessage.getData());
-        String ExchangeMessage = remoteMessage.getNotification().getBody();
-        String ExchangeData = remoteMessage.getData().toString();
-        LogUtil.d("From: " + remoteMessage.getFrom() + ";Notification Message Body= " + ExchangeMessage + "\n" + "data= " + ExchangeData);
+        String ExchangeMessage="";
+        String ExchangeData="";
+        try {
+
+            ExchangeMessage = remoteMessage.getNotification().getBody();
+            ExchangeData = remoteMessage.getData().toString();
+            LogUtil.d("From: " + remoteMessage.getFrom() + ";Notification Message Body= " + ExchangeMessage + "\n" + "data= " + ExchangeData);
+
+        } catch (Exception e) {
+
+            if(Fabric.isInitialized()){
+                Crashlytics.log(e.toString());
+            }
+            return;
+        }
 
         final Intent intent = new Intent(BTConfig.XCHS_NOTIFICATION);
         final LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(this);
@@ -63,10 +78,11 @@ public class CwFirebaseMessagingService extends FirebaseMessagingService {
 //                .setContentText(messageBody)
                 .setStyle(new Notification.InboxStyle()
                         .setBigContentTitle("CoolWallet Exchange Message")
-                        .addLine(messageBody.substring(0,messageBody.indexOf(".")+1))
-                        .addLine(messageBody.substring(messageBody.indexOf(".")+1,messageBody.indexOf(",")+1))
-                        .addLine(messageBody.substring(messageBody.indexOf(",")+1,messageBody.lastIndexOf(",")+1))
-                        .addLine(messageBody.substring(messageBody.lastIndexOf(",")+1,messageBody.lastIndexOf(".")+1)))
+                        .addLine(messageBody.substring(0, messageBody.indexOf(".") + 1))
+                        .addLine(messageBody.substring(messageBody.indexOf(".") + 1)))
+//                        .addLine(messageBody.substring(messageBody.indexOf(".") + 1, messageBody.indexOf(",") + 1))
+//                        .addLine(messageBody.substring(messageBody.indexOf(",") + 1, messageBody.lastIndexOf(",") + 1))
+//                        .addLine(messageBody.substring(messageBody.lastIndexOf(",") + 1, messageBody.lastIndexOf(".") + 1)))
                 .setAutoCancel(true)
                 .setSound(defaultSoundUri)
                 .setContentIntent(pendingIntent);

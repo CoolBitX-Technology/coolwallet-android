@@ -28,6 +28,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import static com.coolbitx.coolwallet.general.PublicPun.SATOSHI_RATE;
+
 /**
  * Created by wmgs_01 on 15/10/7.
  */
@@ -63,7 +65,7 @@ public class BTCUtils {
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
 
     private static int RECOMMENDED_FEE_PER_BYTE;
-    private static final long dustFee = 5460;
+    public static final long dustFee = 5460;
 
     static {
         X9ECParameters params = SECNamedCurves.getByName("secp256k1");
@@ -165,7 +167,7 @@ public class BTCUtils {
 
     public static FeeChangeAndSelectedOutputs calcFeeChangeAndSelectOutputsToSpendii(Context mContext, List<UnSpentTxsBean> UnSpentTxsBeanList,
                                                                                      long amountToSend, long extraFee,
-                                                                                     final boolean isPublicKeyCompressed) throws ValidationException {
+                                                                                     final boolean isPublicKeyCompressed, boolean mSendAll) throws ValidationException {
         long fee = 0;//calculated below
         long change = 0;
         long changeFee = 0;
@@ -179,36 +181,67 @@ public class BTCUtils {
             throw new ValidationException("Spend amount can not be less than 0.");
         } else {
 
-            //34=1 output address length
-            changeFee = calcRecommendedFee(34);
+            if (mSendAll) {
 
-//            while (valueOfUnspentOutputs < amountToSend + fee) //用while的話,一但input不夠會超出UnSpentTxsBeanList size
-            for (int i = 0; i < UnSpentTxsBeanList.size(); i++) {
-                UnSpentTxsBean outputInfo = UnSpentTxsBeanList.get(i);
-                valueOfUnspentOutputs += BTCUtils.BTCconvertToSatoshisValue(outputInfo.getAmount());
-                outputsToSpend.add(outputInfo);
-                txOneOutputLen = BTCUtils.getMaximumTxSizeii(outputsToSpend.size(), isPublicKeyCompressed);
+                for (int j = 0; j < UnSpentTxsBeanList.size(); j++) {
+                    UnSpentTxsBean outputInfo = UnSpentTxsBeanList.get(j);
+                    valueOfUnspentOutputs += BTCUtils.BTCconvertToSatoshisValue(outputInfo.getAmount());
+                    outputsToSpend.add(outputInfo);
+                }
 
-                fee = calcRecommendedFee(txOneOutputLen);
-                AppPrefrence.saveRecommendedDefaultFee(mContext, fee);
-
+                // turn on send all
                 if (!AppPrefrence.getAutoFeeCheckBox(mContext)) {
                     fee = BTCconvertToSatoshisValue(AppPrefrence.getManualFee(mContext));
+                } else {
+                    txOneOutputLen = BTCUtils.getMaximumTxSizeii(outputsToSpend.size(), isPublicKeyCompressed);
+                    fee = calcRecommendedFee(txOneOutputLen);
+                    AppPrefrence.saveRecommendedDefaultFee(mContext, fee);
                 }
 
-                LogUtil.d("計算要用來寄出的第" + i + "筆資料:" + ";addr=" + outputInfo.getAddress() + ",餘額=" +
-                        valueOfUnspentOutputs + ",amountToSend=" + amountToSend + ",fee=" + fee);
+                amountToSend = valueOfUnspentOutputs - fee;
 
-                if (valueOfUnspentOutputs >= amountToSend + fee) {
-                    break;
+                if (amountToSend < 0) {
+
+                    throw new ValidationException("Invalid transaction:\n" +
+                            "Transaction fee is higher than balance.\nfee:" +
+                            new DecimalFormat("#.########").format(fee * PublicPun.SATOSHI_RATE));
                 }
+
+
+            } else {
+
+                //34=1 output address length
+                changeFee = calcRecommendedFee(34);
+
+//            while (valueOfUnspentOutputs < amountToSend + fee) //用while的話,一但input不夠會超出UnSpentTxsBeanList size
+                for (int i = 0; i < UnSpentTxsBeanList.size(); i++) {
+                    UnSpentTxsBean outputInfo = UnSpentTxsBeanList.get(i);
+                    valueOfUnspentOutputs += BTCUtils.BTCconvertToSatoshisValue(outputInfo.getAmount());
+                    outputsToSpend.add(outputInfo);
+
+                    // auto/manual fee
+                    if (!AppPrefrence.getAutoFeeCheckBox(mContext)) {
+                        fee = BTCconvertToSatoshisValue(AppPrefrence.getManualFee(mContext));
+                    } else {
+                        txOneOutputLen = BTCUtils.getMaximumTxSizeii(outputsToSpend.size(), isPublicKeyCompressed);
+                        fee = calcRecommendedFee(txOneOutputLen);
+                        AppPrefrence.saveRecommendedDefaultFee(mContext, fee);
+                    }
+
+                    LogUtil.d("計算要用來寄出的第" + i + "筆資料:" + ";addr=" + outputInfo.getAddress() + ",餘額=" +
+                            valueOfUnspentOutputs + ",amountToSend=" + amountToSend + ",fee=" + fee);
+
+                    if (valueOfUnspentOutputs >= amountToSend + fee) {
+                        break;
+                    }
+                }
+
             }
-
             //先試算不含找零地址的fee and change
             change = valueOfUnspentOutputs - amountToSend - fee;
 
 
-            LogUtil.d("changeFee="+changeFee);
+            LogUtil.d("changeFee=" + changeFee);
             //要找零
             if (change > changeFee && change - changeFee > dustFee) {//如果因找零而要花費的多一個output的錢>零錢,不如不要找零,歸入dust
                 //如果是自動fee,要加總
@@ -225,6 +258,7 @@ public class BTCUtils {
             LogUtil.i("總計寄出資料=" + outputsToSpend.size() + "筆input,餘額=" +
                     valueOfUnspentOutputs + ",fee=" + fee + ",amountToSend=" + amountToSend + ",change=" + change);
 
+
         }
 
         if (outputsToSpend.isEmpty() || outputsToSpend.size() == 0) {
@@ -234,9 +268,15 @@ public class BTCUtils {
 
         //ZERO Confirmation unspent?
         if (amountToSend + fee > valueOfUnspentOutputs) {
-            LogUtil.e("Not enough funds " + (valueOfUnspentOutputs - fee));
-            float output = (((float) valueOfUnspentOutputs - (float) fee - (float) amountToSend) / (float) SATOSHIS_PER_COIN);
-            throw new ValidationException("Insufficient funds: " + new DecimalFormat("#.########").format(output) + " BTC\nFees:" + new DecimalFormat("#.########").format((float) fee / (float) SATOSHIS_PER_COIN) + " BTC");
+//            LogUtil.e("Not enough funds " + (valueOfUnspentOutputs - fee));
+//            float output = (((float) valueOfUnspentOutputs - (float) fee - (float) amountToSend) / (float) SATOSHIS_PER_COIN);
+//            throw new ValidationException("Insufficient funds: " + new DecimalFormat("#.########").format(output * PublicPun.SATOSHI_RATE) + " btc\nFee:" + new DecimalFormat("#.########").format(fee * PublicPun.SATOSHI_RATE) + "btc");
+
+            throw new ValidationException("Invalid transaction:\n" +
+                    "Transaction output + fee is higher than balance.\n"+
+                    "Output value:" + new DecimalFormat("#.########").format(amountToSend * PublicPun.SATOSHI_RATE) + " btc\n"+
+                    "Fee:" + new DecimalFormat("#.########").format(fee * PublicPun.SATOSHI_RATE) + "btc"
+            );
         }
         if (outputsToSpend.isEmpty()) {
             LogUtil.e("No outputs to spend");
@@ -254,9 +294,11 @@ public class BTCUtils {
             LogUtil.e("Incorrect change " + change);
             throw new ValidationException("Incorrect change " + change);
         }
-        if (amountToSend < 0) {
-            LogUtil.e("Incorrect amount to send " + amountToSend);
-            throw new ValidationException("Incorrect amount to send " + amountToSend);
+        if (amountToSend < dustFee) {
+            LogUtil.e("Insufficient amount to send " + amountToSend);
+            throw new ValidationException("Invalid transaction:\n" +
+                    "With transaction fee, this transaction output becomes lower than dust (5460 Satoshi).(value:" +
+                    new DecimalFormat("#.########").format(amountToSend * PublicPun.SATOSHI_RATE) + ";fee:" + new DecimalFormat("#.########").format(fee * PublicPun.SATOSHI_RATE) + ")");
         }
         return new FeeChangeAndSelectedOutputs(fee + extraFee, change, amountToSend, outputsToSpend, valueOfUnspentOutputs, isDust);
     }
@@ -304,7 +346,7 @@ public class BTCUtils {
     }
 
     private static long calcRecommendedFee(int txLen) {
-        LogUtil.e("資料長度=" + txLen +";recommended_per_fee"+RECOMMENDED_FEE_PER_BYTE+ ";fee=" + txLen * RECOMMENDED_FEE_PER_BYTE);//);
+        LogUtil.e("資料長度=" + txLen + ";recommended_per_fee" + RECOMMENDED_FEE_PER_BYTE + ";fee=" + txLen * RECOMMENDED_FEE_PER_BYTE);//);
         return txLen * RECOMMENDED_FEE_PER_BYTE;//;
     }
 

@@ -1,5 +1,8 @@
 package com.coolbitx.coolwallet.ui;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -29,6 +32,7 @@ import com.coolbitx.coolwallet.adapter.ListViewAdapter;
 import com.coolbitx.coolwallet.bean.Constant;
 import com.coolbitx.coolwallet.bean.MyDevice;
 import com.coolbitx.coolwallet.general.CSVReadWrite;
+import com.coolbitx.coolwallet.general.NotificationReceiver;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.coolbitx.coolwallet.ui.Fragment.FragMainActivity;
 import com.crashlytics.android.Crashlytics;
@@ -40,7 +44,9 @@ import com.snscity.egdwlib.cmd.CmdResultCallback;
 import com.snscity.egdwlib.utils.LogUtil;
 import com.snscity.egdwlib.utils.UUIDGenerator;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -103,11 +109,10 @@ public class BleActivity extends BaseActivity {
                 if (!contains(address)) {
                     String name = device.getName();
 
-                    //remove the filter condition because user might change card's name.
-                    //mod by Dorac,170607.
-//                    if (name == null || !name.startsWith("CoolWallet")) {
+                    //filter condition, user change card's name just for CWxxxxxx
 
-                    if (name == null ) {
+                    if (name == null || !name.startsWith("CoolWallet")) {
+//                    if (name == null ) {
                         return;
                     }
 
@@ -121,6 +126,7 @@ public class BleActivity extends BaseActivity {
                     myDevice.setName(name == null ? "unknown device" : name);
                     myDevice.setAddress(address == null ? "unknown address" : address);
                     myDevice.setRssi(String.valueOf(rssi));
+                    LogUtil.e("裝置名稱："+name);
                     myDeviceList.add(myDevice);
                     adapter.refresh();
                     try {
@@ -278,6 +284,26 @@ public class BleActivity extends BaseActivity {
         Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_ble);
         LogUtil.d("BleActivity onCreate");
+
+
+        Bundle params = getIntent().getExtras();
+        if (params!= null) {
+            boolean temp = params.getBoolean ("Disconnection_Notify") ;
+            if(temp){
+                String noteMsg;
+                String title = "CoolWallet Disconnected";
+                if (PublicPun.card.getCardId() == null) {
+                    noteMsg = "CoolWallet Disconnected";
+                } else {
+                    noteMsg = new String(PublicPun.hexStringToByteArray(PublicPun.card.getCardId()));
+                }
+                PublicPun.showNoticeDialog(mContext, title, noteMsg+" disconnected.");
+                systemNotification(title, noteMsg);
+            }
+        }
+
+
+
         bleManager = new BleManager(this);
         cmdManager = new CmdManager();
         IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
@@ -741,4 +767,18 @@ public class BleActivity extends BaseActivity {
         }
     }
 
+    /**
+     * show on Status Bar
+     * foe ble disconn
+     */
+    public void systemNotification(String title, String msg) {
+        final int notifyID = 999; // 通知的識別號碼
+        final NotificationManager notificationManager = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE); // 取得系統的通知服務
+        final Notification notification = new Notification.Builder(mContext)
+                .setSmallIcon(R.mipmap.ic_launcher_cw)
+                .setContentTitle(title)
+                .setContentText(msg) // 建立通知
+                .setContentIntent(PendingIntent.getActivity(mContext, notifyID, new Intent(mContext, BleActivity.class), PendingIntent.FLAG_UPDATE_CURRENT)).build();
+        notificationManager.notify(notifyID, notification); // 發送通知
+    }
 }

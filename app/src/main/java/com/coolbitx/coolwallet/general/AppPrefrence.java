@@ -155,4 +155,14 @@ public class AppPrefrence {
         return mSP.getFloat("ManualFee", 0.0002f);
     }
 
+    public static void saveIsResetSuccess(Context context, boolean isSuccess) {
+        SharedPreferences mSP = PreferenceManager.getDefaultSharedPreferences(context);
+        mSP.edit().putBoolean("IsSuccess", isSuccess).commit();
+    }
+
+    public static boolean getIsResetSuccess(Context context) {
+        SharedPreferences mSP = PreferenceManager.getDefaultSharedPreferences(context);
+        return mSP.getBoolean("IsSuccess", true);
+    }
+
 }

@@ -69,6 +69,8 @@ public class PublicPun {
     public final static String csvFilename = "Login";
     public final static String oldPin = "12345678";
     public final static String newPin = "12345678";
+    public final static String default_oldPin = "123456";
+    public final static String default_newPin = "12345678";
     public static final int HANDLER_SEND_BTC_FINISH = 9527;
     public static final int HANDLER_SEND_BTC_ERROR = 9521;
     /**
@@ -224,11 +226,11 @@ public class PublicPun {
             for (int i = 0; i < jsonArrayOrder.length(); i++) {
                 JSONObject jsonObjectSellData = jsonArrayOrder.getJSONObject(i);
                 ExchangeOrder exchangeOrder = gson.fromJson(jsonObjectSellData.toString(), ExchangeOrder.class);
-
-                LogUtil.i("exchangeOrder" + String.valueOf(i) + " 筆= " +
-                        exchangeOrder.getOrderId() + " , " + exchangeOrder.getAddr() + " , " +
-                        exchangeOrder.getAmount() + " , " + exchangeOrder.getAccount() + " , " +
-                        exchangeOrder.getPrice() + " , " + exchangeOrder.getExpiration());
+                exchangeOrder.setType(mType);
+                LogUtil.i("exchangeOrder" + String.valueOf(i) + " 筆=type:"+exchangeOrder.getType()+" , orderId:" +
+                        exchangeOrder.getOrderId() + " , cwOrderId:"+exchangeOrder.getCworderId()+" , " + exchangeOrder.getAddr() + " , " +
+                        String.valueOf(exchangeOrder.getAmount())+ " , " + exchangeOrder.getAccount() + " , " +
+                        exchangeOrder.getPrice() + " , " + exchangeOrder.getExpiration()+" , isSubmitted:"+exchangeOrder.isSubmitted());
                 // 15847930 , null , 50 , 3 , 234.56 , null
 
                 listExchangeOrder.add(exchangeOrder);
@@ -799,7 +801,7 @@ public class PublicPun {
         //-----------產生輸入視窗--------
         ActivityManager am = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
         ComponentName cn = am.getRunningTasks(1).get(0).topActivity;
-        LogUtil.e("ooshowNoticeDialog context:" + cn.getShortClassName());
+        LogUtil.e("showNoticeDialog context:" + cn.getShortClassName());
 
         try {
             new AlertDialog.Builder(mContext, AlertDialog.THEME_DEVICE_DEFAULT_LIGHT)//
@@ -818,6 +820,7 @@ public class PublicPun {
 //        dialog.show();
 
     }
+
 
 
     public static void showNoticeDialogToFinish(final Context mContext, String mTitle, String mMessage) {

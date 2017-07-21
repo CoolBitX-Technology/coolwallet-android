@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
@@ -22,9 +23,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.coolbitx.coolwallet.DataBase.DatabaseHelper;
 import com.coolbitx.coolwallet.R;
@@ -60,6 +64,8 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -70,6 +76,7 @@ import java.util.TimerTask;
 import static com.coolbitx.coolwallet.general.PublicPun.HANDLER_SEND_BTC_ERROR;
 import static com.coolbitx.coolwallet.general.PublicPun.HANDLER_SEND_BTC_FINISH;
 import static com.coolbitx.coolwallet.ui.BaseActivity.settingOptions;
+import static com.coolbitx.coolwallet.util.BTCUtils.dustFee;
 
 
 /**
@@ -77,7 +84,7 @@ import static com.coolbitx.coolwallet.ui.BaseActivity.settingOptions;
  */
 
 // the tag "error" means that dora remarks the code because the APP crush.
-public class SendFragment extends BaseFragment implements View.OnClickListener {
+public class SendFragment extends BaseFragment implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
 
 
     private static final String DATA_NAME = "name";
@@ -140,6 +147,8 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
     private boolean isBlockr;
     private String UrlUnspent;
     TransactionConfirmDialog trxDialog;
+    private Switch switchSendAll;
+
     private Handler mHandler = new Handler() {
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
@@ -161,7 +170,6 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
                     editSendAddress.setText("");
                     editSendBtc.setText("");
                     editSendUsd.setText("");
-
 
 
                     break;
@@ -200,6 +208,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
             mHandler.sendMessage(mHandler.obtainMessage(hadlerMsg));
         }
     };
+
 
     public static SendFragment newInstance(String title, int indicatorColor, int dividerColor, int iconResId, int accountId) {
         SendFragment f = new SendFragment();
@@ -248,6 +257,12 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        switchSendAll.setChecked(false);
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.activity_send_bitcoin, container, false);
         LogUtil.e("onCreateView");
@@ -275,14 +290,22 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
                 PublicPun.showNoticeDialog(mContext, "Unable to send", "Please enter an amount.");
                 return;
             }
-            if (Double.valueOf(editSendBtc.getText().toString()) <= 0) {
-                PublicPun.showNoticeDialog(mContext, "Unable to send", "Please enter an amount.");
-                return;
-            }
 
+            try {
+
+                double value = NumberFormat.getInstance().parse(editSendBtc.getText().toString()).floatValue();
+//                LogUtil.e("send value="+editSendBtc.getText().toString()+";"+String.valueOf(value));
+                if (value <= dustFee * PublicPun.SATOSHI_RATE) {
+                    PublicPun.showNoticeDialog(mContext, "Unable to send", "Output value must higher than dust (5460 Satoshi).");
+                    return;
+                }
+            } catch (ParseException e) {
+                e.printStackTrace();
+                PublicPun.showNoticeDialog(mContext, "Unable to send", "Valid amount format.");
+            }
             recvAddress = editSendAddress.getText().toString().trim();
             if (tvSendAmountBottom.getText().toString().equals("BTC")) {
-                spendAmountStr = editSendBtc.getText().toString().trim();// for some Europe's money format
+                spendAmountStr = editSendBtc.getText().toString().trim();// for soㄡme Europe's money format
             } else {
                 spendAmountStr = editSendUsd.getText().toString().trim();// for some Europe's money format
             }
@@ -526,8 +549,9 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
         LogUtil.e("帳戶 " + currentAccount + " 地址下有的餘額=" + availableAmount + " 要發出的金額=" + amountToSend);
         Crashlytics.log("帳戶 " + currentAccount + " 地址下有的餘額=" + availableAmount + " 要發出的金額=" + amountToSend);
         try {
+
             processedTxData =
-                    BTCUtils.calcFeeChangeAndSelectOutputsToSpendii(mContext, unSpentTxsBeanList, amountToSend, extraFee, true);
+                    BTCUtils.calcFeeChangeAndSelectOutputsToSpendii(mContext, unSpentTxsBeanList, amountToSend, extraFee, true, switchSendAll.isChecked());
 
             if (processedTxData == null) {
                 cancelTrx();
@@ -591,19 +615,15 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
 
         } catch (ValidationException ve) {
             cancelTrx();
-            btnSend.setEnabled(true);
             PublicPun.showNoticeDialog(mContext, "Unable to send:", ve.getMessage());
         } catch (IOException e) {
             cancelTrx();
-            btnSend.setEnabled(true);
             PublicPun.showNoticeDialog(mContext, "Unable to send:", e.getMessage());
         } catch (NoSuchAlgorithmException e) {
             cancelTrx();
-            btnSend.setEnabled(true);
             PublicPun.showNoticeDialog(mContext, "Unable to send:", e.getMessage());
         } catch (Exception e) {
             cancelTrx();
-            btnSend.setEnabled(true);
             PublicPun.showNoticeDialog(mContext, "Unable to send:", e.getMessage());
             Crashlytics.log("Unable to send:" + e.getMessage());
             LogUtil.e("錯誤=" + e.getMessage());
@@ -935,6 +955,8 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
         if (mProgress.isShowing()) {
             mProgress.dismiss();
         }
+
+        btnSend.setEnabled(true);
 
         if (mTimer != null) {
             mTimer.cancel();
@@ -1329,6 +1351,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
         });
     }
 
+
     private void initView(View view) {
         tvSendTitle = (TextView) view.findViewById(R.id.tv_send_title);
         tvSendSubtitle = (TextView) view.findViewById(R.id.tv_send_subtitle);
@@ -1338,12 +1361,15 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
         editSendBtc = (EditText) view.findViewById(R.id.edit_send_btc);
         editSendUsd = (EditText) view.findViewById(R.id.edit_send_usd);
         btnSend = (Button) view.findViewById(R.id.btn_send);
+        switchSendAll = (Switch) view.findViewById(R.id.switch_send_all);
+        switchSendAll.setOnCheckedChangeListener(this);
         btnSend.setOnClickListener(this);
         imagScan.setOnClickListener(this);
         tvSendAmountTop = (TextView) view.findViewById(R.id.tv_send_amount_top);
         tvSendAmountBottom = (TextView) view.findViewById(R.id.tv_send_amount_bottom);
         tvSendAmountTop.setOnClickListener(this);
         tvSendAmountBottom.setOnClickListener(this);
+
     }
 
     private void setListener() {
@@ -1418,6 +1444,37 @@ public class SendFragment extends BaseFragment implements View.OnClickListener {
         // QR code result
         onQRcodeResult();
     }
+
+    @Override
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+
+        //switch on:disable amount edit
+
+        if (isChecked) {
+            if (tvSendAmountBottom.getText().equals("BTC")) {
+//                NumberFormat format = NumberFormat.getInstance();
+//                try {
+//                    format.parse(tvSendTitle.getText().toString()).floatValue();
+//                } catch (ParseException e) {
+//                    e.printStackTrace();
+//                }
+                editSendBtc.setText(tvSendTitle.getText());
+                editSendUsd.setText(tvSendSubtitle.getText());
+
+            } else {
+                editSendBtc.setText(tvSendSubtitle.getText());
+                editSendUsd.setText(tvSendTitle.getText());
+            }
+
+            editSendBtc.setTextColor(getResources().getColor(R.color.md_grey_500));
+            editSendBtc.setEnabled(false);
+
+        } else {
+            editSendBtc.setTextColor(getResources().getColor(R.color.md_white_1000));
+            editSendBtc.setEnabled(true);
+        }
+    }
+
 
     private class UnSpentTxsAsyncTask extends AsyncTask<String, Void, List<UnSpentTxsBean>> {
         @Override

@@ -40,6 +40,16 @@ public class PendingOrderAdapter<T> extends CommonAdapter<T> {
         TextView mExpiration = viewHolder.getView(R.id.tv_grid_sell_expiration);
         mExpiration.setText(exchangeOrder.getExpiration());
 
+
+        if (exchangeOrder.isSubmitted()) {
+
+            mAmount.setTextColor(mContext.getResources().getColor(R.color.Strong_yellow));
+            mPrice.setTextColor(mContext.getResources().getColor(R.color.Strong_yellow));
+            mExpiration.setTextColor(mContext.getResources().getColor(R.color.Strong_yellow));
+
+        }
+
+
         return viewHolder.getConvertView();
     }
 }

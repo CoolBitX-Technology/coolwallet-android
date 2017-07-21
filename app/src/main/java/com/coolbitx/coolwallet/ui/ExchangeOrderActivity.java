@@ -15,8 +15,10 @@ import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.coolbitx.coolwallet.DataBase.DatabaseHelper;
@@ -71,7 +73,7 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
     private CmdManager cmdManager;
     private Context mContext;
     private ExchangeAPI mExchangeAPI;
-    Button btnCompleteOrder;
+    Button btnCompleteOrder, btnCancelOrder, btnSubmittedOk;
     private ProgressDialog mProgress;
     TextView tvAddr;
     TextView tvAmount;
@@ -111,6 +113,9 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
     TransactionConfirmDialog trxDialog;
     TxsConfirm mTxsConfirm;
 
+    LinearLayout linSbmitted, linUnsbmitted;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -147,12 +152,18 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
     private void initViews() {
         btnCompleteOrder = (Button) findViewById(R.id.btn_complete_order);
         btnCompleteOrder.setOnClickListener(this);
+        btnCancelOrder = (Button) findViewById(R.id.btn_cancel_order);
+        btnCancelOrder.setOnClickListener(this);
         tvAddr = (TextView) findViewById(R.id.order_tvAddress);
         tvAmount = (TextView) findViewById(R.id.order_tvAnount);
         tvPrice = (TextView) findViewById(R.id.order_tvPrice);
         tvOrderNum = (TextView) findViewById(R.id.order_tvNum);
         tvAccount = (TextView) findViewById(R.id.order_tvAccount);
         tvExp = (TextView) findViewById(R.id.order_tvExpiration);
+        btnSubmittedOk = (Button) findViewById(R.id.btn_submitted_ok);
+        btnSubmittedOk.setOnClickListener(this);
+        linSbmitted = (LinearLayout) findViewById(R.id.lin_sbmitted);
+        linUnsbmitted = (LinearLayout) findViewById(R.id.lin_unsbmitted);
     }
 
 
@@ -175,6 +186,19 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
         tvAccount.setText(String.valueOf(xchsOrder.getAccount() + 1));//顯示用account需要加1
         tvExp.setText(xchsOrder.getExpiration());
 
+        if (xchsOrder.getType().equals("buy")) {
+            btnCompleteOrder.setVisibility(View.INVISIBLE);
+        }
+
+        if (xchsOrder.isSubmitted()) {
+            linSbmitted.setVisibility(View.VISIBLE);
+            linUnsbmitted.setVisibility(View.INVISIBLE);
+        } else {
+            linUnsbmitted.setVisibility(View.VISIBLE);
+            linSbmitted.setVisibility(View.INVISIBLE);
+        }
+
+
         orderAccount = xchsOrder.getAccount();
         recvAddress = xchsOrder.getAddr();
 
@@ -190,6 +214,7 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
         actionBar.setHomeButtonEnabled(true);
     }
 
+
     @Override
     public Intent getSupportParentActivityIntent() {
         finish();
@@ -201,11 +226,231 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
         LogUtil.d("before complete");
         isBlockr = AppPrefrence.getIsBlockrApi(mContext);
         if (v == btnCompleteOrder) {
-            mProgress.setMessage("Preparing to complete order...");
-            mProgress.show();
+
             getSecpo();
-            completeOrder();
+//            completeOrder();
+            int infoid = 1;
+
+            cmdManager.XchsGetOtp(infoid, new CmdResultCallback() {
+                @Override
+                public void onSuccess(int status, byte[] outputData) {
+                    if ((status + 65536) == 0x9000) {
+                        BlockVerifyOtp();
+                        //16進制的9000在10進制是36864;6645是26181;status=91717
+                    } else if ((status + 65536) == 0x16645) {
+                        PublicPun.showNoticeDialog(mContext, "Unable to generate OTP", "Please try again.");
+                    } else {
+//                    LogUtil.i("status="+String.valueOf(status));
+                        PublicPun.showNoticeDialog(mContext, "Unable to generate OTP", "Error:" + Integer.toHexString(status));
+                    }
+                }
+            });
+        } else if (v == btnCancelOrder || v == btnSubmittedOk) {
+//            CancelTrx();
+            finish();
         }
+    }
+
+//    private void CancelTrx() {
+//
+//        mExchangeAPI.cancelTrx(orderID, new APIResultCallback() {
+//            @Override
+//            public void success(String[] msg) {
+//                LogUtil.e("cancel trx ok:" + msg[0]);
+//                // String.format(getResources().getString(R.string.str_estimated_fee_content),
+//
+//                clickToFinish(getString(R.string.btn_cancel_order_str), String.format(getString(R.string.str_cancel_trx_success), orderID));
+//            }
+//
+//            @Override
+//            public void fail(String msg) {
+//                PublicPun.showNoticeDialog(mContext, getString(R.string.str_unable_cancel), getString(R.string.str_reason));
+//            }
+//        });
+//    }
+
+    private void clickToFinish(String title, String msg) {
+        AlertDialog.Builder mBuilder =
+                PublicPun.CustomNoticeDialog(mContext, title, msg);
+        mBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                finish();
+            }
+        }).show();
+    }
+
+
+    byte[] okTkn = new byte[4];
+    byte[] unblockTkn = new byte[16];
+
+    private void BlockVerifyOtp() {
+        final View view = LayoutInflater.from(mContext).inflate(R.layout.alert_dialog_otp_input, null);
+        AlertDialog.Builder otp_dialog = new AlertDialog.Builder(mContext, AlertDialog.THEME_HOLO_LIGHT);
+        final EditText editText = (EditText) view.findViewById(R.id.alert_editotp);
+        otp_dialog.setView(view);
+        otp_dialog.setCancelable(false);
+//        verify OTP
+        otp_dialog.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                mProgress.setMessage("Begin to block order...");
+                mProgress.show();
+                //1.transit to server
+
+                String blockOtp = editText.getText().toString();
+                LogUtil.d("block orderID=" + orderID + ";blockOtp=" + blockOtp);
+
+
+                mExchangeAPI.getTrxBlock(orderID, blockOtp, new APIResultCallback() {
+                    @Override
+                    public void success(String[] msg) {
+                        LogUtil.d("getTrxBlock ok " + msg[0]);//orderId(4B)/accId(4B)/amount(8B)/mac1(32B)/nonce(16B)
+
+                        // 2.SE cmd (F9)
+                        byte[] srvOrderBlock = PublicPun.hexStringToByteArray(msg[0]);
+                        cmdManager.XchsBlockBtc(srvOrderBlock, new CmdResultCallback() {
+                            @Override
+                            public void onSuccess(int status, byte[] outputData) {
+
+                                if ((status + 65536) == 0x9000) {//-28672//36864
+                                    LogUtil.d("XchsBlockBtc  success = " + PublicPun.byte2HexStringNoBlank(outputData));
+
+                                    //blockSignature(32B)/okTkn(4B)/encUblkTkn(16B)/mac2(32B)/nonce(16B)
+
+                                    System.arraycopy(outputData, 32, okTkn, 0, 4);
+                                    System.arraycopy(outputData, 36, unblockTkn, 0, 16);
+
+                                    cmdManager.XchsBlockInfo(okTkn, new CmdResultCallback() {
+                                        @Override
+                                        public void onSuccess(int status, byte[] outputData) {
+                                            LogUtil.d("Block資料=" + PublicPun.byte2HexString(outputData));
+                                        }
+                                    });
+
+                                    mExchangeAPI.doExWriteOKToken(orderID, PublicPun.byte2HexStringNoBlank(okTkn), PublicPun.byte2HexStringNoBlank(unblockTkn),
+                                            new APIResultCallback() {
+                                                @Override
+                                                public void success(String[] msg) {
+                                                    LogUtil.d("ExWriteOKToken " + msg[0]);
+//                                                    finish();
+                                                    completeOrder();
+                                                    mProgress.dismiss();
+                                                }
+
+                                                @Override
+                                                public void fail(String msg) {
+                                                    LogUtil.d("ExWriteOKToken failed:" + msg);
+                                                    mProgress.dismiss();
+                                                    PublicPun.showNoticeDialog(mContext, "Unable to Block", "WriteOKToken failed:" + msg);
+                                                }
+                                            });
+
+                                } else {
+                                    LogUtil.d("XchsBlockBtc fail");
+                                    mProgress.dismiss();
+                                    PublicPun.showNoticeDialog(mContext, "Unable to Block", "WriteOKToken failed:" + Integer.toHexString(status));
+                                }
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void fail(String msg) {
+                        LogUtil.d("getTrxBlock failed:" + msg);
+                        mProgress.dismiss();
+                        PublicPun.showNoticeDialog(mContext, "Unable to Block", msg);
+
+                    }
+                });
+            }
+        }).setNegativeButton(R.string.strCancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+
+            }
+        });
+        otp_dialog.show();
+    }
+
+    byte[] cancelBlkInfo;
+
+    private void CancelBlock() {
+        AlertDialog.Builder otp_dialog = new AlertDialog.Builder(mContext, AlertDialog.THEME_HOLO_LIGHT);
+//        otp_dialog.setView(item);
+        otp_dialog.setCancelable(true);
+        otp_dialog.setMessage("Are you sure you want to cancel the block order?");
+        otp_dialog.setNegativeButton(R.string.ok, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+//                cancelTrx(truP e);
+                //queryAccountInfo
+                mProgress.setMessage("Canceling the block order...");
+                mProgress.show();
+                mExchangeAPI.getExUnBlock(orderID, new APIResultCallback() {
+                    @Override
+                    public void success(String[] msg) {
+
+//                        {"orderId":"15847930","okToken":"abc123","unblockTkn":"abc123",
+//                                "mac":"dbe57d18f1c176606f40361a11c755ed655804a319d7b7120cdb1e729786d5dd"}
+
+                        cancelBlkInfo = PublicPun.hexStringToByteArray(msg[1] + msg[2] + msg[3] + msg[4] + msg[5]);
+
+                        LogUtil.e("cancelBlkInfo=trxID:" + msg[0] + ";cwOrder:" + msg[1] + ";OKTKN:" + msg[2] + ";UBLKTKN:" + msg[3] +
+                                ";MAC:" + msg[4] + ";NONCE:" + msg[5]);
+
+                        cmdManager.XchsCancelBlock(cancelBlkInfo, new CmdResultCallback() {
+                            @Override
+                            public void onSuccess(int status, byte[] outputData) {
+
+                                if ((status + 65536) == 0x9000) {//-28672//36864
+                                    LogUtil.d("cmd XchsCancelBlock  success = " + PublicPun.byte2HexString(outputData));
+                                    cancelBlkInfo = outputData;
+
+                                    mExchangeAPI.cancelTrx(orderID, new APIResultCallback() {
+                                        @Override
+                                        public void success(String[] msg) {
+                                            LogUtil.d("cancelTrx  success = " + msg[0]);
+                                            mProgress.dismiss();
+                                        }
+
+                                        @Override
+                                        public void fail(String msg) {
+                                            LogUtil.d("cancelTrx  failed = " + msg);
+                                            mProgress.dismiss();
+                                            PublicPun.showNoticeDialog(mContext, "Unable to Cancel Block", "Error:" + msg);
+                                        }
+                                    });
+                                } else {
+                                    mProgress.dismiss();
+                                    LogUtil.d("XchsCancelBlock fail");
+                                    //for debug error code
+                                    PublicPun.showNoticeDialog(mContext, "Unable to Cancel Block", "Error:" + Integer.toHexString(status)
+                                            + "-" + PublicPun.byte2HexString(outputData));
+                                    cmdManager.getError(new CmdResultCallback() {
+                                        @Override
+                                        public void onSuccess(int status, byte[] outputData) {
+                                            LogUtil.d("Get Error = " + Integer.toHexString(status));
+                                        }
+                                    });
+                                }
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void fail(String msg) {
+                        LogUtil.d("getTrxBlock failed:" + msg);
+                        mProgress.dismiss();
+                        PublicPun.showNoticeDialog(mContext, "Unable to Cancel Block", "Error:" + msg);
+                    }
+                });
+
+            }
+        });
+        otp_dialog.show();
     }
 
     private Timer mTimer;
@@ -223,74 +468,17 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
         new Random().nextBytes(bValue);
         nonce = bValue;
         LogUtil.d("nonce=" + PublicPun.byte2HexStringNoBlank(nonce));
-        cmdManager.trxFinish(new CmdResultCallback() {
-            @Override
-            public void onSuccess(int status, byte[] outputData) {
-                LogUtil.d("Trx finish");
-            }
-        });
+//        cmdManager.trxFinish(new CmdResultCallback() {
+//            @Override
+//            public void onSuccess(int status, byte[] outputData) {
+//                LogUtil.d("Trx finish");
+//            }
+//        });
 
-        mExchangeAPI.doExGetTrxInfo(xchsOrder.getOrderId(), new APIResultCallback() {
-            @Override
-            public void success(final String[] msg) {
-                LogUtil.d("doExGetTrxInfo ok " + msg[0]);
-                //order id, oktoken, unblock token,accid,send amount, mac
-                //{"loginblk":"3488162291780ad0c38e7ebbc44406347d770086fc2c54da0300000000000000000027100ba5ea57e799ef00e33dcb58836c6fbee9820ce0616b26dff7c51c3bdd89eb08",
-                // "out1addr":"1PHcgbVxMCNsB5RnfvKdUC7hidzSdovL2s"}
+        mProgress.setMessage("Preparing to complete order...");
+        mProgress.show();
 
-                // XCHS Transaction Prepare
-                // orderId/okTkn/encBulkTkn/accId/dealAmnt/mac
-
-                //開始組prepare資料
-//                            inId: 1B
-//                            accId: 4B
-//                            kcId: 1B / kId: 4B
-//                            out1Addr: 25B
-//                            out2Addr: 25B
-//                            sigMtrl: 32B
-//                            mac: 32B
-
-
-                cmdManager.XchsTrxsignLogin(PublicPun.hexStringToByteArray(msg[0]), new CmdResultCallback() {
-                    @Override
-                    public void onSuccess(int status, byte[] outputData) {
-                        if ((status + 65536) == 0x9000) {
-                            trxHandle = outputData;
-                            LogUtil.d("XchsTrxSignLogin trxHandle=" + PublicPun.byte2HexStringNoBlank(trxHandle));
-
-                            PrepareToGetUnspentTrx();
-
-                        } else {
-
-                            //for debug error code
-//                            XchsTrxsignLogout(trxHandle);
-                            cmdManager.getError(new CmdResultCallback() {
-                                @Override
-                                public void onSuccess(int status, byte[] outputData) {
-                                    LogUtil.d("Login failed = " + Integer.toHexString(status) + ";outputData=" + PublicPun.byte2HexString(outputData));
-                                }
-                            });
-
-                            AlertDialog.Builder mBuilder =
-                                    PublicPun.CustomNoticeDialog(mContext, "Unable to login Exchange  Transaction", "Error:" + Integer.toHexString(status));
-                            mBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int whichButton) {
-                                    finish();
-                                }
-                            }).show();
-                        }
-                    }
-                });
-            }
-
-            @Override
-            public void fail(String msg) {
-
-                LogUtil.d("doExGetTrxInfo failed:" + msg);
-//                XchsTrxsignLogout(trxHandle);
-                //exchangeSite Logout()
-            }
-        });
+        PrepareToGetUnspentTrx();
     }
 
     private void PrepareToGetUnspentTrx() {
@@ -332,6 +520,7 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
         new UnSpentTxsAsyncTask().execute(InAddress);
     }
 
+
     private class UnSpentTxsAsyncTask extends AsyncTask<String, Void, List<UnSpentTxsBean>> {
         @Override
         protected List<UnSpentTxsBean> doInBackground(String... strings) {
@@ -370,7 +559,7 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
         LogUtil.e("帳戶 " + xchsOrder.getAccount() + " 地址下有的餘額=" + availableAmount + " 要發出的金額=" + amountToSend);
         try {
             processedTxData =
-                    BTCUtils.calcFeeChangeAndSelectOutputsToSpendii(mContext, unSpentTxsBeanList, amountToSend, extraFee, true);
+                    BTCUtils.calcFeeChangeAndSelectOutputsToSpendii(mContext, unSpentTxsBeanList, amountToSend, extraFee, true, false);
 
             if (processedTxData == null) {
                 cancelTrx();
@@ -416,7 +605,6 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
 
                         cancelTrx();
                         PublicPun.showNoticeDialog(mContext, "Unable to send:", msg);
-
                     }
                 });
 //                }
@@ -463,13 +651,14 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
                         mProgress.show();
                     }
                 });
-
                 PrepXchsTrxSign(mTxsConfirm);
 
             }
 
             @Override
             public void TransactionCancel() {
+
+                CancelBlock();
 
             }
         });
@@ -589,7 +778,71 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
                                         exeCnt++;
 
                                         if (exeCnt == signedInputs.length) {
-                                            doTrxSignPrepare(lisTrxBlks);
+
+
+                                            mExchangeAPI.doExGetTrxInfo(xchsOrder.getOrderId(), new APIResultCallback() {
+                                                @Override
+                                                public void success(final String[] msg) {
+                                                    LogUtil.d("doExGetTrxInfo ok " + msg[0]);
+                                                    //order id, oktoken, unblock token,accid,send amount, mac
+                                                    //{"loginblk":"3488162291780ad0c38e7ebbc44406347d770086fc2c54da0300000000000000000027100ba5ea57e799ef00e33dcb58836c6fbee9820ce0616b26dff7c51c3bdd89eb08",
+                                                    // "out1addr":"1PHcgbVxMCNsB5RnfvKdUC7hidzSdovL2s"}
+
+                                                    // XCHS Transaction Prepare
+                                                    // orderId/okTkn/encBulkTkn/accId/dealAmnt/mac
+
+                                                    //開始組prepare資料
+//                            inId: 1B
+//                            accId: 4B
+//                            kcId: 1B / kId: 4B
+//                            out1Addr: 25B
+//                            out2Addr: 25B
+//                            sigMtrl: 32B
+//                            mac: 32B
+
+                                                    cmdManager.XchsTrxsignLogin(PublicPun.hexStringToByteArray(msg[0]), new CmdResultCallback() {
+                                                        @Override
+                                                        public void onSuccess(int status, byte[] outputData) {
+                                                            if ((status + 65536) == 0x9000) {
+                                                                trxHandle = outputData;
+                                                                LogUtil.d("XchsTrxSignLogin trxHandle=" + PublicPun.byte2HexStringNoBlank(trxHandle));
+
+                                                                doTrxSignPrepare(lisTrxBlks);
+
+                                                            } else {
+                                                                //for debug error code
+
+//                            XchsTrxsignLogout(trxHandle);
+                                                                cmdManager.getError(new CmdResultCallback() {
+                                                                    @Override
+                                                                    public void onSuccess(int status, byte[] outputData) {
+                                                                        LogUtil.d("Login failed = " + Integer.toHexString(status) + ";outputData=" + PublicPun.byte2HexString(outputData));
+                                                                    }
+                                                                });
+
+                                                                AlertDialog.Builder mBuilder =
+                                                                        PublicPun.CustomNoticeDialog(mContext, "Unable to login Exchange  Transaction", "Error:" + Integer.toHexString(status));
+                                                                mBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                                                    public void onClick(DialogInterface dialog, int whichButton) {
+                                                                        finish();
+                                                                    }
+                                                                }).show();
+                                                            }
+                                                        }
+                                                    });
+
+                                                }
+
+                                                @Override
+                                                public void fail(String msg) {
+
+                                                    LogUtil.d("doExGetTrxInfo failed:" + msg);
+//                XchsTrxsignLogout(trxHandle);
+                                                    //exchangeSite Logout()
+                                                }
+                                            });
+
+
                                         }
                                     }
                                 }
@@ -613,6 +866,7 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
 
         LogUtil.e("mLisTrxBlks.size=" + String.valueOf(mLisTrxBlks.size()));
         if (mLisTrxBlks.size() > 0) {
+
 
             for (TrxBlks mTrxBlks : mLisTrxBlks) {
                 LogUtil.e("trxHandle=" + PublicPun.byte2HexStringNoBlank(mTrxBlks.getTrxHandle()));
@@ -671,6 +925,7 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
 
             @Override
             public void fail(String msg) {
+                mProgress.dismiss();
                 LogUtil.d("doTrxSignPrepare failed:" + msg);
 //                XchsTrxsignLogout(trxHandle);
             }
@@ -1366,12 +1621,14 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
                             mProgress.dismiss();
                         }
 
-//                        PublishToNetwork(currUnsignedTx);
+                        PublishToNetwork(currUnsignedTx);
 
                     }
 
                     @Override
                     public void fail(String msg) {
+                        //add cancel block
+
                         failedTrx();
 
                     }

@@ -122,7 +122,7 @@ public class NotificationReceiver extends BroadcastReceiver {
 
                 case BSConfig.HANDLER_DISCONN:
 
-                    String title = "CoolWallet Disconnected";
+
                     ActivityManager am = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
                     ComponentName cn = am.getRunningTasks(1).get(0).topActivity;
                     int ind = cn.getShortClassName().lastIndexOf(".") + 1;//.ui.EraseActivity → EraseActivity
@@ -130,23 +130,24 @@ public class NotificationReceiver extends BroadcastReceiver {
 
                     LogUtil.e("BaseActivity HANDLER_DISCONN actitvity=" + act);
 
-                    String noteMsg;
-                    if (PublicPun.card.getCardId() == null) {
-                        noteMsg = "CoolWallet Disconnected";
-                    } else {
-                        noteMsg = new String(PublicPun.hexStringToByteArray(PublicPun.card.getCardId())) + " Disconnected";
-                    }
+
                     if (act.equals("BleActivity")) {
-                        LogUtil.e("BleActivity disconnected,reconnected.");
-                        SharedPreferences settings = mContext.getSharedPreferences("Preference", 0);
-                        //取出name屬性的字串
-                        String address = settings.getString("connAddress", "");
-                        bleManager.connectBle(address);
+
+//                        PublicPun.showNoticeDialogToFinish(mContext, title, noteMsg);
+
+                        //自動連線
+//                        SharedPreferences settings = mContext.getSharedPreferences("Preference", 0);
+//                        //取出name屬性的字串
+//                        String address = settings.getString("connAddress", "");
+//                        bleManager.connectBle(address);
 
                     } else {
                         LogUtil.e("not BleActivity");
-                        PublicPun.showNoticeDialogToFinish(mContext, title, noteMsg);
-                        systemNotification(title, noteMsg);
+                        Intent intent = new Intent(mContext, BleActivity.class);
+                        intent.putExtra ("Disconnection_Notify", true);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        mContext.startActivity(intent);
+
                     }
 
                     break;
@@ -303,22 +304,6 @@ public class NotificationReceiver extends BroadcastReceiver {
                         .addLine(socket.getTx_type() + " Amount:" + TabFragment.BtcFormatter.format(socket.getBtc_amount()) + " BTC")
                         .addLine("Confirmations: " + socket.getConfirmations())).build();
 //                .setContentIntent(PendingIntent.getActivity(getApplicationContext(), notifyID, new Intent(getApplicationContext(), BleActivity.class), PendingIntent.FLAG_UPDATE_CURRENT)).build();
-        notificationManager.notify(notifyID, notification); // 發送通知
-    }
-
-
-    /**
-     * show on Status Bar
-     * foe ble disconn
-     */
-    private void systemNotification(String title, String msg) {
-        final int notifyID = 999; // 通知的識別號碼
-        final NotificationManager notificationManager = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE); // 取得系統的通知服務
-        final Notification notification = new Notification.Builder(mContext)
-                .setSmallIcon(R.mipmap.ic_launcher_cw)
-                .setContentTitle(title)
-                .setContentText(msg) // 建立通知
-                .setContentIntent(PendingIntent.getActivity(mContext, notifyID, new Intent(mContext, BleActivity.class), PendingIntent.FLAG_UPDATE_CURRENT)).build();
         notificationManager.notify(notifyID, notification); // 發送通知
     }
 }

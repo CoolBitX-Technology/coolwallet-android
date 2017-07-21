@@ -38,6 +38,7 @@
             android:layout_height="30dp"
             android:layout_gravity="center_vertical"
             android:layout_marginLeft="20dp"
+            android:ellipsize="middle"
             android:hint="address"
             android:singleLine="true" />
     </LinearLayout>
@@ -96,8 +97,8 @@
                 style="@style/TextView_White_Bold_18"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:gravity="center"
                 android:layout_weight="4"
+                android:gravity="center"
                 android:hint="0.1010 BTC" />
 
             <TextView
@@ -230,7 +231,6 @@
             android:layout_height="30dp"
             android:layout_gravity="center_vertical"
             android:layout_marginLeft="20dp"
-            android:hint="19 Jan 2016 07:12 PM"
             android:singleLine="true" />
     </LinearLayout>
 
@@ -244,20 +244,64 @@
         android:gravity="center"
         android:text="@string/tv_order_notice_str" />
 
-    <LinearLayout
+
+    <RelativeLayout
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:gravity="bottom|center_horizontal"
         android:orientation="vertical">
 
-        <Button
-            android:id="@+id/btn_complete_order"
-            style="@style/TextView_Brown_16"
-            android:layout_width="200dp"
+
+        <LinearLayout
+            android:id="@+id/lin_sbmitted"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
-            android:background="@drawable/selector_button"
-            android:text="@string/btn_complete_order_str" />
-    </LinearLayout>
+            android:layout_alignParentBottom="true"
+           >
+
+            <Button
+                android:id="@+id/btn_submitted_ok"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/selector_button"
+                style="@style/TextView_Brown_16"
+                android:text="@string/ok"
+                android:textAllCaps="false"
+               />
+
+        </LinearLayout>
+
+
+        <!-- Button 置底 -->
+        <LinearLayout
+            android:id="@+id/lin_unsbmitted"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:orientation="horizontal"
+            android:weightSum="10">
+
+            <Button
+                android:id="@+id/btn_cancel_order"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/selector_button"
+                style="@style/TextView_Brown_16"
+                android:text="@string/btn_cancel_order_str"
+                android:textAllCaps="false"
+                android:layout_weight="5"/>
+
+            <Button
+                android:id="@+id/btn_complete_order"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/selector_button"
+                style="@style/TextView_Brown_16"
+                android:text="@string/btn_complete_order_str"
+                android:textAllCaps="false"
+                android:layout_weight="5"/>
+
+
+        </LinearLayout>
+    </RelativeLayout>
 
 </LinearLayout>

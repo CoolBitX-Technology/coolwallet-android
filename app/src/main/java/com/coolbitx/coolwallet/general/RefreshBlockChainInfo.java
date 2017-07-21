@@ -183,7 +183,7 @@ public class RefreshBlockChainInfo {
                                         ArrayList<CWAccountKeyInfo> cwList =
                                                 DatabaseHelper.queryAccountKeyInfo(mContext, -1);
                                         LogUtil.e("KEYINFO account cwList.size()="+cwList.size()+"; cnt="+ACCOUNT_CNT);
-                                        if (cwList.size() != ACCOUNT_CNT*2) {
+                                        if (cwList.size() != ACCOUNT_CNT*2) {//如果keyinfo個數不等於account數，重新從卡片讀取
                                             LogUtil.d("cwList size=" + cwList.size());
                                             for(int i=0;i<ACCOUNT_CNT;i++){
 

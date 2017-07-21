@@ -193,83 +193,6 @@ public class ExchangeAPI {
         }
         mXchsSyncCallback.onSuccess(listXchsSync);
 
-//        int i = 0;
-//        while (i < ACCOUNT_CNT) {
-//            final int accountId = i;
-//            int j = 0;
-//            while (j <= 1) {
-//                final int kcid = j;
-//
-//                cmdManager.hdwQueryAccountKeyInfo(Constant.CwHdwAccountKeyInfoPubKeyAndChainCd,
-//                        j,
-//                        i,
-//                        0,
-//                        new CmdResultCallback() {
-//                            @Override
-//                            public void onSuccess(int status, byte[] outputData) {
-//                                if ((status + 65536) == 0x9000) {
-//                                    if (outputData != null) {
-//
-//                                        ArrayList<dbAddress> listAddress
-//                                                = DatabaseHelper.queryAddress(mContext, accountId, kcid);
-//
-//                                        byte[] publicKeyBytes = new byte[64];
-//                                        byte[] chainCodeBytes = new byte[32];
-//                                        int length = outputData.length;
-//                                        byte[] extendPub = new byte[33];
-//                                        if (length >= 96) {
-//
-//                                            for (int i = 0; i < 64; i++) {
-//                                                publicKeyBytes[i] = outputData[i];
-//                                            }
-//                                            for (int j = 64; j < 96; j++) {
-//                                                chainCodeBytes[j - 64] = outputData[j];
-//                                            }
-//                                            //最後兩個字元一起
-//
-//                                            int mFirstKey = Integer.parseInt(PublicPun.byte2HexString(publicKeyBytes[63]), 16);
-//
-//                                            //format last charactors
-//                                            if (mFirstKey % 2 == 0) {
-//                                                extendPub[0] = 02;
-//                                            } else {
-//                                                extendPub[0] = 03;
-//                                            }
-//                                            for (int a = 0; a < 32; a++) {
-//                                                extendPub[a + 1] = publicKeyBytes[a];
-//                                            }
-//
-//                                            if (kcid == 0) {
-//                                                mXchsSync = new XchsSync();
-//                                                mXchsSync.setAccID_ext(accountId);
-//                                                mXchsSync.setKeyPointer_ext(kcid);
-//                                                mXchsSync.setAccPub_ext(LogUtil.byte2HexStringNoBlank(extendPub));
-//                                                mXchsSync.setAccChain_ext(LogUtil.byte2HexStringNoBlank(chainCodeBytes));
-//                                                mXchsSync.setAddNum_ext(listAddress.size());
-//
-//                                            } else {
-//                                                mXchsSync.setAccID_int(accountId);
-//                                                mXchsSync.setKeyPointer_int(kcid);
-//                                                mXchsSync.setAccPub_int(LogUtil.byte2HexStringNoBlank(extendPub));
-//                                                mXchsSync.setAccChain_int(LogUtil.byte2HexStringNoBlank(chainCodeBytes));
-//                                                mXchsSync.setAddNum_int(listAddress.size());
-//
-//                                                listXchsSync.add(mXchsSync);
-//                                            }
-//
-//                                            if (listXchsSync.size() == ACCOUNT_CNT) {
-//                                                mXchsSyncCallback.onSuccess(listXchsSync);
-//                                            }
-//                                        }
-//                                    }
-//                                } else {
-//                                }
-//                            }
-//                        });
-//                j++;
-//            }
-//            i++;
-//        }
     }
 
     private String createSyncJson(ArrayList<XchsSync> listXchsSync, String exchangeToken) {
@@ -445,10 +368,14 @@ public class ExchangeAPI {
         }.execute(postData);
     }
 
-    public void getPendingOrder(final APIResultCallback apiResultCallback) {
+    /**
+     * get pending trx (matched order)
+     * @param apiResultCallback
+     */
+    public void getPendingTrx(final APIResultCallback apiResultCallback) {
         this.apiResultCallback = apiResultCallback;
         this.mResponse = new String[1];//challenge
-        final String failedlMsg = "getPendingOrder fail.";
+        final String failedlMsg = "getPendingTrx fail.";
         String postData = "";
 
         new AsyncTask<String, Integer, JSONObject>() {
@@ -462,7 +389,7 @@ public class ExchangeAPI {
             protected void onPostExecute(JSONObject result) {
                 if (result != null) {
                     try {
-                        LogUtil.d("getPendingOrder=" + result);
+                        LogUtil.d("getPendingTrx=" + result);
                         String response = result.toString();
                         mResponse[0] = response;
                         apiResultCallback.success(mResponse);
@@ -478,16 +405,16 @@ public class ExchangeAPI {
         }.execute(postData);
     }
 
-    public void getUnclarifyOrder(final APIResultCallback apiResultCallback) {
+    public void getOrderInfo(final APIResultCallback apiResultCallback) {
         this.apiResultCallback = apiResultCallback;
         this.mResponse = new String[1];//challenge
-        final String failedlMsg = "getUnclarifyOrder fail.";
+        final String failedlMsg = "getOrderInfo fail.";
         String postData = "";
 
         new AsyncTask<String, Integer, JSONObject>() {
             @Override
             protected JSONObject doInBackground(String... param) {
-                String url = "http://xsm.coolbitx.com:8080/api/res/cw/unclarify/" + CWID;
+                String url = "http://xsm.coolbitx.com:8080/api/res/cw/order/" + CWID;
                 return new XchsNetWork().makeHttpRequestGet(url, param[0]);
             }
 
@@ -495,7 +422,7 @@ public class ExchangeAPI {
             protected void onPostExecute(JSONObject result) {
                 if (result != null) {
                     try {
-                        LogUtil.d("getUnclarifyOrder=" + result);
+                        LogUtil.d("getOrderInfo=" + result);
                         String response = result.toString();
                         mResponse[0] = response;
                         apiResultCallback.success(mResponse);
@@ -510,17 +437,23 @@ public class ExchangeAPI {
         }.execute(postData);
     }
 
-    //ExRequestOrderBlock
-    public void getExRequestOrderBlock(final String hexOrder, final String blockOtp, final APIResultCallback apiResultCallback) {
+
+    /**
+     * Get Trx block
+     * @param hexOrder
+     * @param blockOtp
+     * @param apiResultCallback
+     */
+    public void getTrxBlock(final String hexOrder, final String blockOtp, final APIResultCallback apiResultCallback) {
         this.apiResultCallback = apiResultCallback;
         this.mResponse = new String[1];//challenge
-        final String failedlMsg = "getExRequestOrderBlock fail.";
+        final String failedlMsg = "getTrxBlock fail.";
         String postData = "";
 
         new AsyncTask<String, Integer, JSONObject>() {
             @Override
             protected JSONObject doInBackground(String... param) {
-                String url = "http://xsm.coolbitx.com:8080/api/res/cw/order/" + hexOrder + "/" + blockOtp;
+                String url = "http://xsm.coolbitx.com:8080/api/res/cw/trx/" + hexOrder + "/" + blockOtp;
                 return new XchsNetWork().makeHttpRequestGet(url, param[0]);
             }
 
@@ -528,7 +461,7 @@ public class ExchangeAPI {
             protected void onPostExecute(JSONObject result) {
                 if (result != null) {
                     try {
-                        LogUtil.d("getExRequestOrderBlock=" + result);
+                        LogUtil.d("getTrxBlock=" + result);
                         String response = result.getString("block_btc");
                         mResponse[0] = response;
                         apiResultCallback.success(mResponse);
@@ -547,7 +480,7 @@ public class ExchangeAPI {
     public void doExWriteOKToken(final String hexOrder, final String okToken, final String unblockToken, final APIResultCallback apiResultCallback) {
         this.apiResultCallback = apiResultCallback;
         this.mResponse = new String[1];//challenge
-        final String failedlMsg = "getExRequestOrderBlock fail.";
+        final String failedlMsg = "getTrxBlock fail.";
         //(With: {"okToken": "a0a1a2a3","unblockToken": "b0b1b2b3"})
         String postData = "{\"okToken\":\"" + okToken + "\", \"unblockToken\":\"" + unblockToken + "\"}";
 
@@ -563,8 +496,8 @@ public class ExchangeAPI {
             protected void onPostExecute(JSONObject result) {
                 if (result != null) {
                     try {
-                        LogUtil.d("getExRequestOrderBlock=" + result);
-                        String response = result.getString("response");
+                        LogUtil.d("getTrxBlock=" + result);
+                        String response = result.getString("data");//blockId
                         mResponse[0] = response;
                         apiResultCallback.success(mResponse);
 
@@ -581,14 +514,13 @@ public class ExchangeAPI {
     //ExRequestOrderBlock
     public void getExUnBlock(final String orderId, final APIResultCallback apiResultCallback) {
         this.apiResultCallback = apiResultCallback;
-        this.mResponse = new String[5];//challenge
+        this.mResponse = new String[6];//challenge
         final String failedlMsg = "getExUnBlock fail.";
         String postData = "";
-
         new AsyncTask<String, Integer, JSONObject>() {
             @Override
             protected JSONObject doInBackground(String... param) {
-                String url = "http://xsm.coolbitx.com:8080/api/res/cw/unblock/" + orderId;
+                String url = "http://xsm.coolbitx.com:8080/api/res/cw/unblock/" + orderId ;
                 LogUtil.d("getExUnBlock url=" + url);
                 return new XchsNetWork().makeHttpRequestGet(url, param[0]);
             }
@@ -599,12 +531,13 @@ public class ExchangeAPI {
                     try {
                         LogUtil.d("getExUnBlock =" + result);
 //                        {"orderId":"15847930","okToken":"abc123","unblockTkn":"abc123",
-////                                "mac":"dbe57d18f1c176606f40361a11c755ed655804a319d7b7120cdb1e729786d5dd"}
+//                                "mac":"dbe57d18f1c176606f40361a11c755ed655804a319d7b7120cdb1e729786d5dd"}
                         mResponse[0] = result.getString("orderId");
-                        mResponse[1] = result.getString("okToken");
-                        mResponse[2] = result.getString("unblockTkn");
-                        mResponse[3] = result.getString("mac");
-                        mResponse[4] = result.getString("nonce");
+                        mResponse[1] = result.getString("cworderId");
+                        mResponse[2] = result.getString("okToken");
+                        mResponse[3] = result.getString("unblockTkn");
+                        mResponse[4] = result.getString("mac");
+                        mResponse[5] = result.getString("nonce");
 
 
                         apiResultCallback.success(mResponse);
@@ -619,12 +552,53 @@ public class ExchangeAPI {
         }.execute(postData);
     }
 
+    /**
+     * trx delete (matched order delete)
+     * @param orderId
+     * @param apiResultCallback
+     */
+    //deleteBlock transaction
+    public void cancelTrx(final String orderId, final APIResultCallback apiResultCallback) {
+        this.apiResultCallback = apiResultCallback;
+        this.mResponse = new String[1];//challenge
+        final String failedlMsg = "cancelTrx fail.";
+        String postData = "";
+        LogUtil.d("cancelTrx in");
+        new AsyncTask<String, Integer, JSONObject>() {
+            @Override
+            protected JSONObject doInBackground(String... param) {
+                String url = "http://xsm.coolbitx.com:8080/api/res/cw/trx/" + orderId;
+                LogUtil.d("cancelTrx url=" + url);
+                return new XchsNetWork().makeHttpDelete(url);
+            }
 
+            @Override
+            protected void onPostExecute(JSONObject result) {
+                if (result != null) {
+                    try {
+                        LogUtil.d("cancelTrx =" + result);
+                        mResponse[0] = result.getString("status");
+                        apiResultCallback.success(mResponse);
+                    } catch (Exception e) {
+                        apiResultCallback.fail(failedlMsg + ":" + e.toString());
+                    }
+                } else {
+                    apiResultCallback.fail(failedlMsg);
+                }
+            }
+        }.execute(postData);
+    }
+
+    /**
+     * order delete (matched order delete)
+     * @param orderId
+     * @param apiResultCallback
+     */
     //deleteBlockOrder
     public void cancelOrder(final String orderId, final APIResultCallback apiResultCallback) {
         this.apiResultCallback = apiResultCallback;
         this.mResponse = new String[1];//challenge
-        final String failedlMsg = "cancelOrder fail.";
+        final String failedlMsg = "cancelTrx fail.";
         String postData = "";
         LogUtil.d("cancelOrder in");
         new AsyncTask<String, Integer, JSONObject>() {
@@ -639,8 +613,8 @@ public class ExchangeAPI {
             protected void onPostExecute(JSONObject result) {
                 if (result != null) {
                     try {
-                        LogUtil.d("cancelOrder =" + result);
-                        mResponse[0] = result.getString("response");
+                        LogUtil.d("ccancelOrder =" + result);
+                        mResponse[0] = result.getString("status");
                         apiResultCallback.success(mResponse);
                     } catch (Exception e) {
                         apiResultCallback.fail(failedlMsg + ":" + e.toString());
@@ -686,6 +660,13 @@ public class ExchangeAPI {
             }
         }.execute(postData);
     }
+
+    /**
+     * prepare transaction
+     * @param orderId
+     * @param mLisTrxBlks
+     * @param apiResultCallback
+     */
 
     //ExGetTrxPrepareBlocks
     public void doExGetTrxPrepareBlocks(final String orderId, ArrayList<TrxBlks> mLisTrxBlks, final APIResultCallback apiResultCallback) {

@@ -10,6 +10,7 @@ import android.widget.EditText;
 import com.coolbitx.coolwallet.DataBase.DatabaseHelper;
 import com.coolbitx.coolwallet.DataBase.DbName;
 import com.coolbitx.coolwallet.R;
+import com.coolbitx.coolwallet.general.AppPrefrence;
 import com.coolbitx.coolwallet.general.CSVReadWrite;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.snscity.egdwlib.CmdManager;
@@ -47,6 +48,7 @@ public class EraseActivity extends BaseActivity implements View.OnClickListener 
         mProgress.setMessage("Generating Reset OTP...");
         mProgress.show();
 
+
         genOTP();
         initViews();
     }
@@ -68,7 +70,8 @@ public class EraseActivity extends BaseActivity implements View.OnClickListener 
         unRegisterBroadcast(this);
     }
 
-    private void genOTP(){
+    private void genOTP() {
+
         //新版reset,如果出6601代表是舊版
         cmdManager.genResetOTP(new CmdResultCallback() {
             @Override
@@ -112,7 +115,7 @@ public class EraseActivity extends BaseActivity implements View.OnClickListener 
         } else if (v == btnErase) {
             //clear txs data;
 
-            LogUtil.i("Erase mode=" + PublicPun.card.getMode());
+            LogUtil.e("Erase mode=" + PublicPun.card.getMode());
             if (PublicPun.card.getMode().equals("NOHOST")) {
                 cleanData();
                 PublicPun.toast(context, "Initial Success");
@@ -136,7 +139,7 @@ public class EraseActivity extends BaseActivity implements View.OnClickListener 
                             }
                         });
                         //處理程式寫在此
-                        if(isNewCard) {
+                        if (isNewCard) {
                             cmdManager.verivyResetOTP(optCode, new CmdResultCallback() {
                                 @Override
                                 public void onSuccess(int status, byte[] outputData) {
@@ -145,16 +148,16 @@ public class EraseActivity extends BaseActivity implements View.OnClickListener 
                                     } else if ((status + 65536) == 0x16606) {
                                         mProgress.dismiss();
 //                                        showNoticeDialog("Erro Message", "Error:" + "OTP incorrect !");
-                                        PublicPun.showNoticeDialog(context,"OTP incorrect", "Please try again");
+                                        PublicPun.showNoticeDialog(context, "OTP incorrect", "Please try again");
                                         editOTP.setText("");
                                         genOTP();
                                     } else {
                                         mProgress.dismiss();
-                                        PublicPun.showNoticeDialogToFinish(context,"Error Message", "Error:" + Integer.toHexString(status));
+                                        PublicPun.showNoticeDialogToFinish(context, "Error Message", "Error:" + Integer.toHexString(status));
                                     }
                                 }
                             });
-                        }else{
+                        } else {
                             resetCard();
                         }
                     }
@@ -173,21 +176,37 @@ public class EraseActivity extends BaseActivity implements View.OnClickListener 
                     if (outputData != null && outputData.length > 0) {
                         pinChllenge = outputData;
 
+                        String oldpin;
+                        String newpin;
+
+
+                        if(AppPrefrence.getIsResetSuccess(context)){
+                            oldpin = PublicPun.oldPin;
+                            newpin = PublicPun.newPin;
+                        }else{
+                            oldpin = PublicPun.default_oldPin;
+                            newpin = PublicPun.default_newPin;
+                        }
+
+
                         cmdManager.bindBackNoHost(PublicPun.card.getMode(), pinChllenge,
-                                PublicPun.oldPin,
-                                PublicPun.newPin,
+                                oldpin,
+                                newpin,
                                 new CmdResultCallback() {
                                     @Override
                                     public void onSuccess(int status, byte[] outputData) {
+
                                         if ((status + 65536) == 0x9000) {
                                             mProgress.dismiss();
                                             cleanData();
                                             PublicPun.toast(context, " Initial Success");
                                             setResult(RESULT_OK);
                                             finish();
-                                        }else{
+                                        } else {
+                                            AppPrefrence.saveIsResetSuccess(context,!AppPrefrence.getIsResetSuccess(context));
                                             mProgress.dismiss();
-                                            PublicPun.showNoticeDialogToFinish(context,"Error Message", "Error:" + Integer.toHexString(status));
+                                            PublicPun.showNoticeDialogToFinish(context, "Update", "Please restart CoolWallet and reset again.");
+
                                         }
                                     }
                                 });

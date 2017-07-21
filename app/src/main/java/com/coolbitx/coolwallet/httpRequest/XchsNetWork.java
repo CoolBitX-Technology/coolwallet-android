@@ -44,7 +44,8 @@ public class XchsNetWork {
 
             LogUtil.d("doGetRawAddress responseCode=" + String.valueOf(responseCode));
 
-            if (responseCode == HttpsURLConnection.HTTP_OK) {
+            if (responseCode == HttpsURLConnection.HTTP_OK||responseCode==HttpsURLConnection.HTTP_ACCEPTED||responseCode==HttpsURLConnection.HTTP_CREATED) {
+
                 String line;
                 BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
                 while ((line = br.readLine()) != null) {
@@ -89,7 +90,8 @@ public class XchsNetWork {
 
             LogUtil.d("getSrvInitSession responseCode=" + String.valueOf(responseCode));
 
-            if (responseCode == HttpsURLConnection.HTTP_OK) {
+            if (responseCode == HttpsURLConnection.HTTP_OK||responseCode==HttpsURLConnection.HTTP_ACCEPTED||responseCode==HttpsURLConnection.HTTP_CREATED) {
+
 
                 Map<String, List<String>> headerFields = conn.getHeaderFields();
                 List<String> cookiesHeader = headerFields.get(COOKIES_HEADER);
@@ -170,7 +172,8 @@ public class XchsNetWork {
 
             int responseCode = conn.getResponseCode();
             LogUtil.d("makeHttpRequestPost responseCode= " + responseCode);
-            if (responseCode == HttpsURLConnection.HTTP_OK) {
+            if (responseCode == HttpsURLConnection.HTTP_OK||responseCode==HttpsURLConnection.HTTP_ACCEPTED||responseCode==HttpsURLConnection.HTTP_CREATED) {
+
                 String line;
                 BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
                 if ((line = br.readLine()) != null) {
@@ -226,7 +229,8 @@ public class XchsNetWork {
 
             LogUtil.d("makeHttpRequestGet responseCode=" + String.valueOf(responseCode));
 
-            if (responseCode == HttpsURLConnection.HTTP_OK) {
+            if (responseCode == HttpsURLConnection.HTTP_OK||responseCode==HttpsURLConnection.HTTP_ACCEPTED||responseCode==HttpsURLConnection.HTTP_CREATED) {
+
 
                 Map<String, List<String>> headerFields = conn.getHeaderFields();
                 List<String> cookiesHeader = headerFields.get(COOKIES_HEADER);
@@ -284,7 +288,8 @@ public class XchsNetWork {
 
             LogUtil.d("makeHttpRequestGet responseCode=" + String.valueOf(responseCode));
 
-            if (responseCode == HttpsURLConnection.HTTP_OK) {
+            if (responseCode == HttpsURLConnection.HTTP_OK||responseCode==HttpsURLConnection.HTTP_ACCEPTED||responseCode==HttpsURLConnection.HTTP_CREATED) {
+
 
                 Map<String, List<String>> headerFields = conn.getHeaderFields();
                 List<String> cookiesHeader = headerFields.get(COOKIES_HEADER);
@@ -351,7 +356,7 @@ public class XchsNetWork {
 
             LogUtil.d("makeHttpDelete responseCode=" + String.valueOf(responseCode));
 
-            if (responseCode == HttpsURLConnection.HTTP_OK) {
+            if (responseCode == HttpsURLConnection.HTTP_OK||responseCode==HttpsURLConnection.HTTP_ACCEPTED||responseCode==HttpsURLConnection.HTTP_CREATED) {
 
                 Map<String, List<String>> headerFields = conn.getHeaderFields();
                 List<String> cookiesHeader = headerFields.get(COOKIES_HEADER);
@@ -363,7 +368,7 @@ public class XchsNetWork {
                 if ((line = br.readLine()) != null) {
                     response += line;
                 } else {
-                    response = "{\"response\":\"" + "ok" + "\"}";
+                    response = "{\"status\":\"" + "ok" + "\"}";
                 }
                 if (!jsonObjectType(response)) {
                     LogUtil.d("jSon object轉jSon array");

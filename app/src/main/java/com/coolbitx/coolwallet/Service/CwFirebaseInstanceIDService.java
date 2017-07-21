@@ -2,7 +2,10 @@ package com.coolbitx.coolwallet.Service;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.FirebaseInstanceIdService;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.snscity.egdwlib.utils.LogUtil;
+
+import java.io.IOException;
 
 public class CwFirebaseInstanceIDService extends FirebaseInstanceIdService {
 
@@ -16,8 +19,14 @@ public class CwFirebaseInstanceIDService extends FirebaseInstanceIdService {
     @Override
     public void onTokenRefresh() {
         // Get updated InstanceID token.
-        String refreshedToken = FirebaseInstanceId.getInstance().getToken();
-        LogUtil.e("Refreshed token: " + refreshedToken);
+        String refreshedToken = null;
+//        try {
+            refreshedToken = FirebaseInstanceId.getInstance().getToken();//FirebaseInstanceId.getInstance().getId(), FirebaseMessaging.INSTANCE_ID_SCOPE
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            LogUtil.e("error:"+e.getMessage());
+//        }
+        LogUtil.e(" Refreshed token: " + refreshedToken);
         sendRegistrationToServer(refreshedToken);
     }
     // [END refresh_token]
