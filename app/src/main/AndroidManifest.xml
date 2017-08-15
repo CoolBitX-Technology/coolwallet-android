@@ -136,7 +136,7 @@
             android:parentActivityName=".ui.Fragment.FragMainActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".ui.Fragment.ServiceProviderActivity"
+            android:name=".ui.ServiceProviderActivity"
             android:parentActivityName=".ui.SettingActivity"
             android:screenOrientation="portrait" />
 

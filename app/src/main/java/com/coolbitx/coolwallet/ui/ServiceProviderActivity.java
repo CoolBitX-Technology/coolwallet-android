@@ -1,4 +1,4 @@
-package com.coolbitx.coolwallet.ui.Fragment;
+package com.coolbitx.coolwallet.ui;
 
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;

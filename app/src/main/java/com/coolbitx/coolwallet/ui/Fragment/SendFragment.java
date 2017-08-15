@@ -193,9 +193,10 @@ public class SendFragment extends BaseFragment implements View.OnClickListener, 
             int postPushResult = -1;
             int hadlerMsg = 0;
 
-            postDecodeResult = cwBtcNetWork.doPost(BtcUrl.URL_BLOCKR_SERVER_SITE + BtcUrl.URL_BLOCKR_DECODE, currUnsignedTx);
+//            postDecodeResult = cwBtcNetWork.doPost(BtcUrl.URL_BLOCKR_SERVER_SITE + BtcUrl.URL_BLOCKR_DECODE, currUnsignedTx);
+            postDecodeResult = cwBtcNetWork.doPostII(BtcUrl.URL_BLOCKCHAIN_SERVER_SITE + BtcUrl.URL_BLICKCHAIN_DECODE, currUnsignedTx);
             if (postDecodeResult == 200) {
-                postPushResult = cwBtcNetWork.doPost(BtcUrl.URL_BLOCKR_SERVER_SITE + BtcUrl.URL_BLOCKR_PUSH, currUnsignedTx);
+                postPushResult = cwBtcNetWork.doPostII(BtcUrl.URL_BLOCKCHAIN_SERVER_SITE + BtcUrl.URL_BLICKCHAIN_PUSH, currUnsignedTx);
                 if (postPushResult == 200) {
                     hadlerMsg = HANDLER_SEND_BTC_FINISH;
                 } else {
@@ -458,7 +459,8 @@ public class SendFragment extends BaseFragment implements View.OnClickListener, 
         final int accountId = currentAccount;
         genChangeAddressResult = "";
 
-        ArrayList<dbAddress> lisCwBtcAdd = new ArrayList<dbAddress>();
+        ArrayList<dbAddress
+                > lisCwBtcAdd = new ArrayList<dbAddress>();
         // find only internal addr
         lisCwBtcAdd = DatabaseHelper.queryAddress(mContext, id - 1, keyChainId);
 
@@ -561,7 +563,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener, 
 
             //--------------- process change address.---------------------
             if (processedTxData.isDust) {
-                LogUtil.d("發送不用找零,發送地址=" + outputAddress + "零錢地址＝" + changeAddr);
+                LogUtil.d("發送不用找零,發送地址" );
                 outputs = new Transaction.Output[]{
                         new Transaction.Output(processedTxData.amountForRecipient, Transaction.Script.buildOutput(outputAddress)),
                 };
@@ -713,7 +715,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener, 
 //                        + "; Script:" + PublicPun.byte2HexStringNoBlank((mScripts)));
 
                     if (j == i) {
-                        //this input we are going to sign (remove the part of sig and filled in the Scripts)
+                        //this input we are going to sign (remove the part of sig and filled in the Scripts(prev tx public key script))
                         unsignedInputs[j] = new Transaction.Input(outPoint,
                                 new Transaction.Script(mScripts), //dora modify
                                 0xffffffff);
@@ -726,6 +728,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener, 
                 byte[] tempHash = null;
                 try {
                     tempHash = Transaction.Script.hashTransactionForSigning(spendTxToSign);
+                    LogUtil.e("tempHash:"+PublicPun.byte2HexStringNoBlank(tempHash));
                 } catch (ValidationException e) {
                     e.printStackTrace();
                     LogUtil.e(e.getMessage());
@@ -1133,6 +1136,10 @@ public class SendFragment extends BaseFragment implements View.OnClickListener, 
             ctxout.setAdd(outputs[i].script.toString());
             LogUtil.i("outputs[" + String.valueOf(i) + "].script=" + outputs[i].script.toString());
             ctxout.setValue((outputs[i].value));
+
+
+
+
             txoutList.add(ctxout);
         }
         ctx.setTxoutList(txoutList);
@@ -1435,11 +1442,11 @@ public class SendFragment extends BaseFragment implements View.OnClickListener, 
             final_balance += TabFragment.lisCwBtcAdd.get(i).getBalance();
         }
         btcAmt = final_balance * PublicPun.SATOSHI_RATE;
-        tvSendTitle.setText(TabFragment.BtcFormatter.format(btcAmt));
+        tvSendTitle.setText(new DecimalFormat("#.########").format(btcAmt));
         tvSendSubtitle_country.setText(AppPrefrence.getCurrentCountry(mContext));
         tvSendAmountTop.setText(AppPrefrence.getCurrentCountry(mContext));
         double currRate = btcAmt * AppPrefrence.getCurrentRate(mContext);
-        tvSendSubtitle.setText(TabFragment.currentFormatter.format(currRate));
+        tvSendSubtitle.setText(new DecimalFormat("#.##").format(currRate));
 
         // QR code result
         onQRcodeResult();

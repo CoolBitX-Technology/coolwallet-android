@@ -7,12 +7,14 @@ import com.crashlytics.android.Crashlytics;
 import com.snscity.egdwlib.utils.LogUtil;
 
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.HashMap;
@@ -62,11 +64,11 @@ public class CwBtcNetWork {
         HttpURLConnection connection = null;
         InputStream inputStream = null;
         String resultString = "";
-        String url="";
+        String url = "";
         try {
             if (extraUrl.equals(BtcUrl.URL_BLOCKR_UNSPENT)) {
                 url = BtcUrl.URL_BLOCKR_SERVER_SITE + extraUrl + cv.getAsString("addresses");
-            }else if(extraUrl.equals(URL_BLOCKCHAIN_UNSPENT)){
+            } else if (extraUrl.equals(URL_BLOCKCHAIN_UNSPENT)) {
                 url = BtcUrl.URL_BLOCKCHAIN_SERVER_SITE + extraUrl + cv.getAsString("addresses");
             } else if (extraUrl.equals(BtcUrl.URL_BLOCKCHAIN_EXCHANGE_RATE)) {
                 url = BtcUrl.URL_BLOCKCHAIN_SERVER_SITE + extraUrl;
@@ -150,28 +152,101 @@ public class CwBtcNetWork {
         }
     }
 
-    public int doPost(String Url, String params) {
+//    public int doPost(String Url, String params) {
+//        String resultString;
+//        HttpURLConnection connection = null;
+//        InputStream inputStream = null;
+//        int code = -1;
+//        String urlParameters = "{\"hex\":\"" + params + "\"}";
+////        String urlParameters = "'tx='" + params;
+//        LogUtil.i("doPost para=" + urlParameters);
+//        try {
+//            String url = Url;
+//            LogUtil.i("doPost url=" + url);
+//            URL getUrl = new URL(url);
+//            connection = (HttpURLConnection) getUrl.openConnection();
+//            connection.setRequestMethod("POST");
+//            connection.setConnectTimeout(this.httpTimeOut);
+//            connection.setReadTimeout(this.httpTimeOut);
+//            connection.setDoOutput(false);
+//            connection.setDoInput(true);
+//
+//            OutputStream out = connection.getOutputStream();// 获得一个输出流,向服务器写数据
+//            out.write(urlParameters.getBytes());
+//            out.flush();
+//            out.close();
+//
+//            code = connection.getResponseCode();
+//            LogUtil.i("doPost code:" + code + ";" + connection.getResponseMessage());
+//            inputStream = connection.getInputStream();
+//            resultString = readString(inputStream);
+//            LogUtil.i("do post resultString=" + resultString);
+////            inputStream = connection.getInputStream();
+////            String resultString = readString(inputStream);
+////            LogUtil.i("doPost resultString =" + resultString);
+//            switch (code) {
+//                case 200:
+//                    break;
+//                case 201:
+//                    break;
+//                case 404:
+//                    resultString = "{\"errorCode\": 404}";
+//                    break;
+//                case 500:
+//                    resultString = "{\"errorCode\": 500}";
+//                    break;
+//            }
+//
+//        } catch (Exception e) {
+//            LogUtil.i("doPost error=" + e.getMessage() + ";" + connection.getResponseMessage());
+//            e.printStackTrace();
+//            Crashlytics.logException(e);
+//        } finally {
+//            if (connection != null) {
+//                connection.disconnect();
+//            }
+//            if (inputStream != null) {
+//                try {
+//                    inputStream.close();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//            return code;
+//        }
+//    }
+
+    public int doPostII(String Url, String params) {
         String resultString;
         HttpURLConnection connection = null;
         InputStream inputStream = null;
         int code = -1;
-        String urlParameters = "{\"hex\":\"" + params + "\"}";
+//        String urlParameters = "{\"hex\":\"" + params + "\"}";
+        String urlParameters = "tx=" + params;
         LogUtil.i("doPost para=" + urlParameters);
         try {
             String url = Url;
             LogUtil.i("doPost url=" + url);
             URL getUrl = new URL(url);
             connection = (HttpURLConnection) getUrl.openConnection();
+
             connection.setRequestMethod("POST");
+
+            connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
             connection.setConnectTimeout(this.httpTimeOut);
             connection.setReadTimeout(this.httpTimeOut);
-            connection.setDoOutput(false);
+            connection.setDoOutput(true);
             connection.setDoInput(true);
 
-            OutputStream out = connection.getOutputStream();// 获得一个输出流,向服务器写数据
-            out.write(urlParameters.getBytes());
-            out.flush();
-            out.close();
+            DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
+            wr.write(urlParameters.getBytes());
+            wr.flush();
+            wr.close();
+//            OutputStream out = connection.getOutputStream();
+//            out.write(urlParameters.getBytes());
+//            out.flush();
+//            out.close();
+
 
             code = connection.getResponseCode();
             LogUtil.i("doPost code:" + code + ";" + connection.getResponseMessage());

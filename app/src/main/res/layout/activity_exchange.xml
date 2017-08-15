@@ -18,7 +18,7 @@
         android:layout_marginTop="20dp"
         android:background="@drawable/selector_textview"
         android:gravity="right|center_vertical"
-        android:text="Sell order verification                                 》" />
+        android:text="Open orders   》  " />
 
     <TextView
         android:id="@+id/tv_no_matched_orders"
@@ -27,7 +27,7 @@
         android:layout_gravity="center"
         android:layout_marginTop="100dp"
         android:gravity="center_horizontal"
-        android:text="@string/tv_no_matched_order"
+        android:text="@string/tv_no_pending_order"
         android:textColor="@color/bottomtab_normal"
         android:textSize="20dp" />
 

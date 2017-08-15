@@ -15,6 +15,14 @@ public class BtcUrl {
     public static final String URL_BLOCKCHAIN_UNSPENT = "unspent?active=";
     public static final String URL_BLICKCHAIN_TXS_MULTIADDR ="multiaddr?active=";
 
+//    public static final String URL_BLICKCHAIN_PUSH ="pushtx";
+public static final String URL_BLICKCHAIN_PUSH ="pushtx?cors=true";
+    public static final String URL_BLICKCHAIN_DECODE ="decode-tx";
+
+
+
+
+
     public static final String URL_BLOCKR_SERVER_SITE = "http://btc.blockr.io/api/v1/";
     public static final String URL_BLOCKR_UNSPENT = "address/unspent/";
     public static final String URL_BLOCKR_UNCONFIRMED = "unconfirmed/address";

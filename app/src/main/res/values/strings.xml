@@ -20,8 +20,8 @@
 
     <!--Exchange-->
     <string name="msg_xchs_get_raw_addr">Get transaction data failed.</string>
-    <string name="tv_exchange_sell_str">Matched sell orders</string>
-    <string name="tv_exchange_buy_str">Matched buy orders</string>
+    <string name="tv_exchange_sell_str">Pending sell orders</string>
+    <string name="tv_exchange_buy_str">Pending buy orders</string>
     <string name="tv_exchange_verification_str">Verify OTP to place your sell orders</string>
     <string name="tv_order_notice_str">Your order will be cancelled automatically after this time</string>
     <string name="btn_complete_order_str">Complete order</string>
@@ -31,7 +31,7 @@
     <string name="btn_str_sign_up">Sign up</string>
     <string name="str_login_title">Trade wih other CoolWallet holders\non CoolBitx Exchange</string>
     <string name="btn_place_order">Place an order now</string>
-    <string name="tv_no_matched_order">No matched orders yet</string>
+    <string name="tv_no_pending_order">No pending orders yet</string>
     <string name="url_exchange_site">http://xsm.coolbitx.com:8080/signup</string>
     <string name="str_cancel_order_msg"> Are you sure you want to cancel?</string>
     <string name="str_yes">Yes</string>
