@@ -16,9 +16,9 @@ import android.widget.TextView;
 import com.coolbitx.coolwallet.DataBase.DatabaseHelper;
 import com.coolbitx.coolwallet.R;
 import com.coolbitx.coolwallet.adapter.AddressInfoAdapter;
-import com.coolbitx.coolwallet.callback.RefreshCallback;
 import com.coolbitx.coolwallet.bean.CwBtcTxs;
 import com.coolbitx.coolwallet.bean.dbAddress;
+import com.coolbitx.coolwallet.callback.RefreshCallback;
 import com.coolbitx.coolwallet.general.AppPrefrence;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.coolbitx.coolwallet.general.RefreshBlockChainInfo;
@@ -129,7 +129,7 @@ public class HomeFragment extends BaseFragment implements AdapterView.OnItemClic
             public void onRefresh() {
                 swipeRefreshLayout.setRefreshing(false);
                 final int mAccount = id - 1;
-                mProgress.setMessage("Synchronizing data...");
+                mProgress.setMessage(getString(R.string.synchronizing_data)+"...");
                 mProgress.show();
 
                 RefreshBlockChainInfo refreshBlockChainInfo = new RefreshBlockChainInfo(mContext, mAccount);
@@ -142,7 +142,7 @@ public class HomeFragment extends BaseFragment implements AdapterView.OnItemClic
                     @Override
                     public void fail(String msg) {
                         LogUtil.i("rollback failed");
-                        PublicPun.showNoticeDialog(mContext, "Unstable internet connection", msg);
+                        PublicPun.showNoticeDialog(mContext, getString(R.string.unable_connect_internet), msg);
                         mProgress.dismiss();
                         TabFragment.lisCwBtcTxs = DatabaseHelper.queryTxs(getActivity(), mAccount);
                         TabFragment.lisCwBtcAdd = DatabaseHelper.queryAddress(getActivity(), mAccount, -1);
@@ -258,7 +258,8 @@ public class HomeFragment extends BaseFragment implements AdapterView.OnItemClic
                             refresh();
                         } else {
                             LogUtil.e("setAccountInfo failed.");
-                            PublicPun.toast(mContext, "setAccountInfo failed!");
+//                            PublicPun.toast(mContext, "setAccountInfo failed!");
+
                             mProgress.dismiss();
                         }
                     }

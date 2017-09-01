@@ -2,38 +2,41 @@ package com.coolbitx.coolwallet.ui;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.coolbitx.coolwallet.R;
+import com.coolbitx.coolwallet.Service.BTConfig;
 import com.coolbitx.coolwallet.adapter.PendingOrderAdapter;
 import com.coolbitx.coolwallet.bean.ExchangeOrder;
 import com.coolbitx.coolwallet.callback.APIResultCallback;
 import com.coolbitx.coolwallet.general.BtcUrl;
 import com.coolbitx.coolwallet.general.PublicPun;
+import com.coolbitx.coolwallet.ui.Fragment.BSConfig;
 import com.coolbitx.coolwallet.util.ExchangeAPI;
 import com.snscity.egdwlib.CmdManager;
 import com.snscity.egdwlib.cmd.CmdResultCallback;
 import com.snscity.egdwlib.utils.LogUtil;
-
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -56,9 +59,7 @@ public class ExchangeActivity extends BaseActivity implements
     private String orderId;
     private ProgressDialog mProgress;
     private LinearLayout lin_orders;
-    byte[] cancelBlkInfo;
-//    Button btnLogin, btnBlock, btnUnblock;
-
+    XchsMsgListener xchsMsgListener;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,11 +72,43 @@ public class ExchangeActivity extends BaseActivity implements
         cmdManager = new CmdManager();
         mExchangeAPI = new ExchangeAPI(mContext, cmdManager);
 
+
         GetPendingOrder();
 
     }
 
+    private class XchsMsgListener extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            LogUtil.e("Receive Message");
+            String action = intent.getAction();
+
+            if (action.equals(BTConfig.XCHS_NOTIFICATION)) {
+                Message msg = new Message();
+                Bundle data = new Bundle();
+                data.putString("handlerMessage", intent.getExtras().getString("ExchangeMessage"));
+                msg.setData(data);
+                msg.what = BSConfig.HANDLER_XCHS;
+                brocastMsgHandler.sendMessage(msg);
+            }
+        }
+    }
+
+    private Handler brocastMsgHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            // TODO Auto-generated method stub
+            switch (msg.what) {
+                case BSConfig.HANDLER_XCHS:
+                    LogUtil.d("go Handler");
+                    GetPendingOrder();
+            }
+            super.handleMessage(msg);
+        }
+    };
+
     private void GetPendingOrder() {
+
         mProgress.show();
         listExchangeSellOrder = new ArrayList<>();
         listExchangeBuyOrder = new ArrayList<>();
@@ -83,7 +116,6 @@ public class ExchangeActivity extends BaseActivity implements
         mExchangeAPI.getPendingTrx(new APIResultCallback() {
             @Override
             public void success(String[] msg) {
-//                LogUtil.d("GetPendingOrder ok " + msg[0]);
                 String[] mString = new String[]{"sell", "buy"};
                 mProgress.dismiss();
                 for (int i = 0; i < mString.length; i++) {
@@ -95,7 +127,6 @@ public class ExchangeActivity extends BaseActivity implements
                         gridViewBuy.setAdapter(new PendingOrderAdapter(mContext, listExchangeBuyOrder));
                     }
                 }
-//                LogUtil.d("listExchangeSellOrder.size=" + listExchangeSellOrder.size() + " ; listExchangeBuyOrder.size=" + listExchangeBuyOrder.size());
 
                 if (listExchangeSellOrder.size() == 0 && listExchangeBuyOrder.size() == 0) {
                     isShowOrders(false);
@@ -106,15 +137,11 @@ public class ExchangeActivity extends BaseActivity implements
 
             @Override
             public void fail(String msg) {
-
-                LogUtil.e("getExchangeSync failed:" + msg);
                 mProgress.dismiss();
-                PublicPun.showNoticeDialog(mContext, "Exchange Sync failed", "Please try again later.");
-                //exchangeSite Logout()
+                PublicPun.showNoticeDialog(mContext, getString(R.string.sync_failed), getString(R.string.plz_try_again));
             }
         });
     }
-
 
 
     @Override
@@ -135,7 +162,7 @@ public class ExchangeActivity extends BaseActivity implements
         }
 
         Intent intent = new Intent();
-        intent.setClass(mContext, ExchangeOrderActivity.class);
+        intent.setClass(mContext, ExchangeCompleteOrderActivity.class);
         Bundle bundle = new Bundle();
         LogUtil.i("exchangeOrder click" +
                 exchngeOrder.getOrderId() + " , " + exchngeOrder.getAddr() + " , " +
@@ -162,9 +189,7 @@ public class ExchangeActivity extends BaseActivity implements
         switch (clickId) {
             case R.id.grid_sell:
                 exchngeOrder = listExchangeSellOrder.get(position);
-
                 orderId = exchngeOrder.getOrderId();
-
                 AlertDialog.Builder mBuilder =
                         PublicPun.CustomNoticeDialog(mContext, getString(R.string.btn_cancel_order_str), getString(R.string.str_cancel_order_msg));
                 mBuilder.setPositiveButton(getString(R.string.str_yes), new DialogInterface.OnClickListener() {
@@ -174,14 +199,12 @@ public class ExchangeActivity extends BaseActivity implements
                         mExchangeAPI.cancelTrx(orderId, new APIResultCallback() {
                             @Override
                             public void success(String[] msg) {
-                                LogUtil.e("cancel trx ok:" + msg[0]);
-                                // String.format(getResources().getString(R.string.str_estimated_fee_content),
                                 GetPendingOrder();
                             }
 
                             @Override
                             public void fail(String msg) {
-                                PublicPun.showNoticeDialog(mContext, getString(R.string.str_unable_cancel), getString(R.string.str_reason));
+                                PublicPun.showNoticeDialog(mContext, getString(R.string.str_unable_cancel), getString(R.string.reason) + msg);
                             }
                         });
                     }
@@ -192,85 +215,6 @@ public class ExchangeActivity extends BaseActivity implements
                     }
                 })
                         .show();
-
-
-//        final View item = LayoutInflater.from(mContext).inflate(R.layout.progress_dialog_layout, null);
-//                AlertDialog.Builder otp_dialog = new AlertDialog.Builder(mContext, AlertDialog.THEME_HOLO_LIGHT);
-////        otp_dialog.setView(item);
-//                otp_dialog.setCancelable(true);
-//                otp_dialog.setMessage("Are you sure you want to cancel the block order?");
-//                otp_dialog.setNegativeButton(R.string.ok, new DialogInterface.OnClickListener() {
-//                    @Override
-//                    public void onClick(DialogInterface dialog, int which) {
-//                        dialog.dismiss();
-////                cancelTrx(truP e);
-//                        //queryAccountInfo
-//                        mProgress.setMessage("Canceling the block order...");
-//                        mProgress.show();
-//                        mExchangeAPI.getExUnBlock(orderId, new APIResultCallback() {
-//                            @Override
-//                            public void success(String[] msg) {
-//
-////                        {"orderId":"15847930","okToken":"abc123","unblockTkn":"abc123",
-////                                "mac":"dbe57d18f1c176606f40361a11c755ed655804a319d7b7120cdb1e729786d5dd"}
-//
-//                                cancelBlkInfo = PublicPun.hexStringToByteArray(msg[1] + msg[2] + msg[3] + msg[4] + msg[5]);
-//
-//                                LogUtil.e("cancelBlkInfo=trxID:" + msg[0] + ";cwOrder:" + msg[1] + ";OKTKN:" + msg[2] + ";UBLKTKN:" + msg[3] +
-//                                        ";MAC:" + msg[4] + ";NONCE:" + msg[5]);
-//
-//                                cmdManager.XchsCancelBlock(cancelBlkInfo, new CmdResultCallback() {
-//                                    @Override
-//                                    public void onSuccess(int status, byte[] outputData) {
-//
-//                                        if ((status + 65536) == 0x9000) {//-28672//36864
-//                                            LogUtil.d("cmd XchsCancelBlock  success = " + PublicPun.byte2HexString(outputData));
-//                                            cancelBlkInfo = outputData;
-//
-//                                            mExchangeAPI.cancelTrx(orderId, new APIResultCallback() {
-//                                                @Override
-//                                                public void success(String[] msg) {
-//                                                    LogUtil.d("cancelTrx  success = " + msg[0]);
-//                                                    GetPendingOrder();
-//                                                    mProgress.dismiss();
-//                                                }
-//
-//                                                @Override
-//                                                public void fail(String msg) {
-//                                                    LogUtil.d("cancelTrx  failed = " + msg);
-//                                                    mProgress.dismiss();
-//                                                    PublicPun.showNoticeDialog(mContext, "Unable to Cancel Block", "Error:" + msg);
-//                                                }
-//                                            });
-//                                        } else {
-//                                            mProgress.dismiss();
-//                                            LogUtil.d("XchsCancelBlock fail");
-//                                            //for debug error code
-//                                            PublicPun.showNoticeDialog(mContext, "Unable to Cancel Block", "Error:" + Integer.toHexString(status)
-//                                                    + "-" + PublicPun.byte2HexString(outputData));
-//                                            cmdManager.getError(new CmdResultCallback() {
-//                                                @Override
-//                                                public void onSuccess(int status, byte[] outputData) {
-//                                                    LogUtil.d("Get Error = " + Integer.toHexString(status));
-//                                                }
-//                                            });
-//                                        }
-//                                    }
-//                                });
-//                            }
-//
-//                            @Override
-//                            public void fail(String msg) {
-//                                LogUtil.d("getTrxBlock failed:" + msg);
-//                                mProgress.dismiss();
-//                                PublicPun.showNoticeDialog(mContext, "Unable to Cancel Block", "Error:" + msg);
-//                            }
-//                        });
-//
-//                    }
-//                });
-//                otp_dialog.show();
-
 
                 break;
             case R.id.grid_buy:
@@ -306,29 +250,17 @@ public class ExchangeActivity extends BaseActivity implements
     private void initViews() {
         sellVerification = (TextView) findViewById(R.id.tv_order_verification);
         sellVerification.setOnClickListener(this);
-
         gridViewSell = (ListView) findViewById(R.id.grid_sell);
         gridViewBuy = (ListView) findViewById(R.id.grid_buy);
-
         gridViewSell.setOnItemClickListener(this);
         gridViewBuy.setOnItemClickListener(this);
-
         gridViewSell.setOnItemLongClickListener(this);
         gridViewBuy.setOnItemLongClickListener(this);
-
         lin_orders = (LinearLayout) findViewById(R.id.layout_matched_orders);
         tv_noMatchedOrders = (TextView) findViewById(R.id.tv_no_matched_orders);
         btn_place_order = (Button) findViewById(R.id.btn_place_order);
         btn_place_order.setOnClickListener(this);
         isShowOrders(true);
-
-//        btnLogin = (Button) findViewById(R.id.btn_login);
-//        btnBlock = (Button) findViewById(R.id.btn_block);
-//        btnUnblock = (Button) findViewById(R.id.btn_unblock);
-//
-//        btnLogin.setOnClickListener(this);
-//        btnBlock.setOnClickListener(this);
-//        btnUnblock.setOnClickListener(this);
 
     }
 
@@ -354,7 +286,7 @@ public class ExchangeActivity extends BaseActivity implements
     private void initToolbar() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setLogo(getResources().getDrawable(R.drawable.exchange));
-        toolbar.setTitle("Exchange");
+        toolbar.setTitle(getString(R.string.exchange));
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
         // 打開 up button_up
@@ -379,13 +311,12 @@ public class ExchangeActivity extends BaseActivity implements
                     @Override
                     public void onSuccess(int status, byte[] outputData) {
                         if ((status + 65536) == 0x9000) {//-28672//36864
-                            LogUtil.d("XchsGetOtp ok= " + outputData);
                         } else {
-                            LogUtil.d("XchsGetOtp fail= " + outputData);
 
                         }
                     }
                 });
+
                 break;
 
             default:
@@ -396,17 +327,9 @@ public class ExchangeActivity extends BaseActivity implements
     }
 
 
-//    @Override
-//    public Intent getSupportParentActivityIntent() {
-//        confirmExit();
-//        return null;
-//    }
-
-
     @Nullable
     @Override
     public Intent getSupportParentActivityIntent() {
-        LogUtil.e("getSupportParentActivityIntent!!!!!");
         confirmExit();
         return null;
     }
@@ -427,7 +350,7 @@ public class ExchangeActivity extends BaseActivity implements
         // 是否c要退出
         if (isExit == false) {
             isExit = true; //記錄下一次要退出
-            Toast.makeText(getBaseContext(), "Press once again to exit Exchange!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getBaseContext(), getString(R.string.press_exit), Toast.LENGTH_SHORT).show();
             // 如果超過兩秒則恢復預設值
             new Timer().schedule(new TimerTask() {
                 @Override
@@ -438,7 +361,6 @@ public class ExchangeActivity extends BaseActivity implements
         } else {
 
             finish(); // 離開程式
-//                System.exit(0);
         }
     }
 
@@ -446,34 +368,13 @@ public class ExchangeActivity extends BaseActivity implements
     public void onClick(View v) {
         if (v == sellVerification) {
             Intent intent;
-            intent = new Intent(getApplicationContext(), ExchangeVerificationActivity.class);
+            intent = new Intent(getApplicationContext(), ExchangeOpenOrderActivity.class);
             startActivityForResult(intent, 0);
         } else if (v == btn_place_order) {
             Intent ie = new Intent(Intent.ACTION_VIEW, Uri.parse(BtcUrl.CW_XHCS_SITE));
             startActivity(ie);
         }
 
-//        else if (v == btnLogin) {
-//            mExchangeAPI.texchangeLogin(new APIResultCallback() {
-//                @Override
-//                public void success(String[] msg) {
-//                    LogUtil.e("Login success:" + msg[0]);
-//                }
-//
-//                @Override
-//                public void fail(String msg) {
-//                    LogUtil.e("Login failed:" + msg);
-//                }
-//            });
-//        } else if (v == btnBlock) {
-//
-//            FunBlock();
-//
-//        } else if (v == btnUnblock) {
-//
-//            FunUnblock();
-//
-//        }
     }
 
 
@@ -485,21 +386,58 @@ public class ExchangeActivity extends BaseActivity implements
 
     }
 
+    public void registerBroadcast(Context context) {
+
+        xchsMsgListener = new XchsMsgListener();
+        //註冊監聽廣播
+        LocalBroadcastManager.getInstance(context).registerReceiver(xchsMsgListener, new IntentFilter(BTConfig.XCHS_NOTIFICATION));
+    }
+
+    public void unRegisterLocalBroadcast(Context context) {
+        try {
+            if (brocastNR != null) {
+                LocalBroadcastManager.getInstance(context).unregisterReceiver(xchsMsgListener);
+                brocastNR = null;
+            }
+
+        } catch (Exception e) {
+            brocastNR = null;
+
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+
+        //註冊監聽(from BaseActivity)
+        registerBroadcast(this, cmdManager);
+        //註冊local
+        registerBroadcast(this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        unRegisterBroadcast(this);
+        unRegisterLocalBroadcast(this);
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
         if (cmdManager == null) {
             cmdManager = new CmdManager();
         }
-        //註冊監聽
-        registerBroadcast(this, cmdManager);
 
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        unRegisterBroadcast(this);
+
     }
 
     @Override

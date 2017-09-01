@@ -10,10 +10,8 @@ import android.view.View;
 import android.widget.Button;
 
 import com.coolbitx.coolwallet.R;
-import com.coolbitx.coolwallet.general.PublicPun;
 import com.snscity.egdwlib.CmdManager;
 import com.snscity.egdwlib.cmd.CmdResultCallback;
-import com.snscity.egdwlib.utils.LogUtil;
 
 /**
  * Created by ShihYi on 2015/12/25.
@@ -70,7 +68,7 @@ public class LogOutActivity extends BaseActivity implements View.OnClickListener
     private void initToolbar() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 //        toolbar.setLogo(getResources().getDrawable(R.mipmap.cw_card));
-        toolbar.setTitle("Exit");
+        toolbar.setTitle(getString(R.string.exit));
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
         // 打開 up button_up
@@ -87,7 +85,7 @@ public class LogOutActivity extends BaseActivity implements View.OnClickListener
     @Override
     public void onClick(View v) {
         if (v == btnLogout) {
-            mProgress.setMessage("Logout...");
+            mProgress.setMessage(getString(R.string.logout)+"...");
             mProgress.show();
 //            cmdManager.hdwQryWaInfo(getWallteStatus, new CmdResultCallback() {
 //                @Override
@@ -123,7 +121,6 @@ public class LogOutActivity extends BaseActivity implements View.OnClickListener
                 public void onSuccess(int status, byte[] outputData) {
                     if ((status + 65536) == 0x9000) {
                         if (outputData != null) {
-                            PublicPun.toast(mContext, "Logout success.");
                             mProgress.dismiss();
                             BleActivity.bleManager.disConnectBle();
                             Intent intent = new Intent();

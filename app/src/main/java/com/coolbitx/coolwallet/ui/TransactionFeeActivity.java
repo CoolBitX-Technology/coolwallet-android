@@ -120,7 +120,7 @@ public class TransactionFeeActivity extends BaseActivity implements CheckBox.OnC
 
     private void initToolbar() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle("Transaction Fee");
+        toolbar.setTitle(getString(R.string.transaction_fee));
         setSupportActionBar(toolbar);
         toolbar.setNavigationIcon(R.mipmap.menu_3x);
         ActionBar actionBar = getSupportActionBar();
@@ -152,23 +152,23 @@ public class TransactionFeeActivity extends BaseActivity implements CheckBox.OnC
     private void checkFees() {
         if (!chkAutoFee.isChecked()) {
             if (edtFee.getText().toString().isEmpty()) {
-                PublicPun.showNoticeDialog(context, "Notification", "Please enter the transaction fee.");
+                PublicPun.showNoticeDialog(context, getString(R.string.prompt), getString(R.string.enter_tx_fee));
                 return;
             } else {
 //                if (Float.valueOf(edtFee.getText().toString()) < estimatedFeeBTC) {
                 try {
                     if (PublicPun.parseStringToFloatInternational(edtFee.getText().toString()) < estimatedFeeBTC) {
-                        showNoticeDialogToFinish(context, "Notification", "Your fee is below average and may take longer than 30 minutes to confirm.");
+                        showNoticeDialogToFinish(context, getString(R.string.prompt), getString(R.string.below_tx_fee));
                     }
 
                     if (PublicPun.parseStringToFloatInternational(edtFee.getText().toString()) > 1) {
                         if (Float.valueOf(edtFee.getText().toString()) > 1) {
-                            showNoticeDialogToFinish(context, "Notification", "Your fee is higher than 1 BTC.");
+                            showNoticeDialogToFinish(context, getString(R.string.prompt), getString(R.string.exceed_tx_fee));
                         }
                     }
                 } catch (ParseException e) {
                     e.printStackTrace();
-                    showNoticeDialogToFinish(context, "Notification", "Fees format is wrong.");
+                    showNoticeDialogToFinish(context, getString(R.string.prompt), getString(R.string.incorrect_format));
                 }
             }
         } else {
@@ -186,7 +186,7 @@ public class TransactionFeeActivity extends BaseActivity implements CheckBox.OnC
             AppPrefrence.saveManual(context,format.parse(edtFee.getText().toString()).floatValue());
         } catch (ParseException e) {
             e.printStackTrace();
-            showNoticeDialogToFinish(context, "Notification", "Fees format is wrong.");
+            showNoticeDialogToFinish(context, getString(R.string.prompt),getString(R.string.incorrect_format));
         }
 
         LogUtil.e("Exit: manual fee=" + edtFee.getText().toString()
@@ -222,8 +222,8 @@ public class TransactionFeeActivity extends BaseActivity implements CheckBox.OnC
         new AlertDialog.Builder(mContext, AlertDialog.THEME_DEVICE_DEFAULT_LIGHT)
                 .setCancelable(false)
                 .setView(alert_view)
-                .setNegativeButton("Cancel", null)
-                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                .setNegativeButton(getString(R.string.strCancel), null)
+                .setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         finish(); // 離開程式
 //                System.exit(0);

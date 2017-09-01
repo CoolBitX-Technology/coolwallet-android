@@ -33,7 +33,6 @@ import android.view.View;
 import android.widget.HorizontalScrollView;
 import android.widget.TextView;
 
-import com.coolbitx.coolwallet.R;
 import com.snscity.egdwlib.utils.LogUtil;
 
 /**

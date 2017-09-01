@@ -15,7 +15,6 @@ import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -56,7 +55,6 @@ import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Formatter;
 import java.util.List;
 import java.util.Random;
 import java.util.Timer;
@@ -68,7 +66,7 @@ import static com.coolbitx.coolwallet.general.PublicPun.HANDLER_SEND_BTC_FINISH;
 /**
  * Created by ShihYi on 2015/12/25.
  */
-public class ExchangeOrderActivity extends BaseActivity implements View.OnClickListener {
+public class ExchangeCompleteOrderActivity extends BaseActivity implements View.OnClickListener {
 
     private CmdManager cmdManager;
     private Context mContext;
@@ -177,7 +175,7 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
         mProgress = new ProgressDialog(this);
         mProgress.setCancelable(false);
         mProgress.setIndeterminate(true);
-        mProgress.setMessage("Completing the order...");
+        mProgress.setMessage(getString(R.string.preparing_to_complete_order));
 
         tvAddr.setText(xchsOrder.getAddr());
         tvAmount.setText(new DecimalFormat("#.########").format(xchsOrder.getAmount()) + " BTC");
@@ -206,7 +204,7 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
 
     private void initToolbar() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_main);
-        toolbar.setTitle("Order details");
+        toolbar.setTitle(getString(R.string.order_details));
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
         // 打開 up button_up
@@ -238,10 +236,10 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
                         BlockVerifyOtp();
                         //16進制的9000在10進制是36864;6645是26181;status=91717
                     } else if ((status + 65536) == 0x16645) {
-                        PublicPun.showNoticeDialog(mContext, "Unable to generate OTP", "Please try again.");
+                        PublicPun.showNoticeDialog(mContext, getString(R.string.unable_to_generate_otp), getString(R.string.plz_try_again));
                     } else {
 //                    LogUtil.i("status="+String.valueOf(status));
-                        PublicPun.showNoticeDialog(mContext, "Unable to generate OTP", "Error:" + Integer.toHexString(status));
+                        PublicPun.showNoticeDialog(mContext, getString(R.string.unable_to_generate_otp), getString(R.string.error) + ":" + Integer.toHexString(status));
                     }
                 }
             });
@@ -259,7 +257,6 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
 //                LogUtil.e("cancel trx ok:" + msg[0]);
 //                // String.format(getResources().getString(R.string.str_estimated_fee_content),
 //
-//                clickToFinish(getString(R.string.btn_cancel_order_str), String.format(getString(R.string.str_cancel_trx_success), orderID));
 //            }
 //
 //            @Override
@@ -272,7 +269,7 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
     private void clickToFinish(String title, String msg) {
         AlertDialog.Builder mBuilder =
                 PublicPun.CustomNoticeDialog(mContext, title, msg);
-        mBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+        mBuilder.setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
                 finish();
             }
@@ -294,7 +291,7 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
-                mProgress.setMessage("Begin to block order...");
+                mProgress.setMessage(getString(R.string.begin_to_block_order) + "...");
                 mProgress.show();
                 //1.transit to server
 
@@ -342,14 +339,14 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
                                                 public void fail(String msg) {
                                                     LogUtil.d("ExWriteOKToken failed:" + msg);
                                                     mProgress.dismiss();
-                                                    PublicPun.showNoticeDialog(mContext, "Unable to Block", "WriteOKToken failed:" + msg);
+                                                    PublicPun.showNoticeDialog(mContext, getString(R.string.unable_to_block), getString(R.string.error) + ":" + msg);
                                                 }
                                             });
 
                                 } else {
                                     LogUtil.d("XchsBlockBtc fail");
                                     mProgress.dismiss();
-                                    PublicPun.showNoticeDialog(mContext, "Unable to Block", "WriteOKToken failed:" + Integer.toHexString(status));
+                                    PublicPun.showNoticeDialog(mContext, getString(R.string.unable_to_block), getString(R.string.error) + ":" + Integer.toHexString(status));
                                 }
                             }
                         });
@@ -359,7 +356,7 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
                     public void fail(String msg) {
                         LogUtil.d("getTrxBlock failed:" + msg);
                         mProgress.dismiss();
-                        PublicPun.showNoticeDialog(mContext, "Unable to Block", msg);
+                        PublicPun.showNoticeDialog(mContext, getString(R.string.unable_to_block), msg);
 
                     }
                 });
@@ -380,14 +377,14 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
         AlertDialog.Builder otp_dialog = new AlertDialog.Builder(mContext, AlertDialog.THEME_HOLO_LIGHT);
 //        otp_dialog.setView(item);
         otp_dialog.setCancelable(true);
-        otp_dialog.setMessage("Are you sure you want to cancel the block order?");
+        otp_dialog.setMessage(getString(R.string.cancel_block_order));
         otp_dialog.setNegativeButton(R.string.ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
 //                cancelTrx(truP e);
                 //queryAccountInfo
-                mProgress.setMessage("Canceling the block order...");
+                mProgress.setMessage(getString(R.string.canceling_block_order));
                 mProgress.show();
                 mExchangeAPI.getExUnBlock(orderID, new APIResultCallback() {
                     @Override
@@ -420,14 +417,14 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
                                         public void fail(String msg) {
                                             LogUtil.d("cancelTrx  failed = " + msg);
                                             mProgress.dismiss();
-                                            PublicPun.showNoticeDialog(mContext, "Unable to Cancel Block", "Error:" + msg);
+                                            PublicPun.showNoticeDialog(mContext, getString(R.string.unable_to_cancel_block), getString(R.string.error) + ":" + msg);
                                         }
                                     });
                                 } else {
                                     mProgress.dismiss();
                                     LogUtil.d("XchsCancelBlock fail");
                                     //for debug error code
-                                    PublicPun.showNoticeDialog(mContext, "Unable to Cancel Block", "Error:" + Integer.toHexString(status)
+                                    PublicPun.showNoticeDialog(mContext, getString(R.string.unable_to_cancel_block), getString(R.string.error) + ":" + Integer.toHexString(status)
                                             + "-" + PublicPun.byte2HexString(outputData));
                                     cmdManager.getError(new CmdResultCallback() {
                                         @Override
@@ -444,7 +441,7 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
                     public void fail(String msg) {
                         LogUtil.d("getTrxBlock failed:" + msg);
                         mProgress.dismiss();
-                        PublicPun.showNoticeDialog(mContext, "Unable to Cancel Block", "Error:" + msg);
+                        PublicPun.showNoticeDialog(mContext, getString(R.string.unable_to_cancel_block), getString(R.string.error) + ":" + msg);
                     }
                 });
 
@@ -475,7 +472,7 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
 //            }
 //        });
 
-        mProgress.setMessage("Preparing to complete order...");
+        mProgress.setMessage(getString(R.string.preparing_to_complete_order));
         mProgress.show();
 
         PrepareToGetUnspentTrx();
@@ -534,7 +531,7 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
             super.onPostExecute(UnSpentTxsBeans);
 
             if (UnSpentTxsBeans == null || UnSpentTxsBeans.size() == 0) {
-                PublicPun.showNoticeDialog(mContext, "Notification", getString(R.string.note_unspent));
+                PublicPun.showNoticeDialog(mContext, getString(R.string.error_msg), getString(R.string.note_unspent));
                 mProgress.dismiss();
             } else {
                 LogUtil.d("UnSpentTxsBeans 取得完成有 " + UnSpentTxsBeans.size() + " 筆");
@@ -563,7 +560,7 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
 
             if (processedTxData == null) {
                 cancelTrx();
-                PublicPun.showNoticeDialog(mContext, "Unable to send:", "Can't find the unspent output.");
+                PublicPun.showNoticeDialog(mContext, getString(R.string.unable_to_send) + ":", getString(R.string.can_not_find_unspent));
                 return;
             }
 
@@ -585,7 +582,7 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
                         //its legal that Change address equals to recipient's address
                         if (outputAddress.equals(addr)) {
                             cancelTrx();
-                            PublicPun.showNoticeDialog(mContext, "Notification", getString(R.string.send_notification_unable_to_send_with_change_error));
+                            PublicPun.showNoticeDialog(mContext, getString(R.string.error_msg), getString(R.string.send_notification_unable_to_send_with_change_error));
                             return;
                         }
 
@@ -604,23 +601,23 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
                     public void onFailed(String msg) {
 
                         cancelTrx();
-                        PublicPun.showNoticeDialog(mContext, "Unable to send:", msg);
+                        PublicPun.showNoticeDialog(mContext, getString(R.string.unable_to_send), msg);
                     }
                 });
 //                }
             }
         } catch (ValidationException ve) {
             cancelTrx();
-            PublicPun.showNoticeDialog(mContext, "Unable to send:", ve.getMessage());
+            PublicPun.showNoticeDialog(mContext, getString(R.string.unable_to_send), ve.getMessage());
         } catch (IOException e) {
             cancelTrx();
-            PublicPun.showNoticeDialog(mContext, "Unable to send:", e.getMessage());
+            PublicPun.showNoticeDialog(mContext, getString(R.string.unable_to_send), e.getMessage());
         } catch (NoSuchAlgorithmException e) {
             cancelTrx();
-            PublicPun.showNoticeDialog(mContext, "Unable to send:", e.getMessage());
+            PublicPun.showNoticeDialog(mContext, getString(R.string.unable_to_send), e.getMessage());
         } catch (Exception e) {
             cancelTrx();
-            PublicPun.showNoticeDialog(mContext, "Unable to send:", e.getMessage());
+            PublicPun.showNoticeDialog(mContext, getString(R.string.unable_to_send), e.getMessage());
             Crashlytics.log(e.getCause().toString() + "\n" + e.getMessage());
             LogUtil.e("錯誤=" + e.getMessage());
         }
@@ -647,7 +644,7 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        mProgress.setMessage("Prepare transaction...");
+                        mProgress.setMessage(getString(R.string.preparing_transaction));
                         mProgress.show();
                     }
                 });
@@ -721,7 +718,7 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
                 dbAddress d = DatabaseHelper.querySendAddress(mContext, processedTxData.outputsToSpend.get(i).getAddress());
                 if (d == null) {
                     cancelTrx();
-                    PublicPun.showNoticeDialog(mContext, getString(R.string.send_notification_unable_to_send), "Can't find Unspent addresses.");
+                    PublicPun.showNoticeDialog(mContext, getString(R.string.unable_to_send), getString(R.string.can_not_find_unspent));
                 }
 
                 final int dbKid = d.getKid();
@@ -771,7 +768,7 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
 //                                        byte[] out2 = mTxsConfirm.getChange_address().getBytes();
                                         trxblks.setOut1Addr(Base58.decode(mTxsConfirm.getOutput_addrese()));
                                         trxblks.setOut2Addr(Base58.decode(mTxsConfirm.getChange_address()));
-                                        trxblks.setChangeKid(DatabaseHelper.queryAddrKid(ExchangeOrderActivity.this, mTxsConfirm.getChange_address()));
+                                        trxblks.setChangeKid(DatabaseHelper.queryAddrKid(ExchangeCompleteOrderActivity.this, mTxsConfirm.getChange_address()));
                                         trxblks.setSigmtrl(hash);
                                         lisTrxBlks.add(trxblks);
 
@@ -821,8 +818,8 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
                                                                 });
 
                                                                 AlertDialog.Builder mBuilder =
-                                                                        PublicPun.CustomNoticeDialog(mContext, "Unable to login Exchange  Transaction", "Error:" + Integer.toHexString(status));
-                                                                mBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                                                        PublicPun.CustomNoticeDialog(mContext, getString(R.string.sign_login_failed), getString(R.string.error) + ":" + Integer.toHexString(status));
+                                                                mBuilder.setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
                                                                     public void onClick(DialogInterface dialog, int whichButton) {
                                                                         finish();
                                                                     }
@@ -852,7 +849,7 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
             }
 
         } catch (Exception e) {
-            PublicPun.showNoticeDialog(mContext, "Notification", "Unable to Send");
+            PublicPun.showNoticeDialog(mContext, getString(R.string.error_msg), getString(R.string.unable_to_send));
             cancelTrx();
             Crashlytics.logException(e);
         }
@@ -941,7 +938,7 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
         if (mProgress != null) {
             mProgress.dismiss();
         }
-        ClickFunction(mContext, "Send", "Please press Button On the Card");
+        ClickFunction(mContext, getString(R.string.send), getString(R.string.plz_press_button));
     }
 
     private void doTrxBegin(final String outputAddress) {
@@ -978,7 +975,7 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
                                     LogUtil.i("case1.button_up pressed!!!!!!");
                                     if (btnTxBuilder.isShowing()) btnTxBuilder.dismiss();
                                     btnTxBuilder.dismiss();
-                                    mProgress.setMessage("Sending Bitcoin...");
+                                    mProgress.setMessage(getString(R.string.sending_bitcoins));
                                     mProgress.show();
                                     for (int i = 0; i < signedInputs.length; i++) {
                                         doTrxSign(i, lisTrxBlks.get(i).getPublickey());
@@ -995,7 +992,7 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
                                     }
                                 }
                             } else {
-                                PublicPun.showNoticeDialog(mContext, "Notification", "CmdTrxBegin error:" + LogUtil.byte2HexString(outputData));
+                                PublicPun.showNoticeDialog(mContext, getString(R.string.error_msg), getString(R.string.cmd_trx_begin_error) + ":" + LogUtil.byte2HexString(outputData));
                             }
                         }
                     }
@@ -1029,7 +1026,7 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
                                         if (Arrays.equals(outputData, successBtnPressesData)) {
                                             //otp+button_up verify
                                             if (btnTxBuilder.isShowing()) btnTxBuilder.dismiss();
-                                            mProgress.setMessage("Sending Bitcoin...");
+                                            mProgress.setMessage(getString(R.string.sending_bitcoins));
                                             mProgress.show();
                                             LogUtil.i("case3. otp+button_up verify!");
                                             for (int i = 0; i < signedInputs.length; i++) {
@@ -1049,7 +1046,7 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
                                     } else {
                                         LogUtil.i("otp failed status=" + String.valueOf(status + 65536));
                                         cancelTrx();
-                                        PublicPun.showNoticeDialog(mContext, "Notification", "OTP verify failed");
+                                        PublicPun.showNoticeDialog(mContext, getString(R.string.error_msg), getString(R.string.failed_to_verify_otp));
                                     }
                                 }
                             }
@@ -1329,9 +1326,20 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
             int postPushResult = -1;
             int hadlerMsg = 0;
 
-            postDecodeResult = cwBtcNetWork.doPost(BtcUrl.URL_BLOCKR_SERVER_SITE + BtcUrl.URL_BLOCKR_DECODE, currUnsignedTx);
+//            postDecodeResult = cwBtcNetWork.doPostII(BtcUrl.URL_BLOCKR_SERVER_SITE + BtcUrl.URL_BLOCKR_DECODE, currUnsignedTx);
+//            if (postDecodeResult == 200) {
+//                postPushResult = cwBtcNetWork.doPostII(BtcUrl.URL_BLOCKR_SERVER_SITE + BtcUrl.URL_BLOCKR_PUSH, currUnsignedTx);
+//                if (postPushResult == 200) {
+//                    hadlerMsg = HANDLER_SEND_BTC_FINISH;
+//                } else {
+//                    hadlerMsg = HANDLER_SEND_BTC_ERROR;
+//                }
+//            } else {
+//                hadlerMsg = HANDLER_SEND_BTC_ERROR;
+//            }
+            postDecodeResult = cwBtcNetWork.doPostII(BtcUrl.URL_BLOCKCHAIN_SERVER_SITE + BtcUrl.URL_BLICKCHAIN_DECODE, currUnsignedTx);
             if (postDecodeResult == 200) {
-                postPushResult = cwBtcNetWork.doPost(BtcUrl.URL_BLOCKR_SERVER_SITE + BtcUrl.URL_BLOCKR_PUSH, currUnsignedTx);
+                postPushResult = cwBtcNetWork.doPostII(BtcUrl.URL_BLOCKCHAIN_SERVER_SITE + BtcUrl.URL_BLICKCHAIN_PUSH, currUnsignedTx);
                 if (postPushResult == 200) {
                     hadlerMsg = HANDLER_SEND_BTC_FINISH;
                 } else {
@@ -1355,7 +1363,7 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
                         mTimer.cancel();
                     }
                     FunTrxFinish();
-                    PublicPun.showNoticeDialog(mContext, "Sent", "Sent " + mTxsConfirm.getOutput_amount() + "btc to " + recvAddress);
+                    PublicPun.showNoticeDialog(mContext, getString(R.string.sent), getString(R.string.sent) + " " + mTxsConfirm.getOutput_amount() + getString(R.string.btc_to) + " " + recvAddress);
 
                     isTrxSuccess = true;
 
@@ -1371,7 +1379,7 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
                         mProgress.dismiss();
                     }
 
-                    PublicPun.showNoticeDialog(mContext, "Notification", "Send BTC to BLOCKCHAIN failed!");
+                    PublicPun.showNoticeDialog(mContext, getString(R.string.error_msg), getString(R.string.failed_to_broadcast_transaction));
                     break;
             }
         }
@@ -1379,7 +1387,7 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
 
     private void doGetButton(final String outputAddress) {
         LogUtil.i("交易要button");
-        ClickFunction(mContext, "Send", "Please press Button On the Card");
+        ClickFunction(mContext, getString(R.string.send), getString(R.string.plz_press_button));
         cmdManager.trxButton(new CmdResultCallback() {
             @Override
             public void onSuccess(int status, byte[] outputData) {
@@ -1389,7 +1397,7 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
                         if (btnTxBuilder.isShowing()) {
                             btnTxBuilder.dismiss();
                         }
-                        mProgress.setMessage("Sending BitCoin...");
+                        mProgress.setMessage(getString(R.string.sending_bitcoins));
                         mProgress.show();
 
                         for (int i = 0; i < signedInputs.length; i++) {
@@ -1519,7 +1527,7 @@ public class ExchangeOrderActivity extends BaseActivity implements View.OnClickL
                             }
                         }
                     } else {
-                        mGetExchangeAddrCallback.onFailed("Get exchange address failed:" + Integer.toHexString(status));
+                        mGetExchangeAddrCallback.onFailed(getString(R.string.failed_to_get_change_address) + getString(R.string.error) + ":" + Integer.toHexString(status));
                     }
                 }
             });

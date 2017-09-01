@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="20dp"
         android:layout_marginTop="20dp"
-        android:text="Card Name"
+        android:text="@string/card_name"
         android:textColor="@color/bottomtab_normal"
         android:textSize="20dp" />
 
@@ -79,6 +79,6 @@
             android:layout_alignParentBottom="true"
             android:layout_margin="@dimen/send_confirm_margin"
             android:background="@drawable/selector_button"
-            android:text="@string/btn_setting_str_update" />
+            android:text="@string/update" />
     </RelativeLayout>
 </LinearLayout>

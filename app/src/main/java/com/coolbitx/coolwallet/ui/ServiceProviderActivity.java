@@ -1,15 +1,13 @@
 package com.coolbitx.coolwallet.ui;
 
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 import android.widget.CompoundButton;
 import android.widget.Switch;
 
 import com.coolbitx.coolwallet.R;
 import com.coolbitx.coolwallet.general.AppPrefrence;
-import com.coolbitx.coolwallet.ui.BaseActivity;
 import com.snscity.egdwlib.utils.LogUtil;
 
 public class ServiceProviderActivity extends BaseActivity implements  CompoundButton.OnCheckedChangeListener {
@@ -38,7 +36,7 @@ public class ServiceProviderActivity extends BaseActivity implements  CompoundBu
 
     private void initToolbar() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle("Payment Service Provider");
+        toolbar.setTitle(getString(R.string.payment_service_provider));
         setSupportActionBar(toolbar);
         toolbar.setNavigationIcon(R.mipmap.menu_3x);
         ActionBar actionBar = getSupportActionBar();

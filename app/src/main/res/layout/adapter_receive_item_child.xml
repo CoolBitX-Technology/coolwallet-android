@@ -13,7 +13,7 @@
         android:layout_marginTop="10dp"
         android:background="@drawable/selector_button"
         android:src="@color/button_material_dark"
-        android:text="@string/btn_str_edit" />
+        android:text="@string/label" />
 
     <Button
         android:id="@+id/btn_request"
@@ -23,7 +23,7 @@
         android:layout_marginLeft="10dp"
         android:layout_marginTop="10dp"
         android:background="@drawable/selector_button"
-        android:text="@string/btn_str_request" />
+        android:text="@string/request" />
 
     <Button
         android:id="@+id/btn_copy"
@@ -33,6 +33,6 @@
         android:layout_marginLeft="10dp"
         android:layout_marginTop="10dp"
         android:background="@drawable/selector_button"
-        android:text="@string/btn_str_copy" />
+        android:text="@string/copy" />
 
 </LinearLayout>

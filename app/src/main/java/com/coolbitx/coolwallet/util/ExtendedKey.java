@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 package com.coolbitx.coolwallet.util;
+
 import com.coolbitx.coolwallet.bean.Key;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.snscity.egdwlib.utils.LogUtil;
 
 import org.bouncycastle.math.ec.ECPoint;
 import org.spongycastle.crypto.generators.SCrypt;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -28,6 +30,7 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;

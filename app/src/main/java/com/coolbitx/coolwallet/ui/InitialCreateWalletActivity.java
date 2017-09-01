@@ -8,7 +8,6 @@ import android.view.View;
 import android.widget.TableRow;
 
 import com.coolbitx.coolwallet.R;
-import com.snscity.egdwlib.CmdManager;
 
 /**
  * Created by ShihYi on 2015/10/20.
@@ -80,7 +79,7 @@ public class InitialCreateWalletActivity extends BaseActivity implements View.On
 
     private void initToolbar() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle("Create Wallet");
+        toolbar.setTitle(getString(R.string.create_wallet));
         setSupportActionBar(toolbar);
         // Navigation Icon設定在 setSupoortActionBar後才有作用,否則會出現 back button_up
         toolbar.setNavigationIcon(R.mipmap.menu_3x);

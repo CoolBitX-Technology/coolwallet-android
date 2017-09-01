@@ -16,29 +16,29 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Manual Fees:"
+            android:text="@string/manual_fee"
             android:textColor="@color/bottomtab_normal"
             android:textSize="18dp" />
 
         <EditText
             android:id="@+id/et_manual_fee"
             style="@style/TextView_Black_16"
-            android:background="@drawable/edit_format"
             android:layout_width="100dp"
             android:layout_height="30dp"
             android:layout_marginLeft="10px"
-            android:paddingLeft="5sp"
-            android:maxLength="8"
+            android:background="@drawable/edit_format"
             android:imeOptions="actionDone"
             android:inputType="numberDecimal"
+            android:maxLength="8"
+            android:paddingLeft="5sp"
             android:text="0.0002" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="10px"
             android:text="BTC"
             android:textColor="@color/bottomtab_normal"
-            android:layout_marginLeft="10px"
             android:textSize="18dp" />
 
     </LinearLayout>
@@ -54,7 +54,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="10px"
-        android:text="Auto Fees"
+        android:text="@string/auto_fee"
         android:textSize="18dp" />
 
     <TextView
@@ -74,46 +74,46 @@
         android:orientation="vertical">
 
         <!--<TextView-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_marginLeft="20px"-->
-            <!--android:layout_marginTop="10px"-->
-            <!--android:text="@string/str_recommended_fee"-->
-            <!--android:textColor="@color/bottomtab_normal"-->
-            <!--android:textSize="20dp" />-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_marginLeft="20px"-->
+        <!--android:layout_marginTop="10px"-->
+        <!--android:text="@string/str_recommended_fee"-->
+        <!--android:textColor="@color/bottomtab_normal"-->
+        <!--android:textSize="20dp" />-->
 
         <!--<LinearLayout-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_marginTop="30px"-->
-            <!--android:background="@android:color/black"-->
-            <!--android:orientation="horizontal"-->
-            <!--android:weightSum="10">-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_marginTop="30px"-->
+        <!--android:background="@android:color/black"-->
+        <!--android:orientation="horizontal"-->
+        <!--android:weightSum="10">-->
 
-            <!--<SeekBar-->
-                <!--android:id="@+id/seekBarFee"-->
-                <!--android:layout_width="0dp"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:layout_weight="5.5"-->
-                <!--android:progress="50" />-->
+        <!--<SeekBar-->
+        <!--android:id="@+id/seekBarFee"-->
+        <!--android:layout_width="0dp"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_weight="5.5"-->
+        <!--android:progress="50" />-->
 
-            <!--<TextView-->
-                <!--android:id="@+id/tv_recommended_fee_length"-->
-                <!--android:layout_width="0dp"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:layout_weight="1"-->
-                <!--android:text="12"-->
-                <!--android:textColor="@color/bottomtab_normal"-->
-                <!--android:textSize="18dp" />-->
+        <!--<TextView-->
+        <!--android:id="@+id/tv_recommended_fee_length"-->
+        <!--android:layout_width="0dp"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_weight="1"-->
+        <!--android:text="12"-->
+        <!--android:textColor="@color/bottomtab_normal"-->
+        <!--android:textSize="18dp" />-->
 
-            <!--<TextView-->
-                <!--android:id="@+id/tv_recommended_fee_desc"-->
-                <!--android:layout_width="0dp"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:layout_weight="3"-->
-                <!--android:text="fastestFee"-->
-                <!--android:textColor="@color/bottomtab_normal"-->
-                <!--android:textSize="18dp" />-->
+        <!--<TextView-->
+        <!--android:id="@+id/tv_recommended_fee_desc"-->
+        <!--android:layout_width="0dp"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_weight="3"-->
+        <!--android:text="fastestFee"-->
+        <!--android:textColor="@color/bottomtab_normal"-->
+        <!--android:textSize="18dp" />-->
 
         <!--</LinearLayout>-->
 

@@ -14,8 +14,8 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.coolbitx.coolwallet.R;
-import com.coolbitx.coolwallet.callback.APIResultCallback;
 import com.coolbitx.coolwallet.bean.Constant;
+import com.coolbitx.coolwallet.callback.APIResultCallback;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.coolbitx.coolwallet.httpRequest.AddressSharingAPI;
 import com.snscity.egdwlib.CmdManager;
@@ -31,7 +31,7 @@ public class ShareAddress extends BaseActivity implements View.OnClickListener {
     private Context mContext;
     private Button btnSharing;
     private AddressSharingAPI mAddressSharingAPI;
-    private byte[] loginChallenge;//登陸的特徵值
+    private byte[] loginChallenge;
     private ProgressDialog mProgress;
 
     @Override
@@ -49,7 +49,7 @@ public class ShareAddress extends BaseActivity implements View.OnClickListener {
         mProgress = new ProgressDialog(mContext, ProgressDialog.THEME_HOLO_DARK);
         mProgress.setCancelable(false);
         mProgress.setIndeterminate(true);
-        mProgress.setMessage("Start to Share address...");
+        mProgress.setMessage(getString(R.string.start_to_share_address)+"...");
     }
 
     private void initViews() {
@@ -64,7 +64,7 @@ public class ShareAddress extends BaseActivity implements View.OnClickListener {
     private void initToolbar() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 //        toolbar.setLogo(getResources().getDrawable(R.mipmap.cw_card));
-        toolbar.setTitle("Exit");
+        toolbar.setTitle(getString(R.string.share_address));
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
         // 打開 up button_up
@@ -180,13 +180,13 @@ public class ShareAddress extends BaseActivity implements View.OnClickListener {
                                         final TextView mDialogMessageref = (TextView) alert_view.findViewById(R.id.dialog_msg_ref);
 
                                         mDialogMessageid.setText(cwid);
-                                        mDialogMessage.setText("\nYour Reference Number is\n");
+                                        mDialogMessage.setText(getString(R.string.reference_number_is));
                                         mDialogMessageref.setText(msg[0]);
                                         //-----------產生輸入視窗--------
                                         AlertDialog.Builder builder = new AlertDialog.Builder(mContext, AlertDialog.THEME_DEVICE_DEFAULT_LIGHT);
-                                        mDialogTitle.setText("Address sharing success");
+                                        mDialogTitle.setText(getString(R.string.address_sharing_success));
                                         builder.setView(alert_view);
-                                        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                        builder.setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
                                             public void onClick(DialogInterface dialog, int whichButton) {
 
                                             }

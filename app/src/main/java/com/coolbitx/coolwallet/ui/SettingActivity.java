@@ -41,7 +41,7 @@ public class SettingActivity extends BaseActivity implements AdapterView.OnItemC
     private void initToolbar() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setLogo(getResources().getDrawable(R.mipmap.settings));
-        toolbar.setTitle("Settings");
+        toolbar.setTitle(getString(R.string.str_setting));
         setSupportActionBar(toolbar);
         toolbar.setNavigationIcon(R.mipmap.menu_3x);
         ActionBar actionBar = getSupportActionBar();
@@ -53,7 +53,7 @@ public class SettingActivity extends BaseActivity implements AdapterView.OnItemC
     @Override
     protected void onResume() {
         super.onResume();
-        String[] item = new String[]{"Exchange Rate","Transaction Fees"};//,"Payment Service Provider"
+        String[] item = new String[]{getString(R.string.str_exchange_rate),getString(R.string.str_transaction_fee)};//,"Payment Service Provider"
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_expandable_list_item_1, item);
         lvSetting.setAdapter(adapter);
         lvSetting.setOnItemClickListener(this);

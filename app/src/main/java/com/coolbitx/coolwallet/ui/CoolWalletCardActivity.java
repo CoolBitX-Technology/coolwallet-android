@@ -17,7 +17,6 @@ import com.coolbitx.coolwallet.general.AppPrefrence;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.snscity.egdwlib.CmdManager;
 import com.snscity.egdwlib.cmd.CmdResultCallback;
-import com.snscity.egdwlib.utils.LogUtil;
 
 /**
  * Created by ShihYi on 2015/12/25.
@@ -62,7 +61,7 @@ public class CoolWalletCardActivity extends BaseActivity implements View.OnClick
     private void initToolbar() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setLogo(getResources().getDrawable(R.mipmap.cw_card));
-        toolbar.setTitle("CoolWallet card");
+        toolbar.setTitle(getString(R.string.coolwallet_card));
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
         // 打開 up button_up

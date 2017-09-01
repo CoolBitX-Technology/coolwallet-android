@@ -135,7 +135,7 @@
                 android:layout_height="wrap_content"
                 android:background="@drawable/selector_button"
                 android:gravity="center"
-                android:text="@string/hdw_create" />
+                android:text="@string/create_wallet" />
         </TableRow>
     </TableLayout>
 

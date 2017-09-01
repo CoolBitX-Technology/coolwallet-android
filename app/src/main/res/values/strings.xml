@@ -3,7 +3,6 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Exchange Login OTP</string>
     <string name="img_logo1">logo1</string>
-
     <string name="drawer_open">Drawer Open</string>
     <string name="drawer_close">Drawer Close</string>
 
@@ -18,6 +17,68 @@
 
     <string name="BLOCKR_ADDRESS_INFO_API">http://btc.blockr.io/api/v1/address/info/</string>
 
+
+    <!--Toolbar-->
+    <string name="coolwallet_card">CoolWallet card</string>
+    <string name="exchange">Exchange Site</string>
+    <string name="order_details">Order details</string>
+    <string name="exchange_rate">Exchange Rate</string>
+    <string name="open_orders">Open orders</string>
+    <string name="host_devices">Host devices</string>
+    <string name="create_wallet">Create Wallet</string>
+    <string name="security">Security</string>
+    <string name="exit">Exit</string>
+    <string name="import_seed">Import Seed</string>
+    <string name="payment_service_provider">Payment Service Provider</string>
+    <string name="share_address">Address Sharing</string>
+
+
+    <!--ReceiveFragment-->
+    <string name="label">Label</string>
+    <string name="request">Request</string>
+    <string name="copy">Copy</string>
+    <string name="generating_new_address">Generating new address</string>
+    <string name="unable_create_new_address">Unable to create new address</string>
+    <string name="maximum_unused_address">Maximum number of 5 unused addresses reached in this account</string>
+    <string name="create_new_address">Create new address</string>
+
+
+    <!--BleActivity-->
+    <string name="login_host">Login Host...</string>
+    <string name="connecting">Connecting...</string>
+    <string name="disconnected">disconnected.</string>
+    <string name="connect">Connect</string>
+    <string name="reset">Reset</string>
+
+
+
+
+    <!--ConfirmOtpActivity-->
+    <string name="paring">Pairing...</string>
+    <string name="gen_reset_otp">Generating Reset OTP...</string>
+    <string name="wait_authorization">Waiting for authorization from paired device</string>
+    <string name="unable_to_pair">Unable to pair</string>
+    <string name="maximum_paired_limitation">maximum number of 3 hosts have been paired with this card</string>
+    <string name="error">Error</string>
+    <string name="approve_success">Approve success</string>
+    <string name="incorrect_otp_try_again">Incorrect OTP, Please try again.</string>
+
+
+    <!--ShareAddress-->
+    <string name="start_to_share_address">Start to Share address</string>
+    <string name="reference_number_is">/nYour Reference Number is/n</string>
+    <string name="address_sharing_success">Address sharing success</string>
+
+
+    <!--EraseActivity-->
+    <string name="resetting">Resetting...</string>
+    <string name="otp_incorrect">OTP incorrect</string>
+    <string name="plz_try_again">Please try again</string>
+    <string name="error_msg">Error Message</string>
+    <string name="initial_success">Initial Success</string>
+    <string name="restart_coolwallet">Please restart CoolWallet and reset again.</string>
+
+
     <!--Exchange-->
     <string name="msg_xchs_get_raw_addr">Get transaction data failed.</string>
     <string name="tv_exchange_sell_str">Pending sell orders</string>
@@ -25,7 +86,6 @@
     <string name="tv_exchange_verification_str">Verify OTP to place your sell orders</string>
     <string name="tv_order_notice_str">Your order will be cancelled automatically after this time</string>
     <string name="btn_complete_order_str">Complete order</string>
-    <string name="btn_block_str">Block order</string>
     <string name="btn_cancel_order_str">Cancel</string>
     <string name="btn_str_sign_in">Sign in</string>
     <string name="btn_str_sign_up">Sign up</string>
@@ -37,9 +97,88 @@
     <string name="str_yes">Yes</string>
     <string name="str_no">No</string>
     <string name="str_unable_cancel">Unable to cancel order</string>
-    <string name="str_reason">Reason:</string>
-    <string name="str_cancel_trx_success">You have successfully canceled %1$s</string>
+    <string name="reason">Reason:</string>
 
+    <!--Exchange Login-->
+    <string name="login">Login...</string>
+
+
+    <!--ExchangeActivity-->
+    <string name="press_exit">Press once again to exit Exchange site!</string>
+    <string name="sync_failed">Synchronization failed</string>
+
+
+    <!--ExchangeOpenOrderActivity-->
+    <string name="no_open_orders_found"> No open orders found.</string>
+    <string name="unable_to_get_open_orders"> Unable to get open orders.</string>
+    <string name="unable_to_cancel_order"> Unable to cancel order.</string>
+
+
+    <!--ExchangeCompleteOrderActivity-->
+    <string name="unable_to_generate_otp">Unable to generate OTP</string>
+    <string name="begin_to_block_order"> Begin to block order</string>
+    <string name="unable_to_block"> Unable to Block</string>
+    <string name="cancel_block_order"> Are you sure you want to cancel the blocking order?</string>
+    <string name="canceling_block_order"> Canceling the blocking order...</string>
+    <string name="unable_to_cancel_block"> Unable to Cancel Block</string>
+    <string name="preparing_to_complete_order">Preparing to complete order...</string>
+    <string name="can_not_find_unspent">Can\'t find the unspents.</string>
+    <string name="preparing_transaction"> Preparing transaction...</string>
+    <string name="sign_login_failed">Sign login failure</string>
+    <string name="plz_press_button">Please press Button On the Card</string>
+    <string name="sending_bitcoins">Sending bitcoins</string>
+    <string name="cmd_trx_begin_error">Command \'TrxBegin\' error</string>
+    <string name="failed_to_verify_otp">Failed to verify OTP</string>
+    <string name="sent">Sent</string>
+    <string name="btc_to">btc to</string>
+    <string name="failed_to_broadcast_transaction">Failed to broadcast transaction to Blockchain</string>
+    <string name="failed_to_get_change_address">Failed to get change address</string>
+
+
+    <!--TabFragment-->
+    <string name="create_account">Creating Account</string>
+
+
+    <!--SendFragment-->
+    <string name="plz_enter_valid_address"> Please enter a valid address.</string>
+    <string name="get_unspents"> Get unspents...</string>
+    <string name="cmd_trxsign_error">Command \'TrxSign\' error</string>
+    <string name="address">address</string>
+    <string name="inputs">Inputs</string>
+
+
+    <!--HomeFragment-->
+    <string name="synchronizing_data">Synchronizing data</string>
+    <string name="unable_connect_internet">Unable to connect to the Internet</string>
+
+
+    <!--FragMainActivity-->
+    <string name="processing">Processing</string>
+    <string name="policy">Policy</string>
+    <string name="feedback_sent">Feedback sent successfully.</string>
+    <string name="failed_to_set_account_ino">Failed to set account info.</string>
+    <string name="share_address_beta">Share address\n(beta)</string>
+
+
+
+    <!--InitialCreateWalletActivity-->
+    <string name="generating_seed">Generating seed</string>
+    <string name="checksum_incorrect">Checksum incorrect</string>
+    <string name="plz_try_again_or_generate_seed_again">Please try again or generate seed again</string>
+    <string name="hd_wallet_created">HD Wallet created</string>
+    <string name="reminder">Reminder</string>
+    <string name="put_coolwallet_on_coollink">Please put the CoolWallet on CoolLink while setting up.</string>
+
+    <!--HostActivity-->
+    <string name="approve_device">Approve this device</string>
+    <string name="approve_new_device">New Device is approved!</string>
+    <string name="approve_failed">Approved failed</string>
+    <string name="remove_device">Remove this device</string>
+    <string name="remove_failed">Removed failed</string>
+    <string name="remove">Remove</string>
+    <string name="approve">Approve</string>
+    <string name="host_removed">Host Removed</string>
+    <string name="host_approved">Host Approved</string>
 
 
     <!--Preference-->
@@ -57,7 +196,7 @@
     <!--ISSUEFEEDBACK-->
     <string name="issue_feedback_title">Issue FeedBack</string>
     <string name="issue_feedback_policy_title">Policy</string>
-    <string name="issue_feedback_message">The current status/log of this app will be sent to CoolBitX. Please email <![CDATA[info@coolbitx.com]]> to follow up the issue.</string>
+    <string name="issue_feedback_message">The current status log of this app will be sent to CoolBitX. Please email <![CDATA[info@coolbitx.com]]> to follow up the issue.</string>
     <string name="issue_feedback_policy">This issue feedback is used to diagnose problems and improve CoolWallet.
         No sensitive data or private key will be shared. Any personal information you submit whether explicitly or incidentally
         will be protected in accordance with our privacy policies. By submitting this feedback, you agree that
@@ -66,6 +205,7 @@
 
     <!--security layout-->
     <string name="tv_security_otp">Enable One Time Password\n(OTP) on transactions</string>
+
     <string name="tv_security_enable_press_button">Enable press the button on the\ncard to complete transactions</string>
     <string name="tv_security_dog">Enable Watch dog function</string>
     <string name="tv_security_dog_explain">Set an alert that warms you when CoolWallet\nand your device are certain distance apart</string>
@@ -80,32 +220,65 @@
     <string name="tv_sharing_str">This function allows you to share ONE of your addresses to a Bitcoin exchange platform you use, so the exchange platfrom will be able to send bitcoins to your CoolWallet
         directly.\n\nIf you agreed, currently this function will share the first address of your first account to a few exchanges we are testing with.\n\n
         Do you want to share CoolWallet address with external exchange platforms?</string>
-    <!--host-->
-    <string name="tv_host_str">Tap to confirm,Swip to delete</string>
+
+
+    <!--Settings-->
+    <string name="str_setting">Settings</string>
+    <string name="str_exchange_rate">Exchange Rate</string>
+    <string name="str_transaction_fee">Transaction Fees</string>
+    <string name="card_name">Card Name</string>
+    <string name="manual_fee">Manual Fees:</string>
+    <string name="auto_fee">Auto Fees:</string>
+
+
     <!--logout-->
     <string name="tv_logout_str1">Do you want to disconnect the\n CoolWallet?</string>
     <string name="tv_logout_str2">The watchdog feature will be\ndisabled once disconnected.</string>
     <string name="btn_str_logout">Disconnect CoolWallet</string>
+    <string name="logout">Logout</string>
+
+
     <!--other setting-->
-    <string name="btn_setting_str_update">Update</string>
-    <string name="tv_str_show_fiat">Show fiat value card</string>
+    <string name="update">Update</string>
+    <string name="tv_str_show_fiat">Show fiat value on card</string>
+
+
     <!--Create Wallet-->
     <string name="tv_generate_seed">Generate Seed On</string>
     <string name="str_sum_of_seeds">
-        Plese use a calculator to add all the sets of\numbers and enter the result
+        Please use a calculator to add all the sets of\numbers and enter the result
         below in order\nto verify that you have written them down\ncorrectly.\n\n\n For example:\n
         1111111+123456+234434+.....
     </string>
 
 
-    <!--txsFee-->
-    <!--<string name="str_estimated_fee_title">Estimated transaction fee:</string>-->
+    <!--ValidationException-->
+    <string name="spend_amount_less_than_zero">Spend amount can not be less than 0.</string>
+    <string name="invalid_transaction">Invalid transaction:\n</string>
+    <string name="fee_higher_than_balance">Transaction fee is higher than balance.\nfee:</string>
+    <string name="no_output_to_spent"> No outputs to spend.</string>
+    <string name="incorrect_fee">Incorrect fee:</string>
+    <string name="incorrect_change">Incorrect change:</string>
+    <string name="amount_and_fee_higher_than_balance">Transaction output amount + fee is higher than balance.\n</string>
+    <string name="output_amount">Output amount:</string>
+    <string name="fees">Fees:</string>
+    <string name="transaction_lower_than_dust">With transaction fee, this transaction output becomes lower than dust (5460 Satoshi).(value:</string>
+    <string name="bad_address">Bad address:</string>
+    <string name="unknown_address_type">Unknown address type:</string>
+
+
+
+    <!--TransactionFeeActivity begin-->
     <string name="str_estimated_fee_content">Estimated transaction fee:\nMedian transaction size 226 bytes x %1$d (in satoshis per byte)\n= %2$d satoshi\n= %3$f BTC</string>
-    <string name="str_recommended_desc">
-        <!--fastestFee:The lowest fee &#040;in satoshis per byte&#041; that will currently result in the fastest transaction confirmations &#040;usually 0 to 1 block delay&#041;.\n\n-->
-        <!--halfHourFee: The lowest fee &#040;in satoshis per byte&#041; that will confirm transactions within half an hour &#040;with 90% probability&#041;.\n\n-->
-        <!--hourFee: The lowest fee &#040;in satoshis per byte&#041; that will confirm transactions within an hour &#040;with 90% probability&#041;.-->
-    </string>
+    <string name="prompt">Prompt </string>
+    <string name="enter_tx_fee"> Please enter the transaction fee.</string>
+    <string name="below_tx_fee"> Your transaction fee is below average and may take longer than 30 minutes to confirm.</string>
+    <string name="exceed_tx_fee"> Your transaction fee exceed 1 BTC.</string>
+    <string name="incorrect_format"> Incorrect format.</string>
+    <string name="transaction_fee">Transaction Fee</string>
+
+    <!--txsFeeActivity end-->
+
 
     <string name="str_seedWords_confirm">
         Plese double check the words you\n
@@ -114,12 +287,11 @@
         your wallet if the card gets lost.
     </string>
 
+
     <string name="tv_generate_seed_highly">Highly Recommended</string>
     <string name="tv_seed_length">Seed Length</string>
-    <string name="btn_create_HDW">Create Wallet</string>
     <string name="btn_next">Next</string>
     <string name="btn_previous">Previous</string>
-    <string name="hdw_create">Create Wallet</string>
     <string name="tv_write_down_seed">Please write down all sets of the\nnumbers shown on the CoolWallet\nonto the seed paper</string>
     <string name="tv_see_next_seed">Press the button on the card to see\nthe next set of numbers</string>
     <string name="hdw_create_word">
@@ -131,13 +303,11 @@
     <string name="tv_choose_seed_msg">Choose your seed type</string>
     <string name="tv_recovery_title">Recovering...</string>
     <string name="tv_recovery_msg">Please wait and put your\nCollWallet on the charger.</string>
-
     <string name="notice_recovery_invalid_numbers">You\'ve chosen to recover with \'numbers\'. If your seed is in words please switch to recover with words.!</string>
     <string name="notice_recovery_invalid_word">You\'ve chosen to recover with \'word\'. If your seed is in numbers please switch to recover with words.!</string>
     <string name="notice_recovery_invalid_numbers_length">The total seed length of numbers should be 8, 12, 16 sets.!</string>
     <string name="notice_recovery_invalid_word_length">The total seed length of words should be 12, 18, 24 sets.!</string>
     <string name="notice_recovery_parsing_seed_incorrect">The seed being parsed is not in the correct form</string>
-
     <string name="notice_recovery_invalid">Seed Invalid</string>
 
     <!--Create HD Wallet-->
@@ -153,8 +323,8 @@
 
     <!--send-->
     <string name="send_notification_unable_to_send_with_change_error">Change address equals to recipient address, it is likely an error.</string>
-    <string name="send_notification_unable_to_send">Unable to Send</string>
-    <string name="btn_str_send">Send</string>
+    <string name="unable_to_send">Unable to Send</string>
+    <string name="send">Send</string>
     <string name="note_unspent">Your balance needs at least one confirmation on Blockchain before you can send it out. Please try again later.</string>
     <string name="note_dust"> the Bitcoin dust of this transaction (BTC %1$f) will be added to mining fee.</string>
 
@@ -167,9 +337,8 @@
     <string name="send_notification_str_failed_msg">Timeout.Please try again.</string>
     <string name="send_confirm_btn_send">Send</string>
     <string name="send_confirm_btn_cancel">Cancel</string>
-    <string name="send_call_unspent_failed">Returns unspent transactions from api failed.</string>
-    <string name="send_call_unspent_success">Returns unspent transactions from api success.multiple addresses to api call including:</string>
-    <string name="send_call_unspent_list_addresses">multiple addresses to api call including:\n</string>
+    <string name="send_call_unspent_failed">Get unspent transactions from api failed.</string>
+    <string name="send_call_unspent_list_addresses">multiple addresses including:\n</string>
 
 
     <!--TransactionConfirmDialog-->
@@ -182,13 +351,6 @@
 
     <!--txs-->
     <string name="btn_str_view_blockchain">View at Blockchain.info</string>
-
-    <!--Receive BC-->
-    <!--<string name="btn_edit">Edit label</string>-->
-    <string name="btn_str_edit">Label</string>
-    <string name="btn_str_request">Request</string>
-    <string name="btn_str_copy">Copy</string>
-    <string name="btn_str_create_new_address">Create New Address</string>
 
 
     <!-- database -->
@@ -254,22 +416,5 @@
         <item>OTP               TEXT    NOT NULL   </item>
         <item>PRIMARY KEY (WID) </item>
     </string-array>
-    <!--&lt;!&ndash;jSon parser&ndash;&gt;-->
-    <!--<string-array name="addressInfo">-->
-    <!--<item>address</item>-->
-    <!--<item>is_unknown</item>-->
-    <!--<item>balance</item>-->
-    <!--<item>balance_multisig</item>-->
-    <!--<item>totalreceived</item>-->
-    <!--<item>nb_txs</item>-->
-    <!--</string-array>-->
-
-    <!--<string-array name="first_tx">-->
-    <!--<item>time_utc</item>-->
-    <!--<item>tx</item>-->
-    <!--<item>block_nb</item>-->
-    <!--<item>value</item>-->
-    <!--<item>confirmations</item>-->
-    <!--</string-array>-->
 
 </resources>

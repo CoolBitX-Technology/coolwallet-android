@@ -16,7 +16,9 @@
  */
 
 package com.coolbitx.coolwallet.util;
+
 import com.coolbitx.coolwallet.bean.Key;
+
 import org.spongycastle.util.Arrays;
 
 /**

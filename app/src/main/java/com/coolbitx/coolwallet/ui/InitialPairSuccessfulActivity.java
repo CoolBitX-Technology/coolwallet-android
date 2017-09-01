@@ -110,7 +110,7 @@ public class InitialPairSuccessfulActivity extends BaseActivity implements View.
     public void onClick(View v) {
         if (v == btnPair) {
             // Handle clicks for btnPair
-            mProgress.setMessage("Login Host...");
+            mProgress.setMessage(getString(R.string.login_host));
             mProgress.show();
 
             cmdManager.bindLoginChlng(hostId, new CmdResultCallback() {

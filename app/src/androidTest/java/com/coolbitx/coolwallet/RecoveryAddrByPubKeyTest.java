@@ -1,11 +1,7 @@
 package com.coolbitx.coolwallet;
 
-import android.app.Application;
-import android.provider.Settings;
-
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.coolbitx.coolwallet.util.ByteUtils;
-import com.coolbitx.coolwallet.util.ExtendedKey;
 import com.snscity.egdwlib.utils.LogUtil;
 
 /**

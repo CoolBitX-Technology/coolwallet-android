@@ -18,7 +18,7 @@
         android:layout_height="wrap_content"
         android:layout_weight="6.5"
         android:background="@drawable/selector_button"
-        android:text="Connect" />
+        android:text="@string/connect" />
 
 
     <Button
@@ -28,6 +28,6 @@
         android:layout_height="wrap_content"
         android:layout_weight="3"
         android:background="@drawable/selector_button"
-        android:text="Reset" />
+        android:text="@string/reset" />
 
 </LinearLayout>

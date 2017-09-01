@@ -30,11 +30,11 @@ import android.widget.TextView;
 import com.coolbitx.coolwallet.DataBase.DatabaseHelper;
 import com.coolbitx.coolwallet.DataBase.DbName;
 import com.coolbitx.coolwallet.R;
-import com.coolbitx.coolwallet.callback.RefreshCallback;
 import com.coolbitx.coolwallet.bean.Account;
 import com.coolbitx.coolwallet.bean.Constant;
 import com.coolbitx.coolwallet.bean.CwBtcTxs;
 import com.coolbitx.coolwallet.bean.dbAddress;
+import com.coolbitx.coolwallet.callback.RefreshCallback;
 import com.coolbitx.coolwallet.general.BtcUrl;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.coolbitx.coolwallet.general.RefreshBlockChainInfo;
@@ -152,7 +152,7 @@ public class RecovWalletActivity extends BaseActivity implements View.OnClickLis
         mProgress.setIndeterminate(true);
         cwBtcNetWork = new CwBtcNetWork();
 
-        PublicPun.showNoticeDialog(mContext, "Reminder", "Please put the CoolWallet on CoolLink while recovery.");
+        PublicPun.showNoticeDialog(mContext, getString(R.string.reminder), getString(R.string.put_coolwallet_on_coollink));
         GetSecpo();
     }
 
@@ -345,6 +345,7 @@ public class RecovWalletActivity extends BaseActivity implements View.OnClickLis
         pop.setBackgroundDrawable(new ColorDrawable(0xffffff));//支持點擊back虛擬鍵退出
         pop.showAtLocation(findViewById(R.id.tl_create), Gravity.NO_GRAVITY, 0, 0);
         showHorizontalDialog();
+
         new Thread() {
             @Override
             public void run() {
@@ -729,7 +730,7 @@ public class RecovWalletActivity extends BaseActivity implements View.OnClickLis
 
     private void initToolbar() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle("Import Seed");
+        toolbar.setTitle(getString(R.string.import_seed));
         setSupportActionBar(toolbar);
         // Navigation Icon設定在 setSupoortActionBar後才有作用,否則會出現 back button_up
         toolbar.setNavigationIcon(R.mipmap.menu_3x);
@@ -763,8 +764,6 @@ public class RecovWalletActivity extends BaseActivity implements View.OnClickLis
     private void showHorizontalDialog() {
         mHorizontalDialog = new ProgressDialog(mContext, R.style.CustomProgressDialog);
         mHorizontalDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-//        mHorizontalDialog.setTitle("progress");
-//        mHorizontalDialog.setMessage("progress");
         mHorizontalDialog.setProgress(0);
         mHorizontalDialog.setMax(100);
         mHorizontalDialog.setIndeterminate(false);

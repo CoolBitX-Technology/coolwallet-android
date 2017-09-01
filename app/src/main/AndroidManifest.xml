@@ -111,7 +111,7 @@
             android:parentActivityName=".ui.Fragment.FragMainActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".ui.ExchangeVerificationActivity"
+            android:name=".ui.ExchangeOpenOrderActivity"
             android:parentActivityName=".ui.Fragment.FragMainActivity"
             android:screenOrientation="portrait" />
         <activity
@@ -119,7 +119,7 @@
             android:parentActivityName=".ui.Fragment.FragMainActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".ui.ExchangeOrderActivity"
+            android:name=".ui.ExchangeCompleteOrderActivity"
             android:parentActivityName=".ui.Fragment.FragMainActivity"
             android:screenOrientation="portrait" />
         <activity

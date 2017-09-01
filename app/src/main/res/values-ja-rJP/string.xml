@@ -1,0 +1,403 @@
+<resources>
+    <string name="app_name">CoolWallet</string>
+    <string name="action_settings">ログイン取引所OTP</string>
+    <string name="img_logo1">logo1</string>
+    <string name="drawer_open">Drawer Open</string>
+    <string name="drawer_close">Drawer Close</string>
+
+    <string name="strErase">CoolWalletをリセットしてもよろしいですか？</string>
+    <string name="strEnterOtp">OTPを入力してください</string>
+    <string name="strSearch">接続先のCoolwalletを検索中...\n  </string>
+    <string name="strSearchDetail">カードのボタンを押してCoolWalletをオンにしてください。</string>
+    <string name="strPullMsg">カードリストを更新するためにプルダウン</string>
+    <string name="strConfirmOtp">ワンタイムパスワード（OTP）の確認</string>
+    <string name="strKeyOtp">カードに表示されたOTPを入力して下さい</string>
+    <string name="strPairSuccessful">接続が成功しました</string>
+
+    <string name="BLOCKR_ADDRESS_INFO_API">http://btc.blockr.io/api/v1/address/info/</string>
+
+    <!--ReceiveFragment-->
+    <string name="label">ラベル</string>
+    <string name="request">リクエスト</string>
+    <string name="copy">コピー</string>
+    <string name="generating_new_address">G新しいアドレスを生成する</string>
+    <string name="unable_create_new_address">できません新しいアドレスを生成する</string>
+    <string name="maximum_unused_address">このアカウントで使用された未使用アドレスの最大数は5つです</string>
+    <string name="create_new_address">新しいアドレスを生成する</string>
+
+
+    <!--BleActivity-->
+    <string name="login_host">ログイン中...</string>
+    <string name="connecting">接続中...</string>
+    <string name="disconnected">断線</string>
+    <string name="connect">接続</string>
+    <string name="reset">リセット</string>
+
+
+    <!--ConfirmOtpActivity-->
+    <string name="paring">ペアリング</string>
+    <string name="gen_reset_otp">生成リセットOTP...</string>
+    <string name="wait_authorization">ペアデバイスからの承認待ち</string>
+    <string name="unable_to_pair">ペア設定できません</string>
+    <string name="maximum_paired_limitation">このカードと最大3つのホストがペアになっています</string>
+    <string name="error">エラー</string>
+    <string name="approve_success">成功を承認する</string>
+    <string name="incorrect_otp_try_again">間違ったOTP。もう一度お試しください</string>
+
+
+    <!--ShareAddress-->
+    <string name="start_to_share_address">共有アドレスの開始</string>
+    <string name="reference_number_is">/nあなたの参照番号は/n</string>
+    <string name="address_sharing_success">アドレス共有の成功</string>
+
+
+    <!--EraseActivity-->
+    <string name="resetting">リセッティング</string>
+    <string name="otp_incorrect">間違ったOTP</string>
+    <string name="plz_try_again">もう一度やり直してください</string>
+    <string name="error_msg">エラーメッセージ</string>
+    <string name="initial_success">初期設定成功</string>
+    <string name="restart_coolwallet">CoolWalletを再起動してもう一度リセットしてください。</string>
+
+
+    <!--SendFragment-->
+    <string name="plz_enter_valid_address"> 有効なアドレスを入力してください</string>
+    <string name="get_unspents">取得使用されていないアドレス...</string>
+    <string name="cmd_trxsign_error">コマンド \'TrxSign\' エラー</string>
+    <string name="address">アドレス</string>
+    <string name="inputs">入力</string>
+
+
+    <!--HomeFragment-->
+    <string name="synchronizing_data">データの同期</string>
+    <string name="unable_connect_internet">インターネットに接続できません</string>
+
+
+    <!--FragMainActivity-->
+    <string name="processing">処理</string>
+    <string name="policy">政策</string>
+    <string name="feedback_sent">フィードバックは正常に送信されました</string>
+    <string name="failed_to_set_account_ino">アカウント情報の設定に失敗しました</string>
+    <string name="share_address_beta">共有アドレス\n(ベータ版)</string>
+
+
+    <!--InitialCreateWalletActivity-->
+    <string name="generating_seed">シード生成</string>
+    <string name="checksum_incorrect">チェックサムが正しくありません</string>
+    <string name="plz_try_again_or_generate_seed_again">再試行するか、再度シードを生成してください</string>
+    <string name="hd_wallet_created">HDウォレットが作成されました</string>
+    <string name="reminder">リマインダ</string>
+    <string name="put_coolwallet_on_coollink">設定中にCoolWalletをCoolLinkに入れてください。</string>
+
+
+    <!--HostActivity-->
+    <string name="approve_device">このデバイスを承認する</string>
+    <string name="approve_new_device">新しいデバイスが承認されました</string>
+    <string name="approve_failed">承認されなかった</string>
+    <string name="remove_device">このデバイスを削除</string>
+    <string name="remove_failed">削除に失敗しました</string>
+    <string name="remove">削除する</string>
+    <string name="approve">承認する</string>
+    <string name="host_removed">デバイスが削除</string>
+    <string name="host_approved">デバイス承認済み</string>
+
+
+    <!--Toolbar-->
+    <string name="coolwallet_card">CoolWalletカード</string>
+    <string name="exchange">交換所</string>
+    <string name="order_details">注文詳細</string>
+    <string name="exchange_rate">為替レート</string>
+    <string name="open_orders">注文を開く</string>
+    <string name="host_devices">ホストデバイス</string>
+    <string name="create_wallet">ウォレット作成</string>
+    <string name="security">セキュリティ</string>
+    <string name="exit">アプリを終了する</string>
+    <string name="import_seed">シードを入力する</string>
+    <string name="payment_service_provider">決済サービスプロバイダ</string>
+    <string name="share_address">アドレスを共有</string>
+
+
+    <!--Exchange-->
+    <string name="msg_xchs_get_raw_addr">取引データ取得に失敗しました</string>
+    <string name="tv_exchange_sell_str">保留中の注文</string>
+    <string name="tv_exchange_buy_str">保留中の買い注文</string>
+    <string name="tv_exchange_verification_str">売り注文を行うOTPを確認する</string>
+    <string name="tv_order_notice_str">注文は時間経過後、自動でキャンセルされます。</string>
+    <string name="btn_complete_order_str">注文完了</string>
+    <string name="btn_cancel_order_str">キャンセル</string>
+    <string name="btn_str_sign_in">サインイン</string>
+    <string name="btn_str_sign_up">サインアップ</string>
+    <string name="str_login_title">CoolBitx取引所のCoolWalletホルダーとの取引</string>
+    <string name="btn_place_order">すぐ注文する</string>
+    <string name="tv_no_pending_order">まだ保留中の注文はありません</string>
+    <string name="url_exchange_site">http://xsm.coolbitx.com:8080/signup</string>
+    <string name="str_cancel_order_msg">あなたがキャンセルしてもよろしいですか？</string>
+    <string name="str_yes">はい</string>
+    <string name="str_no">いいえ</string>
+    <string name="str_unable_cancel">注文をキャンセルできません</string>
+    <string name="reason">理由：</string>
+
+
+    <!--Exchange Login-->
+    <string name="login">ログイン...</string>
+
+
+    <!--ExchangeActivity-->
+    <string name="press_exit">Press once again to exit Exchange site!</string>
+    <string name="sync_failed">同期に失敗しました</string>
+
+
+    <!--ExchangeOpenOrderActivity-->
+    <string name="no_open_orders_found">未処理の注文が見つかりません</string>
+    <string name="unable_to_get_open_orders"> Unable to get open orders.</string>
+    <string name="unable_to_cancel_order"> 注文をキャンセルできません</string>
+
+
+    <!--ExchangeCompleteOrderActivity-->
+    <string name="unable_to_generate_otp">生成OTPできません</string>
+    <string name="begin_to_block_order"> 注文のブロックを開始する</string>
+    <string name="unable_to_block">ブロックできません</string>
+    <string name="cancel_block_order"> ブロックオーダーをキャンセルしてもよろしいですか？</string>
+    <string name="canceling_block_order"> ブロックオーダーの取り消し...</string>
+    <string name="unable_to_cancel_block">ブロック注文をキャンセルできません</string>
+    <string name="preparing_to_complete_order">注文を完了するための準備...</string>
+    <string name="can_not_find_unspent">アドレスが見つかりません</string>
+    <string name="preparing_transaction"> 取引の準備...</string>
+    <string name="sign_login_failed">ログインに失敗しました</string>
+    <string name="plz_press_button">カードのボタンを押してしてください</string>
+    <string name="sending_bitcoins">Bitcoinsを送る</string>
+    <string name="cmd_trx_begin_error">コマンド \'TrxBegin\' エラー</string>
+    <string name="failed_to_verify_otp">OTP確認に失敗しました</string>
+    <string name="sent">送られた</string>
+    <string name="btc_to">btc には</string>
+    <string name="failed_to_broadcast_transaction">トランザクションをBLOCKCHAINにブロードキャストできませんでした</string>
+    <string name="failed_to_get_change_address">アドレスに変更取得できません</string>
+
+
+    <!--TabFragment-->
+    <string name="create_account">アカウントを作成する</string>
+
+
+    <!--Preference-->
+    <string name="pref_title_security_otp">ワンタイムパスワード認証を有効にする</string>
+    <string name="pref_title_security_crad_transaction">カードのボタンをクリックして取引を完了させることを有効にする</string>
+    <string name="pref_title_security_watch_dog">ウォッチドッグ機能を有効にする</string>
+    <string name="strPairSuccessfulDetail">CoolWalletは最大３つのデバイスと接続できます。このデバイスは、2つ目のデバイスを認証できます</string>
+    <string name="strCancel">キャンセル</string>
+    <string name="strReset">リセット</string>
+    <string name="strPairPhone">このデバイスと接続する</string>
+    <string name="connetc_status">接続状態</string>
+    <string name="ok">Ok</string>
+
+
+    <!--ISSUEFEEDBACK-->
+    <string name="issue_feedback_title">フィードバック</string>
+    <string name="issue_feedback_policy_title">ポリシー</string>
+    <string name="issue_feedback_message">問題をフォローアップするには、<![CDATA[info@coolbitx.com]]>に電子メールを送ってください。</string>
+    <string name="issue_feedback_policy">フィードバックに関する個人情報等は保護されます。問題点を診断し今後のcoolwalletの改善に参照させていただきます。</string>
+
+
+    <!--Settings-->
+    <string name="str_setting">設定</string>
+    <string name="str_exchange_rate">通貨設定</string>
+    <string name="str_transaction_fee">手数料設定</string>
+    <string name="card_name">カード名</string>
+    <string name="manual_fee">マニュアル手数料:</string>
+    <string name="auto_fee">自動手数料:</string>
+
+
+    <!--security layout-->
+    <string name="tv_security_otp">ワンタイムパスワード認証を有効にする</string>
+    <string name="tv_security_enable_press_button">カードのボタンをクリックして取引を完了させることを有効にする</string>
+    <string name="tv_security_dog">ウォッチドッグ機能を有効にする</string>
+    <string name="tv_security_dog_explain">あなたのクールウォレットがデバイスと一定の距離まで離れた時にポップアップ通知をします</string>
+    <string name="tv_security_show_address">ビットコインアドレスをカードに表示する</string>
+    <string name="tv_security_show_address_guide">説明書記載の“Segments to Letters”をご覧下さい</string>
+    <string name="btn_security_str_update">セキュリティ設定の更新</string>
+    <string name="tv_import_my_seed">シード入力をします</string>
+
+    <!--StartSharing-->
+    <string name="btn_str_sharing">シェアアドレス</string>
+    <string name="tv_sharing_str">この機能を使用すると、使用しているBitcoin取引所プラットフォームに1つのアドレスを共有することができます。そのため、取引所プラットフォームはBitcoinを直接CoolWalletに送信できます。
+    \n\n同意した場合、この機能は第1アカウントの第１アドレスを、テストしている取引所に共有します。\n\n
+        CoolWalletアドレスを外部取引所プラットフォームと共有しますか？</string>
+
+    <!--logout-->
+    <string name="tv_logout_str1">ログアウトしますか？</string>
+    <string name="tv_logout_str2">ログアウトするとウォッチドッグ機能は無効になります。</string>
+    <string name="btn_str_logout">ログアウトする</string>
+    <string name="logout">ログアウト</string>
+
+
+    <!--other setting-->
+    <string name="update">更新</string>
+    <string name="tv_str_show_fiat">カードに金額を表示する</string>
+    <!--ウォレット作成する-->
+    <string name="tv_generate_seed">シード生成</string>
+    <string name="str_sum_of_seeds">
+        数字を正確に書き留めて保管して下さい。計算機を使い、全ての数字を足した合計の数値を入力して下さい\n\n\n 例:\n
+        1111111+123456+234434+.....
+    </string>
+
+
+    <!--ValidationException-->
+    <string name="spend_amount_less_than_zero">支出額を0未満にすることは出来ません。</string>
+    <string name="invalid_transaction">無効な取引:\n</string>
+    <string name="fee_higher_than_balance">取引手数料が足りません\nfee:</string>
+    <string name="no_output_to_spent"> 費やす出力がありません</string>
+    <string name="incorrect_fee">間違った手数料:</string>
+    <string name="incorrect_change">間違った変更:</string>
+    <string name="amount_and_fee_higher_than_balance">取引金額+手数料が残高にありません\n</string>
+    <string name="output_amount">出力量:</string>
+    <string name="fees">手数料:</string>
+    <string name="transaction_lower_than_dust">取引手数料は5460satoshiより低くなります。(値:</string>
+    <string name="bad_address">アドレスが正しくありません:</string>
+    <string name="unknown_address_type">不明なアドレスタイプ:</string>
+
+
+    <!--TransactionFeeActivity begin-->
+    <string name="str_estimated_fee_content">推定取引手数料：\n平均取引値226 バイトx %1$d(１バイト/satoshi数)\n=%2$d satoshi= %3$f BTC</string>
+    <string name="prompt">プロンプト</string>
+    <string name="enter_tx_fee"> 取引手数料を入力してください</string>
+    <string name="below_tx_fee"> 設定手数料が平均以下のため、承認に30分以上かかる場合があります。</string>
+    <string name="exceed_tx_fee"> 取引手数料は1 BTCを超えています。</string>
+    <string name="incorrect_format">不適切な形式</string>
+    <string name="transaction_fee">取引手数料</string>
+
+
+    <!--txsFeeActivity end-->
+    <string name="str_seedWords_confirm">wordを慎重にメモして間違いないか再確認して下さい。\nこれは、カード紛失時などのウォレット復元に必要な大事なものです。</string>
+    <string name="tv_generate_seed_highly">推薦します</string>
+    <string name="tv_seed_length">シードの数</string>
+    <string name="btn_create_HDW">ウォレット作成する</string>
+    <string name="btn_next">次へ</string>
+    <string name="btn_previous">前画面に戻る</string>
+    <string name="hdw_create">ウォレット作成する</string>
+    <string name="tv_write_down_seed">CoolWalletに表示されている全ての数字を用紙に書き留めて下さい</string>
+    <string name="tv_see_next_seed">カードのボタンを押すと次の数字が表示されます</string>
+    <string name="hdw_create_word">注意：カードにシードが表示されるまで約1分かかりますので、お待ち下さい。</string>
+
+
+    <!--recov wallet-->
+    <string name="tv_recv_msg">シードを入力して下さい（間にスペースを入れて下さい</string>
+    <string name="tv_choose_seed_msg">シードタイプ選択</string>
+    <string name="tv_recovery_title">復元中...</string>
+    <string name="tv_recovery_msg">CoolWalletを充電してください</string>
+    <string name="notice_recovery_invalid_numbers">あなたは\'numbers\'で復元を選択しました。もし、あなたのシードが\'word\'ならば選択を切り替えて下さい。</string>
+    <string name="notice_recovery_invalid_word">あなたは\'word\'で復元を選択しました。もし、あなたのシードが\'numbers\'ならば選択を切り替えて下さい。</string>
+    <string name="notice_recovery_invalid_numbers_length">numbersの合計シード数は12,18,24セットにする必要があります。</string>
+    <string name="notice_recovery_invalid_word_length">Wordsの合計シード数は12,18,24セットにする必要があります。</string>
+    <string name="notice_recovery_parsing_seed_incorrect">入力れたシードは、正しい形ではありません</string>
+    <string name="notice_recovery_invalid">シードが無効です</string>
+
+    <!--Create HD Wallet-->
+    <string name="txt_createNewWallet">新しいウォレットを作成する</string>
+    <string name="txt_recoverMyOldWallet">旧ウォレットの復元</string>
+    <string name="txt_createHDWallet">数字を正確に書き留めて保管して下さい。計算機を使い、全ての数字を足した合計の数値を入力して下さい</string>
+    <string name="txt_createHDWallet_example">例：\n1111111+123456+234434+.....</string>
+    <string name="txt_createHDWallet_alert">重要！\nビットコインのバックアップを取ることができるのはこれだけです。</string>
+    <string name="strCreateWallet">ウォレット作成</string>
+    <string name="frag_available_str">利用可能:</string>
+    <string name="frag_reserved_str">予約済み:</string>
+
+    <!--send-->
+    <string name="send_notification_unable_to_send_with_change_error">アドレスを受信者のアドレスに変更すると、エラーが発生する可能性があります。</string>
+    <string name="unable_to_send">送信できません</string>
+    <string name="send">送信</string>
+    <string name="note_unspent">Blockchainを送信する前に残高を確認する必要があります。後でもう一度お試しください。</string>
+    <string name="note_dust">この取引のビットコインダストは、マイニングに加算されます。(金額: %1$f)</string>
+    この取引のビットコインダストは、マイニングに加算されます。
+
+
+    <string name="send_hint_edit_address">受取先ビットコインアドレス</string>
+    <string name="send_hint_edit_amount">金額を入力してください</string>
+
+    <string name="send_all">全額送信</string>
+
+    <string name="send_notification_str_failed_title">トランザクションが失敗しました</string>
+    <string name="send_notification_str_failed_msg">タイムアウト。もう一度やり直してください</string>
+    <string name="send_confirm_btn_send">送信</string>
+    <string name="send_confirm_btn_cancel">キャンセル</string>
+    <string name="send_call_unspent_failed">APIから未使用トランザクションを取得できませんでした.</string>
+
+    <string name="send_call_unspent_list_addresses">を含む複数のアドレス:\n</string>
+
+
+    <!--TransactionConfirmDialog-->
+    <string name="send_confirm_str_pay">支払います</string>
+    <string name="send_confirm_str_fee">手数料</string>
+    <string name="send_confirm_str_total">合計</string>
+    <string name="send_confirm_str_payment">支払い</string>
+    <string name="send_confirm_str_change">チェンジ</string>
+    <string name="notice_fee_alert">設定手数料が平均以下のため、確認に30分以上かかる可能性があります。</string>
+
+    <!--txs-->
+    <string name="btn_str_view_blockchain">Blockchain.infoで見る</string>
+
+
+    <!-- database -->
+    <string-array name="db_table_name">
+        <item>ADDR</item>
+        <item>TXS</item>
+        <item>CURRENT</item>
+        <item>LOGIN</item>
+        <item>ACCOUNT_KEY_INFO</item>
+    </string-array>
+
+
+    <string-array name="ACCOUNT_KEY_INFO">
+        <item>WID               TEXT  NOT NULL      </item> <!--WALLET ID(CARD ID)-->
+        <item>ACCOUNT_ID        INTEGER  NOT NULL   </item>
+        <item>KCID              INTEGER  NOT NULL   </item> <!--0:External ; 1:Internal-->
+        <item>PUBLICKEY         TEXT   NOT NULL     </item>
+        <item>CHAINCODE         TEXT   NOT NULL     </item>
+        <item>PRIMARY KEY (WID,ACCOUNT_ID,KCID) </item>
+    </string-array>
+
+    <!--table-->
+    <string-array name="ADDR">
+        <item>WID               TEXT  NOT NULL   </item>
+        <!--WALLET ID(CARD ID)-->
+        <item>ACCOUNT_ID        INTEGER  NOT NULL   </item>
+        <item>ADDRESS           TEXT  NOT NULL      </item>
+        <item>KCID              INTEGER  NOT NULL   </item>
+        <!--0:External ; 1:Internal-->
+        <item>KID               INTEGER   NOT NULL  </item>
+        <!--Address KID-->
+        <item>N_TX              INTEGER   NOT NULL  </item>
+        <item>ADDRESS_BALANCE   BIGINT   NOT NULL   </item>
+        <item>ADDRESS_LABEL     TEXT                </item>
+        <item>PRIMARY KEY (WID,ADDRESS) </item>
+    </string-array>
+
+    <string-array name="TXS">
+        <item>WID               TEXT  NOT NULL   </item>
+        <item>ACCOUNT_ID        INTEGER  NOT NULL   </item>
+        <item>ADDRESS           TEXT  NOT NULL      </item>
+        <item>TX_ID             TEXT     NOT NULL   </item>
+        <item>TX_ADDRESS        TEXT  NOT NULL      </item>
+        <item>TX_RESULT         BIGINT  NOT NULL   </item>
+        <item>TX_DATE           TEXT     NOT NULL   </item>
+        <item>TX_CONFIRMATION   INTEGER  			</item>
+        <item>ID   INTEGER PRIMARY KEY</item>
+    </string-array>
+
+    <string-array name="CURRENT">
+        <item>WID               TEXT  NOT NULL   </item>
+        <item>COUNTRY           TEXT    NOT NULL   </item>
+        <!--WALLET ID(CARD ID)-->
+        <item>RATES             REAL    NOT NULL   </item>
+        <item>PRIMARY KEY (WID,COUNTRY) </item>
+    </string-array>
+
+    <string-array name="LOGIN">
+        <item>DATE              TEXT    NOT NULL   </item>
+        <item>WID               TEXT    NOT NULL   </item>
+        <!--WALLET ID(CARD ID)-->
+        <item>UUID              TEXT    NOT NULL   </item>
+        <item>OTP               TEXT    NOT NULL   </item>
+        <item>PRIMARY KEY (WID) </item>
+    </string-array>
+
+
+</resources>

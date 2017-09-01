@@ -6,11 +6,9 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
@@ -29,7 +27,6 @@ import android.widget.Toast;
 import com.coolbitx.coolwallet.DataBase.DatabaseHelper;
 import com.coolbitx.coolwallet.DataBase.DbName;
 import com.coolbitx.coolwallet.R;
-import com.coolbitx.coolwallet.Service.BTConfig;
 import com.coolbitx.coolwallet.Service.BlockSocketHandler;
 import com.coolbitx.coolwallet.bean.Account;
 import com.coolbitx.coolwallet.bean.Address;
@@ -42,7 +39,6 @@ import com.coolbitx.coolwallet.callback.RefreshCallback;
 import com.coolbitx.coolwallet.general.AppPrefrence;
 import com.coolbitx.coolwallet.general.BtcUrl;
 import com.coolbitx.coolwallet.general.CSVReadWrite;
-import com.coolbitx.coolwallet.general.NotificationReceiver;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.coolbitx.coolwallet.general.RefreshBlockChainInfo;
 import com.coolbitx.coolwallet.httpRequest.CwBtcNetWork;
@@ -83,23 +79,23 @@ import java.util.TimerTask;
 public class FragMainActivity extends BaseActivity {//implements CompoundButton.OnCheckedChangeListener
 
     //左側選單圖片
-//    private static final int[] MENU_ITEMS_PIC = new int[]{
-//            R.mipmap.host, R.mipmap.cwcard, R.mipmap.security, R.mipmap.settings, R.drawable.exchange,
-//            R.drawable.exchange, R.mipmap.ic_feedback_white_24dp, R.mipmap.logout, R.mipmap.ic_share_white_24dp};
-//    //     左側選單文字項目
-//    private static final String[] MENU_ITEMS = new String[]{
-//            "Host devices", "CoolWallet card", "Security", "Settings", "Exchange",
-//            "Exchange Login", "Issue Feedback", "Logout", "Share address\n(beta)"
-//    };
+    private static final int[] MENU_ITEMS_PIC = new int[]{
+            R.mipmap.host, R.mipmap.cwcard, R.mipmap.security, R.mipmap.settings, R.drawable.exchange,
+            R.drawable.exchange, R.mipmap.ic_feedback_white_24dp, R.mipmap.logout, R.mipmap.ic_share_white_24dp};
+    //     左側選單文字項目
+    private static final int[] MENU_ITEMS = new int[]{
+            R.string.host_devices, R.string.coolwallet_card, R.string.security, R.string.str_setting,
+            R.string.exchange,R.string.action_settings,
+            R.string.issue_feedback_title, R.string.logout, R.string.share_address_beta};
 
-    private static final int[] MENU_ITEMS_PIC = new int[]
-            {R.mipmap.host, R.mipmap.cwcard, R.mipmap.security, R.mipmap.settings,
-                    R.mipmap.ic_feedback_white_24dp, R.mipmap.logout, R.mipmap.ic_share_white_24dp};
-    // 左側選單文字項目
-    private static final String[] MENU_ITEMS = new String[]{
-            "Host devices", "CoolWallet card", "Security", "Settings",
-            "Issue Feedback", "Logout", "Share address\n(beta)"
-    };
+//    private static final int[] MENU_ITEMS_PIC = new int[]
+//            {R.mipmap.host, R.mipmap.cwcard, R.mipmap.security, R.mipmap.settings,
+//                    R.mipmap.ic_feedback_white_24dp, R.mipmap.logout, R.mipmap.ic_share_white_24dp};
+//    // 左側選單文字項目
+//    private static final int[] MENU_ITEMS = new int[]{
+//            R.string.host_devices, R.string.coolwallet_card, R.string.security, R.string.str_setting,
+//            R.string.issue_feedback_title, R.string.logout, R.string.share_address_beta
+//    };
 
     public static int ACCOUNT_CNT = 0;//這裡要改為抓qryWalletInfo的
     public static boolean refreshFlag = false;
@@ -124,7 +120,6 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
     int IntIntKey = 0;
     TabFragment tabFragment;
 
-    private NotificationReceiver brocastNR;
 
     Handler mHandler = new Handler() {
         @Override
@@ -236,7 +231,7 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
         initToolbar();
         initView();
 
-        mProgress.setMessage("Synchronizing data...");
+        mProgress.setMessage(getString(R.string.synchronizing_data) + "...");
         mProgress.show();
         mTimer = new Timer();
         mTimer.schedule(new TimerTask() {
@@ -371,7 +366,7 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
             // 是否要退出
             if (isExit == false) {
                 isExit = true; //記錄下一次要退出
-                Toast.makeText(getBaseContext(), "Press once again to exit!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getBaseContext(), getString(R.string.press_exit), Toast.LENGTH_SHORT).show();
                 // 如果超過兩秒則恢復預設值
                 new Timer().schedule(new TimerTask() {
                     @Override
@@ -495,7 +490,7 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
 
                                         @Override
                                         public void fail(String msg) {
-                                            PublicPun.showNoticeDialog(mContext, "Unstable internet connection", msg);
+                                            PublicPun.showNoticeDialog(mContext, getString(R.string.unable_connect_internet), msg);
                                             initTabFragment(mSavedInstanceState);
                                             if (mProgress.isShowing()) {
                                                 mProgress.dismiss();
@@ -508,7 +503,7 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
 
                                 @Override
                                 public void fail(String msg) {
-                                    PublicPun.showNoticeDialog(mContext, "Unstable internet connection", msg);
+                                    PublicPun.showNoticeDialog(mContext, getString(R.string.unable_connect_internet), msg);
                                     initTabFragment(mSavedInstanceState);
                                     if (mProgress.isShowing()) {
                                         mProgress.dismiss();
@@ -635,7 +630,7 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
                                 }
                             } else {
                                 LogUtil.i("setAccountInfo failed.");
-                                PublicPun.showNoticeDialog(mContext, "Alert Message", "setAccountInfo failed!");
+                                PublicPun.showNoticeDialog(mContext,getString(R.string.error_msg), getString(R.string.failed_to_set_account_ino));
                                 mProgress.dismiss();
                             }
                         }
@@ -756,51 +751,51 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
                 intent = new Intent(getApplicationContext(), SettingActivity.class);
                 startActivityForResult(intent, 0);
                 break;
-            case 4:
-                IssueFeedBack();
-                break;
-            case 5:
-                intent = new Intent(getApplicationContext(), LogOutActivity.class);
-                startActivityForResult(intent, 0);
-                break;
-            case 6:
-                //Share address service
-                intent = new Intent(getApplicationContext(), ShareAddress.class);
-                startActivityForResult(intent, 0);
-                break;
-
-            //MARK XCHS
 //            case 4:
-//                intent = new Intent(getApplicationContext(), ExchangeLogin.class);
-//                startActivityForResult(intent, 0);
-//                break;
-//
-//            case 5:
-//                int infoid = 0;
-//                cmdManager.XchsGetOtp(infoid, new CmdResultCallback() {
-//                    @Override
-//                    public void onSuccess(int status, byte[] outputData) {
-//                        if ((status + 65536) == 0x9000) {//-28672//36864
-//                            LogUtil.d("XchsGetOtp ok= " + outputData);
-//                        } else {
-//                            LogUtil.d("XchsGetOtp fail= " + outputData);
-//
-//                        }
-//                    }
-//                });
-//                break;
-//            case 6:
 //                IssueFeedBack();
 //                break;
-//            case 7:
+//            case 5:
 //                intent = new Intent(getApplicationContext(), LogOutActivity.class);
 //                startActivityForResult(intent, 0);
 //                break;
-//            case 8:
+//            case 6:
 //                //Share address service
 //                intent = new Intent(getApplicationContext(), ShareAddress.class);
 //                startActivityForResult(intent, 0);
 //                break;
+
+            //MARK XCHS
+            case 4:
+                intent = new Intent(getApplicationContext(), ExchangeLogin.class);
+                startActivityForResult(intent, 0);
+                break;
+
+            case 5:
+                int infoid = 0;
+                cmdManager.XchsGetOtp(infoid, new CmdResultCallback() {
+                    @Override
+                    public void onSuccess(int status, byte[] outputData) {
+                        if ((status + 65536) == 0x9000) {//-28672//36864
+                            LogUtil.d("XchsGetOtp ok= " + outputData);
+                        } else {
+                            LogUtil.d("XchsGetOtp fail= " + outputData);
+
+                        }
+                    }
+                });
+                break;
+            case 6:
+                IssueFeedBack();
+                break;
+            case 7:
+                intent = new Intent(getApplicationContext(), LogOutActivity.class);
+                startActivityForResult(intent, 0);
+                break;
+            case 8:
+                //Share address service
+                intent = new Intent(getApplicationContext(), ShareAddress.class);
+                startActivityForResult(intent, 0);
+                break;
 
 
         }
@@ -822,16 +817,16 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
         new AlertDialog.Builder(mContext, AlertDialog.THEME_DEVICE_DEFAULT_LIGHT)
                 .setView(alert_view)
                 .setCancelable(false)
-                .setPositiveButton("Send", new DialogInterface.OnClickListener() {
+                .setPositiveButton(getString(R.string.send), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         LogUtil.d("feedBack Send");
-                        mProgress.setMessage("Processing...");
+                        mProgress.setMessage(getString(R.string.processing) + "...");
                         mProgress.show();
                         forceCrash();
                     }
                 })
-                .setNegativeButton(">>POLICY", new DialogInterface.OnClickListener() {
+                .setNegativeButton(">>" + getString(R.string.policy), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         LayoutInflater inflater = LayoutInflater.from(mContext);
                         View alert_view = inflater.inflate(R.layout.edit_dialog, null);//alert為另外做給alert用的layout
@@ -891,7 +886,7 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
             LogUtil.d("sent issueFeedBack:");
             e.getStackTrace();
             Crashlytics.logException(e);
-            Toast.makeText(mContext, "Feedback sent successfully.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, getString(R.string.feedback_sent), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -938,7 +933,7 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
         for (int i = 0; i < MENU_ITEMS.length; i++) {
             map = new HashMap<String, Object>();
             map.put("image", MENU_ITEMS_PIC[i]);
-            map.put("title", MENU_ITEMS[i]);
+            map.put("title", getString(MENU_ITEMS[i]));
             mHashMaps.add(map);
         }
         return mHashMaps;
@@ -1006,7 +1001,6 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
         }
 
     }
-
 
 
     public String getAccountFrag(int id) {

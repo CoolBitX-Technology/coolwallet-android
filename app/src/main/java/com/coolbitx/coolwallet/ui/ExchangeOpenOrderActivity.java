@@ -8,20 +8,17 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.EditText;
 import android.widget.ListView;
 
 import com.coolbitx.coolwallet.R;
 import com.coolbitx.coolwallet.adapter.UnclarifyOrderAdapter;
-import com.coolbitx.coolwallet.callback.APIResultCallback;
 import com.coolbitx.coolwallet.bean.ExchangeOrder;
+import com.coolbitx.coolwallet.callback.APIResultCallback;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.coolbitx.coolwallet.util.ExchangeAPI;
 import com.snscity.egdwlib.CmdManager;
-import com.snscity.egdwlib.cmd.CmdResultCallback;
 import com.snscity.egdwlib.utils.LogUtil;
 
 import java.util.ArrayList;
@@ -29,7 +26,7 @@ import java.util.ArrayList;
 /**
  * Created by ShihYi on 2015/12/25.
  */
-public class ExchangeVerificationActivity extends BaseActivity implements View.OnClickListener, AdapterView.OnItemClickListener {
+public class ExchangeOpenOrderActivity extends BaseActivity implements View.OnClickListener, AdapterView.OnItemClickListener {
 
     private CmdManager cmdManager;
     private Context mContext;
@@ -83,7 +80,7 @@ public class ExchangeVerificationActivity extends BaseActivity implements View.O
                 if (listExchangeOrder.size() != 0) {
                     listViewVerification.setAdapter(new UnclarifyOrderAdapter(mContext, listExchangeOrder));
                 } else {
-                    clickToFinish("Sell order verification", "No unverified orders found.");
+                    clickToFinish(getString(R.string.open_orders), getString(R.string.no_open_orders_found));
                 }
             }
 
@@ -91,7 +88,7 @@ public class ExchangeVerificationActivity extends BaseActivity implements View.O
             public void fail(String msg) {
                 mProgress.dismiss();
                 LogUtil.d("getOrderInfo failed:" + msg);
-                clickToFinish("Unable to get Unverified Orders", "Error:" + msg);
+                clickToFinish(getString(R.string.unable_to_get_open_orders), getString(R.string.error)+":" + msg);
             }
         });
     }
@@ -100,7 +97,7 @@ public class ExchangeVerificationActivity extends BaseActivity implements View.O
     private void clickToFinish(String title, String msg) {
         AlertDialog.Builder mBuilder =
                 PublicPun.CustomNoticeDialog(mContext, title, msg);
-        mBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+        mBuilder.setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
                 finish();
             }
@@ -116,12 +113,12 @@ public class ExchangeVerificationActivity extends BaseActivity implements View.O
         mProgress = new ProgressDialog(this, ProgressDialog.THEME_HOLO_DARK);
         mProgress.setCancelable(false);
         mProgress.setIndeterminate(true);
-        mProgress.setMessage("synchronizing...");
+        mProgress.setMessage(getString(R.string.synchronizing_data)+"...");
     }
 
     private void initToolbar() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle("Verification");
+        toolbar.setTitle(getString(R.string.open_orders));
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
         // 打開 up button_up
@@ -166,7 +163,7 @@ public class ExchangeVerificationActivity extends BaseActivity implements View.O
                     }
                     @Override
                     public void fail(String msg) {
-                        PublicPun.showNoticeDialog(mContext, "Unable to Cancel Order", "Reason:" + msg);
+                        PublicPun.showNoticeDialog(mContext, getString(R.string.unable_to_cancel_order), getString(R.string.reason) + msg);
                     }
                 });
 
@@ -198,102 +195,102 @@ public class ExchangeVerificationActivity extends BaseActivity implements View.O
 //        });
     }
 
-    EditText editText;
-    byte[] cancelBlkInfo = new byte[72];
-    byte[] okTkn = new byte[4];
-    byte[] unblockTkn = new byte[16];
+//    EditText editText;
+//    byte[] cancelBlkInfo = new byte[72];
+//    byte[] okTkn = new byte[4];
+//    byte[] unblockTkn = new byte[16];
 
 
-    private void XchsVerifyOtp(final int item) {
-        final String orderID = listExchangeOrder.get(item).getOrderId();
-        final View view = LayoutInflater.from(mContext).inflate(R.layout.alert_dialog_otp_input, null);
-        AlertDialog.Builder otp_dialog = new AlertDialog.Builder(mContext, AlertDialog.THEME_HOLO_LIGHT);
-        editText = (EditText) view.findViewById(R.id.alert_editotp);
-        otp_dialog.setView(view);
-        otp_dialog.setCancelable(false);
-//        verify OTP
-        otp_dialog.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-                mProgress.setMessage("Begin to block order...");
-                mProgress.show();
-                //1.transit to server
-
-                String blockOtp = editText.getText().toString();
-                LogUtil.d("orderID=" + listExchangeOrder.get(item).getOrderId() + ";blockOtp=" + blockOtp);
-
-
-                mExchangeAPI.getTrxBlock(orderID, blockOtp, new APIResultCallback() {
-                    @Override
-                    public void success(String[] msg) {
-                        LogUtil.d("getTrxBlock ok " + msg[0]);//orderId(4B)/accId(4B)/amount(8B)/mac1(32B)/nonce(16B)
-
-                        // 2.SE cmd (F9)
-                        byte[] srvOrderBlock = PublicPun.hexStringToByteArray(msg[0]);
-                        cmdManager.XchsBlockBtc(srvOrderBlock, new CmdResultCallback() {
-                            @Override
-                            public void onSuccess(int status, byte[] outputData) {
-
-                                if ((status + 65536) == 0x9000) {//-28672//36864
-                                    LogUtil.d("XchsBlockBtc  success = " + PublicPun.byte2HexStringNoBlank(outputData));
-
-                                    //blockSignature(32B)/okTkn(4B)/encUblkTkn(16B)/mac2(32B)/nonce(16B)
-
-                                    System.arraycopy(outputData, 32, okTkn, 0, 4);
-                                    System.arraycopy(outputData, 36, unblockTkn, 0, 16);
-
-                                    cmdManager.XchsBlockInfo(okTkn, new CmdResultCallback() {
-                                        @Override
-                                        public void onSuccess(int status, byte[] outputData) {
-                                            LogUtil.d("Block資料=" + PublicPun.byte2HexString(outputData));
-                                        }
-                                    });
-
-                                    mExchangeAPI.doExWriteOKToken(orderID, PublicPun.byte2HexStringNoBlank(okTkn), PublicPun.byte2HexStringNoBlank(unblockTkn),
-                                            new APIResultCallback() {
-                                                @Override
-                                                public void success(String[] msg) {
-                                                    LogUtil.d("ExWriteOKToken " + msg[0]);
-//                                                    finish();
-                                                    GetUnclarifyOrder();
-                                                    mProgress.dismiss();
-                                                }
-
-                                                @Override
-                                                public void fail(String msg) {
-                                                    LogUtil.d("ExWriteOKToken failed:" + msg);
-                                                    mProgress.dismiss();
-                                                    PublicPun.showNoticeDialog(mContext, "Unable to Block", "WriteOKToken failed:" + msg);
-                                                }
-                                            });
-
-                                } else {
-                                    LogUtil.d("XchsBlockBtc fail");
-                                    mProgress.dismiss();
-                                    PublicPun.showNoticeDialog(mContext, "Unable to Block", "WriteOKToken failed:" + Integer.toHexString(status));
-                                }
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void fail(String msg) {
-                        LogUtil.d("getTrxBlock failed:" + msg);
-                        mProgress.dismiss();
-                        PublicPun.showNoticeDialog(mContext, "Unable to Block", msg);
-
-                    }
-                });
-            }
-        }).setNegativeButton(R.string.strCancel, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-
-
-            }
-        });
-        otp_dialog.show();
-    }
+//    private void XchsVerifyOtp(final int item) {
+//        final String orderID = listExchangeOrder.get(item).getOrderId();
+//        final View view = LayoutInflater.from(mContext).inflate(R.layout.alert_dialog_otp_input, null);
+//        AlertDialog.Builder otp_dialog = new AlertDialog.Builder(mContext, AlertDialog.THEME_HOLO_LIGHT);
+//        editText = (EditText) view.findViewById(R.id.alert_editotp);
+//        otp_dialog.setView(view);
+//        otp_dialog.setCancelable(false);
+////        verify OTP
+//        otp_dialog.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+//            @Override
+//            public void onClick(DialogInterface dialog, int which) {
+//                dialog.dismiss();
+//                mProgress.setMessage("Begin to block order...");
+//                mProgress.show();
+//                //1.transit to server
+//
+//                String blockOtp = editText.getText().toString();
+//                LogUtil.d("orderID=" + listExchangeOrder.get(item).getOrderId() + ";blockOtp=" + blockOtp);
+//
+//
+//                mExchangeAPI.getTrxBlock(orderID, blockOtp, new APIResultCallback() {
+//                    @Override
+//                    public void success(String[] msg) {
+//                        LogUtil.d("getTrxBlock ok " + msg[0]);//orderId(4B)/accId(4B)/amount(8B)/mac1(32B)/nonce(16B)
+//
+//                        // 2.SE cmd (F9)
+//                        byte[] srvOrderBlock = PublicPun.hexStringToByteArray(msg[0]);
+//                        cmdManager.XchsBlockBtc(srvOrderBlock, new CmdResultCallback() {
+//                            @Override
+//                            public void onSuccess(int status, byte[] outputData) {
+//
+//                                if ((status + 65536) == 0x9000) {//-28672//36864
+//                                    LogUtil.d("XchsBlockBtc  success = " + PublicPun.byte2HexStringNoBlank(outputData));
+//
+//                                    //blockSignature(32B)/okTkn(4B)/encUblkTkn(16B)/mac2(32B)/nonce(16B)
+//
+//                                    System.arraycopy(outputData, 32, okTkn, 0, 4);
+//                                    System.arraycopy(outputData, 36, unblockTkn, 0, 16);
+//
+//                                    cmdManager.XchsBlockInfo(okTkn, new CmdResultCallback() {
+//                                        @Override
+//                                        public void onSuccess(int status, byte[] outputData) {
+//                                            LogUtil.d("Block資料=" + PublicPun.byte2HexString(outputData));
+//                                        }
+//                                    });
+//
+//                                    mExchangeAPI.doExWriteOKToken(orderID, PublicPun.byte2HexStringNoBlank(okTkn), PublicPun.byte2HexStringNoBlank(unblockTkn),
+//                                            new APIResultCallback() {
+//                                                @Override
+//                                                public void success(String[] msg) {
+//                                                    LogUtil.d("ExWriteOKToken " + msg[0]);
+////                                                    finish();
+//                                                    GetUnclarifyOrder();
+//                                                    mProgress.dismiss();
+//                                                }
+//
+//                                                @Override
+//                                                public void fail(String msg) {
+//                                                    LogUtil.d("ExWriteOKToken failed:" + msg);
+//                                                    mProgress.dismiss();
+//                                                    PublicPun.showNoticeDialog(mContext, "Unable to Block", "WriteOKToken failed:" + msg);
+//                                                }
+//                                            });
+//
+//                                } else {
+//                                    LogUtil.d("XchsBlockBtc fail");
+//                                    mProgress.dismiss();
+//                                    PublicPun.showNoticeDialog(mContext, "Unable to Block", "WriteOKToken failed:" + Integer.toHexString(status));
+//                                }
+//                            }
+//                        });
+//                    }
+//
+//                    @Override
+//                    public void fail(String msg) {
+//                        LogUtil.d("getTrxBlock failed:" + msg);
+//                        mProgress.dismiss();
+//                        PublicPun.showNoticeDialog(mContext, "Unable to Block", msg);
+//
+//                    }
+//                });
+//            }
+//        }).setNegativeButton(R.string.strCancel, new DialogInterface.OnClickListener() {
+//            @Override
+//            public void onClick(DialogInterface dialog, int which) {
+//                dialog.dismiss();
+//
+//
+//            }
+//        });
+//        otp_dialog.show();
+//    }
 }

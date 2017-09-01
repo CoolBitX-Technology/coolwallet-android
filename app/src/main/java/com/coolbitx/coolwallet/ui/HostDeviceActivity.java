@@ -17,7 +17,6 @@ import com.coolbitx.coolwallet.R;
 import com.coolbitx.coolwallet.adapter.HostAdapter;
 import com.coolbitx.coolwallet.bean.Host;
 import com.coolbitx.coolwallet.general.PublicPun;
-import com.coolbitx.coolwallet.ui.Fragment.FragMainActivity;
 import com.snscity.egdwlib.CmdManager;
 import com.snscity.egdwlib.cmd.CmdResultCallback;
 import com.snscity.egdwlib.utils.LogUtil;
@@ -100,7 +99,7 @@ public class HostDeviceActivity extends BaseActivity implements AdapterView.OnIt
 
                     case 0x01:
                         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                        builder.setMessage("Host Approved");
+                        builder.setMessage(getString(R.string.host_approved));
                         builder.setCancelable(true);
                         //建立按下按鈕
                         DialogInterface.OnClickListener OkClick = new DialogInterface.OnClickListener() {
@@ -117,11 +116,11 @@ public class HostDeviceActivity extends BaseActivity implements AdapterView.OnIt
                                                 @Override
                                                 public void onSuccess(int status, byte[] outputData) {
                                                     if ((status + 65536) == 0x9000) {
-                                                        PublicPun.showNoticeDialog(context, "Approve this device", "New Device is approved!");
+                                                        PublicPun.showNoticeDialog(context, getString(R.string.approve_device), getString(R.string.approve_new_device));
 //                                                        updataViews();
                                                         getHosts();
                                                     } else {
-                                                        PublicPun.showNoticeDialog(context, "Approve this device", "Approved failed:" + Integer.toHexString(status));
+                                                        PublicPun.showNoticeDialog(context, getString(R.string.approve_device), getString(R.string.approve_failed)+":" + Integer.toHexString(status));
                                                     }
                                                 }
                                             });
@@ -134,10 +133,10 @@ public class HostDeviceActivity extends BaseActivity implements AdapterView.OnIt
                                             @Override
                                             public void onSuccess(int status, byte[] outputData) {
                                                 if ((status + 65536) == 0x9000) {
-                                                    PublicPun.showNoticeDialog(context, "Remove this device", "");
+                                                    PublicPun.showNoticeDialog(context, getString(R.string.remove_device), "");
                                                     getHosts();
                                                 } else {
-                                                    PublicPun.showNoticeDialog(context, "Remove this device", "Removed failed:" + Integer.toHexString(status));
+                                                    PublicPun.showNoticeDialog(context, getString(R.string.remove_device), getString(R.string.remove_failed)+":" + Integer.toHexString(status));
                                                 }
                                             }
                                         });
@@ -145,16 +144,16 @@ public class HostDeviceActivity extends BaseActivity implements AdapterView.OnIt
                                 }
                             }
                         };
-                        builder.setNegativeButton("Removed", OkClick);
-                        builder.setPositiveButton("Approved", OkClick);
+                        builder.setNegativeButton(getString(R.string.remove), OkClick);
+                        builder.setPositiveButton(getString(R.string.approve), OkClick);
                         builder.show();
                         break;
 
                     case 0x02:
                         AlertDialog.Builder host_dialog = new AlertDialog.Builder(HostDeviceActivity.this);
                         host_dialog.setCancelable(true)
-                                .setMessage("Host Removed")
-                                .setNeutralButton("OK",
+                                .setMessage(getString(R.string.host_removed))
+                                .setNeutralButton(getString(R.string.ok),
                                         new DialogInterface.OnClickListener() {
                                             public void onClick(DialogInterface dialog, int id) {
                                                 //不做任何事情 直接關閉對話方塊
@@ -162,7 +161,7 @@ public class HostDeviceActivity extends BaseActivity implements AdapterView.OnIt
                                                     @Override
                                                     public void onSuccess(int status, byte[] outputData) {
                                                         if ((status + 65536) == 0x9000) {
-                                                            PublicPun.showNoticeDialog(context, "Remove this device", "");
+                                                            PublicPun.showNoticeDialog(context, getString(R.string.remove_device), "");
                                                             getHosts();
                                                         }
                                                     }
@@ -207,7 +206,7 @@ public class HostDeviceActivity extends BaseActivity implements AdapterView.OnIt
     private void initToolbar() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setLogo(getResources().getDrawable(R.mipmap.host));
-        toolbar.setTitle("Host devices");
+        toolbar.setTitle(getString(R.string.host_devices));
         setSupportActionBar(toolbar);
         toolbar.setNavigationIcon(R.mipmap.menu_3x);
         ActionBar actionBar = getSupportActionBar();

@@ -93,7 +93,7 @@ public class ExchangeRateActivity extends BaseActivity implements AdapterView.On
 
     private void initToolbar() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle("Exchange Rate");
+        toolbar.setTitle(getString(R.string.exchange_rate));
         setSupportActionBar(toolbar);
         toolbar.setNavigationIcon(R.mipmap.menu_3x);
         ActionBar actionBar = getSupportActionBar();

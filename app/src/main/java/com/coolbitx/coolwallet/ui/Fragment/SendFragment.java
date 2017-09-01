@@ -2,7 +2,6 @@ package com.coolbitx.coolwallet.ui.Fragment;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.Context;
@@ -10,13 +9,9 @@ import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.Message;
-import android.support.annotation.Nullable;
-import android.support.annotation.UiThread;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,7 +23,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.coolbitx.coolwallet.DataBase.DatabaseHelper;
 import com.coolbitx.coolwallet.R;
@@ -50,7 +44,6 @@ import com.coolbitx.coolwallet.ui.TransactionConfirmDialog;
 import com.coolbitx.coolwallet.util.BTCUtils;
 import com.coolbitx.coolwallet.util.Base58;
 import com.coolbitx.coolwallet.util.ECKey;
-import com.coolbitx.coolwallet.util.ExtendedKey;
 import com.coolbitx.coolwallet.util.ValidationException;
 import com.crashlytics.android.Crashlytics;
 import com.google.zxing.integration.android.IntentIntegrator;
@@ -253,7 +246,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener, 
         mProgress = new ProgressDialog(getActivity(), ProgressDialog.THEME_HOLO_DARK);
         mProgress.setCancelable(false);
         mProgress.setIndeterminate(true);
-        mProgress.setMessage("Sending Bitcoin...");
+        mProgress.setMessage(getString(R.string.sending_bitcoins));
 
     }
 
@@ -315,19 +308,19 @@ public class SendFragment extends BaseFragment implements View.OnClickListener, 
             LogUtil.e("click後對方接收地址=" + recvAddress + ";發送的金額=" + spendAmountStr);
             try {
                 if (!BTCUtils.ValidateBitcoinAddress(recvAddress)) {
-                    PublicPun.showNoticeDialog(mContext, "Unable to send", "Please enter a valid address.");
+                    PublicPun.showNoticeDialog(mContext, getString(R.string.unable_to_send), getString(R.string.plz_enter_valid_address));
                     return;
                 }
                 LogUtil.d("valid address ok");
 
             } catch (Exception e) {
                 e.printStackTrace();
-                Crashlytics.log(new String(PublicPun.hexStringToByteArray(PublicPun.card.getCardId())) + ":Send Click failed:" + e.getMessage());
-                PublicPun.showNoticeDialog(mContext, "Unable to send", "Please enter a valid address.");
+                Crashlytics.log(new String(PublicPun.hexStringToByteArray(PublicPun.card.getCardId())) + ":Click [Send] failed:" + e.getMessage());
+                PublicPun.showNoticeDialog(mContext, getString(R.string.unable_to_send), getString(R.string.plz_enter_valid_address));
                 return;
             }
 
-            mProgress.setMessage("Get unspent transaction...");
+            mProgress.setMessage(getString(R.string.get_unspents));
             mProgress.show();
             btnSend.setEnabled(false);
 
@@ -436,7 +429,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener, 
                             if (mProgress.isShowing()) {
                                 mProgress.dismiss();
                             }
-                            PublicPun.showNoticeDialog(mContext, getString(R.string.send_notification_unable_to_send), getString(R.string.send_call_unspent_failed) + result);
+                            PublicPun.showNoticeDialog(mContext, getString(R.string.unable_to_send), getString(R.string.send_call_unspent_failed) + result);
                             Crashlytics.log(getString(R.string.send_call_unspent_failed) + getString(R.string.send_call_unspent_list_addresses) + InAddress);
                         }
                     });
@@ -557,13 +550,13 @@ public class SendFragment extends BaseFragment implements View.OnClickListener, 
 
             if (processedTxData == null) {
                 cancelTrx();
-                PublicPun.showNoticeDialog(mContext, "Unable to send:", "Can't find the unspent output.");
+                PublicPun.showNoticeDialog(mContext, getString(R.string.unable_to_send), getString(R.string.can_not_find_unspent));
                 return;
             }
 
             //--------------- process change address.---------------------
             if (processedTxData.isDust) {
-                LogUtil.d("發送不用找零,發送地址" );
+                LogUtil.d("發送不用找零,發送地址");
                 outputs = new Transaction.Output[]{
                         new Transaction.Output(processedTxData.amountForRecipient, Transaction.Script.buildOutput(outputAddress)),
                 };
@@ -588,7 +581,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener, 
                         //its legal that Change address equals to recipient's address
                         if (outputAddress.equals(addr)) {
                             cancelTrx();
-                            PublicPun.showNoticeDialog(mContext, "Notification", getString(R.string.send_notification_unable_to_send_with_change_error));
+                            PublicPun.showNoticeDialog(mContext, getString(R.string.error_msg), getString(R.string.send_notification_unable_to_send_with_change_error));
                             return;
                         }
 
@@ -607,7 +600,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener, 
                     public void onFailed(String msg) {
 
                         cancelTrx();
-                        PublicPun.showNoticeDialog(mContext, "Unable to send:", msg);
+                        PublicPun.showNoticeDialog(mContext, getString(R.string.unable_to_send), msg);
 
                     }
                 });
@@ -617,16 +610,16 @@ public class SendFragment extends BaseFragment implements View.OnClickListener, 
 
         } catch (ValidationException ve) {
             cancelTrx();
-            PublicPun.showNoticeDialog(mContext, "Unable to send:", ve.getMessage());
+            PublicPun.showNoticeDialog(mContext, getString(R.string.unable_to_send), ve.getMessage());
         } catch (IOException e) {
             cancelTrx();
-            PublicPun.showNoticeDialog(mContext, "Unable to send:", e.getMessage());
+            PublicPun.showNoticeDialog(mContext, getString(R.string.unable_to_send), e.getMessage());
         } catch (NoSuchAlgorithmException e) {
             cancelTrx();
-            PublicPun.showNoticeDialog(mContext, "Unable to send:", e.getMessage());
+            PublicPun.showNoticeDialog(mContext, getString(R.string.unable_to_send), e.getMessage());
         } catch (Exception e) {
             cancelTrx();
-            PublicPun.showNoticeDialog(mContext, "Unable to send:", e.getMessage());
+            PublicPun.showNoticeDialog(mContext, getString(R.string.unable_to_send), e.getMessage());
             Crashlytics.log("Unable to send:" + e.getMessage());
             LogUtil.e("錯誤=" + e.getMessage());
         }
@@ -651,7 +644,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener, 
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        mProgress.setMessage("Prepare transaction...");
+                        mProgress.setMessage(getString(R.string.preparing_transaction));
                         mProgress.show();
                     }
                 });
@@ -728,7 +721,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener, 
                 byte[] tempHash = null;
                 try {
                     tempHash = Transaction.Script.hashTransactionForSigning(spendTxToSign);
-                    LogUtil.e("tempHash:"+PublicPun.byte2HexStringNoBlank(tempHash));
+                    LogUtil.e("tempHash:" + PublicPun.byte2HexStringNoBlank(tempHash));
                 } catch (ValidationException e) {
                     e.printStackTrace();
                     LogUtil.e(e.getMessage());
@@ -743,7 +736,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener, 
                 dbAddress d = DatabaseHelper.querySendAddress(mContext, processedTxData.outputsToSpend.get(i).getAddress());
                 if (d == null) {
                     cancelTrx();
-                    PublicPun.showNoticeDialog(mContext, getString(R.string.send_notification_unable_to_send), "Can't find Unspent addresses.");
+                    PublicPun.showNoticeDialog(mContext, getString(R.string.unable_to_send), getString(R.string.can_not_find_unspent));
                     return;
                 }
 
@@ -838,7 +831,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener, 
             }
         } catch (Exception e) {
             btnSend.setEnabled(true);
-            PublicPun.showNoticeDialog(mContext, "Notification", "Unable to Send");
+            PublicPun.showNoticeDialog(mContext, getString(R.string.unable_to_send), getString(R.string.error) + ":" + e.getMessage());
             LogUtil.e("prepareTransaction error=" + e.getMessage());
             cancelTrx();
             Crashlytics.logException(e);
@@ -900,7 +893,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener, 
                 doTrxSign(i, inputAddressList.get(i).getPublickey());
             }
         } catch (Exception e) {
-            PublicPun.showNoticeDialog(mContext, "Notification", "doTrxSign  failed");
+            PublicPun.showNoticeDialog(mContext, getString(R.string.error_msg),getString(R.string.cmd_trxsign_error));
             cancelTrx();
             Crashlytics.logException(e);
         }
@@ -945,7 +938,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener, 
                                     }
                                 }
                             } else {
-                                PublicPun.showNoticeDialog(mContext, "Notification", "CmdTrxBegin error:" + LogUtil.byte2HexString(outputData));
+                                PublicPun.showNoticeDialog(mContext, getString(R.string.error_msg), getString(R.string.cmd_trx_begin_error)+":" + LogUtil.byte2HexString(outputData));
                             }
                         }
                     }
@@ -976,7 +969,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener, 
         if (mProgress != null) {
             mProgress.dismiss();
         }
-        ClickFunction(mContext, "Send", "Please press Button On the Card");
+        ClickFunction(mContext, getString(R.string.send), getString(R.string.plz_press_button));
     }
 
     private void didVerifyOtp() {
@@ -1008,7 +1001,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener, 
                                         if (Arrays.equals(outputData, successBtnPressesData)) {
                                             //otp+button_up verify
                                             if (btnTxBuilder.isShowing()) btnTxBuilder.dismiss();
-                                            mProgress.setMessage("Sending Bitcoin...");
+                                            mProgress.setMessage(getString(R.string.sending_bitcoins));
                                             mProgress.show();
                                             LogUtil.i("case3. otp+button_up verify!");
                                             doTrxSign();
@@ -1024,7 +1017,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener, 
                                     } else {
                                         LogUtil.i("otp failed status=" + String.valueOf(status + 65536));
                                         cancelTrx();
-                                        PublicPun.showNoticeDialog(mContext, "Notification", "OTP verify failed");
+                                        PublicPun.showNoticeDialog(mContext, getString(R.string.error_msg), getString(R.string.failed_to_verify_otp));
                                     }
                                 }
                             }
@@ -1136,8 +1129,6 @@ public class SendFragment extends BaseFragment implements View.OnClickListener, 
             ctxout.setAdd(outputs[i].script.toString());
             LogUtil.i("outputs[" + String.valueOf(i) + "].script=" + outputs[i].script.toString());
             ctxout.setValue((outputs[i].value));
-
-
 
 
             txoutList.add(ctxout);
@@ -1495,7 +1486,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener, 
         protected void onPostExecute(List<UnSpentTxsBean> UnSpentTxsBeans) {
 
             if (UnSpentTxsBeans.size() == 0) {
-                PublicPun.showNoticeDialog(mContext, "Notification", getString(R.string.note_unspent));
+                PublicPun.showNoticeDialog(mContext, getString(R.string.prompt), getString(R.string.note_unspent));
                 mProgress.dismiss();
             } else {
                 LogUtil.d("UnSpentTxsBeans 取得完成有 " + UnSpentTxsBeans.size() + " 筆");

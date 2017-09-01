@@ -1,14 +1,11 @@
 package com.coolbitx.coolwallet.httpRequest;
 
 import android.text.TextUtils;
-
 import com.snscity.egdwlib.utils.LogUtil;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -215,6 +212,7 @@ public class XchsNetWork {
         HttpURLConnection conn = null;
         try {
             URL url = new URL(temp_url);
+            LogUtil.d("makeHttpRequestLogout url=" + temp_url);
             conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.setDoInput(true);
@@ -274,6 +272,7 @@ public class XchsNetWork {
         HttpURLConnection conn = null;
         try {
             URL url = new URL(temp_url);
+            LogUtil.d("makeHttpRequestGet url=" + temp_url);
             conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.setDoInput(true);
@@ -342,6 +341,7 @@ public class XchsNetWork {
         HttpURLConnection conn = null;
         try {
             URL url = new URL(temp_url);
+            LogUtil.d("makeHttpDelete url=" + temp_url);
             conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("DELETE");
             conn.setDoInput(true);

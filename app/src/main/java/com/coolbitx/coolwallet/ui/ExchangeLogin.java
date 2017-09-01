@@ -16,8 +16,6 @@ import com.coolbitx.coolwallet.util.ExchangeAPI;
 import com.snscity.egdwlib.CmdManager;
 import com.snscity.egdwlib.utils.LogUtil;
 
-import java.util.Timer;
-
 /**
  * Created by ShihYi on 2017/2/17.
  */
@@ -106,13 +104,13 @@ public class ExchangeLogin extends BaseActivity implements View.OnClickListener 
         mProgress = new ProgressDialog(this, ProgressDialog.THEME_HOLO_DARK);
         mProgress.setCancelable(false);
         mProgress.setIndeterminate(true);
-        mProgress.setMessage("Login...");
+        mProgress.setMessage(getString(R.string.login));
     }
 
     private void initToolbar() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setLogo(getResources().getDrawable(R.drawable.exchange));
-        toolbar.setTitle("Exchange");
+        toolbar.setTitle(getString(R.string.exchange));
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
         // 打開 up button_up

@@ -1,22 +1,15 @@
 package com.coolbitx.coolwallet.general;
 
-import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.os.NetworkOnMainThreadException;
-import android.support.v4.content.LocalBroadcastManager;
 import android.widget.Toast;
 
 import com.coolbitx.coolwallet.DataBase.DatabaseHelper;
@@ -25,12 +18,9 @@ import com.coolbitx.coolwallet.Service.BTConfig;
 import com.coolbitx.coolwallet.bean.dbAddress;
 import com.coolbitx.coolwallet.bean.socketByAddress;
 import com.coolbitx.coolwallet.callback.RefreshCallback;
-import com.coolbitx.coolwallet.httpRequest.CwBtcNetWork;
-import com.coolbitx.coolwallet.ui.BaseActivity;
 import com.coolbitx.coolwallet.ui.BleActivity;
 import com.coolbitx.coolwallet.ui.Fragment.BSConfig;
 import com.coolbitx.coolwallet.ui.Fragment.TabFragment;
-import com.crashlytics.android.Crashlytics;
 import com.snscity.egdwlib.CmdManager;
 import com.snscity.egdwlib.cmd.CmdResultCallback;
 import com.snscity.egdwlib.utils.ByteUtil;
@@ -40,16 +30,12 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 
-import static com.coolbitx.coolwallet.ui.BleActivity.bleManager;
-
 public class NotificationReceiver extends BroadcastReceiver {
 
     private Context mContext;
     private CmdManager mCmdManager;
 
-    public NotificationReceiver(){
 
-    }
     public NotificationReceiver(Context context, CmdManager cmdManager) {
         this.mContext = context;
         this.mCmdManager = cmdManager;
@@ -122,19 +108,16 @@ public class NotificationReceiver extends BroadcastReceiver {
 
                 case BSConfig.HANDLER_DISCONN:
 
-
                     ActivityManager am = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
                     ComponentName cn = am.getRunningTasks(1).get(0).topActivity;
                     int ind = cn.getShortClassName().lastIndexOf(".") + 1;//.ui.EraseActivity → EraseActivity
                     String act = cn.getShortClassName().substring(ind);
 
-                    LogUtil.e("BaseActivity HANDLER_DISCONN actitvity=" + act);
-
+                    LogUtil.e("HANDLER_DISCONN activity=" + act);
 
                     if (act.equals("BleActivity")) {
 
 //                        PublicPun.showNoticeDialogToFinish(mContext, title, noteMsg);
-
                         //自動連線
 //                        SharedPreferences settings = mContext.getSharedPreferences("Preference", 0);
 //                        //取出name屬性的字串
@@ -142,7 +125,6 @@ public class NotificationReceiver extends BroadcastReceiver {
 //                        bleManager.connectBle(address);
 
                     } else {
-                        LogUtil.e("not BleActivity");
                         Intent intent = new Intent(mContext, BleActivity.class);
                         intent.putExtra ("Disconnection_Notify", true);
                         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -168,7 +150,7 @@ public class NotificationReceiver extends BroadcastReceiver {
 
     public void RefreshSetAccInfo(int account) {
 
-        LogUtil.e("這是Main FunhdwSetAccInfo=" + account);
+        LogUtil.e("RefreshSetAccInfo account:" + account);
         byte ByteAccId = (byte) account;
 
         //for card display
@@ -258,32 +240,32 @@ public class NotificationReceiver extends BroadcastReceiver {
 
 
     //建立廣播接收socket訊息
-    public class socketNotificationReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            // TODO Auto-generated method stub
-            String action = intent.getAction();
-            LogUtil.d("broadcast recv!");
-
-            if (action.equals(BTConfig.SOCKET_ADDRESS_MSG)) {
-                LogUtil.d("webSocket  broadcast recv!");
-                brocastMsgHandler.sendMessage(brocastMsgHandler.obtainMessage(BSConfig.HANDLER_SOCKET,
-                        intent.getExtras().getSerializable("socketAddrMsg")));
-            } else if (action.equals(BTConfig.DISCONN_NOTIFICATION)) {
-                LogUtil.d("disconn  broadcast recv!");
-                brocastMsgHandler.sendMessage(brocastMsgHandler.obtainMessage(BSConfig.HANDLER_DISCONN));
-            } else if (action.equals(BTConfig.XCHS_NOTIFICATION)) {
-                LogUtil.d("XCHS  broadcast recv!");
-                Message msg = new Message();
-                Bundle data = new Bundle();
-                data.putString("handlerMessage", intent.getExtras().getString("ExchangeMessage"));
-                msg.setData(data);
-                msg.what = BSConfig.HANDLER_XCHS;
-                brocastMsgHandler.sendMessage(msg);
-            }
-        }
-
-    }
+//    public class socketNotificationReceiver extends BroadcastReceiver {
+//        @Override
+//        public void onReceive(Context context, Intent intent) {
+//            // TODO Auto-generated method stub
+//            String action = intent.getAction();
+//            LogUtil.d("broadcast recv!");
+//
+//            if (action.equals(BTConfig.SOCKET_ADDRESS_MSG)) {
+//                LogUtil.d("webSocket  broadcast recv!");
+//                brocastMsgHandler.sendMessage(brocastMsgHandler.obtainMessage(BSConfig.HANDLER_SOCKET,
+//                        intent.getExtras().getSerializable("socketAddrMsg")));
+//            } else if (action.equals(BTConfig.DISCONN_NOTIFICATION)) {
+//                LogUtil.d("disconn  broadcast recv!");
+//                brocastMsgHandler.sendMessage(brocastMsgHandler.obtainMessage(BSConfig.HANDLER_DISCONN));
+//            } else if (action.equals(BTConfig.XCHS_NOTIFICATION)) {
+//                LogUtil.d("XCHS  broadcast recv!");
+//                Message msg = new Message();
+//                Bundle data = new Bundle();
+//                data.putString("handlerMessage", intent.getExtras().getString("ExchangeMessage"));
+//                msg.setData(data);
+//                msg.what = BSConfig.HANDLER_XCHS;
+//                brocastMsgHandler.sendMessage(msg);
+//            }
+//        }
+//
+//    }
 
     /**
      * show on Status Bar

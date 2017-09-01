@@ -110,7 +110,7 @@ public class InitialSecuritySettingActivity extends BaseActivity implements Comp
     private void initToolbar() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setLogo(getResources().getDrawable(R.mipmap.security));
-        toolbar.setTitle("Security");
+        toolbar.setTitle(getString(R.string.security));
         setSupportActionBar(toolbar);
         // Navigation Icon設定在 setSupoortActionBar後才有作用,否則會出現 back button_up
         toolbar.setNavigationIcon(R.mipmap.menu_3x);

@@ -275,6 +275,6 @@
             android:layout_centerHorizontal="true"
             android:layout_margin="@dimen/send_confirm_margin"
             android:background="@drawable/selector_button"
-            android:text="@string/btn_str_send" />
+            android:text="@string/send" />
     </RelativeLayout>
 </LinearLayout>

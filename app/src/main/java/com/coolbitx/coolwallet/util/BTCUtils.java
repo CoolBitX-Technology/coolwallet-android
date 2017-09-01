@@ -2,10 +2,10 @@ package com.coolbitx.coolwallet.util;
 
 import android.content.Context;
 
+import com.coolbitx.coolwallet.R;
 import com.coolbitx.coolwallet.bean.UnSpentTxsBean;
 import com.coolbitx.coolwallet.general.AppPrefrence;
 import com.coolbitx.coolwallet.general.PublicPun;
-import com.crashlytics.android.Crashlytics;
 import com.snscity.egdwlib.utils.LogUtil;
 
 import org.spongycastle.asn1.ASN1InputStream;
@@ -27,8 +27,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-
-import static com.coolbitx.coolwallet.general.PublicPun.SATOSHI_RATE;
 
 /**
  * Created by wmgs_01 on 15/10/7.
@@ -178,7 +176,7 @@ public class BTCUtils {
         RECOMMENDED_FEE_PER_BYTE = AppPrefrence.getRecommendedFastestFee(mContext);
         ArrayList<UnSpentTxsBean> outputsToSpend = new ArrayList<>();
         if (amountToSend <= 0) {    //No this situation,already rule out by uone instruction.
-            throw new ValidationException("Spend amount can not be less than 0.");
+            throw new ValidationException(mContext.getString(R.string.spend_amount_less_than_zero));
         } else {
 
             if (mSendAll) {
@@ -193,7 +191,7 @@ public class BTCUtils {
                 if (!AppPrefrence.getAutoFeeCheckBox(mContext)) {
                     fee = BTCconvertToSatoshisValue(AppPrefrence.getManualFee(mContext));
                 } else {
-                    txOneOutputLen = BTCUtils.getMaximumTxSizeii(outputsToSpend.size(), isPublicKeyCompressed);
+                    txOneOutputLen = BTCUtils.getMaximumTxSize(mContext, outputsToSpend.size(), isPublicKeyCompressed);
                     fee = calcRecommendedFee(txOneOutputLen);
                     AppPrefrence.saveRecommendedDefaultFee(mContext, fee);
                 }
@@ -202,8 +200,8 @@ public class BTCUtils {
 
                 if (amountToSend < 0) {
 
-                    throw new ValidationException("Invalid transaction:\n" +
-                            "Transaction fee is higher than balance.\nfee:" +
+                    throw new ValidationException(mContext.getString(R.string.invalid_transaction) +
+                            mContext.getString(R.string.fee_higher_than_balance) +
                             new DecimalFormat("#.########").format(fee * PublicPun.SATOSHI_RATE));
                 }
 
@@ -223,7 +221,7 @@ public class BTCUtils {
                     if (!AppPrefrence.getAutoFeeCheckBox(mContext)) {
                         fee = BTCconvertToSatoshisValue(AppPrefrence.getManualFee(mContext));
                     } else {
-                        txOneOutputLen = BTCUtils.getMaximumTxSizeii(outputsToSpend.size(), isPublicKeyCompressed);
+                        txOneOutputLen = BTCUtils.getMaximumTxSize(mContext, outputsToSpend.size(), isPublicKeyCompressed);
                         fee = calcRecommendedFee(txOneOutputLen);
                         AppPrefrence.saveRecommendedDefaultFee(mContext, fee);
                     }
@@ -263,7 +261,7 @@ public class BTCUtils {
 
         if (outputsToSpend.isEmpty() || outputsToSpend.size() == 0) {
             LogUtil.e("No outputs to spend");
-            throw new ValidationException("No outputs to spend.");
+            throw new ValidationException(mContext.getString(R.string.no_output_to_spent));
         }
 
         //ZERO Confirmation unspent?
@@ -272,33 +270,28 @@ public class BTCUtils {
 //            float output = (((float) valueOfUnspentOutputs - (float) fee - (float) amountToSend) / (float) SATOSHIS_PER_COIN);
 //            throw new ValidationException("Insufficient funds: " + new DecimalFormat("#.########").format(output * PublicPun.SATOSHI_RATE) + " btc\nFee:" + new DecimalFormat("#.########").format(fee * PublicPun.SATOSHI_RATE) + "btc");
 
-            throw new ValidationException("Invalid transaction:\n" +
-                    "Transaction output + fee is higher than balance.\n"+
-                    "Output value:" + new DecimalFormat("#.########").format(amountToSend * PublicPun.SATOSHI_RATE) + " btc\n"+
-                    "Fee:" + new DecimalFormat("#.########").format(fee * PublicPun.SATOSHI_RATE) + "btc"
+            throw new ValidationException(mContext.getString(R.string.invalid_transaction) +
+                    mContext.getString(R.string.amount_and_fee_higher_than_balance) +
+                    mContext.getString(R.string.output_amount) + new DecimalFormat("#.########").format(amountToSend * PublicPun.SATOSHI_RATE) + " btc\n" +
+                    mContext.getString(R.string.fees) + new DecimalFormat("#.########").format(fee * PublicPun.SATOSHI_RATE) + " btc"
             );
         }
         if (outputsToSpend.isEmpty()) {
-            LogUtil.e("No outputs to spend");
-            throw new ValidationException("No outputs to spend.");
+            throw new ValidationException(mContext.getString(R.string.no_output_to_spent));
         }
-//        if (fee + extraFee > MAX_ALLOWED_FEE) {
-////            LogUtil.e("Fee is too big " + fee + ";MAX_ALLOWED_FEE=" + MAX_ALLOWED_FEE);
-//            throw new ValidationException("Fee is too big " + fee + ";MAX_ALLOWED_FEE=" + MAX_ALLOWED_FEE);
-//        }
+
         if (fee < 0 || extraFee < 0) {
-            LogUtil.e("Incorrect fee " + fee);
-            throw new ValidationException("Incorrect fee " + fee);
+            throw new ValidationException(mContext.getString(R.string.incorrect_fee) + fee);
         }
         if (change < 0) {
-            LogUtil.e("Incorrect change " + change);
-            throw new ValidationException("Incorrect change " + change);
+            throw new ValidationException(mContext.getString(R.string.incorrect_change) + change);
         }
         if (amountToSend < dustFee) {
             LogUtil.e("Insufficient amount to send " + amountToSend);
-            throw new ValidationException("Invalid transaction:\n" +
-                    "With transaction fee, this transaction output becomes lower than dust (5460 Satoshi).(value:" +
-                    new DecimalFormat("#.########").format(amountToSend * PublicPun.SATOSHI_RATE) + ";fee:" + new DecimalFormat("#.########").format(fee * PublicPun.SATOSHI_RATE) + ")");
+            throw new ValidationException(mContext.getString(R.string.invalid_transaction)+
+                    mContext.getString(R.string.transaction_lower_than_dust) +
+                    new DecimalFormat("#.########").format(amountToSend * PublicPun.SATOSHI_RATE) +
+                    "\n"+mContext.getString(R.string.fees) + new DecimalFormat("#.########").format(fee * PublicPun.SATOSHI_RATE) + " btc)");
         }
         return new FeeChangeAndSelectedOutputs(fee + extraFee, change, amountToSend, outputsToSpend, valueOfUnspentOutputs, isDust);
     }
@@ -357,24 +350,10 @@ public class BTCUtils {
         return MIN_FEE_PER_TX * (1 + txLen / 1000);
     }
 
-    public static int getMaximumTxSize(Collection<UnSpentTxsBean> unspentOutputInfos, int outputsCount, boolean compressedPublicKey) throws ValidationException {
-        if (unspentOutputInfos == null || unspentOutputInfos.isEmpty()) {
-            throw new ValidationException("No information about tx inputs provided");
-        }
-        //scriptSig contains the signature along with the public key(106)
-        int maxInputScriptLen = 73 + (compressedPublicKey ? 33 : 65);
-//        return 9 + unspentOutputInfos.size() * (41 + maxInputScriptLen) + outputsCount * 33;
-        LogUtil.e("getMaximumTxSize 計算:INPUT=" + unspentOutputInfos.size() +
-                ";maxInputScriptLen=" + (41 + maxInputScriptLen) + ";OUTPUT=" + outputsCount);
-        int maxSize = 10 + unspentOutputInfos.size() * (41 + maxInputScriptLen) + outputsCount * 34;
 
-        LogUtil.e("getMaximumTxSize=" + maxSize);
-        return maxSize;
-    }
-
-    public static int getMaximumTxSizeii(int unspentCounts, boolean compressedPublicKey) throws ValidationException {
+    public static int getMaximumTxSize(Context context, int unspentCounts, boolean compressedPublicKey) throws ValidationException {
         if (unspentCounts == 0) {
-            throw new ValidationException("No information about tx inputs provided");
+            throw new ValidationException(context.getString(R.string.can_not_find_unspent));
         }
         //scriptSig contains the signature along with the public key(106)
         int maxInputScriptLen = 73 + (compressedPublicKey ? 33 : 65);

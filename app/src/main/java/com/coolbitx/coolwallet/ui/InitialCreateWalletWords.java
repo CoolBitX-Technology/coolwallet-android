@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
 import android.view.View;
@@ -80,7 +79,7 @@ public class InitialCreateWalletWords extends BaseActivity implements View.OnCli
                 break;
             case R.id.seedWords_confirm:
 
-                mProgress.setMessage("Creating wallet...");
+                mProgress.setMessage(getString(R.string.create_wallet)+"...");
                 mProgress.show();
 
                 LogUtil.i("by soft create seed:" + hdwSeed + "\n" + "EncKey:" + PublicPun.user.getEncKey() + ",MacKey:" + PublicPun.user.getMacKey());
@@ -93,7 +92,7 @@ public class InitialCreateWalletWords extends BaseActivity implements View.OnCli
 
                             @Override
                             public void run() {
-                                mProgress.setMessage("Generating seed...");
+                                mProgress.setMessage(getString(R.string.generating_seed)+"...");
                                 mProgress.show();
                             }
                         });
@@ -113,7 +112,7 @@ public class InitialCreateWalletWords extends BaseActivity implements View.OnCli
 
                                 } else {
                                     mProgress.dismiss();
-                                    PublicPun.showNoticeDialogToFinish(context, "Error Message", "Error:" + Integer.toHexString(status));
+                                    PublicPun.showNoticeDialogToFinish(context, getString(R.string.error_msg), getString(R.string.error)+":" + Integer.toHexString(status));
                                 }
                             }
                         });
@@ -141,7 +140,7 @@ public class InitialCreateWalletWords extends BaseActivity implements View.OnCli
 
     private void initToolbar() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle("Create HD Wallet");
+        toolbar.setTitle(getString(R.string.create_wallet));
         setSupportActionBar(toolbar);
         // Navigation Icon設定在 setSupoortActionBar後才有作用,否則會出現 back button_up
         toolbar.setNavigationIcon(R.mipmap.menu_3x);

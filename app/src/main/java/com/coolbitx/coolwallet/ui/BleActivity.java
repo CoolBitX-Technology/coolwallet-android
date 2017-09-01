@@ -18,7 +18,6 @@ import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.ExpandableListView;
@@ -32,7 +31,6 @@ import com.coolbitx.coolwallet.adapter.ListViewAdapter;
 import com.coolbitx.coolwallet.bean.Constant;
 import com.coolbitx.coolwallet.bean.MyDevice;
 import com.coolbitx.coolwallet.general.CSVReadWrite;
-import com.coolbitx.coolwallet.general.NotificationReceiver;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.coolbitx.coolwallet.ui.Fragment.FragMainActivity;
 import com.crashlytics.android.Crashlytics;
@@ -44,9 +42,7 @@ import com.snscity.egdwlib.cmd.CmdResultCallback;
 import com.snscity.egdwlib.utils.LogUtil;
 import com.snscity.egdwlib.utils.UUIDGenerator;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -147,7 +143,7 @@ public class BleActivity extends BaseActivity {
             isConnected = true;
             mProgress.dismiss();
 
-            mProgress.setMessage("Login Host...");
+            mProgress.setMessage(getString(R.string.login_host));
             mProgress.show();
 
             getFwVersion();
@@ -290,14 +286,15 @@ public class BleActivity extends BaseActivity {
         if (params!= null) {
             boolean temp = params.getBoolean ("Disconnection_Notify") ;
             if(temp){
+                bleManager.disConnectBle();
                 String noteMsg;
-                String title = "CoolWallet Disconnected";
+                String title = "CoolWallet "+getString(R.string.disconnected);
                 if (PublicPun.card.getCardId() == null) {
                     noteMsg = "CoolWallet Disconnected";
                 } else {
                     noteMsg = new String(PublicPun.hexStringToByteArray(PublicPun.card.getCardId()));
                 }
-                PublicPun.showNoticeDialog(mContext, title, noteMsg+" disconnected.");
+                PublicPun.showNoticeDialog(mContext, title, noteMsg+" "+getString(R.string.disconnected));
                 systemNotification(title, noteMsg);
             }
         }
@@ -390,7 +387,7 @@ public class BleActivity extends BaseActivity {
 
                                 @Override
                                 public void run() {
-                                    mProgress.setMessage("Connecting...");
+                                    mProgress.setMessage(getString(R.string.connecting));
                                     mProgress.show();
                                 }
                             });
@@ -441,7 +438,7 @@ public class BleActivity extends BaseActivity {
 
                                 @Override
                                 public void run() {
-                                    mProgress.setMessage("Connecting...");
+                                    mProgress.setMessage(getString(R.string.connecting));
                                     mProgress.show();
                                 }
                             });
@@ -740,6 +737,9 @@ public class BleActivity extends BaseActivity {
     private void disconnBroadCast() {
         Intent SocketIntent = new Intent(BTConfig.DISCONN_NOTIFICATION);
         LogUtil.i("DISCONN_NOTIFICATION");
+        if(mProgress.isShowing()){
+            mProgress.dismiss();
+        }
         LocalBroadcastManager.getInstance(this).sendBroadcast(SocketIntent);
     }
 

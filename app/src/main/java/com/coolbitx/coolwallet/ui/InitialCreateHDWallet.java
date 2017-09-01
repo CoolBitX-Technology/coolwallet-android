@@ -76,7 +76,7 @@ public class InitialCreateHDWallet extends BaseActivity implements View.OnClickL
     }
     private void initToolbar() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle("Create Wallet");
+        toolbar.setTitle(getString(R.string.create_wallet));
         setSupportActionBar(toolbar);
         // Navigation Icon設定在 setSupoortActionBar後才有作用,否則會出現 back button_up
         toolbar.setNavigationIcon(R.mipmap.menu_3x);

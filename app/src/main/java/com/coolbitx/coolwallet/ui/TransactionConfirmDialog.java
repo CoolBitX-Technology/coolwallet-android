@@ -15,8 +15,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.coolbitx.coolwallet.R;
-import com.coolbitx.coolwallet.callback.TransactionConfirmCallback;
 import com.coolbitx.coolwallet.bean.TxsConfirm;
+import com.coolbitx.coolwallet.callback.TransactionConfirmCallback;
 import com.coolbitx.coolwallet.general.AppPrefrence;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.snscity.egdwlib.utils.LogUtil;
@@ -94,7 +94,7 @@ public class TransactionConfirmDialog extends AlertDialog implements View.OnClic
                 mTxsConfirm.getOutput_total() * PublicPun.SATOSHI_RATE)));
         tvTotalForeignAmount.setText("$" + String.valueOf(new DecimalFormat("#.##").format(
                 mTxsConfirm.getOutput_total() * PublicPun.SATOSHI_RATE * UseExchangeRate)));
-        tvInputStr.setText(String.valueOf(mTxsConfirm.getInput_count()) + " Inputs");
+        tvInputStr.setText(String.valueOf(mTxsConfirm.getInput_count()) + " "+mContext.getString(R.string.inputs));
         tvInputAmount.setText("฿" + String.valueOf(new DecimalFormat("#.########").format(
                 mTxsConfirm.getInput_amount() * PublicPun.SATOSHI_RATE)));
         tvChangeAddr.setText(mTxsConfirm.getChange_address());

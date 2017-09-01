@@ -2,10 +2,7 @@ package com.coolbitx.coolwallet.Service;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.FirebaseInstanceIdService;
-import com.google.firebase.messaging.FirebaseMessaging;
 import com.snscity.egdwlib.utils.LogUtil;
-
-import java.io.IOException;
 
 public class CwFirebaseInstanceIDService extends FirebaseInstanceIdService {
 

@@ -58,7 +58,7 @@ public class ConfirmOtpActivity extends BaseActivity implements View.OnClickList
         mProgress = new ProgressDialog(ConfirmOtpActivity.this, ProgressDialog.THEME_HOLO_DARK);
         mProgress.setCancelable(false);
         mProgress.setIndeterminate(true);
-        mProgress.setMessage("Pairing...");
+        mProgress.setMessage(getString(R.string.paring));
 
 
         //通過當前狀態 判断是否是第一次注册
@@ -76,7 +76,7 @@ public class ConfirmOtpActivity extends BaseActivity implements View.OnClickList
         if (isRegistered) {
             DatabaseHelper.deleteTable(getApplicationContext(), DbName.DB_TABLE_ADDR);
             DatabaseHelper.deleteTable(getApplicationContext(), DbName.DB_TABLE_TXS);
-            PublicPun.showNoticeDialogToFinish(context, "Waiting for authorization from paired device", "");
+            PublicPun.showNoticeDialogToFinish(context, getString(R.string.wait_authorization), "");
         } else {
             genOTP();
         }
@@ -99,10 +99,10 @@ public class ConfirmOtpActivity extends BaseActivity implements View.OnClickList
                     }
                     //16進制的9000在10進制是36864;6645是26181;status=91717
                 } else if ((status + 65536) == 0x16645) {
-                    PublicPun.showNoticeDialogToFinish(context, "Unable to pair", "maximum number of 3 hosts have been paired with this card");
+                    PublicPun.showNoticeDialogToFinish(context, getString(R.string.unable_to_pair), getString(R.string.maximum_paired_limitation));
                 } else {
 //                    LogUtil.i("status="+String.valueOf(status));
-                    PublicPun.showNoticeDialogToFinish(context, "Unable to pair", "Error:" + Integer.toHexString(status));
+                    PublicPun.showNoticeDialogToFinish(context, getString(R.string.unable_to_pair), getString(R.string.error)+":" + Integer.toHexString(status));
                 }
             }
         });
@@ -126,7 +126,7 @@ public class ConfirmOtpActivity extends BaseActivity implements View.OnClickList
                         public void onSuccess(int status, byte[] outputData) {
                             if ((status + 65536) == 0x9000) {
                                 LogUtil.i("OTP:" + "bindRegApprove success");
-                                PublicPun.toast(getApplicationContext(), "Approve success");
+                                PublicPun.toast(getApplicationContext(), getString(R.string.approve_success));
 
                                 if (PublicPun.modeState.equals("PERSO")) {
                                     //default security setting
@@ -201,17 +201,17 @@ public class ConfirmOtpActivity extends BaseActivity implements View.OnClickList
                                                         LogUtil.i("bindRegFinish2 isConfirm:" + isConfirm + ", uuid:" + currentUuid + ",hostId" + hostId);
                                                         DatabaseHelper.deleteTable(getApplicationContext(), DbName.DB_TABLE_ADDR);
                                                         DatabaseHelper.deleteTable(getApplicationContext(), DbName.DB_TABLE_TXS);
-                                                        PublicPun.showNoticeDialogToFinish(context, "Waiting for authorization from paired device", "");
+                                                        PublicPun.showNoticeDialogToFinish(context, getString(R.string.wait_authorization), "");
                                                     }
                                                 }
                                             } else if ((status + 65536) == 0x16648) {
                                                 mProgress.dismiss();
-                                                PublicPun.showNoticeDialog(context, "Unable to pair", "Incorrect OTP, Please try again.");
+                                                PublicPun.showNoticeDialog(context, getString(R.string.unable_to_pair), getString(R.string.incorrect_otp_try_again));
                                                 editotp.setText("");
                                                 genOTP();
                                             } else {
                                                 mProgress.dismiss();
-                                                PublicPun.showNoticeDialogToFinish(context, "Unable to pair", "Error:" + Integer.toHexString(status));
+                                                PublicPun.showNoticeDialogToFinish(context, getString(R.string.unable_to_pair), getString(R.string.error)+":" + Integer.toHexString(status));
                                             }
                                         }
                                     });

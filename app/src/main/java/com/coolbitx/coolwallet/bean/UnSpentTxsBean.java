@@ -1,7 +1,5 @@
 package com.coolbitx.coolwallet.bean;
 
-import com.google.gson.annotations.SerializedName;
-
 /**
  * Created by wmgs_01 on 15/10/7.
  */

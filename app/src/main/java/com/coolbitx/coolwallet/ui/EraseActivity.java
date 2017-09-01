@@ -45,7 +45,7 @@ public class EraseActivity extends BaseActivity implements View.OnClickListener 
         mProgress.setCancelable(false);
         mProgress.setIndeterminate(true);
         //睡毫秒
-        mProgress.setMessage("Generating Reset OTP...");
+        mProgress.setMessage(getString(R.string.gen_reset_otp));
         mProgress.show();
 
 
@@ -134,7 +134,7 @@ public class EraseActivity extends BaseActivity implements View.OnClickListener 
 
                             @Override
                             public void run() {
-                                mProgress.setMessage("Reseting...");
+                                mProgress.setMessage(getString(R.string.resetting));
                                 mProgress.show();
                             }
                         });
@@ -147,13 +147,12 @@ public class EraseActivity extends BaseActivity implements View.OnClickListener 
                                         resetCard();
                                     } else if ((status + 65536) == 0x16606) {
                                         mProgress.dismiss();
-//                                        showNoticeDialog("Erro Message", "Error:" + "OTP incorrect !");
-                                        PublicPun.showNoticeDialog(context, "OTP incorrect", "Please try again");
+                                        PublicPun.showNoticeDialog(context, getString(R.string.otp_incorrect),getString(R.string.plz_try_again));
                                         editOTP.setText("");
                                         genOTP();
                                     } else {
                                         mProgress.dismiss();
-                                        PublicPun.showNoticeDialogToFinish(context, "Error Message", "Error:" + Integer.toHexString(status));
+                                        PublicPun.showNoticeDialogToFinish(context,getString(R.string.error_msg), getString(R.string.error)+":" + Integer.toHexString(status));
                                     }
                                 }
                             });
@@ -199,13 +198,13 @@ public class EraseActivity extends BaseActivity implements View.OnClickListener 
                                         if ((status + 65536) == 0x9000) {
                                             mProgress.dismiss();
                                             cleanData();
-                                            PublicPun.toast(context, " Initial Success");
+                                            PublicPun.toast(context, getString(R.string.initial_success));
                                             setResult(RESULT_OK);
                                             finish();
                                         } else {
                                             AppPrefrence.saveIsResetSuccess(context,!AppPrefrence.getIsResetSuccess(context));
                                             mProgress.dismiss();
-                                            PublicPun.showNoticeDialogToFinish(context, "Update", "Please restart CoolWallet and reset again.");
+                                            PublicPun.showNoticeDialogToFinish(context,getString(R.string.update), getString(R.string.restart_coolwallet));
 
                                         }
                                     }

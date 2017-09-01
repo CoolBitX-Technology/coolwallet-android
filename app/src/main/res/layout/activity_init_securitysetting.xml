@@ -14,26 +14,28 @@
         android:background="@color/col_black">
 
         <TableRow
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginTop="10sp">
+            android:layout_marginTop="10sp"
+            android:weightSum="10">
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_column="0"
                 android:layout_marginLeft="20px"
+                android:layout_weight="8"
                 android:text="@string/tv_security_otp"
                 android:textColor="@color/bottomtab_normal"
                 android:textSize="20dp" />
 
             <Switch
                 android:id="@+id/switchOtp"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_column="1"
                 android:layout_gravity="center_vertical"
-                android:layout_marginLeft="80px"
+                android:layout_weight="2"
                 android:text="" />
         </TableRow>
 
@@ -43,24 +45,30 @@
             android:layout_marginTop="20sp"
             android:background="@color/dark_gray" />
 
-        <TableRow android:layout_marginTop="10sp">
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="10sp"
+            android:weightSum="10">
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_column="0"
                 android:layout_marginLeft="20px"
+                android:layout_weight="8"
                 android:text="@string/tv_security_enable_press_button"
                 android:textColor="@color/bottomtab_normal"
                 android:textSize="20dp" />
 
             <Switch
                 android:id="@+id/switch_enable_press_button"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_column="1"
                 android:layout_gravity="center_vertical"
                 android:layout_marginLeft="80px"
+                android:layout_weight="2"
                 android:text="" />
         </TableRow>
 
@@ -70,24 +78,30 @@
             android:layout_marginTop="20sp"
             android:background="@color/dark_gray" />
 
-        <TableRow android:layout_marginTop="20sp">
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="20sp"
+            android:weightSum="10">
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_column="0"
                 android:layout_marginLeft="20px"
+                android:layout_weight="8"
                 android:text="@string/tv_security_dog"
                 android:textColor="@color/bottomtab_normal"
                 android:textSize="20dp" />
 
             <Switch
                 android:id="@+id/switch_dog"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_column="1"
                 android:layout_gravity="center_vertical"
                 android:layout_marginLeft="80px"
+                android:layout_weight="2"
                 android:text="" />
         </TableRow>
 
@@ -150,24 +164,30 @@
         android:layout_centerHorizontal="true"
         android:background="@color/col_black">
 
-        <TableRow android:layout_marginTop="20sp">
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="20sp"
+            android:weightSum="10">
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_column="0"
                 android:layout_marginLeft="20px"
+                android:layout_weight="8"
                 android:text="@string/tv_security_show_address"
                 android:textColor="@color/bottomtab_normal"
                 android:textSize="20dp" />
 
             <Switch
                 android:id="@+id/switchAddress"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_column="1"
                 android:layout_gravity="center_vertical"
                 android:layout_marginLeft="80px"
+                android:layout_weight="2"
                 android:text="" />
         </TableRow>
 
@@ -194,14 +214,15 @@
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
-    <Button
-        android:id="@+id/btn_update_sec"
-        style="@style/TextView_Brown_16"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_margin="@dimen/send_confirm_margin"
-        android:background="@drawable/selector_button"
-        android:text="@string/btn_security_str_update" />
+
+        <Button
+            android:id="@+id/btn_update_sec"
+            style="@style/TextView_Brown_16"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_margin="@dimen/send_confirm_margin"
+            android:background="@drawable/selector_button"
+            android:text="@string/btn_security_str_update" />
     </RelativeLayout>
 </LinearLayout>

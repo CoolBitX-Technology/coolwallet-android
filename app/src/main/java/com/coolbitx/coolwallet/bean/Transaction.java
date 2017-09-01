@@ -3,9 +3,6 @@ package com.coolbitx.coolwallet.bean;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.coolbitx.coolwallet.util.BTCUtils;
 import com.coolbitx.coolwallet.util.BitcoinOutputStream;
-import com.coolbitx.coolwallet.util.ByteUtils;
-import com.coolbitx.coolwallet.util.ECPublicKey;
-import com.coolbitx.coolwallet.util.Hash;
 import com.coolbitx.coolwallet.util.ValidationException;
 import com.snscity.egdwlib.utils.LogUtil;
 
@@ -15,8 +12,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Stack;
-
-import static com.coolbitx.coolwallet.util.ByteUtils.toBase58;
 
 /**
  * Created by wmgs_01 on 15/10/6.
@@ -34,14 +29,18 @@ public class Transaction {
         this.lockTime = lockTime;
     }
 
+
+    //genRawtx(byte[] sc)
+
+
     public byte[] getBytes() {
         BitcoinOutputStream bos = new BitcoinOutputStream();
         try {
-            bos.writeInt32(1);
-            bos.writeVarInt(inputs.length);
+            bos.writeInt32(1);//4B
+            bos.writeVarInt(inputs.length);//1B
             for (Input input : inputs) {
                 bos.write(BTCUtils.reverse(input.outPoint.hash));
-                bos.writeInt32(input.outPoint.index);
+                bos.writeInt32(input.outPoint.index);//4B
                 int scriptLen = input.script == null ? 0 : input.script.bytes.length;
                 bos.writeVarInt(scriptLen);
                 if (scriptLen > 0) {
@@ -72,64 +71,6 @@ public class Transaction {
 
     }
 
-//    public byte[] getBitcoinOutputStreamBytes() {
-//        BitcoinOutputStream baos = new BitcoinOutputStream();
-//        try {
-//            baos.writeInt32(1);
-//            baos.writeVarInt(inputs.length);
-//            for (Input input : inputs) {
-//                //input.outPoint.hash = txid
-//                //input.outPoint.index= getN
-//                //input.script  = outputToSpend.getScript().getBytes()
-//
-////               byte[]input_outPoint= LogUtil.byte2HexString(input.outPoint.hash).getBytes();
-////                LogUtil.i("input_hash=" + LogUtil.byte2HexString((input_outPoint)));
-//
-////                LogUtil.i("Input.OuptPoint.hash length=" + input.outPoint.hash.length);
-////                LogUtil.i("hash的HexString=" + PublicPun.byte2HexString(input.outPoint.hash));
-//
-//                baos.write(BTCUtils.reverse(input.outPoint.hash));//tid //input.outPoint.hash
-//
-//                BitcoinOutputStream prevOutputIndexStream = new BitcoinOutputStream();
-//                prevOutputIndexStream.writeInt32(input.outPoint.index);//getN
-//                baos.write(BTCUtils.reverse(prevOutputIndexStream.toByteArray()));
-//
-//                int scriptLen = input.script == null ? 0 : input.script.bytes.length;
-//
-//                LogUtil.i(" input.script=" + input.script + ",Len =" + scriptLen);
-//
-//                baos.writeVarInt(scriptLen);
-//                if (scriptLen > 0) {
-//                    baos.write(input.script.bytes);
-//                }
-//                baos.writeInt32(input.sequence);
-//            }
-//
-//
-//            baos.writeVarInt(outputs.length);
-//            for (Output output : outputs) {
-//                baos.writeInt64(output.value);
-//
-//                int scriptLen = output.script == null ? 0 : output.script.bytes.length;
-//                LogUtil.i("output script=" + output.script + ",Len =" + scriptLen);
-//                baos.writeVarInt(scriptLen);
-//                if (scriptLen > 0) {
-//                    baos.write(output.script.bytes);
-//                }
-//            }
-//            baos.writeInt32(lockTime);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        } finally {
-//            try {
-//                baos.close();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//        return baos.toByteArray();
-//
-//    }
 
     public static class Input {
         public final OutPoint outPoint;
@@ -167,11 +108,6 @@ public class Transaction {
         }
     }
 
-    public static class PrepTrxPoint{
-
-
-
-    }
 
     public static final class Script {
 

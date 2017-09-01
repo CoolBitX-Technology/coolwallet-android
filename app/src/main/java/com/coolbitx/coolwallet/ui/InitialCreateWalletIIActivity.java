@@ -79,7 +79,7 @@ public class InitialCreateWalletIIActivity extends BaseActivity implements SeekB
         mProgress.setIndeterminate(true);
         hdwSeedLength.setProgress(0);
 
-        PublicPun.showNoticeDialog(this, "Reminder", "Please put the CoolWallet on CoolLink while setting up.");
+        PublicPun.showNoticeDialog(this, getString(R.string.reminder), getString(R.string.put_coolwallet_on_coollink));
         GetSecpo();
     }
 
@@ -105,7 +105,7 @@ public class InitialCreateWalletIIActivity extends BaseActivity implements SeekB
 
                             @Override
                             public void run() {
-                                mProgress.setMessage("Generating seed...");
+                                mProgress.setMessage(getString(R.string.generating_seed)+"...");
                                 mProgress.show();
                             }
                         });
@@ -131,7 +131,7 @@ public class InitialCreateWalletIIActivity extends BaseActivity implements SeekB
                                     mProgress.dismiss();
                                 } else {
                                     mProgress.dismiss();
-                                    PublicPun.showNoticeDialogToFinish(context, "Error Message", "Error:" + Integer.toHexString(status));
+                                    PublicPun.showNoticeDialogToFinish(context, getString(R.string.error_msg), getString(R.string.error)+":" + Integer.toHexString(status));
                                 }
                             }
                         });
@@ -156,7 +156,7 @@ public class InitialCreateWalletIIActivity extends BaseActivity implements SeekB
 
         } else if (view == hdwConfirm) {
             //種子
-            mProgress.setMessage("Creating wallet...");
+            mProgress.setMessage(getString(R.string.create_wallet)+"...");
             mProgress.show();
             String hdwSumStr = hdwSumEt.getText().toString().trim();
             LogUtil.d("hdwSumStr="+hdwSumStr);
@@ -164,16 +164,16 @@ public class InitialCreateWalletIIActivity extends BaseActivity implements SeekB
                 @Override
                 public void onSuccess(int status, byte[] outputData) {
                     if ((status + 65536) == 0x9000) {
-                        PublicPun.toast(InitialCreateWalletIIActivity.this, "HDW Created");
+                        PublicPun.toast(InitialCreateWalletIIActivity.this, getString(R.string.hd_wallet_created));
 
                         Intent intent = new Intent(getApplicationContext(), FragMainActivity.class);
                         intent.putExtra("Parent", InitialCreateWalletIIActivity.class.getSimpleName());
                         startActivity(intent);
 
                     } else if ((status + 65536) == 0x16645) {
-                        PublicPun.showNoticeDialogToFinish(context, "Checksum incorrect", "Please try again or generate seed again");
+                        PublicPun.showNoticeDialogToFinish(context, getString(R.string.checksum_incorrect), getString(R.string.plz_try_again_or_generate_seed_again));
                     } else {
-                        PublicPun.showNoticeDialogToFinish(context, "Error Message", "Error:" + Integer.toHexString(status));
+                        PublicPun.showNoticeDialogToFinish(context, getString(R.string.error_msg), getString(R.string.error)+":" + Integer.toHexString(status));
                     }
                 }
             });
@@ -365,7 +365,7 @@ public class InitialCreateWalletIIActivity extends BaseActivity implements SeekB
 
     private void initToolbar() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle("Create Wallet");
+        toolbar.setTitle(getString(R.string.create_wallet));
         setSupportActionBar(toolbar);
         // Navigation Icon設定在 setSupoortActionBar後才有作用,否則會出現 back button_up
         toolbar.setNavigationIcon(R.mipmap.menu_3x);

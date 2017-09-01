@@ -15,7 +15,9 @@
  * limitations under the License.
  */
 package com.coolbitx.coolwallet.util;
+
 import com.coolbitx.coolwallet.bean.Key;
+
 import org.spongycastle.asn1.ASN1InputStream;
 import org.spongycastle.asn1.DERInteger;
 import org.spongycastle.asn1.DERSequenceGenerator;

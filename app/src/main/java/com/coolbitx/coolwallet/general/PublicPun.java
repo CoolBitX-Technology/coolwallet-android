@@ -1,9 +1,7 @@
 package com.coolbitx.coolwallet.general;
 
-import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -35,7 +33,6 @@ import com.coolbitx.coolwallet.bean.User;
 import com.coolbitx.coolwallet.bean.Wallet;
 import com.coolbitx.coolwallet.bean.socketByAddress;
 import com.coolbitx.coolwallet.ui.BleActivity;
-import com.coolbitx.coolwallet.ui.EraseActivity;
 import com.coolbitx.coolwallet.util.ByteUtils;
 import com.crashlytics.android.Crashlytics;
 import com.google.gson.Gson;
@@ -51,7 +48,6 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;

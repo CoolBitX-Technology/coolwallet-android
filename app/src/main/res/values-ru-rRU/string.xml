@@ -1,0 +1,417 @@
+<resources>
+    <string name="app_name">CoolWallet</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Обменный сайт авторизоваться одноразовый пароль</string>
+    <string name="img_logo1">logo1</string>
+    <string name="drawer_open">Drawer Open</string>
+    <string name="drawer_close">Drawer Close</string>
+
+    <string name="strErase">Вы уверены, что вы хотите перезапустить ваш CoolWallet?...</string>
+    <string name="strEnterOtp">Введите одноразовый пароль</string>
+    <string name="strSearch">Поиск CoolWallet...</string>
+    <string name="strSearchDetail">Пожалуйста, включите CoolWallet, нажав кнопку на карте.</string>
+    <string name="strPullMsg">Потяните экран вниз, чтобы обновить список карт</string>
+    <string name="strConfirmOtp">Подтвердите одноразовый пароль</string>
+    <string name="strKeyOtp">Введите одноразовый пароль с вашей карты</string>
+    <string name="strPairSuccessful">Pairing successful</string>
+
+    <string name="BLOCKR_ADDRESS_INFO_API">http://btc.blockr.io/api/v1/address/info/</string>
+
+
+    <!--Toolbar-->
+    <string name="coolwallet_card">Карта CoolWallet</string>
+    <string name="exchange">Обменный сайт</string>
+    <string name="order_details">Order details</string>
+    <string name="exchange_rate">Обменный курс</string>
+    <string name="open_orders">Открытые заказы</string>
+    <string name="host_devices">Используемые устройства</string>
+    <string name="create_wallet">Создать кошелек</string>
+    <string name="security">Безопасность</string>
+    <string name="exit">Выход</string>
+    <string name="import_seed">Ввести код</string>
+    <string name="payment_service_provider">Провайдер услуг</string>
+    <string name="share_address">Совместное использование адресов</string>
+
+
+    <!--ReceiveFragment-->
+    <string name="label">Метка</string>
+    <string name="request">Запрос</string>
+    <string name="copy">Копия</string>
+    <string name="generating_new_address">Создание нового адреса</string>
+    <string name="unable_create_new_address">Не удалось создать новый адрес</string>
+    <string name="maximum_unused_address">Maximum number of 5 unused addresses reached in this account</string>
+    <string name="create_new_address">Создание нового адреса</string>
+
+
+    <!--BleActivity-->
+    <string name="login_host">Вход в систему...</string>
+    <string name="connecting">connecting...</string>
+    <string name="disconnected">отсоединены.</string>
+    <string name="connect">ЗАПУСТИТЬ</string>
+    <string name="reset">Сброс</string>
+
+
+    <!--ConfirmOtpActivity-->
+    <string name="paring">спаривание...</string>
+    <string name="gen_reset_otp">Создание сброса одноразовый пароль...</string>
+    <string name="wait_authorization">Ожидание авторизации от сопряженного устройства</string>
+    <string name="unable_to_pair">Unable to pair</string>
+    <string name="maximum_paired_limitation">maximum number of 3 hosts have been paired with this card</string>
+    <string name="error">ошибка</string>
+    <string name="approve_success">Утвердить успех</string>
+    <string name="incorrect_otp_try_again">Неправильный одноразовый пароль, повторите попытку.</string>
+
+
+    <!--ShareAddress-->
+    <string name="start_to_share_address">Начать делиться адресом</string>
+    <string name="reference_number_is">/nВаш ссылочный номер/n</string>
+    <string name="address_sharing_success">Успешность совместного использования адресов</string>
+
+
+    <!--EraseActivity-->
+    <string name="resetting">Resetting...</string>
+    <string name="otp_incorrect">Неверный одноразовый пароль</string>
+    <string name="plz_try_again">Пожалуйста, попробуйте еще раз</string>
+    <string name="error_msg">Сообщение об ошибке</string>
+    <string name="initial_success">Начальный успех</string>
+    <string name="restart_coolwallet">Please restart CoolWallet and reset again.</string>
+
+
+    <!--Exchange-->
+    <string name="msg_xchs_get_raw_addr">Не удалось получить данные транзакции.</string>
+    <string name="tv_exchange_sell_str">Pending sell orders</string>
+    <string name="tv_exchange_buy_str">Pending buy orders</string>
+    <string name="tv_exchange_verification_str">Verify OTP to place your sell orders</string>
+    <string name="tv_order_notice_str">Ваш заказ будет отменен автоматически по истечении этого времени.</string>
+    <string name="btn_complete_order_str">Complete order</string>
+    <string name="btn_cancel_order_str">ОТМЕНА</string>
+    <string name="btn_str_sign_in">войти в систему</string>
+    <string name="btn_str_sign_up">зарегистрироваться</string>
+    <string name="str_login_title">Trade wih other CoolWallet holders\non CoolBitx Exchange</string>
+    <string name="btn_place_order">Оформить заказ сейчас</string>
+    <string name="tv_no_pending_order">Пока нет отложенных ордеров</string>
+    <string name="url_exchange_site">http://xsm.coolbitx.com:8080/signup</string>
+    <string name="str_cancel_order_msg"> Вы действительно хотите отменить?</string>
+    <string name="str_yes">да</string>
+    <string name="str_no">нет</string>
+    <string name="str_unable_cancel">Не удалось отменить заказ</string>
+    <string name="reason">причина:</string>
+
+    <!--Exchange Login-->
+    <string name="login">Вход в систему...</string>
+
+
+    <!--ExchangeActivity-->
+    <string name="press_exit">Press once again to exit Exchange site!</string>
+    <string name="sync_failed">Ошибка синхронизации</string>
+
+
+    <!--ExchangeOpenOrderActivity-->
+    <string name="no_open_orders_found">Не найдено открытых ордеров.</string>
+    <string name="unable_to_get_open_orders"> Невозможно получить открытые заказы.</string>
+    <string name="unable_to_cancel_order">Не удалось отменить заказ.</string>
+
+
+    <!--ExchangeCompleteOrderActivity-->
+    <string name="unable_to_generate_otp">Не удалось создать одноразовый пароль</string>
+    <string name="begin_to_block_order"> Начните блокировать заказ</string>
+    <string name="unable_to_block"> Не удалось заблокировать</string>
+    <string name="cancel_block_order"> Are you sure you want to cancel the block order?</string>
+    <string name="canceling_block_order"> Canceling the blocking order...</string>
+    <string name="unable_to_cancel_block"> Unable to Cancel Block</string>
+    <string name="preparing_to_complete_order">Подготовка к завершению заказа...</string>
+    <string name="can_not_find_unspent">Can\'t find the unspents.</string>
+    <string name="preparing_transaction"> Подготовка транзакции...</string>
+    <string name="sign_login_failed">\'Sign login\' failure</string>
+    <string name="plz_press_button">Please press Button On the Card</string>
+    <string name="sending_bitcoins">Отправка биткойнов</string>
+    <string name="cmd_trx_begin_error">Command \'TrxBegin\' error</string>
+    <string name="failed_to_verify_otp">Не удалось проверить одноразовый пароль</string>
+    <string name="sent">Отправлено</string>
+    <string name="btc_to">btc до</string>
+    <string name="failed_to_broadcast_transaction">Failed to broadcast transaction to Blockchain</string>
+    <string name="failed_to_get_change_address">Не удалось получить адрес изменения</string>
+
+
+    <!--TabFragment-->
+    <string name="create_account">Создание аккаунта</string>
+
+
+    <!--SendFragment-->
+    <string name="plz_enter_valid_address"> Пожалуйста,Введите действительный адрес.</string>
+    <string name="get_unspents"> Get unspents...</string>
+    <string name="cmd_trxsign_error">Command \'TrxSign\' error</string>
+    <string name="address">адрес</string>
+    <string name="inputs">ввода</string>
+
+
+    <!--HomeFragment-->
+    <string name="synchronizing_data">Синхронизация данных</string>
+    <string name="unable_connect_internet">Unable to connect to the Internet</string>
+
+
+    <!--FragMainActivity-->
+    <string name="processing">Processing</string>
+    <string name="policy">политика</string>
+    <string name="feedback_sent">Обратная связь отправлена ​​успешно.</string>
+    <string name="failed_to_set_account_ino">Не удалось установить учетную информацию.</string>
+    <string name="share_address_beta">Поделиться адресом\n(бета-версия)</string>
+
+
+    <!--InitialCreateWalletActivity-->
+    <string name="generating_seed">Создание семян</string>
+    <string name="checksum_incorrect">Контрольная сумма неверна</string>
+    <string name="plz_try_again_or_generate_seed_again">Пожалуйста,Повторите попытку или снова создайте семя</string>
+    <string name="hd_wallet_created">HD Wallet created</string>
+    <string name="reminder">Важно</string>
+    <string name="put_coolwallet_on_coollink">Во время установки разместите свой CoolWallet на устройство CoolLink</string>
+
+    <!--HostActivity-->
+    <string name="approve_device">Утвердить это устройство</string>
+    <string name="approve_new_device">Новое устройство одобрено!</string>
+    <string name="approve_failed">Утверждено не выполнено</string>
+    <string name="remove_device">Удалить это устройство</string>
+    <string name="remove_failed">Удалено сбой</string>
+    <string name="remove">Удалить</string>
+    <string name="approve">Одобрить</string>
+    <string name="host_removed">Хост удален</string>
+    <string name="host_approved">Утвержденный хост</string>
+
+
+    <!--Preference-->
+    <string name="pref_title_security_otp">Включить функцию запроса одноразового пароля при осуществлении транзакций</string>
+    <string name="pref_title_security_crad_transaction">Включить функцию нажатия кнопки на карте для завершения транзакций</string>
+    <string name="pref_title_security_watch_dog">Включить функцию сторожевого таймера</string>
+    <string name="strPairSuccessfulDetail">CoolWallet allows you to pair up to\n3 devices,This device will be able to authenticate the second device.</string>
+    <string name="strCancel">Отмена</string>
+    <string name="strReset">Сброс</string>
+    <string name="strPairPhone"> ПРИВЯЗАТЬ К УСТРОЙСТВУ </string>
+    <string name="connetc_status">Состояние подключения</string>
+    <string name="ok">Ok</string>
+
+
+    <!--ISSUEFEEDBACK-->
+    <string name="issue_feedback_title">Обратная связь</string>
+    <string name="issue_feedback_policy_title">политика</string>
+    <string name="issue_feedback_message">Текущее состояние журнал этого приложения будет отправлено в CoolBitX. Пожалуйста, напишите <![CDATA[info@coolbitx.com]]>, чтобы следить за проблемой.</string>
+    <string name="issue_feedback_policy">This issue feedback is used to diagnose problems and improve CoolWallet.
+        No sensitive data or private key will be shared. Any personal information you submit whether explicitly or incidentally
+        will be protected in accordance with our privacy policies. By submitting this feedback, you agree that
+        CoolBitX may use feedback that you provide to improve any CoolBitX product or service.</string>
+
+
+    <!--security layout-->
+    <string name="tv_security_otp">Включить функцию запроса одноразового пароля при осуществлении транзакций</string>
+
+    <string name="tv_security_enable_press_button">Включить функцию нажатия кнопки на карте для завершения транзакций</string>
+    <string name="tv_security_dog">Включить функцию сторожевого таймера</string>
+    <string name="tv_security_dog_explain">Оповещать, когда CoolWallet и ваше устройство находятся на некотором расстоянии друг от друга</string>
+    <string name="tv_security_show_address">Показывать на карте адрес отправки</string>
+    <string name="tv_security_show_address_guide">Обратитесь к руководству пользователя</string>
+    <string name="btn_security_str_update">СОХРАНИТЬ ИЗМЕНЕНИЯ В ПОЛИТИКЕ БЕЗОПАСНОСТИ</string>
+
+    <string name="tv_import_my_seed">Импортировать свой код</string>
+
+    <!--StartSharing-->
+    <string name="btn_str_sharing">Поделиться адресом</string>
+    <string name="tv_sharing_str">This function allows you to share ONE of your addresses to a Bitcoin exchange platform you use, so the exchange platfrom will be able to send bitcoins to your CoolWallet
+        directly.\n\nIf you agreed, currently this function will share the first address of your first account to a few exchanges we are testing with.\n\n
+        Do you want to share CoolWallet address with external exchange platforms?</string>
+
+
+    <!--Settings-->
+    <string name="str_setting">Настройки</string>
+    <string name="str_exchange_rate">Обменный курс</string>
+    <string name="str_transaction_fee">Комиссия за транзакцию</string>
+    <string name="card_name">Название карты</string>
+    <string name="manual_fee">Ручная настройка:</string>
+    <string name="auto_fee">Авто настройка:</string>
+
+
+    <!--logout-->
+    <string name="tv_logout_str1">Do you want to disconnect the\n CoolWallet?</string>
+    <string name="tv_logout_str2">Функция сторожевого таймера будет отключена после отключения.</string>
+    <string name="btn_str_logout">Disconnect CoolWallet</string>
+    <string name="logout">Выход</string>
+
+
+    <!--other setting-->
+    <string name="update">Обновить</string>
+    <string name="tv_str_show_fiat">Показать значение fiat на карточке</string>
+
+
+    <!--Create Wallet-->
+    <string name="tv_generate_seed">Сгенерировать код для</string>
+    <string name="str_sum_of_seeds">
+        Plese use a calculator to add all the sets of\numbers and enter the result
+        below in order\nto verify that you have written them down\ncorrectly.\n\n\n For example:\n
+        1111111+123456+234434+.....
+    </string>
+
+
+    <!--ValidationException-->
+    <string name="spend_amount_less_than_zero">Spend amount can not be less than 0.</string>
+    <string name="invalid_transaction">Invalid transaction:\n</string>
+    <string name="fee_higher_than_balance">Transaction fee is higher than balance.\nfee:</string>
+    <string name="no_output_to_spent"> No outputs to spend.</string>
+    <string name="incorrect_fee">Incorrect fee:</string>
+    <string name="incorrect_change">Incorrect change:</string>
+    <string name="amount_and_fee_higher_than_balance">Transaction output amount + fee is higher than balance.\n</string>
+    <string name="output_amount">Output amount:</string>
+    <string name="fees">Fees:</string>
+    <string name="transaction_lower_than_dust">With transaction fee, this transaction output becomes lower than dust (5460 Satoshi).(value:</string>
+    <string name="bad_address">Bad address:</string>
+    <string name="unknown_address_type">Unknown address type:</string>
+
+
+    <!--TransactionFeeActivity begin-->
+
+    <string name="str_estimated_fee_content">Расчет комиссии за транзакцию:\nСредний размер транзакции 226 байт х %1$d (сатоши за 1 байт)\n = %2$d satoshi\n= %3$f BTC</string>
+    <string name="prompt">Prompt </string>
+    <string name="enter_tx_fee"> Please enter the transaction fee.</string>
+    <string name="below_tx_fee"> Your transaction fee is below average and may take longer than 30 minutes to confirm.</string>
+    <string name="exceed_tx_fee"> Your transaction fee exceed 1 BTC.</string>
+    <string name="incorrect_format"> Incorrect format.</string>
+    <string name="transaction_fee">Transaction Fee</string>
+
+    <!--txsFeeActivity end-->
+
+
+    <string name="str_seedWords_confirm">
+        Внимательно проверьте слова,\n
+        которые вы записали.\n
+        Они потребуются для восстановления кошелька,\n
+        если карта будет утеряна.
+    </string>
+
+
+    <string name="tv_generate_seed_highly">Highly Recommended</string>
+    <string name="tv_seed_length">Длина кода</string>
+    <string name="btn_next">ДАЛЕЕ</string>
+    <string name="btn_previous">Previous</string>
+    <string name="tv_write_down_seed">Please write down all sets of the\nnumbers shown on the CoolWallet\nonto the seed paper</string>
+    <string name="tv_see_next_seed">Press the button on the card to see\nthe next set of numbers</string>
+    <string name="hdw_create_word">
+        Warning:It takes about 1 minute to generate seed on card, please wait until it is done.
+    </string>
+
+    <!--recov wallet-->
+    <string name="tv_recv_msg">Введите ваш код (с пробелами)</string>
+    <string name="tv_choose_seed_msg">Выберите тип вашего кода</string>
+    <string name="tv_recovery_title">Recovering...</string>
+    <string name="tv_recovery_msg">Please wait and put your\nCollWallet on the charger.</string>
+    <string name="notice_recovery_invalid_numbers">You\'ve chosen to recover with \'numbers\'. If your seed is in words please switch to recover with words.!</string>
+    <string name="notice_recovery_invalid_word">You\'ve chosen to recover with \'word\'. If your seed is in numbers please switch to recover with words.!</string>
+    <string name="notice_recovery_invalid_numbers_length">The total seed length of numbers should be 8, 12, 16 sets.!</string>
+    <string name="notice_recovery_invalid_word_length">The total seed length of words should be 12, 18, 24 sets.!</string>
+    <string name="notice_recovery_parsing_seed_incorrect">The seed being parsed is not in the correct form</string>
+    <string name="notice_recovery_invalid">Seed Invalid</string>
+
+    <!--Create HD Wallet-->
+    <string name="txt_createNewWallet">Создать новый кошелек</string>
+    <string name="txt_recoverMyOldWallet">Восстановить старый кошелек</string>
+    <string name="txt_createHDWallet">Please user a calculator to add all the\nsets of numbers and enter the result\nbelow in order to verivy that you have\nwritten them down correctly.</string>
+    <string name="txt_createHDWallet_example">For example:\n1111111+123456+234434+.....</string>
+    <string name="txt_createHDWallet_alert">IMPORTANT!This is the only time\nyou can make a backup of your\nbitcoins.</string>
+    <string name="strCreateWallet">Создать кошелек</string>
+
+    <string name="frag_available_str">Доступный:</string>
+    <string name="frag_reserved_str">Зарезервированный:</string>
+
+    <!--send-->
+    <string name="send_notification_unable_to_send_with_change_error">Change address equals to recipient address, it is likely an error.</string>
+    <string name="unable_to_send">Не удалось отправить</string>
+    <string name="send">Отправить</string>
+    <string name="note_unspent">Your balance needs at least one confirmation on Blockchain before you can send it out. Please try again later.</string>
+    <string name="note_dust"> the Bitcoin dust of this transaction (BTC %1$f) will be added to mining fee.</string>
+
+    <string name="send_hint_edit_address">Адрес получателя</string>
+    <string name="send_hint_edit_amount">Введите суммa</string>
+
+    <string name="send_all">Отправь все</string>
+
+    <string name="send_notification_str_failed_title">Сбой транзакции</string>
+    <string name="send_notification_str_failed_msg">Тайм-аут. Пожалуйста,Повторите попытку.</string>
+    <string name="send_confirm_btn_send">ОТПРАВИТЬ</string>
+    <string name="send_confirm_btn_cancel">ОТМЕНА</string>
+    <string name="send_call_unspent_failed">Get unspent transactions from api failed.</string>
+    <string name="send_call_unspent_list_addresses">multiple addresses including:\n</string>
+
+
+    <!--TransactionConfirmDialog-->
+    <string name="send_confirm_str_pay">PAY TO</string>
+    <string name="send_confirm_str_fee">сборы</string>
+    <string name="send_confirm_str_total">Всего</string>
+    <string name="send_confirm_str_payment">ОПЛАТА</string>
+    <string name="send_confirm_str_change">изменение</string>
+    <string name="notice_fee_alert">Ваш сбор ниже среднего, и для подтверждения может потребоваться более 30 минут.</string>
+
+    <!--txs-->
+    <string name="btn_str_view_blockchain">View at Blockchain.info</string>
+
+
+    <!-- database -->
+    <string-array name="db_table_name">
+        <item>ADDR</item>
+        <item>TXS</item>
+        <item>CURRENT</item>
+        <item>LOGIN</item>
+        <item>ACCOUNT_KEY_INFO</item>
+    </string-array>
+
+
+    <string-array name="ACCOUNT_KEY_INFO">
+        <item>WID               TEXT  NOT NULL      </item> <!--WALLET ID(CARD ID)-->
+        <item>ACCOUNT_ID        INTEGER  NOT NULL   </item>
+        <item>KCID              INTEGER  NOT NULL   </item> <!--0:External ; 1:Internal-->
+        <item>PUBLICKEY         TEXT   NOT NULL     </item>
+        <item>CHAINCODE         TEXT   NOT NULL     </item>
+        <item>PRIMARY KEY (WID,ACCOUNT_ID,KCID) </item>
+    </string-array>
+
+    <!--table-->
+    <string-array name="ADDR">
+        <item>WID               TEXT  NOT NULL   </item>
+        <!--WALLET ID(CARD ID)-->
+        <item>ACCOUNT_ID        INTEGER  NOT NULL   </item>
+        <item>ADDRESS           TEXT  NOT NULL      </item>
+        <item>KCID              INTEGER  NOT NULL   </item>
+        <!--0:External ; 1:Internal-->
+        <item>KID               INTEGER   NOT NULL  </item>
+        <!--Address KID-->
+        <item>N_TX              INTEGER   NOT NULL  </item>
+        <item>ADDRESS_BALANCE   BIGINT   NOT NULL   </item>
+        <item>ADDRESS_LABEL     TEXT                </item>
+        <item>PRIMARY KEY (WID,ADDRESS) </item>
+    </string-array>
+
+    <string-array name="TXS">
+        <item>WID               TEXT  NOT NULL   </item>
+        <item>ACCOUNT_ID        INTEGER  NOT NULL   </item>
+        <item>ADDRESS           TEXT  NOT NULL      </item>
+        <item>TX_ID             TEXT     NOT NULL   </item>
+        <item>TX_ADDRESS        TEXT  NOT NULL      </item>
+        <item>TX_RESULT         BIGINT  NOT NULL   </item>
+        <item>TX_DATE           TEXT     NOT NULL   </item>
+        <item>TX_CONFIRMATION   INTEGER  			</item>
+        <item>ID   INTEGER PRIMARY KEY</item>
+    </string-array>
+
+    <string-array name="CURRENT">
+        <item>WID               TEXT  NOT NULL   </item>
+        <item>COUNTRY           TEXT    NOT NULL   </item>
+        <!--WALLET ID(CARD ID)-->
+        <item>RATES             REAL    NOT NULL   </item>
+        <item>PRIMARY KEY (WID,COUNTRY) </item>
+    </string-array>
+
+    <string-array name="LOGIN">
+        <item>DATE              TEXT    NOT NULL   </item>
+        <item>WID               TEXT    NOT NULL   </item>
+        <!--WALLET ID(CARD ID)-->
+        <item>UUID              TEXT    NOT NULL   </item>
+        <item>OTP               TEXT    NOT NULL   </item>
+        <item>PRIMARY KEY (WID) </item>
+    </string-array>
+
+</resources>

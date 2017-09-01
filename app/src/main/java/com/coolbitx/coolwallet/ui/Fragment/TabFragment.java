@@ -16,11 +16,11 @@ import android.widget.RadioButton;
 import com.coolbitx.coolwallet.DataBase.DatabaseHelper;
 import com.coolbitx.coolwallet.R;
 import com.coolbitx.coolwallet.adapter.TabFragmentPagerAdapter;
-import com.coolbitx.coolwallet.callback.RefreshCallback;
 import com.coolbitx.coolwallet.bean.Address;
 import com.coolbitx.coolwallet.bean.Constant;
 import com.coolbitx.coolwallet.bean.CwBtcTxs;
 import com.coolbitx.coolwallet.bean.dbAddress;
+import com.coolbitx.coolwallet.callback.RefreshCallback;
 import com.coolbitx.coolwallet.general.AppPrefrence;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.coolbitx.coolwallet.general.RefreshBlockChainInfo;
@@ -411,7 +411,7 @@ public class TabFragment extends Fragment {
                                 }
                             } else {
                                 LogUtil.i("setAccountInfo failed.");
-                                PublicPun.showNoticeDialog(getActivity(), "Alert Message", "setAccountInfo failed!");
+                                PublicPun.showNoticeDialog(getActivity(), getString(R.string.error_msg), getString(R.string.error)+":" + Integer.toHexString(status));
                                 mProgress.dismiss();
                             }
                         }
@@ -462,7 +462,7 @@ public class TabFragment extends Fragment {
                     });
                 } else {
                     mProgress.dismiss();
-                    PublicPun.showNoticeDialog(getActivity(), "Error Message", "CreateNewAccount Error:" + Integer.toHexString(status));
+                    PublicPun.showNoticeDialog(getActivity(), getString(R.string.error_msg), getString(R.string.error)+":" + Integer.toHexString(status));
                 }
             }
         });
@@ -573,14 +573,14 @@ public class TabFragment extends Fragment {
             final int accountID = position;
             LogUtil.i("切換標籤account=" + accountID);
             if (fragments.get(position).getTitle().equals("+")) {
-                mProgress.setMessage("Creating Account...");
+                mProgress.setMessage(getString(R.string.create_account)+"...");
                 mProgress.show();
                 CreateNewAccount(accountID);
                 addFragmentToList(mPageType);
             } else {
                 //當切換位置
                 if (!PublicPun.accountRefresh[accountID]) {
-                    mProgress.setMessage("Synchronizing data...");
+                    mProgress.setMessage(getString(R.string.synchronizing_data)+"...");
                     mProgress.show();
                     mTimer = new Timer();
                     mTimer.schedule(new TimerTask() {
@@ -609,14 +609,14 @@ public class TabFragment extends Fragment {
                                 }
                                 @Override
                                 public void fail(String msg) {
-                                    PublicPun.showNoticeDialog(getActivity(), "Unstable internet connection", msg);
+                                    PublicPun.showNoticeDialog(getActivity(), getString(R.string.unable_connect_internet), msg);
                                     mProgress.dismiss();
                                 }
                             });
                         }
                         @Override
                         public void fail(String msg) {
-                            PublicPun.showNoticeDialog(getActivity(), "Error Message", msg);
+                            PublicPun.showNoticeDialog(getActivity(), getString(R.string.error_msg), msg);
                             mProgress.dismiss();
                         }
                     });

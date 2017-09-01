@@ -43,8 +43,7 @@ import java.util.Locale;
  * Created by ShihYi on 2015/12/7.
  */
 public class ReceiveFragment extends BaseFragment implements View.OnClickListener {
-    private static final String[] STRING_OK = new String[]{"OK", "確定"};
-    private static final String[] STRING_ALERT_TITLE = new String[]{"Request Payment", "欲收款金額"};
+
     private static final String DATA_NAME = "name";
     private static final String DATA_ID = "id";
     public static byte[] hdwAccountPointer;
@@ -174,7 +173,7 @@ public class ReceiveFragment extends BaseFragment implements View.OnClickListene
         AlertDialog.Builder builder = new AlertDialog.Builder(mContext, AlertDialog.THEME_DEVICE_DEFAULT_LIGHT);
         mDialogTitle.setText(mTitle);
         builder.setView(alert_view);
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
                 switch (id) {
                     case R.id.btn_edit_label:
@@ -293,9 +292,9 @@ public class ReceiveFragment extends BaseFragment implements View.OnClickListene
             }
         }
         if (NotrsAddress >= 5) {
-            PublicPun.showNoticeDialog(mContext, "Unable to create new address", "Maximum number of 5 unused addresses reached in this account");
+            PublicPun.showNoticeDialog(mContext, getString(R.string.unable_create_new_address), getString(R.string.maximum_unused_address));
         } else {
-            mProgress.setMessage("Generating New address...");
+            mProgress.setMessage(getString(R.string.generating_new_address)+"...");
             mProgress.show();
             cmdManager.hdwGetNextAddress(keyChainId, id - 1, new CmdResultCallback() {
                 @Override
