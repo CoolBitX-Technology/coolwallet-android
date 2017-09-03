@@ -140,6 +140,7 @@
 
     <!--Exchange Login-->
     <string name="login">ログイン...</string>
+    <string name="login_failed">失敗したログイン</string>
 
 
     <!--ExchangeActivity-->

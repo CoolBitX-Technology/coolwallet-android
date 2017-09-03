@@ -158,6 +158,18 @@ public class ByteUtils {
         return data;
     }
 
+    public static String bytesToHex(byte[] bytes) {
+        if (bytes == null) return null;
+
+        StringBuilder sb = new StringBuilder();
+        for (byte b : bytes) {
+            sb.append(String.format("%02x", b));
+        }
+
+        return sb.toString();
+    }
+
+
     public static String toHex (byte[] data)
     {
         try

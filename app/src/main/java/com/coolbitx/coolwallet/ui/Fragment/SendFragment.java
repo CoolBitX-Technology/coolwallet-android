@@ -43,6 +43,7 @@ import com.coolbitx.coolwallet.httpRequest.CwBtcNetWork;
 import com.coolbitx.coolwallet.ui.TransactionConfirmDialog;
 import com.coolbitx.coolwallet.util.BTCUtils;
 import com.coolbitx.coolwallet.util.Base58;
+import com.coolbitx.coolwallet.util.ByteUtils;
 import com.coolbitx.coolwallet.util.ECKey;
 import com.coolbitx.coolwallet.util.ValidationException;
 import com.crashlytics.android.Crashlytics;
@@ -61,7 +62,6 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -91,7 +91,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener, 
     Transaction.Output[] outputs;
 
     String InAddress;
-    String currUnsignedTx;
+    String rawTx;
     CwBtcNetWork cwBtcNetWork;
     int currentAccount = -1;
     int errorCnt;
@@ -140,7 +140,11 @@ public class SendFragment extends BaseFragment implements View.OnClickListener, 
     private boolean isBlockr;
     private String UrlUnspent;
     TransactionConfirmDialog trxDialog;
+    TxsConfirm mTxsConfirm;
     private Switch switchSendAll;
+    Transaction.Input[] unsignedInputs;
+    int inputCount;
+    Transaction transaction;
 
     private Handler mHandler = new Handler() {
         public void handleMessage(Message msg) {
@@ -186,10 +190,10 @@ public class SendFragment extends BaseFragment implements View.OnClickListener, 
             int postPushResult = -1;
             int hadlerMsg = 0;
 
-//            postDecodeResult = cwBtcNetWork.doPost(BtcUrl.URL_BLOCKR_SERVER_SITE + BtcUrl.URL_BLOCKR_DECODE, currUnsignedTx);
-            postDecodeResult = cwBtcNetWork.doPostII(BtcUrl.URL_BLOCKCHAIN_SERVER_SITE + BtcUrl.URL_BLICKCHAIN_DECODE, currUnsignedTx);
+//            postDecodeResult = cwBtcNetWork.doPost(BtcUrl.URL_BLOCKR_SERVER_SITE + BtcUrl.URL_BLOCKR_DECODE, rawTx);
+            postDecodeResult = cwBtcNetWork.doPostII(BtcUrl.URL_BLOCKCHAIN_SERVER_SITE + BtcUrl.URL_BLICKCHAIN_DECODE, rawTx);
             if (postDecodeResult == 200) {
-                postPushResult = cwBtcNetWork.doPostII(BtcUrl.URL_BLOCKCHAIN_SERVER_SITE + BtcUrl.URL_BLICKCHAIN_PUSH, currUnsignedTx);
+                postPushResult = cwBtcNetWork.doPostII(BtcUrl.URL_BLOCKCHAIN_SERVER_SITE + BtcUrl.URL_BLICKCHAIN_PUSH, rawTx);
                 if (postPushResult == 200) {
                     hadlerMsg = HANDLER_SEND_BTC_FINISH;
                 } else {
@@ -627,7 +631,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener, 
 
     private void transactionConfirm(String mOutputAddress) {
         //--------------- process change address end.---------------------
-        TxsConfirm mTxsConfirm;
+
         LogUtil.e("outputs length=" + outputs.length);
 
         if (mProgress.isShowing()) {
@@ -664,6 +668,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener, 
 
     private void prepareTransaction(final String outputAddress, String changeAddress, long amountToSend) {
 
+        inputCount = mTxsConfirm.getInput_count();
 
         //close transaction if exists
         cmdManager.trxFinish(new CmdResultCallback() {
@@ -671,11 +676,8 @@ public class SendFragment extends BaseFragment implements View.OnClickListener, 
             public void onSuccess(int status, byte[] outputData) {
                 if ((status + 65536) == 0x9000) {
                     if (trxStatus == Constant.TrxStatusFinish) {
-                        LogUtil.i("trxFinish 成功!!");
-//                            didSignTransaction();
                     }
                     trxStatus = Constant.TrxStatusBegin;
-                    LogUtil.i("trxStatus=" + trxStatus);
                 }
             }
         });
@@ -692,20 +694,17 @@ public class SendFragment extends BaseFragment implements View.OnClickListener, 
             final boolean[] prepRsult = new boolean[signedInputs.length];
 
             for (int i = 0; i < signedInputs.length; i++) {
-                Transaction.Input[] unsignedInputs = new Transaction.Input[signedInputs.length];
-                LogUtil.d("signedInputs loop " + i + " begin =" + new Date().toLocaleString());
+                unsignedInputs = new Transaction.Input[signedInputs.length];
                 for (int j = 0; j < unsignedInputs.length; j++) { //有幾個input
                     UnSpentTxsBean outputToSpend = processedTxData.outputsToSpend.get(j);
-                    //dora modify
-//                LogUtil.e("跑hash " + i + "-" + j + "次");
                     byte[] byteTx = PublicPun.hexStringToByteArray(outputToSpend.getTx());//outputToSpend.getTx().getBytes()
-                    //my send addr
-//                LogUtil.d("Transaction.OutPoint:" + outputToSpend.getAddress() + "的HEX=" +
-//                        PublicPun.byte2HexStringNoBlank(byteTx) + ";outputToSpend.getN()=" + outputToSpend.getN());
                     Transaction.OutPoint outPoint = new Transaction.OutPoint(byteTx, outputToSpend.getN());//outputToSpend.getN
                     byte[] mScripts = PublicPun.hexStringToByteArray(outputToSpend.getScript());//outputToSpend.getScript().getBytes()
-//                LogUtil.i("第" + j + "個input=" + " tx:" + outputToSpend.getTx() + " ; " + outputToSpend.getN()
-//                        + "; Script:" + PublicPun.byte2HexStringNoBlank((mScripts)));
+
+//                    LogUtil.d("(previous outpoint)input addr:" + outputToSpend.getAddress() +
+//                            "\ninput tx hash=" + LogUtil.byte2HexString(byteTx) +
+//                            "\ninput index()=" + outputToSpend.getN() +
+//                            "\ninput script=" + outputToSpend.getScript());
 
                     if (j == i) {
                         //this input we are going to sign (remove the part of sig and filled in the Scripts(prev tx public key script))
@@ -716,11 +715,11 @@ public class SendFragment extends BaseFragment implements View.OnClickListener, 
                         unsignedInputs[j] = new Transaction.Input(outPoint, null, 0xffffffff);
                     }
                 }
-                LogUtil.d("signedInputs loop " + i + " end =" + new Date().toLocaleString());
-                Transaction spendTxToSign = new Transaction(unsignedInputs, outputs, 0);
+                transaction = new Transaction(unsignedInputs, outputs, 0);
+
                 byte[] tempHash = null;
                 try {
-                    tempHash = Transaction.Script.hashTransactionForSigning(spendTxToSign);
+                    tempHash = Transaction.Script.hashTransactionForSigning(transaction);
                     LogUtil.e("tempHash:" + PublicPun.byte2HexStringNoBlank(tempHash));
                 } catch (ValidationException e) {
                     e.printStackTrace();
@@ -781,6 +780,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener, 
                                         address.setAddress(processedTxData.outputsToSpend.get(finalI).getAddress()); //account 0 的 internal地址之一
                                         address.setKeyId(dbKid);
                                         address.setPublickey(publicKeyBytes);
+
 //                                    LogUtil.d("run " + finalI + ": getAddressInfo=" + processedTxData.outputsToSpend.get(finalI).getAddress() +
 //                                            " ;publicKey=" + PublicPun.byte2HexStringNoBlank(address.getPublickey()));
                                         inputAddressList.add(address);
@@ -788,7 +788,8 @@ public class SendFragment extends BaseFragment implements View.OnClickListener, 
 //                                    LogUtil.e("prepare trx getMacKey=" + PublicPun.byte2HexStringNoBlank(PublicPun.user.getMacKey()) + ";input id=" + finalI + ";" + ";KeyChainExternal=" + (int) CwAddressKeyChainExternal +
 //                                            ";account=" + currentAccount + ";dbKid=" + dbKid + ";dbBalance=" + unspentBalance + ";hash=" + PublicPun.byte2HexStringNoBlank(hash));
 
-                                        //         big endian  ex:("0000000000002710");
+                                        //         bigendian  ex:("0000000000002710");
+
                                         cmdManager.cwCmdHdwPrepTrxSign(PublicPun.user.getMacKey(),
                                                 finalI,
                                                 CwAddressKeyChainExternal,
@@ -893,7 +894,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener, 
                 doTrxSign(i, inputAddressList.get(i).getPublickey());
             }
         } catch (Exception e) {
-            PublicPun.showNoticeDialog(mContext, getString(R.string.error_msg),getString(R.string.cmd_trxsign_error));
+            PublicPun.showNoticeDialog(mContext, getString(R.string.error_msg), getString(R.string.cmd_trxsign_error));
             cancelTrx();
             Crashlytics.logException(e);
         }
@@ -938,7 +939,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener, 
                                     }
                                 }
                             } else {
-                                PublicPun.showNoticeDialog(mContext, getString(R.string.error_msg), getString(R.string.cmd_trx_begin_error)+":" + LogUtil.byte2HexString(outputData));
+                                PublicPun.showNoticeDialog(mContext, getString(R.string.error_msg), getString(R.string.cmd_trx_begin_error) + ":" + LogUtil.byte2HexString(outputData));
                             }
                         }
                     }
@@ -1056,13 +1057,32 @@ public class SendFragment extends BaseFragment implements View.OnClickListener, 
                                     doTrxSignSuccessCnt++;
 //                                    LogUtil.i("xxxxxxxxxx :addr " + inputID + inputAddressList.get(inputID).getAddress() +
 //                                            ";punlickey =" + LogUtil.byte2HexString(BTCUtils.reverse(inputAddressList.get(inputID).getPublickey())));
+
+
+//                                    unsignedInputs[inputID].setSignature(Transaction.getSignature(signOfTx));
+//                                    unsignedInputs[inputID].setPublicKey(inputAddressList.get(inputID).getPublickey());
+//
+//                                    if (doTrxSignSuccessCnt == signedInputs.length) {
+//
+//                                        byte[] tx = null;
+//                                        try {
+//                                            tx = Transaction.Script.rawTransactionForpublishing(transaction);
+//                                        } catch (ValidationException e) {
+//                                            e.printStackTrace();
+//                                        }
+//                                        rawTx = PublicPun.byte2HexStringNoBlank(tx);
+//                                        LogUtil.e("取得 RawTx length=" + tx.length + " ; rawTx=" + rawTx);
+//                                        PublishToNetwork(rawTx);
+//
+//                                    }
+
                                     scriptSigs.add(genScriptSig(signOfTx, inputAddressList.get(inputID).getPublickey()));
 
                                     if (doTrxSignSuccessCnt == signedInputs.length) {
-                                        currUnsignedTx = genRawTxData(scriptSigs);
-                                        LogUtil.e("取得 currUnsignedTx=" + currUnsignedTx + ";length=" + currUnsignedTx.length());
-                                        LogUtil.e("byte長度=" + PublicPun.hexStringToByteArray(currUnsignedTx).length);
-                                        PublishToNetwork(currUnsignedTx);
+                                        rawTx = genRawTxData(scriptSigs);
+                                        LogUtil.e("取得 currUnsignedTx=" + rawTx + ";length=" + rawTx.length());
+                                        LogUtil.e("byte長度=" + PublicPun.hexStringToByteArray(rawTx).length);
+                                        PublishToNetwork(rawTx);
 
                                     }
                                 }
@@ -1085,211 +1105,6 @@ public class SendFragment extends BaseFragment implements View.OnClickListener, 
         });
     }
 
-    private String genRawTxData(List<byte[]> scriptSigs) {
-
-        APITx.Tx ctx = new APITx.Tx();
-
-
-        ctx.setVersion(1);
-        ctx.setTxinCnt(signedInputs.length);
-        ctx.setTxoutCnt(outputs.length);
-        ctx.setLock(0x00000000);
-
-        ArrayList<APITx.Txin> txinList = new ArrayList<APITx.Txin>();
-
-        for (int i = 0; i < signedInputs.length; i++) {
-            LogUtil.i("signedInputs " + i);
-            APITx.Txin ctxin = new APITx.Txin();
-
-            byte[] ByteinTx = PublicPun.hexStringToByteArrayRev(processedTxData.outputsToSpend.get(i).getTx());
-//            Collections.reverse(ByteinTx);
-            LogUtil.i("ByteinTx=" + PublicPun.byte2HexStringNoBlank(ByteinTx));
-            byte[] revId = new byte[32];
-            String tid;
-
-            for (int j = 0; j < 32; j++) {
-                revId[j] = ByteinTx[ByteinTx.length - j - 1];
-            }
-            tid = PublicPun.byte2HexStringNoBlank(revId);
-            LogUtil.i("tid=" + tid);
-            ctxin.setTx(tid);
-//            ctxin.setIndex(outputToSpend.getN());
-            ctxin.setIndex(processedTxData.outputsToSpend.get(i).getN());
-            ctxin.setScriptSigLen(scriptSigs.get(i).length);
-            ctxin.setScriptSig(scriptSigs.get(i));
-            txinList.add(ctxin);
-
-        }
-        ctx.setTxinList(txinList);
-
-        ArrayList<APITx.Txout> txoutList = new ArrayList<APITx.Txout>();
-
-        for (int i = 0; i < outputs.length; i++) {
-            APITx.Txout ctxout = new APITx.Txout();
-            ctxout.setAdd(outputs[i].script.toString());
-            LogUtil.i("outputs[" + String.valueOf(i) + "].script=" + outputs[i].script.toString());
-            ctxout.setValue((outputs[i].value));
-
-
-            txoutList.add(ctxout);
-        }
-        ctx.setTxoutList(txoutList);
-        return txToHex(ctx);
-    }
-
-    private String txToHex(APITx.Tx tx) {
-
-        StringBuilder sb = new StringBuilder();
-        // version no.
-        sb.append("01000000");
-        LogUtil.i("getVersion=" + PublicPun.algorismToHEXString(tx.getVersion(), 2));
-        // In-counter
-        sb.append(PublicPun.algorismToHEXString(tx.getTxinCnt(), 2));
-        LogUtil.i("getTxinCnt=" + PublicPun.algorismToHEXString(tx.getTxinCnt(), 2));
-
-        //List of inputs
-        for (int i = 0; i < tx.getTxinCnt(); i++) {
-            //prehash
-            sb.append(tx.getTxinList().get(i).getTx());
-            LogUtil.i("hash=" + tx.getTxinList().get(i).getTx());
-            sb.append(PublicPun.byte2HexStringNoBlank(ByteUtil.intToByteLittle(tx.getTxinList().get(i).getIndex(), 4)));
-            LogUtil.i("in index=" + PublicPun.algorismToHEXString(tx.getTxinList().get(i).getIndex(), 2));
-            //script len
-            sb.append(PublicPun.algorismToHEXString(tx.getTxinList().get(i).getScriptSigLen(), 2));
-            LogUtil.i("in getScriptSigLen=" + PublicPun.algorismToHEXString(tx.getTxinList().get(i).getScriptSigLen(), 2));
-            //scriptSig
-            sb.append(PublicPun.byte2HexStringNoBlank(tx.getTxinList().get(i).getScriptSig()));
-            LogUtil.i("getScriptSig=" + PublicPun.byte2HexStringNoBlank(tx.getTxinList().get(i).getScriptSig()));
-            //sequence_no
-            sb.append("ffffffff");
-        }
-
-        // Out-counter
-        sb.append(PublicPun.algorismToHEXString(tx.getTxoutCnt(), 2));
-        LogUtil.i("Out-counter=" + PublicPun.algorismToHEXString(tx.getTxoutCnt(), 2));
-        //List of outputs
-        for (int i = 0; i < tx.getTxoutCnt(); i++) {
-            //value
-//            sb.append("1027000000000000");
-//            PublicPun.algorismToHEXString((int)tx.getTxoutList().get(i).getValue(), 16)
-            byte[] value = ByteUtil.intToByteLittle((int) tx.getTxoutList().get(i).getValue(), 8);
-            LogUtil.i("Out-value=" + String.valueOf(tx.getTxoutList().get(i).getValue()) + " ;hex=" + LogUtil.byte2HexString(value));
-            sb.append(PublicPun.byte2HexStringNoBlank(value));
-
-            //script len
-            int scriptLen = tx.getTxoutList().get(i).getAdd().length() / 2;//兩個byte一組hex
-            LogUtil.i("Out-scriptLen=" + String.valueOf(scriptLen) + "Out-scriptLen hex=" + PublicPun.algorismToHEXString(scriptLen, 2) + "\n");
-            sb.append(PublicPun.algorismToHEXString(scriptLen, 2));
-//            LogUtil.i("Out-scriptLen len=" + PublicPun.algorismToHEXString(scriptLen, 2));
-            //script
-            sb.append(tx.getTxoutList().get(i).getAdd());
-            LogUtil.i("Out-script=" + tx.getTxoutList().get(i).getAdd());
-            //sequence_no
-//            sb.append(PublicPun.algorismToHEXString(0, 2));
-        }
-        //block lock time
-        sb.append("00000000");
-        String info = sb.toString();
-        info.replace(" ", "");
-        LogUtil.i("api hex=" + info);
-
-        return info;
-    }
-
-    private byte[] genScriptSig(byte[] bytes, byte[] mPublicKey) {
-
-        byte[] xPublicKey = new byte[32];
-        //input data
-        byte[] mCalKey = new byte[34];
-        byte[] SignatureDER;
-        byte mType;
-        byte PUSHDATA;
-
-        for (int i = 0; i < 32; i++) {
-            xPublicKey[i] = mPublicKey[i];
-        }
-
-        SignatureDER = encodeToDER(bytes);
-        LogUtil.i("取得 SignatureDER=" + LogUtil.byte2HexString(SignatureDER));
-        LogUtil.i("取得 publicKey=" + LogUtil.byte2HexString(mPublicKey));
-        LogUtil.i("取得 publicKey lastone=" + PublicPun.byte2HexString(mPublicKey[63]));
-        //mCalKey=34B (PUSHDATA + type(1b) + x publicKey(32b)+)
-        PUSHDATA = (byte) 0x21; // 33B=type(1b)+ x publicKey(32b)
-        LogUtil.i("genScriptSig mType判斷 =" + Integer.toBinaryString(mPublicKey[63]));
-        int mLastKey = Integer.parseInt(PublicPun.byte2HexString(mPublicKey[63]), 16);
-        //
-        if (mLastKey % 2 == 1) {
-            mType = (byte) 0x03;
-        } else {
-            mType = (byte) 0x02;
-        }
-
-        LogUtil.i("mLastKey=" + mLastKey + ";mType:" + mType);
-
-        mCalKey[0] = PUSHDATA;
-        mCalKey[1] = mType;
-
-        for (int i = 0; i < xPublicKey.length; i++) {
-            mCalKey[i + 2] = xPublicKey[i];
-        }
-        LogUtil.i("取得 mCalKey=" + LogUtil.byte2HexString(mCalKey));
-        byte[] mSig = new byte[SignatureDER.length + mCalKey.length];
-
-
-        for (int i = 0; i < SignatureDER.length; i++) {
-//            LogUtil.i("SignatureDER loop="+PublicPun.byte2HexString(SignatureDER[i]));
-            mSig[i] = SignatureDER[i];
-
-        }
-
-        for (int i = 0; i < mCalKey.length; i++) {
-//            LogUtil.i("mCalKey loop="+PublicPun.byte2HexString(mCalKey[i]));
-            mSig[i + SignatureDER.length] = mCalKey[i];
-        }
-        LogUtil.i("取得 mSig=" + LogUtil.byte2HexString(mSig));
-
-        return mSig;
-    }
-
-    private byte[] encodeToDER(byte[] bytes) {
-        byte[] mScriptSig = null;
-        byte[] derX = new byte[32];
-        byte[] derY = new byte[32];
-
-        //x data
-        for (int i = 0; i < 32; i++) {
-            derX[i] = bytes[i];
-//            LogUtil.i("derX loop="+PublicPun.byte2HexString(derX[i]));
-        }
-        LogUtil.i("derX loop=" + LogUtil.byte2HexString(derX));
-        //y data
-        for (int i = 0; i < 32; i++) {
-            derY[i] = bytes[i + 32];
-//            LogUtil.i("derY loop="+PublicPun.byte2HexString(derY[i]));
-        }
-        LogUtil.i("derY loop=" + LogUtil.byte2HexString(derY));
-        try {
-            ECKey.ECDSASignature ecSig = new ECKey.ECDSASignature(new BigInteger(1, derX), new BigInteger(1, derY));
-            byte[] mDERSig = ecSig.encodeToDER();
-            LogUtil.i("取得 encodeToDER=" + LogUtil.byte2HexString(mDERSig));
-
-            byte PushData = (byte) (mDERSig.length + 1);
-            mScriptSig = new byte[1 + mDERSig.length + 1];
-            LogUtil.i("mScriptSig.length=" + mScriptSig.length);
-            mScriptSig[0] = PushData;
-
-            for (int i = 0; i < mDERSig.length; i++) {
-                mScriptSig[i + 1] = mDERSig[i];
-            }
-            //SIGHASH_ALL
-            mScriptSig[mDERSig.length + 1] = (byte) 0x01;
-
-            LogUtil.i("取得 mScriptSig=" + LogUtil.byte2HexString(mScriptSig));
-        } catch (Exception e) {
-//            throw new VerificationException("Could not decode DER", e);
-        }
-        return mScriptSig;
-    }
 
     private void PublishToNetwork(final String sendTx) {
 
@@ -1495,5 +1310,210 @@ public class SendFragment extends BaseFragment implements View.OnClickListener, 
             }
             super.onPostExecute(UnSpentTxsBeans);
         }
+    }
+
+    private String genRawTxData(List<byte[]> scriptSigs) {
+
+        APITx.Tx ctx = new APITx.Tx();
+
+        ctx.setVersion(1);
+        ctx.setTxinCnt(signedInputs.length);
+        ctx.setTxoutCnt(outputs.length);
+        ctx.setLock(0x00000000);
+
+        ArrayList<APITx.Txin> txinList = new ArrayList<APITx.Txin>();
+
+        for (int i = 0; i < signedInputs.length; i++) {
+            LogUtil.i("signedInputs " + i);
+            APITx.Txin ctxin = new APITx.Txin();
+
+            byte[] ByteinTx = PublicPun.hexStringToByteArrayRev(processedTxData.outputsToSpend.get(i).getTx());
+//            Collections.reverse(ByteinTx);
+            LogUtil.i("ByteinTx=" + PublicPun.byte2HexStringNoBlank(ByteinTx));
+            byte[] revId = new byte[32];
+            String tid;
+
+            for (int j = 0; j < 32; j++) {
+                revId[j] = ByteinTx[ByteinTx.length - j - 1];
+            }
+            tid = PublicPun.byte2HexStringNoBlank(revId);
+            LogUtil.i("tid=" + tid);
+            ctxin.setTx(tid);
+//            ctxin.setIndex(outputToSpend.getN());
+            ctxin.setIndex(processedTxData.outputsToSpend.get(i).getN());
+            ctxin.setScriptSigLen(scriptSigs.get(i).length);
+            ctxin.setScriptSig(scriptSigs.get(i));
+            txinList.add(ctxin);
+
+        }
+        ctx.setTxinList(txinList);
+
+        ArrayList<APITx.Txout> txoutList = new ArrayList<APITx.Txout>();
+
+        for (int i = 0; i < outputs.length; i++) {
+            APITx.Txout ctxout = new APITx.Txout();
+            ctxout.setAdd(outputs[i].script.toString());
+            LogUtil.i("outputs[" + String.valueOf(i) + "].script=" + outputs[i].script.toString());
+            ctxout.setValue((outputs[i].value));
+
+
+            txoutList.add(ctxout);
+        }
+        ctx.setTxoutList(txoutList);
+        return txToHex(ctx);
+    }
+
+    private String txToHex(APITx.Tx tx) {
+
+        StringBuilder sb = new StringBuilder();
+        // version no.
+        sb.append("01000000");
+        LogUtil.i("getVersion=" + PublicPun.algorismToHEXString(tx.getVersion(), 2));
+        // In-counter
+        sb.append(PublicPun.algorismToHEXString(tx.getTxinCnt(), 2));
+        LogUtil.i("getTxinCnt=" + PublicPun.algorismToHEXString(tx.getTxinCnt(), 2));
+
+        //List of inputs
+        for (int i = 0; i < tx.getTxinCnt(); i++) {
+            //prehash
+            sb.append(tx.getTxinList().get(i).getTx());
+            LogUtil.i("hash=" + tx.getTxinList().get(i).getTx());
+            sb.append(PublicPun.byte2HexStringNoBlank(ByteUtil.intToByteLittle(tx.getTxinList().get(i).getIndex(), 4)));
+            LogUtil.i("in index=" + PublicPun.algorismToHEXString(tx.getTxinList().get(i).getIndex(), 2));
+            //script len
+            sb.append(PublicPun.algorismToHEXString(tx.getTxinList().get(i).getScriptSigLen(), 2));
+            LogUtil.i("in getScriptSigLen=" + PublicPun.algorismToHEXString(tx.getTxinList().get(i).getScriptSigLen(), 2));
+            //scriptSig
+            sb.append(PublicPun.byte2HexStringNoBlank(tx.getTxinList().get(i).getScriptSig()));
+            LogUtil.i("getScriptSig=" + PublicPun.byte2HexStringNoBlank(tx.getTxinList().get(i).getScriptSig()));
+            //sequence_no
+            sb.append("ffffffff");
+        }
+
+        // Out-counter
+        sb.append(PublicPun.algorismToHEXString(tx.getTxoutCnt(), 2));
+        LogUtil.i("Out-counter=" + PublicPun.algorismToHEXString(tx.getTxoutCnt(), 2));
+        //List of outputs
+        for (int i = 0; i < tx.getTxoutCnt(); i++) {
+            //value
+//            sb.append("1027000000000000");
+//            PublicPun.algorismToHEXString((int)tx.getTxoutList().get(i).getValue(), 16)
+            byte[] value = ByteUtil.intToByteLittle((int) tx.getTxoutList().get(i).getValue(), 8);
+            LogUtil.i("Out-value=" + String.valueOf(tx.getTxoutList().get(i).getValue()) + " ;hex=" + LogUtil.byte2HexString(value));
+            sb.append(PublicPun.byte2HexStringNoBlank(value));
+
+            //script len
+            int scriptLen = tx.getTxoutList().get(i).getAdd().length() / 2;//兩個byte一組hex
+            LogUtil.i("Out-scriptLen=" + String.valueOf(scriptLen) + "Out-scriptLen hex=" + PublicPun.algorismToHEXString(scriptLen, 2) + "\n");
+            sb.append(PublicPun.algorismToHEXString(scriptLen, 2));
+//            LogUtil.i("Out-scriptLen len=" + PublicPun.algorismToHEXString(scriptLen, 2));
+            //script
+            sb.append(tx.getTxoutList().get(i).getAdd());
+            LogUtil.i("Out-script=" + tx.getTxoutList().get(i).getAdd());
+            //sequence_no
+//            sb.append(PublicPun.algorismToHEXString(0, 2));
+        }
+        //block lock time
+        sb.append("00000000");
+        String info = sb.toString();
+        info.replace(" ", "");
+        LogUtil.i("api hex=" + info);
+
+        return info;
+    }
+
+    private byte[] genScriptSig(byte[] bytes, byte[] mPublicKey) {
+
+        byte[] xPublicKey = new byte[32];
+        //input data
+        byte[] mCalKey = new byte[34];
+        byte[] SignatureDER;
+        byte mType;
+        byte PUSHDATA;
+
+        for (int i = 0; i < 32; i++) {
+            xPublicKey[i] = mPublicKey[i];
+        }
+
+        SignatureDER = encodeToDER(bytes);
+        LogUtil.i("取得 SignatureDER=" + LogUtil.byte2HexString(SignatureDER));
+        LogUtil.i("取得 publicKey=" + LogUtil.byte2HexString(mPublicKey));
+        LogUtil.i("取得 publicKey lastone=" + PublicPun.byte2HexString(mPublicKey[63]));
+        //mCalKey=34B (PUSHDATA + type(1b) + x publicKey(32b)+)
+        PUSHDATA = (byte) 0x21; // 33B=type(1b)+ x publicKey(32b)
+        LogUtil.i("genScriptSig mType判斷 =" + Integer.toBinaryString(mPublicKey[63]));
+        int mLastKey = Integer.parseInt(PublicPun.byte2HexString(mPublicKey[63]), 16);
+        //
+        if (mLastKey % 2 == 1) {
+            mType = (byte) 0x03;
+        } else {
+            mType = (byte) 0x02;
+        }
+
+        LogUtil.i("mLastKey=" + mLastKey + ";mType:" + mType);
+
+        mCalKey[0] = PUSHDATA;
+        mCalKey[1] = mType;
+
+        for (int i = 0; i < xPublicKey.length; i++) {
+            mCalKey[i + 2] = xPublicKey[i];
+        }
+        LogUtil.i("取得 mCalKey=" + LogUtil.byte2HexString(mCalKey));
+        byte[] mSig = new byte[SignatureDER.length + mCalKey.length];
+
+
+        for (int i = 0; i < SignatureDER.length; i++) {
+//            LogUtil.i("SignatureDER loop="+PublicPun.byte2HexString(SignatureDER[i]));
+            mSig[i] = SignatureDER[i];
+
+        }
+
+        for (int i = 0; i < mCalKey.length; i++) {
+//            LogUtil.i("mCalKey loop="+PublicPun.byte2HexString(mCalKey[i]));
+            mSig[i + SignatureDER.length] = mCalKey[i];
+        }
+        LogUtil.i("取得 mSig=" + LogUtil.byte2HexString(mSig));
+
+        return mSig;
+    }
+
+    private byte[] encodeToDER(byte[] bytes) {
+        byte[] mScriptSig = null;
+        byte[] derX = new byte[32];
+        byte[] derY = new byte[32];
+
+        //x data
+        for (int i = 0; i < 32; i++) {
+            derX[i] = bytes[i];
+//            LogUtil.i("derX loop="+PublicPun.byte2HexString(derX[i]));
+        }
+        LogUtil.i("derX loop=" + LogUtil.byte2HexString(derX));
+        //y data
+        for (int i = 0; i < 32; i++) {
+            derY[i] = bytes[i + 32];
+//            LogUtil.i("derY loop="+PublicPun.byte2HexString(derY[i]));
+        }
+        LogUtil.i("derY loop=" + LogUtil.byte2HexString(derY));
+        try {
+            ECKey.ECDSASignature ecSig = new ECKey.ECDSASignature(new BigInteger(1, derX), new BigInteger(1, derY));
+            byte[] mDERSig = ecSig.encodeToDER();
+            LogUtil.i("取得 encodeToDER=" + LogUtil.byte2HexString(mDERSig));
+
+            byte PushData = (byte) (mDERSig.length + 1);
+            mScriptSig = new byte[1 + mDERSig.length + 1];
+            LogUtil.i("mScriptSig.length=" + mScriptSig.length);
+            mScriptSig[0] = PushData;
+
+            for (int i = 0; i < mDERSig.length; i++) {
+                mScriptSig[i + 1] = mDERSig[i];
+            }
+            //SIGHASH_ALL
+            mScriptSig[mDERSig.length + 1] = (byte) 0x01;
+
+            LogUtil.i("取得 mScriptSig=" + LogUtil.byte2HexString(mScriptSig));
+        } catch (Exception e) {
+//            throw new VerificationException("Could not decode DER", e);
+        }
+        return mScriptSig;
     }
 }

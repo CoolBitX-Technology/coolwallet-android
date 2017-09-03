@@ -101,7 +101,7 @@
 
     <!--Exchange Login-->
     <string name="login">Login...</string>
-
+    <string name="login_failed">Login failed</string>
 
     <!--ExchangeActivity-->
     <string name="press_exit">Press once again to exit Exchange site!</string>

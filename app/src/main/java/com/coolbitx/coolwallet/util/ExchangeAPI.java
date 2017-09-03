@@ -46,22 +46,20 @@ public class ExchangeAPI {
         this.cmdManager = cmdManager;
         this.mContext = context;
         this.CWID = new String(PublicPun.hexStringToByteArray(PublicPun.card.getCardId()));
-//        this.orderID=orderID;
     }
 
     public void exchangeLogin(final APIResultCallback mAPIResultCallback) {
         this.mAPIResultCallback = mAPIResultCallback;
-//        String mFirebaseToken = FirebaseInstanceId.getInstance().getToken();
         exchangeToken = FirebaseInstanceId.getInstance().getToken();
         LogUtil.d("FCM InstanceID token: " + exchangeToken);
 
         //1.Create Session:get [Challenge](session key) from Server
-        LogUtil.d("getSrvInitSession CWID=" + CWID);
         getSrvInitSession(new APIResultCallback() {
             @Override
             public void success(String[] msg) {
                 byte[] srvChlng = PublicPun.hexStringToByteArray(msg[0]);
                 LogUtil.d("srvChlng=" + PublicPun.byte2HexString(srvChlng));
+
                 //2.transfer [challenge] to the card and get [SRVRSP] [SECHLNG]
                 cmdManager.XchsSessionInit(srvChlng, new CmdResultCallback() {
                     @Override
@@ -98,7 +96,6 @@ public class ExchangeAPI {
                                                     public void onSuccess(ArrayList<XchsSync> listXchsSync) {
                                                         ArrayList<XchsSync> lisXchsSync = listXchsSync;
                                                         if (lisXchsSync.size() != 0) {
-                                                            LogUtil.e("ready to getExchangeSync");
                                                             String SyncData = createSyncJson(lisXchsSync, exchangeToken);
                                                             getExchangeSync(CWID, SyncData, new APIResultCallback() {
                                                                 @Override
@@ -109,13 +106,12 @@ public class ExchangeAPI {
 
                                                                 @Override
                                                                 public void fail(String msg) {
-                                                                    LogUtil.d("getExchangeSync failed:" + msg);
                                                                     //exchangeSite Logout()
                                                                     mAPIResultCallback.fail(msg);
                                                                 }
                                                             });
                                                         } else {
-                                                            LogUtil.e("lisXchsSync no data found:");
+//                                                            LogUtil.e("lisXchsSync no data found:");
                                                             mAPIResultCallback.fail("lisXchsSync no data found");
                                                         }
                                                     }
