@@ -1,5 +1,9 @@
 package com.coolbitx.coolwallet.ui;
 
+import android.app.ActivityManager;
+import android.app.Application;
+import android.app.ApplicationErrorReport;
+import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -30,9 +34,8 @@ import java.nio.ByteOrder;
 /**
  * Created by ShihYi on 2016/4/8.
  * 所有activity需要做的事
- * for disconn 廣播
  */
-public class BaseActivity extends AppCompatActivity {
+public class BaseActivity extends AppCompatActivity{//AppCompatActivity {
 
     public static CmdManager cmdManager;
     Context mContext;
@@ -84,36 +87,43 @@ public class BaseActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        LogUtil.e("lifeCycle BaseActivity onDestroy");
+        LogUtil.e("BaseActivity onDestroy");
 
     }
 
     static NotificationReceiver brocastNR;
 
-    /**
-     * for all activity register
-     * @param context
-     * @param cmdManager
-     */
+//    /**
+//     * for all activity register
+//     * @param context
+//     * @param cmdManager
+//     */
 
     public void registerBroadcast(Context context, CmdManager cmdManager) {
         LogUtil.e("registerBroadcast");
         //註冊監聽
         LocalBroadcastManager mLocalBroadcastManager;
-//        if (brocastNR == null) {
-        brocastNR = new NotificationReceiver(context, cmdManager);
-        //註冊廣播
-        mLocalBroadcastManager = LocalBroadcastManager.getInstance(context);
-        mLocalBroadcastManager.registerReceiver(brocastNR, new IntentFilter(BTConfig.SOCKET_ADDRESS_MSG));
-        mLocalBroadcastManager.registerReceiver(brocastNR, new IntentFilter(BTConfig.DISCONN_NOTIFICATION));
-        mLocalBroadcastManager.registerReceiver(brocastNR, new IntentFilter(BTConfig.XCHS_NOTIFICATION));
+        if (brocastNR == null) {
+            brocastNR = new NotificationReceiver();
+//            brocastNR = new NotificationReceiver(Context context, CmdManager cmdManager);
+            //註冊廣播
+            mLocalBroadcastManager = LocalBroadcastManager.getInstance(context);
+            mLocalBroadcastManager.registerReceiver(brocastNR, new IntentFilter(BTConfig.SOCKET_ADDRESS_MSG));
+            mLocalBroadcastManager.registerReceiver(brocastNR, new IntentFilter(BTConfig.DISCONN_NOTIFICATION));
+            mLocalBroadcastManager.registerReceiver(brocastNR, new IntentFilter(BTConfig.XCHS_NOTIFICATION));
+        }
     }
 
     public void unRegisterBroadcast(Context context) {
         try {
+            ActivityManager am = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
+            ComponentName cn = am.getRunningTasks(1).get(0).topActivity;
+            int ind = cn.getShortClassName().lastIndexOf(".") + 1;//.ui.EraseActivity → EraseActivity
+            String act = cn.getShortClassName().substring(ind);
+
             if (brocastNR != null)
             {
-                LogUtil.e("Unregister receiver");
+                LogUtil.e("unRegisterBroadcast:"+act);
                 LocalBroadcastManager.getInstance(context).unregisterReceiver(brocastNR);
                 brocastNR = null;
             }

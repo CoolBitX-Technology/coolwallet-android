@@ -1,5 +1,6 @@
 package com.coolbitx.coolwallet.general;
 
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.ComponentName;
@@ -223,10 +224,10 @@ public class PublicPun {
                 JSONObject jsonObjectSellData = jsonArrayOrder.getJSONObject(i);
                 ExchangeOrder exchangeOrder = gson.fromJson(jsonObjectSellData.toString(), ExchangeOrder.class);
                 exchangeOrder.setType(mType);
-                LogUtil.i("exchangeOrder" + String.valueOf(i) + " 筆=type:"+exchangeOrder.getType()+" , orderId:" +
-                        exchangeOrder.getOrderId() + " , cwOrderId:"+exchangeOrder.getCworderId()+" , " + exchangeOrder.getAddr() + " , " +
-                        String.valueOf(exchangeOrder.getAmount())+ " , " + exchangeOrder.getAccount() + " , " +
-                        exchangeOrder.getPrice() + " , " + exchangeOrder.getExpiration()+" , isSubmitted:"+exchangeOrder.isSubmitted());
+                LogUtil.i("exchangeOrder" + String.valueOf(i) + " 筆=type:" + exchangeOrder.getType() + " , orderId:" +
+                        exchangeOrder.getOrderId() + " , cwOrderId:" + exchangeOrder.getCworderId() + " , " + exchangeOrder.getAddr() + " , " +
+                        String.valueOf(exchangeOrder.getAmount()) + " , " + exchangeOrder.getAccount() + " , " +
+                        exchangeOrder.getPrice() + " , " + exchangeOrder.getExpiration() + " , isSubmitted:" + exchangeOrder.isSubmitted());
                 // 15847930 , null , 50 , 3 , 234.56 , null
 
                 listExchangeOrder.add(exchangeOrder);
@@ -766,7 +767,6 @@ public class PublicPun {
         mDialogMessage.setText(mMessage);
         //-----------產生輸入視窗--------
 
-
         return new AlertDialog.Builder(mContext, AlertDialog.THEME_DEVICE_DEFAULT_LIGHT)
                 .setView(alert_view);
 //                .setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
@@ -786,7 +786,7 @@ public class PublicPun {
     private static Timer mTimer;
 
     public static void showNoticeDialog(final Context mContext, final String mTitle, final String mMessage) {
-        LogUtil.d("showNoticeDialog");
+
 
         LayoutInflater inflater = LayoutInflater.from(mContext);
         View alert_view = inflater.inflate(R.layout.edit_dialog, null);//alert為另外做給alert用的layout
@@ -797,20 +797,25 @@ public class PublicPun {
         //-----------產生輸入視窗--------
         ActivityManager am = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
         ComponentName cn = am.getRunningTasks(1).get(0).topActivity;
-        LogUtil.e("showNoticeDialog context:" + cn.getShortClassName());
 
-        try {
-            new AlertDialog.Builder(mContext, AlertDialog.THEME_DEVICE_DEFAULT_LIGHT)//
-                    .setView(alert_view)
-                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int whichButton) {
+        LogUtil.d("showNoticeDialog");
+        if (!((Activity) mContext).isFinishing()) {
+            //show dialog
+            LogUtil.e("showNoticeDialog From:" + cn.getShortClassName());
+            try {
+                new AlertDialog.Builder(mContext, AlertDialog.THEME_DEVICE_DEFAULT_LIGHT)//
+                        .setView(alert_view)
+                        .setPositiveButton(mContext.getString(R.string.ok), new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
 
-                        }
-                    }).show();
+                            }
+                        }).show();
 
-        }catch (Exception e){
-            LogUtil.e("showNoticeDialog錯誤＝"+e.getMessage());
+            } catch (Exception e) {
+                LogUtil.e("showNoticeDialog錯誤＝" + e.getMessage());
+            }
         }
+
 //        Dialog dialog=builder.create();
 //        dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
 //        dialog.show();
@@ -818,37 +823,37 @@ public class PublicPun {
     }
 
 
-
     public static void showNoticeDialogToFinish(final Context mContext, String mTitle, String mMessage) {
-        LogUtil.d("showNoticeDialogToFinish");
 
-
-        try {
-            LayoutInflater inflater = LayoutInflater.from(mContext);
-            View alert_view = inflater.inflate(R.layout.edit_dialog, null);//alert為另外做給alert用的layout
-            final EditText mEditText = (EditText) alert_view.findViewById(R.id.etInputLabel);
-            final TextView mDialogTitle = (TextView) alert_view.findViewById(R.id.dialog_title);
-            final TextView mDialogMessage = (TextView) alert_view.findViewById(R.id.dialog_message);
+        LayoutInflater inflater = LayoutInflater.from(mContext);
+        View alert_view = inflater.inflate(R.layout.edit_dialog, null);//alert為另外做給alert用的layout
+        final EditText mEditText = (EditText) alert_view.findViewById(R.id.etInputLabel);
+        final TextView mDialogTitle = (TextView) alert_view.findViewById(R.id.dialog_title);
+        final TextView mDialogMessage = (TextView) alert_view.findViewById(R.id.dialog_message);
 //        mEditText.setVisibility(View.INVISIBLE);
-            //-----------產生輸入視窗--------ProgressDialog.THEME_DEVICE_DEFAULT_LIGHT
-            AlertDialog.Builder builder = new AlertDialog.Builder(mContext, AlertDialog.THEME_DEVICE_DEFAULT_LIGHT);
-            builder.setCancelable(false);
-            mDialogTitle.setText(mTitle);
-            mDialogMessage.setText(mMessage);
-            builder.setView(alert_view);
-            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int whichButton) {
-                    BleActivity.bleManager.disConnectBle();
-//                    ((Activity) mContext).finish(); // 離開程式
-                    Intent intent = new Intent(mContext, BleActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);//它可以關掉所要到的介面中間的activity
-                    mContext.startActivity(intent);
+        //-----------產生輸入視窗--------ProgressDialog.THEME_DEVICE_DEFAULT_LIGHT
 
-                }
-            });
-            builder.show();
-        } catch (Exception e) {
-            LogUtil.e("showNoticeDialogToFinish 錯誤：" + e.getMessage());
+        if (!((Activity) mContext).isFinishing()) {
+            try {
+                AlertDialog.Builder builder = new AlertDialog.Builder(mContext, AlertDialog.THEME_DEVICE_DEFAULT_LIGHT);
+                builder.setCancelable(false);
+                mDialogTitle.setText(mTitle);
+                mDialogMessage.setText(mMessage);
+                builder.setView(alert_view);
+                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        BleActivity.bleManager.disConnectBle();
+//                    ((Activity) mContext).finish(); // 離開程式
+                        Intent intent = new Intent(mContext, BleActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);//它可以關掉所要到的介面中間的activity
+                        mContext.startActivity(intent);
+
+                    }
+                });
+                builder.show();
+            } catch (Exception e) {
+                LogUtil.e("showNoticeDialogToFinish 錯誤：" + e.getMessage());
+            }
         }
     }
 

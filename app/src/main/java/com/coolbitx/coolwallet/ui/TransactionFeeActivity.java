@@ -69,17 +69,27 @@ public class TransactionFeeActivity extends BaseActivity implements CheckBox.OnC
             edtFee.setBackgroundResource(R.drawable.edit_format);
             edtFee.setEnabled(true);
         }
-        //註冊監聽
-        registerBroadcast(this, cmdManager);
 
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        unRegisterBroadcast(this);
+
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        //註冊監聽
+        registerBroadcast(this, cmdManager);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        unRegisterBroadcast(this);
+    }
 
     private void initView() {
 

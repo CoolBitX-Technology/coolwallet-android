@@ -52,11 +52,14 @@ public class InitialPairSuccessfulActivity extends BaseActivity implements View.
     @Override
     protected void onStart() {
         super.onStart();
+        //註冊監聽
+        registerBroadcast(this, cmdManager);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
+        unRegisterBroadcast(this);
     }
 
     @Override
@@ -68,14 +71,13 @@ public class InitialPairSuccessfulActivity extends BaseActivity implements View.
     protected void onResume() {
 
         super.onResume();
-        //註冊監聽
-        registerBroadcast(this, cmdManager);
+
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        unRegisterBroadcast(this);
+
     }
 
 

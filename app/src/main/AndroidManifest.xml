@@ -42,7 +42,6 @@
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -175,14 +174,15 @@
                 <category android:name="com.coolbitx.coolwallet" />
             </intent-filter>
         </receiver>
+
         <receiver
             android:name=".general.NotificationReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
-                <action android:name="SOCKET_ADDRESS_MSG" />
-                <action android:name="DISCONN_NOTIFICATION" />
-                <action android:name="XCHS_NOTIFICATION" />
+                <action android:name="com.coolbitx.SOCKET_ADDRESS_MSG" />
+                <action android:name="com.coolbitx.DISCONN_NOTIFICATION" />
+                <action android:name="com.coolbitx.XCHS_NOTIFICATION" />
                 <category android:name="com.coolbitx.coolwallet" />
             </intent-filter>
 

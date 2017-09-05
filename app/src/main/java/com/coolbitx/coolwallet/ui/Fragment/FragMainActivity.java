@@ -220,6 +220,8 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
 
         }
 
+
+
         //LogUtil.e("class name = " + mParentActivityName);
 
         mContext = this;
@@ -273,6 +275,7 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
             e.printStackTrace();
 //            Crashlytics.log("FragMainActivity onCreate failed=" + e.getMessage());
         }
+
     }
 
     public CmdManager getCmdManager() {
@@ -965,8 +968,7 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
         if (cmdManager == null) {
             cmdManager = new CmdManager();
         }
-        //註冊監聽
-        registerBroadcast(this, cmdManager);
+
 
     }
 
@@ -974,25 +976,26 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
     protected void onStart() {
         super.onStart();
         LogUtil.e("lifeCycle FragMainActivity onStart");
+
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         LogUtil.e("lifeCycle FragMainActivity onPause");
-        unRegisterBroadcast(this);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        LogUtil.e("lifeCycle FragMainActivity onPause");
+        LogUtil.e("lifeCycle FragMainActivity onStop");
+
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        LogUtil.e("lifeCycle FragMainActivity onResume");
+        LogUtil.e("lifeCycle FragMainActivity onDestroy");
         if (mProgress.isShowing()) {
             mProgress.dismiss();
         }

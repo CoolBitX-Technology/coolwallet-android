@@ -34,7 +34,7 @@ android {
         minSdkVersion 18
         targetSdkVersion 22
         versionCode 39
-        versionName "1.7.1" //1.6.7
+        versionName "1.7.1(TEST)" //1.6.7
         multiDexEnabled = true
     }
 //    compileOptions {
@@ -86,7 +86,7 @@ dependencies {
     compile 'com.google.firebase:firebase-messaging:9.0.2'
     compile 'com.microsoft.azure:notification-hubs-android-sdk:0.4@aar'
     compile 'com.microsoft.azure:azure-notifications-handler:1.0.1@aar'
-    compile 'com.android.support:multidex:1.0.0'
+    compile 'com.android.support:multidex:1.0.1'
     //FCM add
     compile 'com.google.android.gms:play-services-gcm:9.0.2'
 //    compile 'com.android.support.constraint:constraint-layout:+'

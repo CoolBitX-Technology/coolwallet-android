@@ -51,6 +51,14 @@ public class SettingActivity extends BaseActivity implements AdapterView.OnItemC
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+
+        //註冊監聽
+        registerBroadcast(this, cmdManager);
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         String[] item = new String[]{getString(R.string.str_exchange_rate),getString(R.string.str_transaction_fee)};//,"Payment Service Provider"
@@ -58,20 +66,18 @@ public class SettingActivity extends BaseActivity implements AdapterView.OnItemC
         lvSetting.setAdapter(adapter);
         lvSetting.setOnItemClickListener(this);
 
-        //註冊監聽
-        registerBroadcast(this, cmdManager);
-
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        unRegisterBroadcast(this);
+
     }
 
     @Override
     protected void onStop() {
         super.onStop();
+        unRegisterBroadcast(this);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.coolbitx.coolwallet.general;
 
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -36,29 +37,29 @@ public class NotificationReceiver extends BroadcastReceiver {
     private CmdManager mCmdManager;
 
 
-    public NotificationReceiver(Context context, CmdManager cmdManager) {
-        this.mContext = context;
-        this.mCmdManager = cmdManager;
-    }
+//    public NotificationReceiver(Context context, CmdManager cmdManager) {
+//        this.mContext = context;
+//        this.mCmdManager = cmdManager;
+//    }
 
     @Override
     public void onReceive(Context context, Intent intent) {
         // TODO: This method is called when the BroadcastReceiver is receiving
-        // an Intent broadcast.
-//        throw new UnsupportedOperationException("Not yet implemented");
-        // TODO Auto-generated method stub
         String action = intent.getAction();
-        LogUtil.d("webSocket broadcast recv!");
-
+        this.mContext = context;
+        mCmdManager = new CmdManager();
+        LogUtil.e("我聽到了喔:" + action);
         if (action.equals(BTConfig.SOCKET_ADDRESS_MSG)) {
-            LogUtil.d("webSocket BaseActivity broadcast recv!");
+
             brocastMsgHandler.sendMessage(brocastMsgHandler.obtainMessage(BSConfig.HANDLER_SOCKET,
                     intent.getExtras().getSerializable("socketAddrMsg")));
+
         } else if (action.equals(BTConfig.DISCONN_NOTIFICATION)) {
-            LogUtil.d("disconn broadcast recv!");
+
             brocastMsgHandler.sendMessage(brocastMsgHandler.obtainMessage(BSConfig.HANDLER_DISCONN));
+
         } else if (action.equals(BTConfig.XCHS_NOTIFICATION)) {
-            LogUtil.d("XCHS BaseActivity broadcast recv!");
+
             Message msg = new Message();
             Bundle data = new Bundle();
             data.putString("handlerMessage", intent.getExtras().getString("ExchangeMessage"));
@@ -115,21 +116,18 @@ public class NotificationReceiver extends BroadcastReceiver {
 
                     LogUtil.e("HANDLER_DISCONN activity=" + act);
 
-                    if (act.equals("BleActivity")) {
+                    if (!act.equals("BleActivity")) {
 
+                        Intent intent = new Intent(mContext, BleActivity.class);
+                        intent.putExtra("Disconnection_Notify", true);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        mContext.startActivity(intent);
 //                        PublicPun.showNoticeDialogToFinish(mContext, title, noteMsg);
                         //自動連線
 //                        SharedPreferences settings = mContext.getSharedPreferences("Preference", 0);
 //                        //取出name屬性的字串
 //                        String address = settings.getString("connAddress", "");
 //                        bleManager.connectBle(address);
-
-                    } else {
-                        Intent intent = new Intent(mContext, BleActivity.class);
-                        intent.putExtra ("Disconnection_Notify", true);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                        mContext.startActivity(intent);
-
                     }
 
                     break;
@@ -140,8 +138,10 @@ public class NotificationReceiver extends BroadcastReceiver {
                     if (message != null) {
                         //Receive message from Exchange site
                         LogUtil.d("ExchangeMessage=" + message);
+
                         PublicPun.showNoticeDialog(mContext, "CoolWallet Exchange Message", message);
                     }
+
             }
             super.handleMessage(msg);
         }
@@ -237,35 +237,6 @@ public class NotificationReceiver extends BroadcastReceiver {
             );
         }
     }
-
-
-    //建立廣播接收socket訊息
-//    public class socketNotificationReceiver extends BroadcastReceiver {
-//        @Override
-//        public void onReceive(Context context, Intent intent) {
-//            // TODO Auto-generated method stub
-//            String action = intent.getAction();
-//            LogUtil.d("broadcast recv!");
-//
-//            if (action.equals(BTConfig.SOCKET_ADDRESS_MSG)) {
-//                LogUtil.d("webSocket  broadcast recv!");
-//                brocastMsgHandler.sendMessage(brocastMsgHandler.obtainMessage(BSConfig.HANDLER_SOCKET,
-//                        intent.getExtras().getSerializable("socketAddrMsg")));
-//            } else if (action.equals(BTConfig.DISCONN_NOTIFICATION)) {
-//                LogUtil.d("disconn  broadcast recv!");
-//                brocastMsgHandler.sendMessage(brocastMsgHandler.obtainMessage(BSConfig.HANDLER_DISCONN));
-//            } else if (action.equals(BTConfig.XCHS_NOTIFICATION)) {
-//                LogUtil.d("XCHS  broadcast recv!");
-//                Message msg = new Message();
-//                Bundle data = new Bundle();
-//                data.putString("handlerMessage", intent.getExtras().getString("ExchangeMessage"));
-//                msg.setData(data);
-//                msg.what = BSConfig.HANDLER_XCHS;
-//                brocastMsgHandler.sendMessage(msg);
-//            }
-//        }
-//
-//    }
 
     /**
      * show on Status Bar

@@ -54,20 +54,31 @@ public class EraseActivity extends BaseActivity implements View.OnClickListener 
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        //註冊監聽
+//        registerBroadcast(this, cmdManager);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+//        unRegisterBroadcast(this);
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         if (cmdManager == null) {
             cmdManager = new CmdManager();
         }
-        //註冊監聽
-        registerBroadcast(this, cmdManager);
 
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        unRegisterBroadcast(this);
+
     }
 
     private void genOTP() {

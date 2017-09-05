@@ -136,15 +136,26 @@ public class ExchangeCompleteOrderActivity extends BaseActivity implements View.
         if (cwBtcNetWork == null) {
             cwBtcNetWork = new CwBtcNetWork();
         }
-        //註冊監聽
-        registerBroadcast(this, cmdManager);
 
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        unRegisterBroadcast(this);
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        //註冊監聽
+//        registerBroadcast(this, cmdManager);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+//        unRegisterBroadcast(this);
     }
 
     private void initViews() {
@@ -322,6 +333,7 @@ public class ExchangeCompleteOrderActivity extends BaseActivity implements View.
                                         @Override
                                         public void onSuccess(int status, byte[] outputData) {
                                             LogUtil.d("Block資料=" + PublicPun.byte2HexString(outputData));
+                                            qryBlockBalance(xchsOrder.getAccount());
                                         }
                                     });
 
@@ -330,8 +342,7 @@ public class ExchangeCompleteOrderActivity extends BaseActivity implements View.
                                                 @Override
                                                 public void success(String[] msg) {
                                                     LogUtil.d("ExWriteOKToken " + msg[0]);
-//                                                    finish();
-                                                    completeOrder();
+//                                                    completeOrder();
                                                     mProgress.dismiss();
                                                 }
 
@@ -345,6 +356,15 @@ public class ExchangeCompleteOrderActivity extends BaseActivity implements View.
 
                                 } else {
                                     LogUtil.d("XchsBlockBtc fail");
+
+                                    cmdManager.XchsBlockInfo(okTkn, new CmdResultCallback() {
+                                        @Override
+                                        public void onSuccess(int status, byte[] outputData) {
+                                            LogUtil.d("Block資料=" + PublicPun.byte2HexString(outputData));
+                                            qryBlockBalance(xchsOrder.getAccount());
+                                        }
+                                    });
+
                                     mProgress.dismiss();
                                     PublicPun.showNoticeDialog(mContext, getString(R.string.unable_to_block), getString(R.string.error) + ":" + Integer.toHexString(status));
                                 }
@@ -358,6 +378,7 @@ public class ExchangeCompleteOrderActivity extends BaseActivity implements View.
                         mProgress.dismiss();
                         PublicPun.showNoticeDialog(mContext, getString(R.string.unable_to_block), msg);
 
+
                     }
                 });
             }
@@ -369,6 +390,19 @@ public class ExchangeCompleteOrderActivity extends BaseActivity implements View.
             }
         });
         otp_dialog.show();
+    }
+
+    private void qryBlockBalance(int account) {
+
+//        final byte cwHdwAllAccountInfo = 0x05;
+        final byte cwHdwAccountInfoBlockAmount = 0x04;
+        //[B5]
+        cmdManager.hdwQueryAccountInfo(cwHdwAccountInfoBlockAmount, account, new CmdResultCallback() {
+            @Override
+            public void onSuccess(int status, byte[] outputData) {
+                LogUtil.e("帳戶block金額："+PublicPun.byte2HexStringNoBlank(outputData));
+            }
+        });
     }
 
     byte[] cancelBlkInfo;
@@ -1326,17 +1360,6 @@ public class ExchangeCompleteOrderActivity extends BaseActivity implements View.
             int postPushResult = -1;
             int hadlerMsg = 0;
 
-//            postDecodeResult = cwBtcNetWork.doPostII(BtcUrl.URL_BLOCKR_SERVER_SITE + BtcUrl.URL_BLOCKR_DECODE, currUnsignedTx);
-//            if (postDecodeResult == 200) {
-//                postPushResult = cwBtcNetWork.doPostII(BtcUrl.URL_BLOCKR_SERVER_SITE + BtcUrl.URL_BLOCKR_PUSH, currUnsignedTx);
-//                if (postPushResult == 200) {
-//                    hadlerMsg = HANDLER_SEND_BTC_FINISH;
-//                } else {
-//                    hadlerMsg = HANDLER_SEND_BTC_ERROR;
-//                }
-//            } else {
-//                hadlerMsg = HANDLER_SEND_BTC_ERROR;
-//            }
             postDecodeResult = cwBtcNetWork.doPostII(BtcUrl.URL_BLOCKCHAIN_SERVER_SITE + BtcUrl.URL_BLICKCHAIN_DECODE, currUnsignedTx);
             if (postDecodeResult == 200) {
                 postPushResult = cwBtcNetWork.doPostII(BtcUrl.URL_BLOCKCHAIN_SERVER_SITE + BtcUrl.URL_BLICKCHAIN_PUSH, currUnsignedTx);
@@ -1357,28 +1380,39 @@ public class ExchangeCompleteOrderActivity extends BaseActivity implements View.
             super.handleMessage(msg);
             switch (msg.what) {
                 case HANDLER_SEND_BTC_FINISH:
-//                    final String recvAddress = editSendAddress.getText().toString().trim();
-//                    final String amountStr = editSendBtc.getText().toString().trim();
+
                     if (mTimer != null) {
                         mTimer.cancel();
                     }
-                    FunTrxFinish();
-                    PublicPun.showNoticeDialog(mContext, getString(R.string.sent), getString(R.string.sent) + " " + mTxsConfirm.getOutput_amount() + getString(R.string.btc_to) + " " + recvAddress);
-
                     isTrxSuccess = true;
-
                     //clear trx data
 
                     if (mProgress != null) {
                         mProgress.dismiss();
                     }
 
+                    FunTrxFinish();
+
+                    PublicPun.showNoticeDialog(mContext, getString(R.string.sent), getString(R.string.sent) + " " + mTxsConfirm.getOutput_amount() + getString(R.string.btc_to) + " " + recvAddress);
+
+                    PublicPun.CustomNoticeDialog(mContext, getString(R.string.sent), getString(R.string.sent) + " " + mTxsConfirm.getOutput_amount() + getString(R.string.btc_to) + " " + recvAddress)
+                            .setCancelable(false)
+                            .setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int whichButton) {
+                                    finish();
+
+                                }
+                            }).show();
+
+
                     break;
                 case HANDLER_SEND_BTC_ERROR:
                     if (mProgress != null) {
                         mProgress.dismiss();
                     }
-
+                    if (mTimer != null) {
+                        mTimer.cancel();
+                    }
                     PublicPun.showNoticeDialog(mContext, getString(R.string.error_msg), getString(R.string.failed_to_broadcast_transaction));
                     break;
             }
@@ -1667,7 +1701,7 @@ public class ExchangeCompleteOrderActivity extends BaseActivity implements View.
             }
         });
 
-        finish();
+
     }
 
 

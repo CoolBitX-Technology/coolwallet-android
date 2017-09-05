@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -57,7 +58,7 @@ public class HostDeviceActivity extends BaseActivity implements AdapterView.OnIt
         hostList = (ListView) findViewById(R.id.lv_host);
         hostList.setOnItemClickListener(this);
         hostList.requestFocus();
-
+        LogUtil.e("lifeCycle HostDeviceActivity onCreate");
 
         updataViews();
 
@@ -66,17 +67,35 @@ public class HostDeviceActivity extends BaseActivity implements AdapterView.OnIt
 
     @Override
     protected void onResume() {
-
         super.onResume();
-        //註冊監聽
-        registerBroadcast(this, cmdManager);
-
+        LogUtil.e("lifeCycle HostDeviceActivity onResume");
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        unRegisterBroadcast(this);
+        LogUtil.e("lifeCycle HostDeviceActivity onPause");
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        LogUtil.e("lifeCycle HostDeviceActivity onStart");
+        //註冊監聽
+//        registerBroadcast(this, cmdManager);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        LogUtil.e("lifeCycle HostDeviceActivity onStop");
+//        unRegisterBroadcast(this);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        LogUtil.e("lifeCycle HostDeviceActivity onDestroy");
     }
 
     @Override

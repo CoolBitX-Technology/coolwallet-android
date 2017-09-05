@@ -17,6 +17,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.view.ActionMode;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.View;
@@ -678,6 +679,8 @@ public class BleActivity extends BaseActivity {
     protected void onStart() {
         super.onStart();
         LogUtil.d("BleActivity onStart");
+
+//        registerBroadcast(BleActivity.this, cmdManager);
     }
 
     @Override
@@ -695,8 +698,8 @@ public class BleActivity extends BaseActivity {
             bleManager.openBluetooth();
         }
 
-        registerBroadcast(BleActivity.this, cmdManager);
     }
+
 
 
     @Override
@@ -719,7 +722,7 @@ public class BleActivity extends BaseActivity {
     protected void onPause() {
         super.onPause();
         LogUtil.d("BleActivity onPause");
-        unRegisterBroadcast(this);
+
     }
 
     @Override
@@ -729,6 +732,7 @@ public class BleActivity extends BaseActivity {
         if (mTimer != null) {
             mTimer.cancel();
         }
+//        unRegisterBroadcast(this);
     }
 
     /**
@@ -740,7 +744,8 @@ public class BleActivity extends BaseActivity {
         if(mProgress.isShowing()){
             mProgress.dismiss();
         }
-        LocalBroadcastManager.getInstance(this).sendBroadcast(SocketIntent);
+//        LocalBroadcastManager.getInstance(this).sendBroadcast(SocketIntent);
+        sendBroadcast(SocketIntent);
     }
 
     private class BluetoothStateListener extends BroadcastReceiver {

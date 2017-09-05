@@ -15,6 +15,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -25,6 +26,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.coolbitx.coolwallet.R;
 import com.coolbitx.coolwallet.Service.BTConfig;
 import com.coolbitx.coolwallet.adapter.PendingOrderAdapter;
@@ -37,6 +39,7 @@ import com.coolbitx.coolwallet.util.ExchangeAPI;
 import com.snscity.egdwlib.CmdManager;
 import com.snscity.egdwlib.cmd.CmdResultCallback;
 import com.snscity.egdwlib.utils.LogUtil;
+
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -60,6 +63,7 @@ public class ExchangeActivity extends BaseActivity implements
     private ProgressDialog mProgress;
     private LinearLayout lin_orders;
     XchsMsgListener xchsMsgListener;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -109,7 +113,7 @@ public class ExchangeActivity extends BaseActivity implements
 
     private void GetPendingOrder() {
 
-        mProgress.show();
+//        mProgress.show();
         listExchangeSellOrder = new ArrayList<>();
         listExchangeBuyOrder = new ArrayList<>();
 
@@ -117,7 +121,7 @@ public class ExchangeActivity extends BaseActivity implements
             @Override
             public void success(String[] msg) {
                 String[] mString = new String[]{"sell", "buy"};
-                mProgress.dismiss();
+//                mProgress.dismiss();
                 for (int i = 0; i < mString.length; i++) {
                     if (i == 0) {
                         listExchangeSellOrder = PublicPun.jsonParserExchange(msg[0], mString[i], true);
@@ -387,13 +391,14 @@ public class ExchangeActivity extends BaseActivity implements
     }
 
     public void registerBroadcast(Context context) {
-
+        LogUtil.e("註冊");
         xchsMsgListener = new XchsMsgListener();
         //註冊監聽廣播
         LocalBroadcastManager.getInstance(context).registerReceiver(xchsMsgListener, new IntentFilter(BTConfig.XCHS_NOTIFICATION));
     }
 
     public void unRegisterLocalBroadcast(Context context) {
+        LogUtil.e("取消註冊");
         try {
             if (brocastNR != null) {
                 LocalBroadcastManager.getInstance(context).unregisterReceiver(xchsMsgListener);
@@ -410,9 +415,8 @@ public class ExchangeActivity extends BaseActivity implements
     protected void onStart() {
         super.onStart();
 
-
         //註冊監聽(from BaseActivity)
-        registerBroadcast(this, cmdManager);
+//        registerBroadcast(this, cmdManager);
         //註冊local
         registerBroadcast(this);
     }
@@ -421,7 +425,7 @@ public class ExchangeActivity extends BaseActivity implements
     protected void onStop() {
         super.onStop();
 
-        unRegisterBroadcast(this);
+//        unRegisterBroadcast(this);
         unRegisterLocalBroadcast(this);
     }
 

@@ -125,6 +125,7 @@ public class BlockWebSocketClient extends org.java_websocket.client.WebSocketCli
         Intent SocketIntent = new Intent(BTConfig.SOCKET_ADDRESS_MSG);
         LogUtil.d("put broadcast from webSocket =" + socketAddress.getAddress());
         SocketIntent.putExtra("socketAddrMsg", socketAddress);
-        LocalBroadcastManager.getInstance(mContext).sendBroadcast(SocketIntent);
+//        LocalBroadcastManager.getInstance(mContext).sendBroadcast(SocketIntent);
+        mContext.sendBroadcast(SocketIntent);
     }
 }
