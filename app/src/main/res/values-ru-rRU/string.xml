@@ -99,7 +99,7 @@
 
     <!--Exchange Login-->
     <string name="login">Вход в систему...</string>
-
+    <string name="login_failed">Ошибка входа</string>
 
     <!--ExchangeActivity-->
     <string name="press_exit">Press once again to exit Exchange site!</string>

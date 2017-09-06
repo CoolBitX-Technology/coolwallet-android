@@ -3,11 +3,14 @@ package com.coolbitx.coolwallet.bean;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.coolbitx.coolwallet.util.BTCUtils;
 import com.coolbitx.coolwallet.util.BitcoinOutputStream;
+import com.coolbitx.coolwallet.util.ByteUtils;
+import com.coolbitx.coolwallet.util.ECKey;
 import com.coolbitx.coolwallet.util.ValidationException;
 import com.snscity.egdwlib.utils.LogUtil;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -29,8 +32,71 @@ public class Transaction {
         this.lockTime = lockTime;
     }
 
+    public  static byte[] getSignature(byte[] signedData) {
 
-    //genRawtx(byte[] sc)
+        byte[] derX = new byte[32];
+        byte[] derY = new byte[32];
+
+        //x data
+        System.arraycopy(signedData, 0, derX, 0, derX.length);
+        System.arraycopy(signedData, 32, derY, 0, derY.length);
+        ECKey.ECDSASignature ecSig = new ECKey.ECDSASignature(new BigInteger(1, derX), new BigInteger(1, derY));
+        byte[] signature = ecSig.encodeToDER();
+
+
+        return signature;
+    }
+
+    public  byte[] getScriptSig(int ind) throws IOException {
+
+        BitcoinOutputStream bos = new BitcoinOutputStream();
+        int scriptLen = inputs[ind].signature == null ? 0 : inputs[ind].signature.length;
+        bos.writeVarInt(scriptLen + 1);//SIGHASH_ALL 1B
+        if (scriptLen > 0) {
+            bos.write(inputs[ind].signature);
+        }
+        bos.writeVarInt(Transaction.Script.SIGHASH_ALL);
+        int pushPublicKeyLen = inputs[ind].publicKey.length;
+        bos.writeVarInt(pushPublicKeyLen);
+        bos.write(inputs[ind].publicKey);
+
+        return bos.toByteArray();
+    }
+
+    public byte[] getBitcoinTransaction() {
+        BitcoinOutputStream bos = new BitcoinOutputStream();
+        try {
+            bos.writeInt32(1);
+            bos.writeVarInt(inputs.length);
+            for (Input input : inputs) {
+                bos.write(BTCUtils.reverse(input.outPoint.hash));
+                bos.writeInt32(input.outPoint.index);
+                byte[] scriptSig = getScriptSig(inputs.length - 1);
+                bos.writeVarInt(scriptSig.length);
+                bos.write(scriptSig);
+                bos.writeInt32(input.sequence);
+            }
+            bos.writeVarInt(outputs.length);
+            for (Output output : outputs) {
+                bos.writeInt64(output.value);
+                int scriptLen = output.script == null ? 0 : output.script.bytes.length;
+                bos.writeVarInt(scriptLen);
+                if (scriptLen > 0) {
+                    bos.write(output.script.bytes);
+                }
+            }
+            bos.writeInt32(lockTime);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                bos.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return bos.toByteArray();
+    }
 
 
     public byte[] getBytes() {
@@ -76,12 +142,23 @@ public class Transaction {
         public final OutPoint outPoint;
         public final Script script;
         public final int sequence;
+        public byte[] signature;
+        public byte[] publicKey;
 
         public Input(OutPoint outPoint, Script script, int sequence) {
             this.outPoint = outPoint;
             this.script = script;
             this.sequence = sequence;
         }
+
+        public void setSignature(byte[] signature) {
+            this.signature = signature;
+        }
+
+        public void setPublicKey(byte[] publicKey) {
+            this.publicKey = publicKey;
+        }
+
 
     }
 
@@ -90,7 +167,7 @@ public class Transaction {
         public final Script script;
 
         public Output(long value, Script script) {
-            LogUtil.e("output data:value=" + String.valueOf(value) );
+            LogUtil.e("output data:value=" + String.valueOf(value));
             this.value = value;
             this.script = script;
         }
@@ -188,6 +265,20 @@ public class Transaction {
             return result;
         }
 
+        public static byte[] rawTransactionForpublishing(Transaction unsignedTransaction) throws ValidationException {
+            byte[] txUnsignedBytes = unsignedTransaction.getBitcoinTransaction();
+            LogUtil.d("rawTx hex=" + ByteUtils.bytesToHex(txUnsignedBytes));
+            BitcoinOutputStream baos = new BitcoinOutputStream();
+            try {
+                baos.write(txUnsignedBytes);
+                baos.close();
+            } catch (Exception e) {
+                throw new ValidationException(e);
+            }
+
+            return baos.toByteArray();
+        }
+
         public static byte[]
         hashTransactionForSigning(Transaction unsignedTransaction) throws ValidationException {
 //            byte[] txUnsignedBytes = unsignedTransaction.getBitcoinOutputStreamBytes(); //
@@ -222,9 +313,9 @@ public class Transaction {
         public static Script buildOutput(String address) throws ValidationException, NoSuchAlgorithmException, IOException {
             //noinspection TryWithIdenticalCatches
 //            try {
-            LogUtil.e("out address="+address);
+            LogUtil.e("out address=" + address);
             byte[] addressWithCheckSumAndNetworkCode = BTCUtils.decodeBase58(address);
-            LogUtil.e("addressWithCheckSumAndNetworkCode="+PublicPun.byte2HexStringNoBlank(addressWithCheckSumAndNetworkCode));
+            LogUtil.e("addressWithCheckSumAndNetworkCode=" + PublicPun.byte2HexStringNoBlank(addressWithCheckSumAndNetworkCode));
 //                if (addressWithCheckSumAndNetworkCode[0] != 0 ||  addressWithCheckSumAndNetworkCode[0]!=5) {
             if (addressWithCheckSumAndNetworkCode[0] != 0 && addressWithCheckSumAndNetworkCode[0] != 5) {
                 LogUtil.e("Unknown address type: " + addressWithCheckSumAndNetworkCode[0] + ";addr=" + address);
@@ -380,7 +471,6 @@ public class Transaction {
         }
 
 
-
         public static class ScriptInvalidException extends Exception {
             public ScriptInvalidException() {
 
@@ -390,9 +480,6 @@ public class Transaction {
                 super(s);
             }
         }
-
-
-
 
 
     }

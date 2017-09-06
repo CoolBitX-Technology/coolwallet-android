@@ -84,7 +84,6 @@ public class ExchangeActivity extends BaseActivity implements
     private class XchsMsgListener extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            LogUtil.e("Receive Message");
             String action = intent.getAction();
 
             if (action.equals(BTConfig.XCHS_NOTIFICATION)) {
@@ -104,7 +103,6 @@ public class ExchangeActivity extends BaseActivity implements
             // TODO Auto-generated method stub
             switch (msg.what) {
                 case BSConfig.HANDLER_XCHS:
-                    LogUtil.d("go Handler");
                     GetPendingOrder();
             }
             super.handleMessage(msg);
@@ -168,8 +166,13 @@ public class ExchangeActivity extends BaseActivity implements
         Intent intent = new Intent();
         intent.setClass(mContext, ExchangeCompleteOrderActivity.class);
         Bundle bundle = new Bundle();
+<<<<<<< HEAD
         LogUtil.i("exchangeOrder click" +
                 exchngeOrder.getOrderId() + " , " + exchngeOrder.getCworderId() +" , " + exchngeOrder.getAddr() + " , " +
+=======
+        LogUtil.i("exchangeOrder data" +
+                exchngeOrder.getOrderId() + " , " + exchngeOrder.getAddr() + " , " +
+>>>>>>> 588802ec8522e67274b6f73568e70a2fed1c2e34
                 exchngeOrder.getAmount() + " , " + exchngeOrder.getAccount() + " , " +
                 exchngeOrder.getPrice() + " , " + exchngeOrder.getExpiration());
 
@@ -183,7 +186,7 @@ public class ExchangeActivity extends BaseActivity implements
     @Override
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
         int clickId = parent.getId();
-        ExchangeOrder exchngeOrder = new ExchangeOrder();
+        ExchangeOrder exchngeOrder;
         orderId = null;
 
         if (listExchangeSellOrder.size() == 0) {
@@ -235,13 +238,13 @@ public class ExchangeActivity extends BaseActivity implements
         cmdManager.XchsSessionLogout(new CmdResultCallback() {
             @Override
             public void onSuccess(int status, byte[] outputData) {
-                LogUtil.e("XchsSessionLogout success");
+                LogUtil.e("SE XchsSessionLogout success");
             }
         });
         mExchangeAPI.exchangeLogOut(new APIResultCallback() {
             @Override
             public void success(String[] msg) {
-                LogUtil.d("Logout success.");
+                LogUtil.d("XCHS Logout success.");
             }
 
             @Override
@@ -314,9 +317,9 @@ public class ExchangeActivity extends BaseActivity implements
                 cmdManager.XchsGetOtp(infoid, new CmdResultCallback() {
                     @Override
                     public void onSuccess(int status, byte[] outputData) {
-                        if ((status + 65536) == 0x9000) {//-28672//36864
-                        } else {
-
+                        if ((status + 65536) != 0x9000) {//-28672//36864
+                            PublicPun.showNoticeDialog(mContext, getString(R.string.unable_to_generate_otp), getString(R.string.plz_try_again)
+                                    + "(" + getString(R.string.error) + ":" + Integer.toHexString(status) + ")");
                         }
                     }
                 });
@@ -352,7 +355,7 @@ public class ExchangeActivity extends BaseActivity implements
         // 判斷是否按下Back
 
         // 是否c要退出
-        if (isExit == false) {
+        if (!isExit) {
             isExit = true; //記錄下一次要退出
             Toast.makeText(getBaseContext(), getString(R.string.press_exit), Toast.LENGTH_SHORT).show();
             // 如果超過兩秒則恢復預設值
