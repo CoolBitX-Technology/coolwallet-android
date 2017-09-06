@@ -166,13 +166,8 @@ public class ExchangeActivity extends BaseActivity implements
         Intent intent = new Intent();
         intent.setClass(mContext, ExchangeCompleteOrderActivity.class);
         Bundle bundle = new Bundle();
-<<<<<<< HEAD
         LogUtil.i("exchangeOrder click" +
                 exchngeOrder.getOrderId() + " , " + exchngeOrder.getCworderId() +" , " + exchngeOrder.getAddr() + " , " +
-=======
-        LogUtil.i("exchangeOrder data" +
-                exchngeOrder.getOrderId() + " , " + exchngeOrder.getAddr() + " , " +
->>>>>>> 588802ec8522e67274b6f73568e70a2fed1c2e34
                 exchngeOrder.getAmount() + " , " + exchngeOrder.getAccount() + " , " +
                 exchngeOrder.getPrice() + " , " + exchngeOrder.getExpiration());
 
