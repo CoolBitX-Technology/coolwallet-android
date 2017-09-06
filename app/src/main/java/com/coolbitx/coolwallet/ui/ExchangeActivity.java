@@ -169,7 +169,7 @@ public class ExchangeActivity extends BaseActivity implements
         intent.setClass(mContext, ExchangeCompleteOrderActivity.class);
         Bundle bundle = new Bundle();
         LogUtil.i("exchangeOrder click" +
-                exchngeOrder.getOrderId() + " , " + exchngeOrder.getAddr() + " , " +
+                exchngeOrder.getOrderId() + " , " + exchngeOrder.getCworderId() +" , " + exchngeOrder.getAddr() + " , " +
                 exchngeOrder.getAmount() + " , " + exchngeOrder.getAccount() + " , " +
                 exchngeOrder.getPrice() + " , " + exchngeOrder.getExpiration());
 
@@ -416,7 +416,7 @@ public class ExchangeActivity extends BaseActivity implements
         super.onStart();
 
         //註冊監聽(from BaseActivity)
-//        registerBroadcast(this, cmdManager);
+        registerBroadcast(this, cmdManager);
         //註冊local
         registerBroadcast(this);
     }
@@ -425,7 +425,7 @@ public class ExchangeActivity extends BaseActivity implements
     protected void onStop() {
         super.onStop();
 
-//        unRegisterBroadcast(this);
+        unRegisterBroadcast(this);
         unRegisterLocalBroadcast(this);
     }
 

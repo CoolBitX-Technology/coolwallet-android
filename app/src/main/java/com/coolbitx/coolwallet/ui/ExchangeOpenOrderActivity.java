@@ -69,13 +69,13 @@ public class ExchangeOpenOrderActivity extends BaseActivity implements View.OnCl
     protected void onStart() {
         super.onStart();
         //註冊監聽
-//        registerBroadcast(this, cmdManager);
+        registerBroadcast(this, cmdManager);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-//        unRegisterBroadcast(this);
+        unRegisterBroadcast(this);
     }
 
     private void GetUnclarifyOrder() {

@@ -37,17 +37,16 @@ public class NotificationReceiver extends BroadcastReceiver {
     private CmdManager mCmdManager;
 
 
-//    public NotificationReceiver(Context context, CmdManager cmdManager) {
-//        this.mContext = context;
-//        this.mCmdManager = cmdManager;
-//    }
+    public NotificationReceiver(Context context, CmdManager cmdManager) {
+        this.mContext = context;
+        this.mCmdManager = cmdManager;
+    }
 
     @Override
     public void onReceive(Context context, Intent intent) {
         // TODO: This method is called when the BroadcastReceiver is receiving
         String action = intent.getAction();
-        this.mContext = context;
-        mCmdManager = new CmdManager();
+
         LogUtil.e("我聽到了喔:" + action);
         if (action.equals(BTConfig.SOCKET_ADDRESS_MSG)) {
 

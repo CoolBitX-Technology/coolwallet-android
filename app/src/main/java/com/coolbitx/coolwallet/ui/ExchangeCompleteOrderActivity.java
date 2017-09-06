@@ -124,6 +124,7 @@ public class ExchangeCompleteOrderActivity extends BaseActivity implements View.
         initValues();
 
         cwBtcNetWork = new CwBtcNetWork();
+        getBlockInfo();
 
     }
 
@@ -149,13 +150,13 @@ public class ExchangeCompleteOrderActivity extends BaseActivity implements View.
     protected void onStart() {
         super.onStart();
         //註冊監聽
-//        registerBroadcast(this, cmdManager);
+        registerBroadcast(this, cmdManager);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-//        unRegisterBroadcast(this);
+        unRegisterBroadcast(this);
     }
 
     private void initViews() {
@@ -232,7 +233,9 @@ public class ExchangeCompleteOrderActivity extends BaseActivity implements View.
 
     @Override
     public void onClick(View v) {
-        LogUtil.d("before complete");
+
+        FunTrxFinish();
+
         isBlockr = AppPrefrence.getIsBlockrApi(mContext);
         if (v == btnCompleteOrder) {
 
@@ -254,8 +257,10 @@ public class ExchangeCompleteOrderActivity extends BaseActivity implements View.
                     }
                 }
             });
-        } else if (v == btnCancelOrder || v == btnSubmittedOk) {
+        }
+        else if (v == btnCancelOrder || v == btnSubmittedOk) {
 //            CancelTrx();
+            LogUtil.d("cancel order");
             finish();
         }
     }
@@ -329,20 +334,14 @@ public class ExchangeCompleteOrderActivity extends BaseActivity implements View.
                                     System.arraycopy(outputData, 32, okTkn, 0, 4);
                                     System.arraycopy(outputData, 36, unblockTkn, 0, 16);
 
-                                    cmdManager.XchsBlockInfo(okTkn, new CmdResultCallback() {
-                                        @Override
-                                        public void onSuccess(int status, byte[] outputData) {
-                                            LogUtil.d("Block資料=" + PublicPun.byte2HexString(outputData));
-                                            qryBlockBalance(xchsOrder.getAccount());
-                                        }
-                                    });
+                                    getBlockInfo();
 
                                     mExchangeAPI.doExWriteOKToken(orderID, PublicPun.byte2HexStringNoBlank(okTkn), PublicPun.byte2HexStringNoBlank(unblockTkn),
                                             new APIResultCallback() {
                                                 @Override
                                                 public void success(String[] msg) {
                                                     LogUtil.d("ExWriteOKToken " + msg[0]);
-//                                                    completeOrder();
+                                                    completeOrder();
                                                     mProgress.dismiss();
                                                 }
 
@@ -357,13 +356,7 @@ public class ExchangeCompleteOrderActivity extends BaseActivity implements View.
                                 } else {
                                     LogUtil.d("XchsBlockBtc fail");
 
-                                    cmdManager.XchsBlockInfo(okTkn, new CmdResultCallback() {
-                                        @Override
-                                        public void onSuccess(int status, byte[] outputData) {
-                                            LogUtil.d("Block資料=" + PublicPun.byte2HexString(outputData));
-                                            qryBlockBalance(xchsOrder.getAccount());
-                                        }
-                                    });
+                                    getBlockInfo();
 
                                     mProgress.dismiss();
                                     PublicPun.showNoticeDialog(mContext, getString(R.string.unable_to_block), getString(R.string.error) + ":" + Integer.toHexString(status));
@@ -390,6 +383,19 @@ public class ExchangeCompleteOrderActivity extends BaseActivity implements View.
             }
         });
         otp_dialog.show();
+    }
+
+    private void getBlockInfo(){
+        if(mProgress.isShowing()){
+            mProgress.dismiss();
+        }
+        cmdManager.XchsBlockInfo(okTkn, new CmdResultCallback() {
+            @Override
+            public void onSuccess(int status, byte[] outputData) {
+                LogUtil.d("Block資料=" + PublicPun.byte2HexString(outputData));
+                qryBlockBalance(xchsOrder.getAccount());
+            }
+        });
     }
 
     private void qryBlockBalance(int account) {
@@ -445,6 +451,8 @@ public class ExchangeCompleteOrderActivity extends BaseActivity implements View.
                                         public void success(String[] msg) {
                                             LogUtil.d("cancelTrx  success = " + msg[0]);
                                             mProgress.dismiss();
+                                            finish();
+                                            getBlockInfo();
                                         }
 
                                         @Override
@@ -543,7 +551,7 @@ public class ExchangeCompleteOrderActivity extends BaseActivity implements View.
         if (isBlockr) {
             InAddress += "?unconfirmed=1";
         }
-        System.out.print("unSpent addresses=" + InAddress);
+//        System.out.print("unSpent addresses=" + InAddress);
 //        unSpentTxsAsyncTask = new UnSpentTxsAsyncTask();
 //        unSpentTxsAsyncTask.execute(InAddress);
 
@@ -688,7 +696,6 @@ public class ExchangeCompleteOrderActivity extends BaseActivity implements View.
 
             @Override
             public void TransactionCancel() {
-
                 CancelBlock();
 
             }
@@ -837,6 +844,8 @@ public class ExchangeCompleteOrderActivity extends BaseActivity implements View.
                                                             if ((status + 65536) == 0x9000) {
                                                                 trxHandle = outputData;
                                                                 LogUtil.d("XchsTrxSignLogin trxHandle=" + PublicPun.byte2HexStringNoBlank(trxHandle));
+
+                                                                getBlockInfo();
 
                                                                 doTrxSignPrepare(lisTrxBlks);
 
@@ -1126,9 +1135,8 @@ public class ExchangeCompleteOrderActivity extends BaseActivity implements View.
                                         currUnsignedTx = genRawTxData(scriptSigs);
                                         LogUtil.e("取得 currUnsignedTx=" + currUnsignedTx + ";length=" + currUnsignedTx.length());
                                         LogUtil.e("byte長度=" + PublicPun.hexStringToByteArray(currUnsignedTx).length);
-
+                                        getBlockInfo();
                                         FunApiSubmit(PublicPun.hexStringToByteArray(currUnsignedTx));
-
                                     }
                                 }
                             }
@@ -1630,27 +1638,6 @@ public class ExchangeCompleteOrderActivity extends BaseActivity implements View.
                 LogUtil.d("XchsTrxsignLogout 成功");
 
                 final String trxReceipt = PublicPun.byte2HexStringNoBlank(outputData);
-                // get Receipt
-                //API Single Address
-                //CALL XCHS SUBMIT API
-
-//                mProgress.setMessage("Synchronizing to Exchange Site...");
-//                mProgress.show();
-
-//                mExchangeAPI.getBlockChainRawAddress(xchsOrder.getAddr(), new APIResultCallback() {
-//                    @Override
-//                    public void success(String[] msg) {
-//                        String trxId = msg[0];
-//                        LogUtil.e("trxID=" + trxId);
-//
-//                        if (trxId == "" || trxId == null) {
-//                            failedTrx();
-//                        } else {
-
-//                            if(trxId!=txId){
-//                                failedTrx();
-//                                return;
-//                            }
 
                 byte[] doubleSha256TxHash = PublicPun.encryptSHA256(PublicPun.encryptSHA256(txHash));
                 String txId = PublicPun.byte2HexStringNoBlank(BTCUtils.reverse(doubleSha256TxHash));
@@ -1663,7 +1650,9 @@ public class ExchangeCompleteOrderActivity extends BaseActivity implements View.
                             mProgress.dismiss();
                         }
 
-                        PublishToNetwork(currUnsignedTx);
+
+                        getBlockInfo();
+//                        PublishToNetwork(currUnsignedTx);
 
                     }
 
@@ -1675,14 +1664,7 @@ public class ExchangeCompleteOrderActivity extends BaseActivity implements View.
 
                     }
                 });
-//                        }
-//                    }
-//
-//                    @Override
-//                    public void fail(String msg) {
-//                        failedTrx();
-//                    }
-//                });
+
             }
         });
 

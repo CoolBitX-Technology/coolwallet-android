@@ -185,8 +185,8 @@
                 <action android:name="com.coolbitx.XCHS_NOTIFICATION" />
                 <category android:name="com.coolbitx.coolwallet" />
             </intent-filter>
-
         </receiver>
+
     </application>
 
 </manifest>

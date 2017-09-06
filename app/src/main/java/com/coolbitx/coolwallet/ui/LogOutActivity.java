@@ -34,6 +34,7 @@ public class LogOutActivity extends BaseActivity implements View.OnClickListener
     private ProgressDialog mProgress;
     private int getWallteStatus = 0x00;
     static NotificationReceiver brocastNR;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,16 +71,8 @@ public class LogOutActivity extends BaseActivity implements View.OnClickListener
         super.onStart();
         //註冊監聽
         registerBroadcast(this, cmdManager);
-//        LocalBroadcastManager mLocalBroadcastManager;
-//        if (brocastNR == null) {
-//            brocastNR = new NotificationReceiver(this, cmdManager);
-//            //註冊廣播
-//            mLocalBroadcastManager = LocalBroadcastManager.getInstance(this);
-//            mLocalBroadcastManager.registerReceiver(brocastNR, new IntentFilter(BTConfig.SOCKET_ADDRESS_MSG));
-//            mLocalBroadcastManager.registerReceiver(brocastNR, new IntentFilter(BTConfig.DISCONN_NOTIFICATION));
-//            mLocalBroadcastManager.registerReceiver(brocastNR, new IntentFilter(BTConfig.XCHS_NOTIFICATION));
-//        }
     }
+
     public void unRegisterBroadcast(Context context) {
         try {
             ActivityManager am = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
@@ -87,9 +80,8 @@ public class LogOutActivity extends BaseActivity implements View.OnClickListener
             int ind = cn.getShortClassName().lastIndexOf(".") + 1;//.ui.EraseActivity → EraseActivity
             String act = cn.getShortClassName().substring(ind);
 
-            if (brocastNR != null)
-            {
-                LogUtil.e("unRegisterBroadcast:"+act);
+            if (brocastNR != null) {
+                LogUtil.e("unRegisterBroadcast:" + act);
                 LocalBroadcastManager.getInstance(context).unregisterReceiver(brocastNR);
                 brocastNR = null;
             }
@@ -99,6 +91,7 @@ public class LogOutActivity extends BaseActivity implements View.OnClickListener
             LogUtil.e("error:" + e.getMessage());
         }
     }
+
     @Override
     protected void onStop() {
         super.onStop();
@@ -134,36 +127,8 @@ public class LogOutActivity extends BaseActivity implements View.OnClickListener
     @Override
     public void onClick(View v) {
         if (v == btnLogout) {
-            mProgress.setMessage(getString(R.string.logout)+"...");
+            mProgress.setMessage(getString(R.string.logout) + "...");
             mProgress.show();
-//            cmdManager.hdwQryWaInfo(getWallteStatus, new CmdResultCallback() {
-//                @Override
-//                public void onSuccess(int status, byte[] outputData) {
-//                    if ((status + 65536) == 0x9000) {
-//                        if (outputData != null) {
-//                            String statusName = "";
-//                            if (outputData[0] == 0x00) {
-//                                statusName = "INACTIVE";
-//                            } else if (outputData[0] == 0x01) {
-//                                statusName = "WAITACTV";
-//                            } else if (outputData[0] == 0x02) {
-//                                statusName = "ACTIVE";
-//                            }
-////                            PublicPun.toast(mContext, "HDW Status:" + statusName);
-//                            LogUtil.i("HDW Status:" + statusName);
-//
-//                        }
-//                    }
-//                }
-//            });
-
-//            cmdManager.getModeState(new CmdResultCallback() {
-//                @Override
-//                public void onSuccess(int status, byte[] outputData) {
-//                    if ((status + 65536) == 0x9000) {//-28672//36864
-//                        PublicPun.card.setMode(PublicPun.selectMode(PublicPun.byte2HexString(outputData[0])));
-//                        PublicPun.card.setState(String.valueOf(outputData[1]));
-//                        LogUtil.i("Logout ModeState:" + "\nMode=" + PublicPun.card.getMode() + "\nState=" + outputData[1]);
 
             cmdManager.bindLogout(new CmdResultCallback() {
                 @Override
@@ -176,14 +141,11 @@ public class LogOutActivity extends BaseActivity implements View.OnClickListener
                             intent.setClass(LogOutActivity.this, BleActivity.class);
                             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);//关掉所要到的界面中间的activity
                             startActivity(intent);
-//
                         }
                     }
                 }
             });
-//                    }
-//                }
-//            });
         }
     }
+
 }

@@ -40,7 +40,7 @@ public class BaseActivity extends AppCompatActivity{//AppCompatActivity {
     public static CmdManager cmdManager;
     Context mContext;
     public static boolean[] settingOptions = new boolean[4];
-
+    String act;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,13 +49,17 @@ public class BaseActivity extends AppCompatActivity{//AppCompatActivity {
         mContext = this;
 //        Fabric.with(this, new Crashlytics());
 
+        ActivityManager am = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
+        ComponentName cn = am.getRunningTasks(1).get(0).topActivity;
+        int ind = cn.getShortClassName().lastIndexOf(".") + 1;//.ui.EraseActivity → EraseActivity
+        act = cn.getShortClassName().substring(ind);
+
     }
 
     @Override
     protected void onStart() {
         super.onStart();
         LogUtil.e("lifeCycle BaseActivity onStart");
-
     }
 
     @Override
@@ -91,7 +95,7 @@ public class BaseActivity extends AppCompatActivity{//AppCompatActivity {
 
     }
 
-    static NotificationReceiver brocastNR;
+    NotificationReceiver brocastNR;
 
 //    /**
 //     * for all activity register
@@ -100,26 +104,23 @@ public class BaseActivity extends AppCompatActivity{//AppCompatActivity {
 //     */
 
     public void registerBroadcast(Context context, CmdManager cmdManager) {
-        LogUtil.e("registerBroadcast");
+        LogUtil.e("registerBroadcast:"+act);
         //註冊監聽
         LocalBroadcastManager mLocalBroadcastManager;
-        if (brocastNR == null) {
-            brocastNR = new NotificationReceiver();
+//        if (brocastNR == null) {
+            brocastNR = new NotificationReceiver(context,cmdManager);
 //            brocastNR = new NotificationReceiver(Context context, CmdManager cmdManager);
             //註冊廣播
             mLocalBroadcastManager = LocalBroadcastManager.getInstance(context);
             mLocalBroadcastManager.registerReceiver(brocastNR, new IntentFilter(BTConfig.SOCKET_ADDRESS_MSG));
             mLocalBroadcastManager.registerReceiver(brocastNR, new IntentFilter(BTConfig.DISCONN_NOTIFICATION));
             mLocalBroadcastManager.registerReceiver(brocastNR, new IntentFilter(BTConfig.XCHS_NOTIFICATION));
-        }
+//        }
     }
 
     public void unRegisterBroadcast(Context context) {
         try {
-            ActivityManager am = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
-            ComponentName cn = am.getRunningTasks(1).get(0).topActivity;
-            int ind = cn.getShortClassName().lastIndexOf(".") + 1;//.ui.EraseActivity → EraseActivity
-            String act = cn.getShortClassName().substring(ind);
+
 
             if (brocastNR != null)
             {

@@ -665,7 +665,10 @@ public class SendFragment extends BaseFragment implements View.OnClickListener, 
     private void prepareTransaction(final String outputAddress, String changeAddress, long amountToSend) {
 
 
-        //close transaction if exists
+        /**
+         * Signing status is set to be IDLE
+         * All context info are cleared
+         */
         cmdManager.trxFinish(new CmdResultCallback() {
             @Override
             public void onSuccess(int status, byte[] outputData) {

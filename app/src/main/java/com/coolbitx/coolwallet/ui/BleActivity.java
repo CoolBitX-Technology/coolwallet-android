@@ -680,7 +680,7 @@ public class BleActivity extends BaseActivity {
         super.onStart();
         LogUtil.d("BleActivity onStart");
 
-//        registerBroadcast(BleActivity.this, cmdManager);
+        registerBroadcast(BleActivity.this, cmdManager);
     }
 
     @Override
@@ -732,7 +732,7 @@ public class BleActivity extends BaseActivity {
         if (mTimer != null) {
             mTimer.cancel();
         }
-//        unRegisterBroadcast(this);
+        unRegisterBroadcast(this);
     }
 
     /**
@@ -744,8 +744,8 @@ public class BleActivity extends BaseActivity {
         if(mProgress.isShowing()){
             mProgress.dismiss();
         }
-//        LocalBroadcastManager.getInstance(this).sendBroadcast(SocketIntent);
-        sendBroadcast(SocketIntent);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(SocketIntent);
+//        sendBroadcast(SocketIntent);
     }
 
     private class BluetoothStateListener extends BroadcastReceiver {

@@ -50,12 +50,12 @@ public class CwFirebaseMessagingService extends FirebaseMessagingService {
         }
 
         final Intent intent = new Intent(BTConfig.XCHS_NOTIFICATION);
-//        final LocalBroadcastManager broadcastManager = LocalBroadcastManager.getInstance(this);
         intent.putExtra("ExchangeMessage", ExchangeMessage);
         intent.putExtra("ExchangeData", ExchangeData);
-        sendBroadcast(intent);
-
+//        sendBroadcast(intent);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
         sendNotification(ExchangeMessage);
+
     }
     // [END receive_message]
 

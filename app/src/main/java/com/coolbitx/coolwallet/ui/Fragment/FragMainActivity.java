@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
@@ -27,6 +28,7 @@ import android.widget.Toast;
 import com.coolbitx.coolwallet.DataBase.DatabaseHelper;
 import com.coolbitx.coolwallet.DataBase.DbName;
 import com.coolbitx.coolwallet.R;
+import com.coolbitx.coolwallet.Service.BTConfig;
 import com.coolbitx.coolwallet.Service.BlockSocketHandler;
 import com.coolbitx.coolwallet.bean.Account;
 import com.coolbitx.coolwallet.bean.Address;
@@ -163,40 +165,10 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
     private int getWallteStatus = 0x03;
     private Address address;
     private SimpleAdapter mAdapter;
-    private CSVReadWrite mLoginCsv;
     private ProgressDialog mProgress;
     private String mParentActivityName = null;
     private Timer mTimer;
     private TextView tvVer;
-    private Handler socketMsgHandler = new Handler() {
-
-        @Override
-        public void handleMessage(Message msg) {
-            // TODO Auto-generated method stub
-
-            switch (msg.what) {
-                case BSConfig.HANDLER_SOCKET:
-                    socketByAddress socket = (socketByAddress) msg.obj;
-                    final int mAccount = DatabaseHelper.queryAccountByAddress(mContext, socket.getAddress());
-                    if (socket.getTx_type().equals("Received") && socket.getConfirmations() <= 1) {
-                        String socketTitle = "BitCoin Received";
-                        String socketMsg = "Account " + (mAccount + 1) + "\n"
-                                + "Address:" + "\n"
-                                + socket.getAddress() + "\n"
-                                + socket.getTx_type() + " Amount:" + TabFragment.BtcFormatter.format(socket.getBtc_amount()) + " BTC" + "\n"
-                                + "Confirmations: " + socket.getConfirmations();
-//                        PublicPun.showNoticeDialog(mContext, socketTitle, socketMsg);
-                    }
-                    break;
-                case BSConfig.HANDLER_DISCONN:
-                    String title = "CoolWallet Disconnected";
-                    String noteMsg = PublicPun.card.getCardName() + " Disconnected";
-//                    PublicPun.showNoticeDialogToFinish(mContext, title, noteMsg);
-                    break;
-            }
-            super.handleMessage(msg);
-        }
-    };
 
     public static void registerOnResumeFromBackCallBack(OnResumeFromBackCallBack cb) {
         mOnResumeFromBackCallBack = cb;
@@ -219,22 +191,18 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
             }
 
         }
-
-
-
-        //LogUtil.e("class name = " + mParentActivityName);
-
+        
         mContext = this;
         cwBtcNetWork = new CwBtcNetWork();
         cmdManager = new CmdManager();
         address = new Address();
-        mLoginCsv = new CSVReadWrite(mContext);
 
         initToolbar();
         initView();
 
         mProgress.setMessage(getString(R.string.synchronizing_data) + "...");
         mProgress.show();
+
         mTimer = new Timer();
         mTimer.schedule(new TimerTask() {
             @Override
@@ -262,13 +230,13 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
             };
             thread.start();
 
+
             getModeState();
             getHosts();//獲取設備資訊
             getCardId();//獲取卡片id
             getCardName();//獲取卡片名稱
             getCurrRate();
             queryWallteInfo(getWallteStatus);
-//            registerBroadcast();
 
 
         } catch (Exception e) {
@@ -328,20 +296,6 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_main);
 //        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setLogo(getResources().getDrawable(R.mipmap.logo2));
-//        toolbar.setLogo(getResources().getDrawable(R.drawable.actionbar_logo));
-//        String title="";
-//        if(tabFragment==null){
-//            title = "Account";
-//        }else{
-//            if(tabFragment.getPageType()==0){
-//                title = "Account";
-//            }else if(tabFragment.getPageType()==1){
-//                title = "Send";
-//            }else{
-//                title = "Receive";
-//            }
-//        }
-//        toolbar.setTitle(title);
         setSupportActionBar(toolbar);
         toolbar.setNavigationIcon(R.mipmap.menu_3x);
         // Navigation Icon設定在 setSupoortActionBar後才有作用,否則會出現 back button_up
@@ -976,7 +930,7 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
     protected void onStart() {
         super.onStart();
         LogUtil.e("lifeCycle FragMainActivity onStart");
-
+        registerBroadcast(this,cmdManager);
     }
 
     @Override
@@ -989,7 +943,7 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
     protected void onStop() {
         super.onStop();
         LogUtil.e("lifeCycle FragMainActivity onStop");
-
+        unRegisterBroadcast(this);
     }
 
     @Override

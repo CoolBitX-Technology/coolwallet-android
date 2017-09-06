@@ -304,4 +304,20 @@ public class ConfirmOtpActivity extends BaseActivity implements View.OnClickList
         Button cancelButton = (Button) findViewById(R.id.btn_cancel);
         cancelButton.setOnClickListener(this);
     }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        //註冊監聽
+        registerBroadcast(this, cmdManager);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        unRegisterBroadcast(this);
+    }
+
+
+
 }

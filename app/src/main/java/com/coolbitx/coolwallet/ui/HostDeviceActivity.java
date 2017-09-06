@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -15,6 +16,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.coolbitx.coolwallet.R;
+import com.coolbitx.coolwallet.Service.BTConfig;
 import com.coolbitx.coolwallet.adapter.HostAdapter;
 import com.coolbitx.coolwallet.bean.Host;
 import com.coolbitx.coolwallet.general.PublicPun;
@@ -82,14 +84,14 @@ public class HostDeviceActivity extends BaseActivity implements AdapterView.OnIt
         super.onStart();
         LogUtil.e("lifeCycle HostDeviceActivity onStart");
         //註冊監聽
-//        registerBroadcast(this, cmdManager);
+        registerBroadcast(this, cmdManager);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
         LogUtil.e("lifeCycle HostDeviceActivity onStop");
-//        unRegisterBroadcast(this);
+        unRegisterBroadcast(this);
     }
 
     @Override
