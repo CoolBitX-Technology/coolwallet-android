@@ -46,6 +46,8 @@ import java.util.TimerTask;
 
 /**
  * Created by ShihYi on 2015/12/25.
+ * <p>
+ * Get pending order and cancel order
  */
 public class ExchangeActivity extends BaseActivity implements
         View.OnClickListener, AdapterView.OnItemClickListener, AdapterView.OnItemLongClickListener {
@@ -145,6 +147,20 @@ public class ExchangeActivity extends BaseActivity implements
         });
     }
 
+    private void CancelOrder() {
+        mExchangeAPI.cancelTrx(orderId, new APIResultCallback() {
+            @Override
+            public void success(String[] msg) {
+                GetPendingOrder();
+            }
+
+            @Override
+            public void fail(String msg) {
+                PublicPun.showNoticeDialog(mContext, getString(R.string.str_unable_cancel), getString(R.string.reason) + msg);
+            }
+        });
+    }
+
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -167,7 +183,7 @@ public class ExchangeActivity extends BaseActivity implements
         intent.setClass(mContext, ExchangeCompleteOrderActivity.class);
         Bundle bundle = new Bundle();
         LogUtil.i("exchangeOrder click" +
-                exchngeOrder.getOrderId() + " , " + exchngeOrder.getCworderId() +" , " + exchngeOrder.getAddr() + " , " +
+                exchngeOrder.getOrderId() + " , " + exchngeOrder.getCworderId() + " , " + exchngeOrder.getAddr() + " , " +
                 exchngeOrder.getAmount() + " , " + exchngeOrder.getAccount() + " , " +
                 exchngeOrder.getPrice() + " , " + exchngeOrder.getExpiration());
 
@@ -196,27 +212,16 @@ public class ExchangeActivity extends BaseActivity implements
                         PublicPun.CustomNoticeDialog(mContext, getString(R.string.btn_cancel_order_str), getString(R.string.str_cancel_order_msg));
                 mBuilder.setPositiveButton(getString(R.string.str_yes), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        // cancel trx
 
-                        mExchangeAPI.cancelTrx(orderId, new APIResultCallback() {
-                            @Override
-                            public void success(String[] msg) {
-                                GetPendingOrder();
-                            }
+                        CancelOrder();
 
-                            @Override
-                            public void fail(String msg) {
-                                PublicPun.showNoticeDialog(mContext, getString(R.string.str_unable_cancel), getString(R.string.reason) + msg);
-                            }
-                        });
                     }
                 }).setNegativeButton(getString(R.string.str_no), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
                     }
-                })
-                        .show();
+                }).show();
 
                 break;
             case R.id.grid_buy:

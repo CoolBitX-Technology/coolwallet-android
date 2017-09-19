@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">CoolWallet</string>
-    <string name="hello_world">Hello world!</string>
     <string name="action_settings">Exchange Login OTP</string>
     <string name="img_logo1">logo1</string>
     <string name="drawer_open">Drawer Open</string>
@@ -86,14 +85,14 @@
     <string name="tv_exchange_verification_str">Verify OTP to place your sell orders</string>
     <string name="tv_order_notice_str">Your order will be cancelled automatically after this time</string>
     <string name="btn_complete_order_str">Complete order</string>
-    <string name="btn_cancel_order_str">Cancel</string>
+    <string name="btn_cancel_order_str">Cancel order</string>
     <string name="btn_str_sign_in">Sign in</string>
     <string name="btn_str_sign_up">Sign up</string>
     <string name="str_login_title">Trade wih other CoolWallet holders\non CoolBitx Exchange</string>
     <string name="btn_place_order">Place an order now</string>
     <string name="tv_no_pending_order">No pending orders yet</string>
     <string name="url_exchange_site">http://xsm.coolbitx.com:8080/signup</string>
-    <string name="str_cancel_order_msg"> Are you sure you want to cancel?</string>
+    <string name="str_cancel_order_msg"> Are you sure you want to cancel order?</string>
     <string name="str_yes">Yes</string>
     <string name="str_no">No</string>
     <string name="str_unable_cancel">Unable to cancel order</string>
@@ -245,6 +244,8 @@
 
     <!--Create Wallet-->
     <string name="tv_generate_seed">Generate Seed On</string>
+    <string name="btn_create_HDW">Create Wallet</string>
+    <string name="hdw_create">Create Wallet</string>
     <string name="str_sum_of_seeds">
         Please use a calculator to add all the sets of\numbers and enter the result
         below in order\nto verify that you have written them down\ncorrectly.\n\n\n For example:\n

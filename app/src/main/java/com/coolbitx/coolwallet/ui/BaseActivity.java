@@ -165,6 +165,17 @@ public class BaseActivity extends AppCompatActivity{//AppCompatActivity {
     }
 
 
+    public void FunTrxFinish() {
+        cmdManager.trxFinish(new CmdResultCallback() {
+            @Override
+            public void onSuccess(int status, byte[] outputData) {
+                if ((status + 65536) == 0x9000) {
+                    LogUtil.i("trxFinish成功");
+                }
+            }
+        });
+    }
+
     public void getUniqueId() {
         cmdManager.getUniqueId(new CmdResultCallback() {
             @Override

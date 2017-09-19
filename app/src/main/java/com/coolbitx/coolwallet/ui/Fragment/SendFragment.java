@@ -43,7 +43,6 @@ import com.coolbitx.coolwallet.httpRequest.CwBtcNetWork;
 import com.coolbitx.coolwallet.ui.TransactionConfirmDialog;
 import com.coolbitx.coolwallet.util.BTCUtils;
 import com.coolbitx.coolwallet.util.Base58;
-import com.coolbitx.coolwallet.util.ByteUtils;
 import com.coolbitx.coolwallet.util.ECKey;
 import com.coolbitx.coolwallet.util.ValidationException;
 import com.crashlytics.android.Crashlytics;
@@ -938,7 +937,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener, 
                                     LogUtil.i("cwCmdTrxBegin 成功!!");
                                     if (settingOptions[0]) {
                                         // 交易要otp
-                                        didVerifyOtp();
+                                        txVerifyOtp();
                                     }
                                 }
                             } else {
@@ -976,7 +975,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener, 
         ClickFunction(mContext, getString(R.string.send), getString(R.string.plz_press_button));
     }
 
-    private void didVerifyOtp() {
+    private void txVerifyOtp() {
 //        verify OTP
         if (trxStatus == Constant.TrxStatusWaitOtp) {
             trxStatus = Constant.TrxStatusGetOtp;

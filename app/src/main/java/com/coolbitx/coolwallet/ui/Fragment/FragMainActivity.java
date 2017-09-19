@@ -80,24 +80,24 @@ import java.util.TimerTask;
 //        FragmentActivity
 public class FragMainActivity extends BaseActivity {//implements CompoundButton.OnCheckedChangeListener
 
-    //左側選單圖片
-    private static final int[] MENU_ITEMS_PIC = new int[]{
-            R.mipmap.host, R.mipmap.cwcard, R.mipmap.security, R.mipmap.settings, R.drawable.exchange,
-            R.drawable.exchange, R.mipmap.ic_feedback_white_24dp, R.mipmap.logout, R.mipmap.ic_share_white_24dp};
-    //     左側選單文字項目
-    private static final int[] MENU_ITEMS = new int[]{
-            R.string.host_devices, R.string.coolwallet_card, R.string.security, R.string.str_setting,
-            R.string.exchange,R.string.action_settings,
-            R.string.issue_feedback_title, R.string.logout, R.string.share_address_beta};
-
-//    private static final int[] MENU_ITEMS_PIC = new int[]
-//            {R.mipmap.host, R.mipmap.cwcard, R.mipmap.security, R.mipmap.settings,
-//                    R.mipmap.ic_feedback_white_24dp, R.mipmap.logout, R.mipmap.ic_share_white_24dp};
-//    // 左側選單文字項目
+//    //左側選單圖片
+//    private static final int[] MENU_ITEMS_PIC = new int[]{
+//            R.mipmap.host, R.mipmap.cwcard, R.mipmap.security, R.mipmap.settings, R.drawable.exchange,
+//            R.drawable.exchange, R.mipmap.ic_feedback_white_24dp, R.mipmap.logout, R.mipmap.ic_share_white_24dp};
+//    //     左側選單文字項目
 //    private static final int[] MENU_ITEMS = new int[]{
 //            R.string.host_devices, R.string.coolwallet_card, R.string.security, R.string.str_setting,
-//            R.string.issue_feedback_title, R.string.logout, R.string.share_address_beta
-//    };
+//            R.string.exchange,R.string.action_settings,
+//            R.string.issue_feedback_title, R.string.logout, R.string.share_address_beta};
+
+    private static final int[] MENU_ITEMS_PIC = new int[]
+            {R.mipmap.host, R.mipmap.cwcard, R.mipmap.security, R.mipmap.settings,
+                    R.mipmap.ic_feedback_white_24dp, R.mipmap.logout, R.mipmap.ic_share_white_24dp};
+    // 左側選單文字項目
+    private static final int[] MENU_ITEMS = new int[]{
+            R.string.host_devices, R.string.coolwallet_card, R.string.security, R.string.str_setting,
+            R.string.issue_feedback_title, R.string.logout, R.string.share_address_beta
+    };
 
     public static int ACCOUNT_CNT = 0;//這裡要改為抓qryWalletInfo的
     public static boolean refreshFlag = false;
@@ -708,51 +708,51 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
                 intent = new Intent(getApplicationContext(), SettingActivity.class);
                 startActivityForResult(intent, 0);
                 break;
-//            case 4:
-//                IssueFeedBack();
-//                break;
-//            case 5:
-//                intent = new Intent(getApplicationContext(), LogOutActivity.class);
-//                startActivityForResult(intent, 0);
-//                break;
-//            case 6:
-//                //Share address service
-//                intent = new Intent(getApplicationContext(), ShareAddress.class);
-//                startActivityForResult(intent, 0);
-//                break;
-
-            //MARK XCHS
             case 4:
-                intent = new Intent(getApplicationContext(), ExchangeLogin.class);
-                startActivityForResult(intent, 0);
-                break;
-
-            case 5:
-                int infoid = 0;
-                cmdManager.XchsGetOtp(infoid, new CmdResultCallback() {
-                    @Override
-                    public void onSuccess(int status, byte[] outputData) {
-                        if ((status + 65536) == 0x9000) {//-28672//36864
-                            LogUtil.d("XchsGetOtp ok= " + outputData);
-                        } else {
-                            LogUtil.d("XchsGetOtp fail= " + outputData);
-
-                        }
-                    }
-                });
-                break;
-            case 6:
                 IssueFeedBack();
                 break;
-            case 7:
+            case 5:
                 intent = new Intent(getApplicationContext(), LogOutActivity.class);
                 startActivityForResult(intent, 0);
                 break;
-            case 8:
+            case 6:
                 //Share address service
                 intent = new Intent(getApplicationContext(), ShareAddress.class);
                 startActivityForResult(intent, 0);
                 break;
+
+            //MARK XCHS
+//            case 4:
+//                intent = new Intent(getApplicationContext(), ExchangeLogin.class);
+//                startActivityForResult(intent, 0);
+//                break;
+//
+//            case 5:
+//                int infoid = 0;
+//                cmdManager.XchsGetOtp(infoid, new CmdResultCallback() {
+//                    @Override
+//                    public void onSuccess(int status, byte[] outputData) {
+//                        if ((status + 65536) == 0x9000) {//-28672//36864
+//                            LogUtil.d("XchsGetOtp ok= " + outputData);
+//                        } else {
+//                            LogUtil.d("XchsGetOtp fail= " + outputData);
+//
+//                        }
+//                    }
+//                });
+//                break;
+//            case 6:
+//                IssueFeedBack();
+//                break;
+//            case 7:
+//                intent = new Intent(getApplicationContext(), LogOutActivity.class);
+//                startActivityForResult(intent, 0);
+//                break;
+//            case 8:
+//                //Share address service
+//                intent = new Intent(getApplicationContext(), ShareAddress.class);
+//                startActivityForResult(intent, 0);
+//                break;
 
 
         }

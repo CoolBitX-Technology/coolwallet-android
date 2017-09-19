@@ -339,7 +339,7 @@ public class PublicPun {
         JSONArray jsonDataJsonArray;
 
         try {
-            System.out.print("jsonString=" + jsonString);
+//            System.out.print("jsonString=" + jsonString);
             jsonData = new JSONObject(jsonString).get("unspent_outputs");
 
             jsonDataJsonArray = (JSONArray) jsonData;

@@ -254,7 +254,7 @@ public class CmdProcessor implements BleGattCallback {
 //                    }
 
                     final BluetoothGattCharacteristic characteristic = gattCharacteristics.get(3);
-                    LogUtil.e("準備請求uuid：" + characteristic.getUuid());
+//                    LogUtil.e("準備請求uuid：" + characteristic.getUuid());
                     bluetoothGatt.readCharacteristic(characteristic);
                 }
             }

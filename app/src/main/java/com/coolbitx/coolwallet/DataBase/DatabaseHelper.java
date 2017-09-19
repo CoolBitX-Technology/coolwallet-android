@@ -555,7 +555,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Cursor c = null;
         try {
             if (pointer == 0 || pointer == 1) {
-                LogUtil.i("queryAddress: wid=" + wid + " ;" + accountIndex + " AND POINTER=" + pointer);
+//                LogUtil.i("queryAddress: wid=" + wid + " ;" + accountIndex + " AND POINTER=" + pointer);
                 c = db.query("ADDR",                                 // 資料表名字
                         new String[]{"WID", "ACCOUNT_ID", "ADDRESS", "KCID", "KID", "N_TX", "ADDRESS_BALANCE", "ADDRESS_LABEL"},  // 要取出的欄位資料
                         "WID='" + wid + "' AND ACCOUNT_ID=" + accountIndex + " and KCID=" + pointer,                                              // 查詢條件式
@@ -565,7 +565,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         "WID,ACCOUNT_ID,KCID,KID",                        // Order By字串語法(排序)
                         null);                                             // Limit字串語法
             } else {
-                LogUtil.i("queryAddress: wid" + wid + " ;" + accountIndex + " AND POINTER all");
+//                LogUtil.i("queryAddress: wid" + wid + " ;" + accountIndex + " AND POINTER all");
                 c = db.query("ADDR",                                 // 資料表名字
                         new String[]{"WID", "ACCOUNT_ID", "ADDRESS", "KCID", "KID", "N_TX", "ADDRESS_BALANCE", "ADDRESS_LABEL"},  // 要取出的欄位資料
                         "WID='" + wid + "' AND ACCOUNT_ID=" + accountIndex,                                                            // 查詢條件式
@@ -587,11 +587,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 d.setN_tx(c.getInt(5));
                 d.setBalance(c.getLong(6));
                 d.setAddLabel(c.getString(7));
-                LogUtil.i("query record:" + mCount + "=" + c.getString(0) + ",AccountID=" + c.getInt(1) + ",kcID=" + c.getInt(3) + ",KID=" + c.getInt(4)
-                        + ",ADDR=" + c.getString(2)
-                        + ",N_tx=" + c.getInt(5)
-                        + "," + c.getLong(6));
-
+                if(c.getLong(6)>0) {
+                    LogUtil.i("query address(balance>0):" + mCount + "=" + c.getString(0) + ",AccountID=" + c.getInt(1) + ",kcID=" + c.getInt(3) + ",KID=" + c.getInt(4)
+                            + ",ADDR=" + c.getString(2)
+                            + ",N_tx=" + c.getInt(5)
+                            + "," + c.getLong(6));
+                }
                 listResult.add(d);
             }
         } catch (Exception e) {

@@ -165,4 +165,14 @@ public class AppPrefrence {
         return mSP.getBoolean("IsSuccess", true);
     }
 
+    public static void saveTrxHandle(Context context, String handle) {
+        LogUtil.i("Preference saveTrxHandle=" + handle);
+        SharedPreferences mSP = PreferenceManager.getDefaultSharedPreferences(context);
+        mSP.edit().putString("CurrentCountry", handle).commit();
+    }
+
+    public static String getTrxHandle(Context context) {
+        SharedPreferences mSP = PreferenceManager.getDefaultSharedPreferences(context);
+        return mSP.getString("getTrxHandle", "00000000");
+    }
 }

@@ -108,7 +108,7 @@ public class BleActivity extends BaseActivity {
 
                     //filter condition, user change card's name just for CWxxxxxx
 
-                    if (name == null || !name.startsWith("CoolWallet")) {
+                    if (name == null || !name.startsWith("CoolWallet ")) {
 //                    if (name == null ) {
                         return;
                     }

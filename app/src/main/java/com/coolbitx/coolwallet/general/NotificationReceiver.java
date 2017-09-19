@@ -42,6 +42,8 @@ public class NotificationReceiver extends BroadcastReceiver {
         this.mCmdManager = cmdManager;
     }
 
+    public NotificationReceiver(){}
+
     @Override
     public void onReceive(Context context, Intent intent) {
         // TODO: This method is called when the BroadcastReceiver is receiving

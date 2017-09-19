@@ -124,14 +124,14 @@
     <string name="tv_exchange_verification_str">売り注文を行うOTPを確認する</string>
     <string name="tv_order_notice_str">注文は時間経過後、自動でキャンセルされます。</string>
     <string name="btn_complete_order_str">注文完了</string>
-    <string name="btn_cancel_order_str">キャンセル</string>
+    <string name="btn_cancel_order_str">注文キャンセル</string>
     <string name="btn_str_sign_in">サインイン</string>
     <string name="btn_str_sign_up">サインアップ</string>
     <string name="str_login_title">CoolBitx取引所のCoolWalletホルダーとの取引</string>
     <string name="btn_place_order">すぐ注文する</string>
     <string name="tv_no_pending_order">まだ保留中の注文はありません</string>
     <string name="url_exchange_site">http://xsm.coolbitx.com:8080/signup</string>
-    <string name="str_cancel_order_msg">あなたがキャンセルしてもよろしいですか？</string>
+    <string name="str_cancel_order_msg">注文をキャンセルしてもよろしいですか？</string>
     <string name="str_yes">はい</string>
     <string name="str_no">いいえ</string>
     <string name="str_unable_cancel">注文をキャンセルできません</string>
