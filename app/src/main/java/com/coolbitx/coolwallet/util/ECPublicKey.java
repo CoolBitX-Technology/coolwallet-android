@@ -18,6 +18,7 @@
 package com.coolbitx.coolwallet.util;
 
 import com.coolbitx.coolwallet.bean.Key;
+import com.coolbitx.coolwallet.exception.ValidationException;
 
 import org.spongycastle.util.Arrays;
 

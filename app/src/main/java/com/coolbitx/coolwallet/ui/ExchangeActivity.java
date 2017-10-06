@@ -15,7 +15,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -35,7 +34,7 @@ import com.coolbitx.coolwallet.callback.APIResultCallback;
 import com.coolbitx.coolwallet.general.BtcUrl;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.coolbitx.coolwallet.ui.Fragment.BSConfig;
-import com.coolbitx.coolwallet.util.ExchangeAPI;
+import com.coolbitx.coolwallet.general.ExchangeAPI;
 import com.snscity.egdwlib.CmdManager;
 import com.snscity.egdwlib.cmd.CmdResultCallback;
 import com.snscity.egdwlib.utils.LogUtil;
@@ -80,7 +79,16 @@ public class ExchangeActivity extends BaseActivity implements
 
 
         GetPendingOrder();
+        testNotification();
+    }
 
+
+    private void testNotification() {
+        LogUtil.e("testNotification");
+        String ExchangeMessage = "Congrats!! Your sell order has a match. Please connect with CoolWallet CW001306 to complete the trade.";
+        final Intent intent = new Intent(BTConfig.XCHS_NOTIFICATION);
+        intent.putExtra("ExchangeMessage", ExchangeMessage);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 
     private class XchsMsgListener extends BroadcastReceiver {
@@ -113,7 +121,6 @@ public class ExchangeActivity extends BaseActivity implements
 
     private void GetPendingOrder() {
 
-//        mProgress.show();
         listExchangeSellOrder = new ArrayList<>();
         listExchangeBuyOrder = new ArrayList<>();
 
@@ -121,7 +128,6 @@ public class ExchangeActivity extends BaseActivity implements
             @Override
             public void success(String[] msg) {
                 String[] mString = new String[]{"sell", "buy"};
-//                mProgress.dismiss();
                 for (int i = 0; i < mString.length; i++) {
                     if (i == 0) {
                         listExchangeSellOrder = PublicPun.jsonParserExchange(msg[0], mString[i], true);

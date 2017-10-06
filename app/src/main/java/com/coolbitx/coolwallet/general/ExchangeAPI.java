@@ -1,4 +1,4 @@
-package com.coolbitx.coolwallet.util;
+package com.coolbitx.coolwallet.general;
 
 import android.content.Context;
 import android.os.AsyncTask;

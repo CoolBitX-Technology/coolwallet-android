@@ -114,6 +114,8 @@ public class EraseActivity extends BaseActivity implements View.OnClickListener 
         DatabaseHelper.deleteTable(EraseActivity.this, DbName.DB_TABLE_CURRENT);
         DatabaseHelper.deleteTable(EraseActivity.this, DbName.DB_TABLE_LOGIN);
         DatabaseHelper.deleteTable(EraseActivity.this, DbName.DB_TABLE_KEYINFO);
+        DatabaseHelper.deleteTable(EraseActivity.this, DbName.DB_TABLE_EXCEPTION);
+
     }
 
     @Override

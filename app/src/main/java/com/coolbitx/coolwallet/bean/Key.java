@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 package com.coolbitx.coolwallet.bean;
-import com.coolbitx.coolwallet.util.ValidationException;
+import com.coolbitx.coolwallet.exception.ValidationException;
 /**
  * Created by ShihYi on 2016/1/26.
  */

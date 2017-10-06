@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.coolbitx.coolwallet.R;
 import com.coolbitx.coolwallet.bean.UnSpentTxsBean;
+import com.coolbitx.coolwallet.exception.ValidationException;
 import com.coolbitx.coolwallet.general.AppPrefrence;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.snscity.egdwlib.utils.LogUtil;
@@ -100,7 +101,7 @@ public class BTCUtils {
 //                valueOfUnspentOutputs += BTCUtils.BTCconvertToSatoshisValue(outputInfo.getAmount());
 //
 //                for (int j = 0; j < 2; j++) {
-//                    txOneOutputLen = BTCUtils.getMaximumTxSize(outputsToSpend, change > 0 ? 2 : 1, isPublicKeyCompressed);
+//                    txOneOutputLen = BTCUtils.getTxSize(outputsToSpend, change > 0 ? 2 : 1, isPublicKeyCompressed);
 //                    updatedFee = calcRecommendedFee(txOneOutputLen);
 //                    AppPrefrence.saveRecommendedDefaultFee(mContext, updatedFee);
 //
@@ -170,7 +171,7 @@ public class BTCUtils {
         long change = 0;
         long changeFee = 0;
         long valueOfUnspentOutputs = 0;
-        int txOneOutputLen = 0;
+        int txSize = 0;
         boolean isDust = false;
 
         RECOMMENDED_FEE_PER_BYTE = AppPrefrence.getRecommendedFastestFee(mContext);
@@ -191,8 +192,8 @@ public class BTCUtils {
                 if (!AppPrefrence.getAutoFeeCheckBox(mContext)) {
                     fee = BTCconvertToSatoshisValue(AppPrefrence.getManualFee(mContext));
                 } else {
-                    txOneOutputLen = BTCUtils.getMaximumTxSize(mContext, outputsToSpend.size(), isPublicKeyCompressed);
-                    fee = calcRecommendedFee(txOneOutputLen);
+                    txSize = BTCUtils.getTxSize(mContext, outputsToSpend.size(), isPublicKeyCompressed);
+                    fee = calcRecommendedFee(txSize);
                     AppPrefrence.saveRecommendedDefaultFee(mContext, fee);
                 }
 
@@ -221,8 +222,8 @@ public class BTCUtils {
                     if (!AppPrefrence.getAutoFeeCheckBox(mContext)) {
                         fee = BTCconvertToSatoshisValue(AppPrefrence.getManualFee(mContext));
                     } else {
-                        txOneOutputLen = BTCUtils.getMaximumTxSize(mContext, outputsToSpend.size(), isPublicKeyCompressed);
-                        fee = calcRecommendedFee(txOneOutputLen);
+                        txSize = BTCUtils.getTxSize(mContext, outputsToSpend.size(), isPublicKeyCompressed);
+                        fee = calcRecommendedFee(txSize);
                         AppPrefrence.saveRecommendedDefaultFee(mContext, fee);
                     }
 
@@ -351,18 +352,18 @@ public class BTCUtils {
     }
 
 
-    public static int getMaximumTxSize(Context context, int unspentCounts, boolean compressedPublicKey) throws ValidationException {
+    public static int getTxSize(Context context, int unspentCounts, boolean compressedPublicKey) throws ValidationException {
         if (unspentCounts == 0) {
             throw new ValidationException(context.getString(R.string.can_not_find_unspent));
         }
-        //scriptSig contains the signature along with the public key(106)
+        //scriptSig contains the signature and public key(106) / length =1
         int maxInputScriptLen = 73 + (compressedPublicKey ? 33 : 65);
 //        return 9 + unspentOutputInfos.size() * (41 + maxInputScriptLen) + outputsCount * 33;
-        LogUtil.e("getMaximumTxSize 計算:INPUT=" + unspentCounts +
+        LogUtil.e("getTxSize 計算:INPUT=" + unspentCounts +
                 ";maxInputScriptLen=" + (41 + maxInputScriptLen));
         int maxSize = 10 + unspentCounts * (41 + maxInputScriptLen) + 34;
 
-        LogUtil.e("getMaximumTxSize=" + maxSize);
+        LogUtil.e("getTxSize=" + maxSize);
         return maxSize;
     }
 

@@ -50,8 +50,6 @@
     <string name="reset">Reset</string>
 
 
-
-
     <!--ConfirmOtpActivity-->
     <string name="paring">Pairing...</string>
     <string name="gen_reset_otp">Generating Reset OTP...</string>
@@ -157,7 +155,6 @@
     <string name="feedback_sent">Feedback sent successfully.</string>
     <string name="failed_to_set_account_ino">Failed to set account info.</string>
     <string name="share_address_beta">Share address\n(beta)</string>
-
 
 
     <!--InitialCreateWalletActivity-->
@@ -268,7 +265,6 @@
     <string name="unknown_address_type">Unknown address type:</string>
 
 
-
     <!--TransactionFeeActivity begin-->
     <string name="str_estimated_fee_content">Estimated transaction fee:\nMedian transaction size 226 bytes x %1$d (in satoshis per byte)\n= %2$d satoshi\n= %3$f BTC</string>
     <string name="prompt">Prompt </string>
@@ -361,6 +357,7 @@
         <item>CURRENT</item>
         <item>LOGIN</item>
         <item>ACCOUNT_KEY_INFO</item>
+        <item>EXCEPTION</item>
     </string-array>
 
 
@@ -417,5 +414,15 @@
         <item>OTP               TEXT    NOT NULL   </item>
         <item>PRIMARY KEY (WID) </item>
     </string-array>
+
+
+    <string-array name="EXCEPTION">
+        <item>DATE           TEXT    NOT NULL    </item>
+        <item>WID            TEXT    NOT NULL    </item>
+        <item>ACCOUNT_ID     INTEGER    NOT NULL </item>
+        <item>TYPE           TEXT    NOT NULL    </item>
+        <item>DATA           TEXT   </item>
+    </string-array>
+
 
 </resources>

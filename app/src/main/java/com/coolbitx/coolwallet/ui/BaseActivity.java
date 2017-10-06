@@ -164,6 +164,18 @@ public class BaseActivity extends AppCompatActivity{//AppCompatActivity {
         });
     }
 
+    public void qryBlockBalance(int account) {
+
+//        final byte cwHdwAllAccountInfo = 0x05;
+        final byte cwHdwAccountInfoBlockAmount = 0x04;
+        //[B5]
+        cmdManager.hdwQueryAccountInfo(cwHdwAccountInfoBlockAmount, account, new CmdResultCallback() {
+            @Override
+            public void onSuccess(int status, byte[] outputData) {
+                LogUtil.e("帳戶block金額：" + PublicPun.byte2HexStringNoBlank(outputData));
+            }
+        });
+    }
 
     public void FunTrxFinish() {
         cmdManager.trxFinish(new CmdResultCallback() {

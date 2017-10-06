@@ -1,6 +1,6 @@
 package com.coolbitx.coolwallet.callback;
 
-import com.coolbitx.coolwallet.util.ValidationException;
+import com.coolbitx.coolwallet.exception.ValidationException;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;

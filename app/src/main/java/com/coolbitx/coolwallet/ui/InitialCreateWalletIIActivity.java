@@ -22,7 +22,7 @@ import com.coolbitx.coolwallet.R;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.coolbitx.coolwallet.ui.Fragment.FragMainActivity;
 import com.coolbitx.coolwallet.util.BIP39;
-import com.coolbitx.coolwallet.util.ValidationException;
+import com.coolbitx.coolwallet.exception.ValidationException;
 import com.snscity.egdwlib.CmdManager;
 import com.snscity.egdwlib.cmd.CmdResultCallback;
 import com.snscity.egdwlib.utils.LogUtil;

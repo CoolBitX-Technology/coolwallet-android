@@ -16,6 +16,7 @@
 package com.coolbitx.coolwallet.util;
 
 import com.coolbitx.coolwallet.bean.Key;
+import com.coolbitx.coolwallet.exception.ValidationException;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.snscity.egdwlib.utils.LogUtil;
 

@@ -17,7 +17,7 @@ import com.coolbitx.coolwallet.adapter.UnclarifyOrderAdapter;
 import com.coolbitx.coolwallet.bean.ExchangeOrder;
 import com.coolbitx.coolwallet.callback.APIResultCallback;
 import com.coolbitx.coolwallet.general.PublicPun;
-import com.coolbitx.coolwallet.util.ExchangeAPI;
+import com.coolbitx.coolwallet.general.ExchangeAPI;
 import com.snscity.egdwlib.CmdManager;
 
 import java.util.ArrayList;

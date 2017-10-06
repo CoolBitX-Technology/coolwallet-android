@@ -16,6 +16,8 @@
  */
 
 package com.coolbitx.coolwallet.util;
+import com.coolbitx.coolwallet.exception.ValidationException;
+
 import org.spongycastle.util.encoders.Hex;
 
 import java.io.UnsupportedEncodingException;

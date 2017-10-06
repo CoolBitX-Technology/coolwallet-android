@@ -44,7 +44,7 @@ import com.coolbitx.coolwallet.ui.TransactionConfirmDialog;
 import com.coolbitx.coolwallet.util.BTCUtils;
 import com.coolbitx.coolwallet.util.Base58;
 import com.coolbitx.coolwallet.util.ECKey;
-import com.coolbitx.coolwallet.util.ValidationException;
+import com.coolbitx.coolwallet.exception.ValidationException;
 import com.crashlytics.android.Crashlytics;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;

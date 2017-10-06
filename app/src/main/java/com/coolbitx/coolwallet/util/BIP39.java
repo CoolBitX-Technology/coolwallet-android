@@ -1,5 +1,6 @@
 package com.coolbitx.coolwallet.util;
 
+import com.coolbitx.coolwallet.exception.ValidationException;
 import com.snscity.egdwlib.utils.LogUtil;
 
 import java.io.UnsupportedEncodingException;
@@ -60,7 +61,7 @@ public class BIP39 {
         return data;
     }
 
-    public static String encode(byte[] data, String passphrase) throws ValidationException{
+    public static String encode(byte[] data, String passphrase) throws ValidationException {
         if (data.length % 8 != 0) {
         }
         try {

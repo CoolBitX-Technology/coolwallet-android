@@ -17,6 +17,7 @@
 package com.coolbitx.coolwallet.util;
 
 import com.coolbitx.coolwallet.bean.Key;
+import com.coolbitx.coolwallet.exception.ValidationException;
 
 import org.spongycastle.asn1.ASN1InputStream;
 import org.spongycastle.asn1.DERInteger;

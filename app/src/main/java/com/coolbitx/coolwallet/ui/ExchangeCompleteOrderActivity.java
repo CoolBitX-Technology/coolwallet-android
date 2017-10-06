@@ -2,17 +2,14 @@ package com.coolbitx.coolwallet.ui;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -34,15 +31,17 @@ import com.coolbitx.coolwallet.bean.dbAddress;
 import com.coolbitx.coolwallet.callback.APIResultCallback;
 import com.coolbitx.coolwallet.callback.GetExchangeAddrCallback;
 import com.coolbitx.coolwallet.callback.TransactionConfirmCallback;
+import com.coolbitx.coolwallet.callback.UnSpentCallback;
 import com.coolbitx.coolwallet.general.AppPrefrence;
 import com.coolbitx.coolwallet.general.BtcUrl;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.coolbitx.coolwallet.httpRequest.CwBtcNetWork;
 import com.coolbitx.coolwallet.util.BTCUtils;
 import com.coolbitx.coolwallet.util.Base58;
+import com.coolbitx.coolwallet.general.BlockChainAPI;
 import com.coolbitx.coolwallet.util.ECKey;
-import com.coolbitx.coolwallet.util.ExchangeAPI;
-import com.coolbitx.coolwallet.util.ValidationException;
+import com.coolbitx.coolwallet.general.ExchangeAPI;
+import com.coolbitx.coolwallet.exception.ValidationException;
 import com.crashlytics.android.Crashlytics;
 import com.snscity.egdwlib.CmdManager;
 import com.snscity.egdwlib.cmd.CmdResultCallback;
@@ -58,7 +57,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.Timer;
-import java.util.TimerTask;
 
 import static com.coolbitx.coolwallet.general.PublicPun.HANDLER_SEND_BTC_ERROR;
 import static com.coolbitx.coolwallet.general.PublicPun.HANDLER_SEND_BTC_FINISH;
@@ -71,6 +69,7 @@ public class ExchangeCompleteOrderActivity extends BaseActivity implements View.
     private CmdManager cmdManager;
     private Context mContext;
     private ExchangeAPI mExchangeAPI;
+    private BlockChainAPI blockChainAPI;
     Button btnCompleteOrder, btnCancelOrder, btnSubmittedOk;
     private ProgressDialog mProgress;
     TextView tvAddr;
@@ -81,11 +80,12 @@ public class ExchangeCompleteOrderActivity extends BaseActivity implements View.
     TextView tvExp;
 
     //for complete order
-    int unspendNum;
     private ArrayList<dbAddress> lisCwBtcAdd = new ArrayList<dbAddress>();
     String InAddress;
     private List<UnSpentTxsBean> unSpentTxsBeanList;
-    UnSpentTxsAsyncTask unSpentTxsAsyncTask;
+//    UnSpentTxsAsyncTask unSpentTxsAsyncTask;
+byte[] okTkn = new byte[4];
+    byte[] unblockTkn = new byte[16];
     double BTCFee = 0.0001;
     double amount = 0;
     int orderAccount = -1;
@@ -162,13 +162,43 @@ public class ExchangeCompleteOrderActivity extends BaseActivity implements View.
     @Override
     public void onClick(View v) {
 
+
         FunTrxFinish();
+
+        //本來是signLogin與signLogout之間失敗退出時重新進入執行以便清空block，but useless
+//        mExchangeAPI.doExGetTrxInfo(xchsOrder.getOrderId(), new APIResultCallback() {
+//            @Override
+//            public void success(final String[] msg) {
+//                LogUtil.d("doExGetTrxInfo ok " + msg[0]);
+//
+//                // orderId(4B)/okTkn(4B)/encBulkTkn(16B)/accId(4B)/dealAmnt(8B)/mac(32B)
+//                cmdManager.XchsTrxsignLogin(PublicPun.hexStringToByteArray(msg[0]), new CmdResultCallback() {
+//                    @Override
+//                    public void onSuccess(int status, byte[] outputData) {
+//                        if ((status + 65536) == 0x9000) {
+//                            trxHandle = outputData;
+//
+//                            XchsTrxLogout(trxHandle);
+//
+//                        } else {
+//                            CancelBlock();
+//                        }
+//                    }
+//                });
+//
+//            }
+//            @Override
+//            public void fail(String msg) {
+//
+//                LogUtil.d("doExGetTrxInfo failed:" + msg);
+//            }
+//        });
+
 
         isBlockr = AppPrefrence.getIsBlockrApi(mContext);
         if (v == btnCompleteOrder) {
             getSecpo();
             int infoid = 1;//XCHS OTP
-
 
             cmdManager.XchsGetOtp(infoid, new CmdResultCallback() {
                 @Override
@@ -186,24 +216,11 @@ public class ExchangeCompleteOrderActivity extends BaseActivity implements View.
             });
         } else if (v == btnCancelOrder || v == btnSubmittedOk) {
             LogUtil.d("cancel order");
-//            cmdManager.trxFinish(new CmdResultCallback() {
-//                @Override
-//                public void onSuccess(int status, byte[] outputData) {
-//                    if ((status + 65536) == 0x9000) {
-//                        LogUtil.i("trxFinish成功");
-//                        CancelBlock();
-//                    }
-//                }
-//            });
-
             finish();
-//            completeOrder();
-
         }
     }
 
-    byte[] okTkn = new byte[4];
-    byte[] unblockTkn = new byte[16];
+
 
     private void BlockVerifyOtp() {
 
@@ -219,7 +236,7 @@ public class ExchangeCompleteOrderActivity extends BaseActivity implements View.
                 dialog.dismiss();
                 mProgress.setMessage(getString(R.string.begin_to_block_order) + "...");
                 mProgress.show();
-                //1.transit to server
+
 
                 String blockOtp = editText.getText().toString();
                 LogUtil.d("block orderID=" + orderID + ";blockOtp=" + blockOtp);
@@ -243,7 +260,7 @@ public class ExchangeCompleteOrderActivity extends BaseActivity implements View.
 
                                     System.arraycopy(outputData, 32, okTkn, 0, 4);
                                     System.arraycopy(outputData, 36, unblockTkn, 0, 16);
-
+//                                    XchsTrxLogout(trxHandle);
 
                                     mExchangeAPI.doExWriteOKToken(orderID, PublicPun.byte2HexStringNoBlank(okTkn), PublicPun.byte2HexStringNoBlank(unblockTkn),
                                             new APIResultCallback() {
@@ -312,18 +329,7 @@ public class ExchangeCompleteOrderActivity extends BaseActivity implements View.
         });
     }
 
-    private void qryBlockBalance(int account) {
 
-//        final byte cwHdwAllAccountInfo = 0x05;
-        final byte cwHdwAccountInfoBlockAmount = 0x04;
-        //[B5]
-        cmdManager.hdwQueryAccountInfo(cwHdwAccountInfoBlockAmount, account, new CmdResultCallback() {
-            @Override
-            public void onSuccess(int status, byte[] outputData) {
-                LogUtil.e("帳戶block金額：" + PublicPun.byte2HexStringNoBlank(outputData));
-            }
-        });
-    }
 
     byte[] cancelBlkInfo;
 
@@ -396,14 +402,8 @@ public class ExchangeCompleteOrderActivity extends BaseActivity implements View.
     private Timer mTimer;
 
     private void completeOrder() {
-        byte[] svrResp = null;
         trxHandle = new byte[4];
         isTrxSuccess = false;
-        // prepareTransaction
-        // 1.getTrxInfo (需不需要exBlockInfo)
-        // 2.TrxSignLogin
-        // 3.prepareTransaction
-        // 4.
 
         mProgress.setMessage(getString(R.string.preparing_to_complete_order));
         mProgress.show();
@@ -421,58 +421,42 @@ public class ExchangeCompleteOrderActivity extends BaseActivity implements View.
         LogUtil.i("run XchsTrxSignPrepare");
         lisCwBtcAdd = DatabaseHelper.queryAddress(this, accountID, -1);
 
-        String v_separator;
-        if (!isBlockr) {
-            UrlUnspent = BtcUrl.URL_BLOCKCHAIN_UNSPENT;
-            v_separator = "|";
-        } else {
-            UrlUnspent = BtcUrl.URL_BLOCKR_UNSPENT;
-            v_separator = ",";
-        }
-
         for (int i = 0; i < lisCwBtcAdd.size(); i++) {
             if (lisCwBtcAdd.get(i).getBalance() > 0) {
                 if (i == 0) {
                     InAddress += lisCwBtcAdd.get(i).getAddress();
                 } else {
-                    InAddress += v_separator + lisCwBtcAdd.get(i).getAddress();
+                    InAddress += "|" + lisCwBtcAdd.get(i).getAddress();
                 }
             }
         }
-        if (isBlockr) {
-            InAddress += "?unconfirmed=1";
-        }
-
-        new UnSpentTxsAsyncTask().execute(InAddress);
-    }
 
 
-    private class UnSpentTxsAsyncTask extends AsyncTask<String, Void, List<UnSpentTxsBean>> {
-        @Override
-        protected List<UnSpentTxsBean> doInBackground(String... strings) {
-            LogUtil.i("doInBackground!!!!");
-            unSpentTxsBeanList = getUnspentTxsByAddr(strings[0]);
-            return unSpentTxsBeanList;
-        }
-
-        @Override
-        protected void onPostExecute(List<UnSpentTxsBean> UnSpentTxsBeans) {
-            super.onPostExecute(UnSpentTxsBeans);
-
-            if (UnSpentTxsBeans == null || UnSpentTxsBeans.size() == 0) {
-                PublicPun.showNoticeDialog(mContext, getString(R.string.error_msg), getString(R.string.note_unspent));
-                mProgress.dismiss();
-            } else {
-                LogUtil.d("UnSpentTxsBeans 取得完成有 " + UnSpentTxsBeans.size() + " 筆");
+        blockChainAPI.getUnspent(InAddress,new UnSpentCallback() {
+            @Override
+            public void onSuccess(List<UnSpentTxsBean> UnSpentTxsBeanList) {
+                LogUtil.d("UnSpentTxsBeans 取得完成有 " + UnSpentTxsBeanList.size() + " 筆");
+                unSpentTxsBeanList =UnSpentTxsBeanList;
                 PreviousPrepareTransaction(xchsOrder.getAddr(), BTCUtils.BTCconvertToSatoshisValue(xchsOrder.getAmount()));
             }
-        }
+
+            @Override
+            public void onException() {
+                PublicPun.showNoticeDialog(mContext, getString(R.string.error_msg), getString(R.string.note_unspent));
+                mProgress.dismiss();
+                CancelBlock();
+
+            }
+        });
+
     }
+
 
     String changeAddr = "";
 
     private void PreviousPrepareTransaction(final String outputAddress, final long amountToSend) {
 
+        try {
         long availableAmount = 0;
         for (UnSpentTxsBean unSpentTxsBean : unSpentTxsBeanList) {
             /**
@@ -483,7 +467,7 @@ public class ExchangeCompleteOrderActivity extends BaseActivity implements View.
         }
         long extraFee = BTCUtils.parseValue("0.0");
         LogUtil.e("帳戶 " + xchsOrder.getAccount() + " 地址下有的餘額=" + availableAmount + " 要發出的金額=" + amountToSend);
-        try {
+
             processedTxData =
                     BTCUtils.calcFeeChangeAndSelectOutputsToSpendii(mContext, unSpentTxsBeanList, amountToSend, extraFee, true, false);
 
@@ -789,6 +773,7 @@ public class ExchangeCompleteOrderActivity extends BaseActivity implements View.
                             @Override
                             public void onSuccess(int status, byte[] outputData) {
                                 if ((status + 65536) == 0x9000) {
+
                                     LogUtil.e("cwCmdHdwPrepTrxSign 成功!");
                                     exePrepCnt++;
                                     if (exePrepCnt == mLisTrxBlks.size()) {
@@ -985,7 +970,7 @@ public class ExchangeCompleteOrderActivity extends BaseActivity implements View.
                                         currUnsignedTx = genRawTxData(scriptSigs);
                                         LogUtil.e("取得 currUnsignedTx=" + currUnsignedTx + ";length=" + currUnsignedTx.length());
                                         LogUtil.e("byte長度=" + PublicPun.hexStringToByteArray(currUnsignedTx).length);
-//                                        FunApiSubmit(PublicPun.hexStringToByteArray(currUnsignedTx));
+                                        FunApiSubmit(PublicPun.hexStringToByteArray(currUnsignedTx));
 
                                     }
                                 }
@@ -1169,42 +1154,8 @@ public class ExchangeCompleteOrderActivity extends BaseActivity implements View.
                 }
             });
         }
-//        return genChangeAddressResult;
     }
 
-
-    public List<UnSpentTxsBean> getUnspentTxsByAddr(String mAddr) {
-
-        List<UnSpentTxsBean> UnSpentTxsBeanList = null;
-        ContentValues cv = new ContentValues();
-        cv.put("addresses", mAddr);
-        LogUtil.d("addressesXX=" + cv.getAsString("addresses"));
-        String result = cwBtcNetWork.doGet(cv, UrlUnspent, null);
-        if (!TextUtils.isEmpty(result)) {
-            if (result.equals("{\"errorCode\": 404}") || result.equals("{\"errorCode\": 400}") || result.equals("{\"errorCode\": 500}")) {
-                errorCnt++;
-                if (errorCnt <= 3) {
-                    //cacel old task
-                    unSpentTxsAsyncTask.cancel(true);
-                    //run new task
-                    unSpentTxsAsyncTask = new UnSpentTxsAsyncTask();
-                    unSpentTxsAsyncTask.execute(InAddress);
-                } else {
-                    //cacel old task
-                    unSpentTxsAsyncTask.cancel(true);
-                }
-            } else {
-//                UnSpentTxsBeanList = PublicPun.jsonParseBlockrUnspent(result);
-                if (isBlockr) {
-                    UnSpentTxsBeanList = PublicPun.jsonParseBlockrUnspent(result);
-                } else {
-                    UnSpentTxsBeanList = PublicPun.jsonParseBlockChainInfoUnspent(result);
-                }
-                errorCnt = 0;
-            }
-        }
-        return UnSpentTxsBeanList;
-    }
 
     private void cancelTrx() {
 
@@ -1229,7 +1180,7 @@ public class ExchangeCompleteOrderActivity extends BaseActivity implements View.
         new Random().nextBytes(bValue);
         nonce = bValue;
         mProgress.dismiss();
-
+        LogUtil.d("做XchsTrxsignLogout");
         cmdManager.XchsTrxsignLogout(trxHandle, nonce, new CmdResultCallback() {
             @Override
             public void onSuccess(int status, byte[] outputData) {
@@ -1282,26 +1233,7 @@ public class ExchangeCompleteOrderActivity extends BaseActivity implements View.
 
     }
 
-    private void TimeOutCheck() {
-        mTimer = new Timer();
-        mTimer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                if (!isTrxSuccess) {
-                    if (mProgress.isShowing()) {
-                        mProgress.dismiss();
-                    }
-                    cancelTrx();
-                    runOnUiThread(new Runnable() {
-                        public void run() {
-                            // do your work right here
-                            PublicPun.showNoticeDialog(mContext, getString(R.string.send_notification_str_failed_title), getString(R.string.send_notification_str_failed_msg));
-                        }
-                    });
-                }
-            }
-        }, 60000);////60s沒成功就自動cacel
-    }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
@@ -1514,7 +1446,6 @@ public class ExchangeCompleteOrderActivity extends BaseActivity implements View.
         return mScriptSig;
     }
 
-
     private void initViews() {
         btnCompleteOrder = (Button) findViewById(R.id.btn_complete_order);
         btnCompleteOrder.setOnClickListener(this);
@@ -1532,7 +1463,6 @@ public class ExchangeCompleteOrderActivity extends BaseActivity implements View.
         linUnsbmitted = (LinearLayout) findViewById(R.id.lin_unsbmitted);
     }
 
-
     private void initValues() {
 
         xchsOrder = (ExchangeOrder) getIntent().getSerializableExtra("ExchangeOrder");
@@ -1540,6 +1470,7 @@ public class ExchangeCompleteOrderActivity extends BaseActivity implements View.
         orderID = xchsOrder.getOrderId();
         cmdManager = new CmdManager();
         mExchangeAPI = new ExchangeAPI(mContext, cmdManager);
+        blockChainAPI = new BlockChainAPI(mContext);
         mProgress = new ProgressDialog(this);
         mProgress.setCancelable(false);
         mProgress.setIndeterminate(true);
@@ -1579,7 +1510,6 @@ public class ExchangeCompleteOrderActivity extends BaseActivity implements View.
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setHomeButtonEnabled(true);
     }
-
 
     @Override
     public Intent getSupportParentActivityIntent() {

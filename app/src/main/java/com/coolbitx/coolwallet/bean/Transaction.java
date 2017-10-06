@@ -5,7 +5,7 @@ import com.coolbitx.coolwallet.util.BTCUtils;
 import com.coolbitx.coolwallet.util.BitcoinOutputStream;
 import com.coolbitx.coolwallet.util.ByteUtils;
 import com.coolbitx.coolwallet.util.ECKey;
-import com.coolbitx.coolwallet.util.ValidationException;
+import com.coolbitx.coolwallet.exception.ValidationException;
 import com.snscity.egdwlib.utils.LogUtil;
 
 import java.io.ByteArrayOutputStream;

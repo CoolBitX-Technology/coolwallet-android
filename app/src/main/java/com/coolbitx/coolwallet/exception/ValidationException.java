@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.coolbitx.coolwallet.util;
+package com.coolbitx.coolwallet.exception;
 
 /**
  * Created by ShihYi on 2016/1/26.

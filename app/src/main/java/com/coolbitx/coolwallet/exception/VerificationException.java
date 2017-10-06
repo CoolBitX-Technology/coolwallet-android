@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.coolbitx.coolwallet.util;
+package com.coolbitx.coolwallet.exception;
 
 @SuppressWarnings("serial")
 public class VerificationException extends Exception {

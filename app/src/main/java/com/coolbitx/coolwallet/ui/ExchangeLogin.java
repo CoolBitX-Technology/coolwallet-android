@@ -12,7 +12,7 @@ import android.widget.Button;
 import com.coolbitx.coolwallet.R;
 import com.coolbitx.coolwallet.callback.APIResultCallback;
 import com.coolbitx.coolwallet.general.PublicPun;
-import com.coolbitx.coolwallet.util.ExchangeAPI;
+import com.coolbitx.coolwallet.general.ExchangeAPI;
 import com.snscity.egdwlib.CmdManager;
 import com.snscity.egdwlib.utils.LogUtil;
 

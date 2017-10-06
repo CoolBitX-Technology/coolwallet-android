@@ -25,9 +25,9 @@ public static final String URL_BLICKCHAIN_PUSH ="pushtx?cors=true";
 
     public static final String URL_BLOCKR_SERVER_SITE = "http://btc.blockr.io/api/v1/";
     public static final String URL_BLOCKR_UNSPENT = "address/unspent/";
-    public static final String URL_BLOCKR_UNCONFIRMED = "unconfirmed/address";
-    public static final String URL_BLOCKR_INFO = "info/address";
-    public static final String URL_BLOCKR_EXCHANGE_RATE = "exchangerate/current";
+//    public static final String URL_BLOCKR_UNCONFIRMED = "unconfirmed/address";
+//    public static final String URL_BLOCKR_INFO = "info/address";
+//    public static final String URL_BLOCKR_EXCHANGE_RATE = "exchangerate/current";
     public static final String URL_BLOCKCHAIN_EXCHANGE_RATE = "ticker";
 
     public static final String URL_BLOCKR_DECODE ="tx/decode";
