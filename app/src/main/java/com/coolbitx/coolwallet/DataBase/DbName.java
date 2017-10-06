@@ -10,5 +10,5 @@ public class DbName {
     public static final String DB_TABLE_CURRENT = "CURRENT";
     public static final String DB_TABLE_LOGIN = "LOGIN";
     public static final String DB_TABLE_KEYINFO = "ACCOUNT_KEY_INFO";
-    public static final String DB_TABLE_EXCEPTION = "EXCEPTION";
+//    public static final String DB_TABLE_EXCEPTION = "EXCEPTION";
 }

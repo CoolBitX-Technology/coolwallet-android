@@ -357,7 +357,7 @@
         <item>CURRENT</item>
         <item>LOGIN</item>
         <item>ACCOUNT_KEY_INFO</item>
-        <item>EXCEPTION</item>
+        <!--<item>EXCEPTION</item>-->
     </string-array>
 
 

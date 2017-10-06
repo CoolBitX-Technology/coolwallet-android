@@ -61,7 +61,7 @@ public class XchsSellException {
         });
     }
 
-    public void SignLogout(final byte[] trxHandle,final ContentValues cv, final ProgressDialog mProgress) {
+    public void SignLogout(final byte[] trxHandle, final ProgressDialog mProgress) {
 
         byte[] nonce = new byte[16];
         new Random().nextBytes(nonce);
@@ -73,12 +73,11 @@ public class XchsSellException {
                 if ((status + 65536) == 0x9000) {
                     LogUtil.d("XchsTrxsignLogout 成功");
                 }else{
-//                    ContentValues cv = new ContentValues();
-//                    cv.put("ACCOUNT_ID", cv.getAsInteger("accountID"));
-//                    cv.put("TYPE", cv.getAsInteger("type"));
-//                    cv.put("DATA", cv.getAsInteger("data"));
-                    DatabaseHelper.insertException(mContext,cv);
-                    RetrySignLogout(trxHandle,mProgress);
+
+                    PublicPun.showNoticeDialog(mContext, mContext.getString(R.string.error_msg),
+                            mContext.getString(R.string.error) + ":" + Integer.toHexString(status)
+                            + "-" + PublicPun.byte2HexString(outputData));
+
                 }
             }
         });

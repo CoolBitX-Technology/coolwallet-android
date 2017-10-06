@@ -794,35 +794,35 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return result;
     }
 
-    public static long insertException(Context context, ContentValues cv) {
-        DatabaseHelper mOpenHelper = new DatabaseHelper(context);
-        String nullColumnHack = "id";
-        boolean mResult = false;
-        long resultID = 0;
-        // 取出資料庫物件, 並且是可以寫入狀態
-        // 當APP空間不夠時, 該方法會呈唯讀狀態
-        SQLiteDatabase mDatabase = mOpenHelper.getWritableDatabase();
-        try {
-            ContentValues values = new ContentValues();
-            values.put("WID", wid);
-            values.put("ACCOUNT_ID", cv.getAsInteger("accountID"));
-            values.put("TYPE", cv.getAsInteger("type"));
-            values.put("DATA", cv.getAsInteger("data"));
-
-            resultID = mDatabase.insert(DbName.DB_TABLE_EXCEPTION, nullColumnHack, values);
-            LogUtil.e("insert result: " + String.valueOf(resultID) + " ,WID:"
-                    + wid
-                    + " ,ACCOUNT_ID:" + String.valueOf(cv.getAsInteger("accountID"))
-                    + " ,TYPE:" + cv.getAsInteger("type") + " ,DATA:" + cv.getAsInteger("data"));
-
-        } catch (Exception e) {
-            LogUtil.i("sql insert Error: " + e.toString());
-
-        } finally {
-            mDatabase.close();
-            return resultID;
-        }
-    }
+//    public static long insertException(Context context, ContentValues cv) {
+//        DatabaseHelper mOpenHelper = new DatabaseHelper(context);
+//        String nullColumnHack = "id";
+//        boolean mResult = false;
+//        long resultID = 0;
+//        // 取出資料庫物件, 並且是可以寫入狀態
+//        // 當APP空間不夠時, 該方法會呈唯讀狀態
+//        SQLiteDatabase mDatabase = mOpenHelper.getWritableDatabase();
+//        try {
+//            ContentValues values = new ContentValues();
+//            values.put("WID", wid);
+//            values.put("ACCOUNT_ID", cv.getAsInteger("accountID"));
+//            values.put("TYPE", cv.getAsInteger("type"));
+//            values.put("DATA", cv.getAsInteger("data"));
+//
+//            resultID = mDatabase.insert(DbName.DB_TABLE_EXCEPTION, nullColumnHack, values);
+//            LogUtil.e("insert result: " + String.valueOf(resultID) + " ,WID:"
+//                    + wid
+//                    + " ,ACCOUNT_ID:" + String.valueOf(cv.getAsInteger("accountID"))
+//                    + " ,TYPE:" + cv.getAsInteger("type") + " ,DATA:" + cv.getAsInteger("data"));
+//
+//        } catch (Exception e) {
+//            LogUtil.i("sql insert Error: " + e.toString());
+//
+//        } finally {
+//            mDatabase.close();
+//            return resultID;
+//        }
+//    }
 
 
     @Override
