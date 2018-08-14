@@ -10,5 +10,5 @@ import java.util.List;
 
 public interface UnSpentCallback {
     void onSuccess(List<UnSpentTxsBean> UnSpentTxsBeanList);
-    void onException();
+    void onException(String msg);
 }

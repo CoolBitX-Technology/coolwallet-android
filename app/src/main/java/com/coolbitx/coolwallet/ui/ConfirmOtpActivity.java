@@ -125,7 +125,7 @@ public class ConfirmOtpActivity extends BaseActivity implements View.OnClickList
                         @Override
                         public void onSuccess(int status, byte[] outputData) {
                             if ((status + 65536) == 0x9000) {
-                                LogUtil.i("OTP:" + "bindRegApprove success");
+                                LogUtil.i("OTP:" + "bindRegApprove onSuccess");
                                 PublicPun.toast(getApplicationContext(), getString(R.string.approve_success));
 
                                 if (PublicPun.modeState.equals("PERSO")) {
@@ -157,7 +157,7 @@ public class ConfirmOtpActivity extends BaseActivity implements View.OnClickList
                             if ((status + 65536) == 0x9000) { //36864,status=-28672
                                 if (outputData != null) {
                                     challenge = outputData;
-                                    LogUtil.i("bindRegChlng success");
+                                    LogUtil.i("bindRegChlng onSuccess");
 
                                     cmdManager.bindRegFinish(handle, currentUuid, currentOptCode, challenge, new CmdResultCallback() {
                                         @Override

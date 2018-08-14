@@ -135,12 +135,12 @@ public class HomeFragment extends BaseFragment implements AdapterView.OnItemClic
                 RefreshBlockChainInfo refreshBlockChainInfo = new RefreshBlockChainInfo(mContext, mAccount);
                 refreshBlockChainInfo.callTxsRunnable(new RefreshCallback() {
                     @Override
-                    public void success() {
+                    public void onSuccess() {
                         FunhdwSetAccInfo(mAccount);
                     }
 
                     @Override
-                    public void fail(String msg) {
+                    public void onFailure(String msg) {
                         LogUtil.i("rollback failed");
                         PublicPun.showNoticeDialog(mContext, getString(R.string.unable_connect_internet), msg);
                         mProgress.dismiss();

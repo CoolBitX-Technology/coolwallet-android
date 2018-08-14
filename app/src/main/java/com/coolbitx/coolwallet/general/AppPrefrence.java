@@ -16,15 +16,15 @@ public class AppPrefrence {
      */
 
 
-    public static void saveIsBlockrApi(Context context,boolean var){
-        SharedPreferences mSP = PreferenceManager.getDefaultSharedPreferences(context);
-        mSP.edit().putBoolean("IsBlockrApi", var).commit();
-    }
-
-    public static boolean getIsBlockrApi(Context context) {
-        SharedPreferences mSP = PreferenceManager.getDefaultSharedPreferences(context);
-        return mSP.getBoolean("IsBlockrApi",false);
-    }
+//    public static void saveIsBlockrApi(Context context,boolean var){
+//        SharedPreferences mSP = PreferenceManager.getDefaultSharedPreferences(context);
+//        mSP.edit().putBoolean("IsBlockrApi", var).commit();
+//    }
+//
+//    public static boolean getIsBlockrApi(Context context) {
+//        SharedPreferences mSP = PreferenceManager.getDefaultSharedPreferences(context);
+//        return mSP.getBoolean("IsBlockrApi",false);
+//    }
 
 
     /**

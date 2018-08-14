@@ -5,6 +5,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.text.TextUtils;
 
 import com.coolbitx.coolwallet.DataBase.DatabaseHelper;
 import com.coolbitx.coolwallet.DataBase.DbName;
@@ -13,6 +14,7 @@ import com.coolbitx.coolwallet.bean.CWAccountKeyInfo;
 import com.coolbitx.coolwallet.bean.Constant;
 import com.coolbitx.coolwallet.bean.dbAddress;
 import com.coolbitx.coolwallet.callback.RefreshCallback;
+import com.coolbitx.coolwallet.httpRequest.BlockChainAPI;
 import com.coolbitx.coolwallet.httpRequest.CwBtcNetWork;
 import com.coolbitx.coolwallet.util.BTCUtils;
 import com.coolbitx.coolwallet.util.ExtendedKey;
@@ -20,6 +22,8 @@ import com.crashlytics.android.Crashlytics;
 import com.snscity.egdwlib.CmdManager;
 import com.snscity.egdwlib.cmd.CmdResultCallback;
 import com.snscity.egdwlib.utils.LogUtil;
+
+import org.json.JSONException;
 
 import java.util.ArrayList;
 
@@ -54,12 +58,12 @@ public class RefreshBlockChainInfo {
                     LogUtil.i("BIP32 handler addrAuccess=" + addrAuccess + " & needToRefreshCnt=" + needToRefreshCnt);
                     if (addrAuccess == needToRefreshCnt) {
                         LogUtil.i("BIP32 handler RUN callTxsRunnable");
-                        cmdResultCallback.success();
+                        cmdResultCallback.onSuccess();
 
                     }
                     break;
                 case 0:
-                    cmdResultCallback.fail(result);
+                    cmdResultCallback.onFailure(result);
                     break;
             }
         }
@@ -72,10 +76,10 @@ public class RefreshBlockChainInfo {
             int mAccountID = data.getInt("accountID");
             switch (msg.what) {
                 case 1:
-                    cmdResultCallback.success();
+                    cmdResultCallback.onSuccess();
                     break;
                 case -1:
-                    cmdResultCallback.fail("Account:" + (mAccountID + 1) + " get transaction data from BLOCKCHAIN failed, Please do again later.");
+                    cmdResultCallback.onFailure("Account:" + (mAccountID + 1) + " get transaction data from BLOCKCHAIN failed, Please do again later.");
 //                    showNoticeDialog("Erro Message", "Get Txs data from BLOCKCHAIN failed!");
                     break;
             }
@@ -182,10 +186,10 @@ public class RefreshBlockChainInfo {
 
                                         ArrayList<CWAccountKeyInfo> cwList =
                                                 DatabaseHelper.queryAccountKeyInfo(mContext, -1);
-                                        LogUtil.e("KEYINFO account cwList.size()="+cwList.size()+"; cnt="+ACCOUNT_CNT);
-                                        if (cwList.size() != ACCOUNT_CNT*2) {//如果keyinfo個數不等於account數，重新從卡片讀取
+                                        LogUtil.e("KEYINFO account cwList.size()=" + cwList.size() + "; cnt=" + ACCOUNT_CNT);
+                                        if (cwList.size() != ACCOUNT_CNT * 2) {//如果keyinfo個數不等於account數，重新從卡片讀取
                                             LogUtil.d("cwList size=" + cwList.size());
-                                            for(int i=0;i<ACCOUNT_CNT;i++){
+                                            for (int i = 0; i < ACCOUNT_CNT; i++) {
 
                                                 getAccountKeyInfo(i, IntExtKey, Constant.CwAddressKeyChainExternal, false);
                                             }
@@ -220,8 +224,8 @@ public class RefreshBlockChainInfo {
                                         //query全跑完後作業
                                         ArrayList<CWAccountKeyInfo> cwList =
                                                 DatabaseHelper.queryAccountKeyInfo(mContext, -1);
-                                        if (cwList.size() != ACCOUNT_CNT*2) {
-                                            for(int i=0;i<ACCOUNT_CNT;i++) {
+                                        if (cwList.size() != ACCOUNT_CNT * 2) {
+                                            for (int i = 0; i < ACCOUNT_CNT; i++) {
                                                 getAccountKeyInfo(i, IntIntKey, Constant.CwAddressKeyChainInternal, false);
                                             }
                                         }
@@ -247,7 +251,7 @@ public class RefreshBlockChainInfo {
                             if (flag[0] && flag[1] && flag[2] && flag[3] && flag[4]) {
                                 LogUtil.i("QryAccInfo跑完=" + accountID);
                                 if (isPointerSame) {
-                                    cmdResultCallback.success();
+                                    cmdResultCallback.onSuccess();
 
                                 }
                             }
@@ -417,6 +421,8 @@ public class RefreshBlockChainInfo {
         }
     }
 
+    int updateAddrResult;
+
     private void getTxsFromBlockchain(final int mAccount) {
         LogUtil.i("refresh跑account:" + mAccount);
         //分5個account跑addr的txs.
@@ -427,51 +433,45 @@ public class RefreshBlockChainInfo {
         for (int j = 0; j < listAddress.size(); j++) {
             mTxsAddresses += listAddress.get(j).getAddress() + '|';
         }
+        mTxsAddresses = mTxsAddresses.substring(0, mTxsAddresses.length() - 1);
+
         final ContentValues cv = new ContentValues();
         cv.put("addresses", mTxsAddresses);
 
         String result = null;
         int msgResult = -1;
-        try {
-            result = cwBtcNetWork.doGet(cv, BtcUrl.URL_BLICKCHAIN_TXS_MULTIADDR, null);
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            msgResult = -1;
-            e.printStackTrace();
-            cmdResultCallback.fail("Account:" + mAccount + " get transaction data from BLOCKCHAIN failed, Please do again later.");
-        }
-
         //使用Handler和Message把資料丟給主UI去後續處理
         Message msg = txsHandler.obtainMessage();
 
-        if (result != null && !result.contains("errorCode")) {
-            LogUtil.i("return 200");
+        result = cwBtcNetWork.doGet(cv, BtcUrl.URL_BLICKCHAIN_TXS_MULTIADDR, null);
+//        result = "{\"errorCode\": " + "404" + "}"; //for test node API
+        if (!TextUtils.isEmpty(result) && !result.contains("errorCode")) {
+            //call blockchain success
             DatabaseHelper.deleteTableByAccount(mContext, DbName.DB_TABLE_TXS, mAccount);
-//            int mWalletTxsN = PublicPun.jsonParserRecoveryTxs(mContext, result, PublicPun.card.getCardId(), mAccount);
-            int mWalletTxsN = PublicPun.jsonParserRefresh(mContext, result, mAccount, true);
-            if (mWalletTxsN > 50) {
-                int mRunTxsCnt = (int) Math.round((mWalletTxsN / 50) + 0.5);
-                LogUtil.i("refresh超過50筆,要跑幾次=" + mRunTxsCnt);
-                for (int i = 1; i < mRunTxsCnt; i++) {
-                    int param = i * 50 + 1;
-                    try {
+            try {
+                int mWalletTxsN = PublicPun.jsonParserRefresh(mContext, result, mAccount, true, false);
+                if (mWalletTxsN > 50) {
+                    int mRunTxsCnt = (int) Math.round((mWalletTxsN / 50) + 0.5);
+                    LogUtil.i("refresh超過50筆,要跑幾次=" + mRunTxsCnt);
+                    for (int i = 1; i < mRunTxsCnt; i++) {
+                        int param = i * 50 + 1;
+
                         //https://blockchain.info/multiaddr?offset=51&active=
                         LogUtil.i("refresh超過50筆,跑param=" + param);
                         result = cwBtcNetWork.doGet(cv, BtcUrl.URL_BLICKCHAIN_TXS_MULTIADDR, String.valueOf(param));
-                        PublicPun.jsonParserRefresh(mContext, result, mAccount, false);
-
-                    } catch (Exception e) {
-                        // TODO Auto-generated catch block
-                        msgResult = -1;
-                        e.printStackTrace();
-                        Crashlytics.logException(e);
+                        PublicPun.jsonParserRefresh(mContext, result, mAccount, false, false);
                     }
                 }
+                msgResult = 1;
+            } catch (Exception e) {
+                // TODO Auto-generated catch block
+                msgResult = -1;
+                e.printStackTrace();
+                Crashlytics.logException(e);
             }
-            msgResult = 1;
         } else {
-            LogUtil.e("return 非 200");
-            msgResult = -1;
+            //call blockchain failed , call Node to update balance
+            msgResult = new BlockChainAPI(mContext).updateBalance(cv);
         }
         Bundle data = new Bundle();
         data.putInt("accountID", mAccount);
@@ -481,5 +481,4 @@ public class RefreshBlockChainInfo {
         txsHandler.sendMessage(msg);
 
     }
-
 }

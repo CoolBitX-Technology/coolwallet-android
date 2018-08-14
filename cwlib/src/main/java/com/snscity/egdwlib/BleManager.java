@@ -155,7 +155,6 @@ public class BleManager {
         if (bluetoothAddress != null && address.equals(bluetoothAddress) && bluetoothGatt != null) {
             LogUtil.e("Trying to use an existing mBluetoothGatt for connection.");
             if (bluetoothGatt.connect()) {
-//                mConnectionState = STATE_CONNECTING;
                 return true;
             } else {
                 return false;
@@ -172,7 +171,6 @@ public class BleManager {
         bluetoothGatt = device.connectGatt(context.getApplicationContext(), false, mGattCallback);
         LogUtil.e("Trying to create a new connection.");
         bluetoothAddress = address;
-//        mConnectionState = STATE_CONNECTING;
         return true;
     }
 
@@ -247,9 +245,9 @@ public class BleManager {
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                LogUtil.e("services discovered");
-                gattCharacteristics = new ArrayList<>();
+                LogUtil.e("services discovered status ="+status);
                 if (bluetoothGatt != null) {
+                    gattCharacteristics = new ArrayList<>();
                     getGattCharacteristics(bluetoothGatt.getServices());
                 }
                 try {

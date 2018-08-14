@@ -59,7 +59,7 @@ public class ExchangeLogin extends BaseActivity implements View.OnClickListener 
         mExchangeAPI.exchangeLogin(new APIResultCallback() {
             @Override
             public void success(String[] msg) {
-                LogUtil.e("Exchange Login success");
+                LogUtil.e("Exchange Login onSuccess");
 
                 mProgress.dismiss();
 
@@ -82,7 +82,7 @@ public class ExchangeLogin extends BaseActivity implements View.OnClickListener 
         mExchangeAPI.exchangeLogOut(new APIResultCallback() {
             @Override
             public void success(String[] msg) {
-                LogUtil.d("Logout success.");
+                LogUtil.d("Logout onSuccess.");
             }
 
             @Override

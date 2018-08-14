@@ -84,15 +84,15 @@ public class TransactionConfirmDialog extends AlertDialog implements View.OnClic
         tvAddressLower.setText(mTxsConfirm.getOutput_addrese());
         tvSendAmount.setText("฿" + String.valueOf(new DecimalFormat("#.########").format(
                 mTxsConfirm.getOutput_amount() * PublicPun.SATOSHI_RATE)));
-        tvSendForeignAmount.setText("$" + String.valueOf(new DecimalFormat("#.##").format(
+        tvSendForeignAmount.setText(mContext.getString(R.string.dollar) + String.valueOf(new DecimalFormat("#.##").format(
                 mTxsConfirm.getOutput_amount() * PublicPun.SATOSHI_RATE * UseExchangeRate)));
         tvFeesAmount.setText("฿" + String.valueOf(new DecimalFormat("#.########").format(
                 mTxsConfirm.getFees() * PublicPun.SATOSHI_RATE)));
-        tvFeesForeignAmount.setText("$" + String.valueOf(new DecimalFormat("#.##").format(
+        tvFeesForeignAmount.setText(mContext.getString(R.string.dollar) + String.valueOf(new DecimalFormat("#.##").format(
                 mTxsConfirm.getFees() * PublicPun.SATOSHI_RATE * UseExchangeRate)));
         tvTotalAmount.setText("฿" + String.valueOf(new DecimalFormat("#.########").format(
                 mTxsConfirm.getOutput_total() * PublicPun.SATOSHI_RATE)));
-        tvTotalForeignAmount.setText("$" + String.valueOf(new DecimalFormat("#.##").format(
+        tvTotalForeignAmount.setText(mContext.getString(R.string.dollar) + String.valueOf(new DecimalFormat("#.##").format(
                 mTxsConfirm.getOutput_total() * PublicPun.SATOSHI_RATE * UseExchangeRate)));
         tvInputStr.setText(String.valueOf(mTxsConfirm.getInput_count()) + " "+mContext.getString(R.string.inputs));
         tvInputAmount.setText("฿" + String.valueOf(new DecimalFormat("#.########").format(
@@ -202,5 +202,6 @@ public class TransactionConfirmDialog extends AlertDialog implements View.OnClic
         btnConfrim.setOnClickListener(this);
         btnCancel.setOnClickListener(this);
         imgAlert.setOnClickListener(this);
+
     }
 }

@@ -2,6 +2,7 @@ package com.coolbitx.coolwallet.general;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import com.coolbitx.coolwallet.DataBase.DatabaseHelper;
 import com.coolbitx.coolwallet.bean.CWAccountKeyInfo;
@@ -233,7 +234,7 @@ public class ExchangeAPI {
     public void exchangeLogOut(final APIResultCallback apiResultCallback) {
         this.apiResultCallback = apiResultCallback;
         this.mResponse = new String[1];//challenge
-        final String failedlMsg = "Card init session fail.";
+        final String failedlMsg = "Card init session onFailure.";
         String httpData = null;
         new AsyncTask<String, Integer, JSONObject>() {
 
@@ -266,7 +267,7 @@ public class ExchangeAPI {
     public void getSrvInitSession(final APIResultCallback apiResultCallback) {
         this.apiResultCallback = apiResultCallback;
         this.mResponse = new String[1];//challenge
-        final String failedlMsg = "Card init session fail.";
+        final String failedlMsg = "Card init session onFailure.";
         String httpData = null;
         new AsyncTask<String, Integer, JSONObject>() {
 
@@ -371,7 +372,7 @@ public class ExchangeAPI {
     public void getPendingTrx(final APIResultCallback apiResultCallback) {
         this.apiResultCallback = apiResultCallback;
         this.mResponse = new String[1];//challenge
-        final String failedlMsg = "getPendingTrx fail.";
+        final String failedlMsg = "getPendingTrx onFailure.";
         String postData = "";
 
         new AsyncTask<String, Integer, JSONObject>() {
@@ -404,7 +405,7 @@ public class ExchangeAPI {
     public void getOrderInfo(final APIResultCallback apiResultCallback) {
         this.apiResultCallback = apiResultCallback;
         this.mResponse = new String[1];//challenge
-        final String failedlMsg = "getOrderInfo fail.";
+        final String failedlMsg = "getOrderInfo onFailure.";
         String postData = "";
 
         new AsyncTask<String, Integer, JSONObject>() {
@@ -443,7 +444,7 @@ public class ExchangeAPI {
     public void getTrxBlock(final String hexOrder, final String blockOtp, final APIResultCallback apiResultCallback) {
         this.apiResultCallback = apiResultCallback;
         this.mResponse = new String[1];//challenge
-        final String failedlMsg = "getTrxBlock fail.";
+        final String failedlMsg = "getTrxBlock onFailure.";
         String postData = "";
 
         new AsyncTask<String, Integer, JSONObject>() {
@@ -476,10 +477,10 @@ public class ExchangeAPI {
     public void doExWriteOKToken(final String hexOrder, final String okToken, final String unblockToken, final APIResultCallback apiResultCallback) {
         this.apiResultCallback = apiResultCallback;
         this.mResponse = new String[1];//challenge
-        final String failedlMsg = "getTrxBlock fail.";
+        final String failedlMsg = "getTrxBlock onFailure.";
         //(With: {"okToken": "a0a1a2a3","unblockToken": "b0b1b2b3"})
         String postData = "{\"okToken\":\"" + okToken + "\", \"unblockToken\":\"" + unblockToken + "\"}";
-
+        LogUtil.e("doExWriteOKToken postdata:"+postData);
         new AsyncTask<String, Integer, JSONObject>() {
             @Override
             protected JSONObject doInBackground(String... param) {
@@ -511,7 +512,7 @@ public class ExchangeAPI {
     public void getExUnBlock(final String orderId, final APIResultCallback apiResultCallback) {
         this.apiResultCallback = apiResultCallback;
         this.mResponse = new String[6];//challenge
-        final String failedlMsg = "getExUnBlock fail.";
+        final String failedlMsg = "getExUnBlock onFailure.";
         String postData = "";
         new AsyncTask<String, Integer, JSONObject>() {
             @Override
@@ -557,7 +558,7 @@ public class ExchangeAPI {
     public void cancelTrx(final String orderId, final APIResultCallback apiResultCallback) {
         this.apiResultCallback = apiResultCallback;
         this.mResponse = new String[1];//challenge
-        final String failedlMsg = "cancelTrx fail.";
+        final String failedlMsg = "cancelTrx onFailure.";
         String postData = "";
         LogUtil.d("cancelTrx in");
         new AsyncTask<String, Integer, JSONObject>() {
@@ -594,7 +595,7 @@ public class ExchangeAPI {
     public void cancelOrder(final String orderId, final APIResultCallback apiResultCallback) {
         this.apiResultCallback = apiResultCallback;
         this.mResponse = new String[1];//challenge
-        final String failedlMsg = "cancelTrx fail.";
+        final String failedlMsg = "cancelTrx onFailure.";
         String postData = "";
         LogUtil.d("cancelOrder in");
         new AsyncTask<String, Integer, JSONObject>() {
@@ -627,7 +628,7 @@ public class ExchangeAPI {
     public void doExGetTrxInfo(final String orderId, final APIResultCallback apiResultCallback) {
         this.apiResultCallback = apiResultCallback;
         this.mResponse = new String[1];//challenge
-        final String failedlMsg = "doExGetTrxInfo fail.";
+        final String failedlMsg = "doExGetTrxInfo onFailure.";
         String postData = "";
 
         new AsyncTask<String, Integer, JSONObject>() {
@@ -668,7 +669,7 @@ public class ExchangeAPI {
     public void doExGetTrxPrepareBlocks(final String orderId, ArrayList<TrxBlks> mLisTrxBlks, final APIResultCallback apiResultCallback) {
         this.apiResultCallback = apiResultCallback;
         this.mResponse = new String[1];//challenge
-        final String failedlMsg = "doExGetTrxPrepareBlocks fail.";
+        final String failedlMsg = "doExGetTrxPrepareBlocks onFailure.";
         String inputData = createXchsTrxJson(mLisTrxBlks);
         new AsyncTask<String, Integer, JSONObject>() {
             @Override
@@ -743,7 +744,7 @@ public class ExchangeAPI {
     public void doTrxSubmit(final int inputs, final String orderId, final String trxId, final String changeAddr, final String trxReceipt, String uid, String nonce, final APIResultCallback apiResultCallback) {
         this.apiResultCallback = apiResultCallback;
         this.mResponse = new String[1];//challenge
-        final String failedlMsg = "doTrxSubmit fail.";
+        final String failedlMsg = "doTrxSubmit onFailure.";
 
         String postData = "{\"inputs\":" + inputs + ",\"bcTrxId\":\"" + trxId + "\",\"changeAddr\":\"" + changeAddr + "\", \"trxReceipt\":\"" + trxReceipt +
                 "\", \"uid\":\"" + uid + "\", \"nonce\":\"" + nonce + "\"}";

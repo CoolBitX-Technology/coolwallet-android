@@ -244,13 +244,13 @@ public class ExchangeActivity extends BaseActivity implements
         cmdManager.XchsSessionLogout(new CmdResultCallback() {
             @Override
             public void onSuccess(int status, byte[] outputData) {
-                LogUtil.e("SE XchsSessionLogout success");
+                LogUtil.e("SE XchsSessionLogout onSuccess");
             }
         });
         mExchangeAPI.exchangeLogOut(new APIResultCallback() {
             @Override
             public void success(String[] msg) {
-                LogUtil.d("XCHS Logout success.");
+                LogUtil.d("XCHS Logout onSuccess.");
             }
 
             @Override

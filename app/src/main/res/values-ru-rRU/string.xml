@@ -1,4 +1,5 @@
 <resources>
+    <string name="icon_name">CW 2016</string>
     <string name="app_name">CoolWallet</string>
     <string name="action_settings">Обменный сайт авторизоваться одноразовый пароль</string>
     <string name="img_logo1">logo1</string>
@@ -37,6 +38,9 @@
     <string name="label">Метка</string>
     <string name="request">Запрос</string>
     <string name="copy">Копия</string>
+    <string name="edit_label">редактировать ярлык</string>
+    <string name="request_payment">запросить оплату</string>
+    <string name="copied">скопированный</string>
     <string name="generating_new_address">Создание нового адреса</string>
     <string name="unable_create_new_address">Не удалось создать новый адрес</string>
     <string name="maximum_unused_address">Maximum number of 5 unused addresses reached in this account</string>
@@ -131,7 +135,7 @@
     <string name="btc_to">btc до</string>
     <string name="failed_to_broadcast_transaction">Не удалось отправить транзакцию в блокчейн</string>
     <string name="failed_to_get_change_address">Не удалось получить адрес изменения</string>
-
+    <string name="amount">Суммаf</string>
 
     <!--TabFragment-->
     <string name="create_account">Создание аккаунта</string>
@@ -232,7 +236,9 @@
     <string name="card_name">Название карты</string>
     <string name="manual_fee">Ручная настройка:</string>
     <string name="auto_fee">Авто настройка:</string>
-
+    <string name="confirmed">подтвердил</string>
+    <string name="empty">пустой</string>
+    <string name="registered">зарегистрированный</string>
 
     <!--logout-->
     <string name="tv_logout_str1">Вы хотите отключить CoolWallet?</string>
@@ -343,8 +349,10 @@
     <string name="send_notification_str_failed_msg">Тайм-аут. Пожалуйста,Повторите попытку.</string>
     <string name="send_confirm_btn_send">ОТПРАВИТЬ</string>
     <string name="send_confirm_btn_cancel">ОТМЕНА</string>
-    <string name="send_call_unspent_failed">Получение неистраченных транзакций через API не удалось.</string>
+    <string name="send_call_unspent_failed">Получение неистраченных транзакций через API не удалось</string>
     <string name="send_call_unspent_list_addresses">несколько адресов включительно:\n</string>
+    <string name="dollar">₽</string>
+    <string name="Send_to">Отправить</string>
 
 
     <!--TransactionConfirmDialog-->

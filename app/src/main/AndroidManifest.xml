@@ -32,13 +32,14 @@
         android:icon="@mipmap/ic_launcher_cw"
         android:label="@string/app_name"
         android:theme="@style/AppTheme"
-        tools:replace="android:icon">
+        tools:replace="android:icon"
+        >
 
         <!-- InitialSecuritySettingActivity -->
         <!-- BleActivity -->
         <activity
             android:name=".ui.BleActivity"
-            android:label="@string/app_name"
+            android:label="@string/icon_name"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

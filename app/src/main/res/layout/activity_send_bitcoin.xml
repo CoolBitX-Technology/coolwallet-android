@@ -83,7 +83,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
                 android:layout_margin="@dimen/editText_margin"
-                android:text="Send to" />
+                android:text="@string/Send_to" />
 
             <ImageView
                 android:id="@+id/imageView"
@@ -145,7 +145,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="@dimen/editText_margin"
-                    android:text="Amount" />
+                    android:text="@string/amount" />
 
 
                 <EditText

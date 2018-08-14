@@ -29,16 +29,26 @@ public class SSLSocketChannel2 implements ByteChannel, WrappedByteChannel {
 
     protected List<Future<?>> tasks;
 
-    /** raw payload incomming */
+    /**
+     * raw payload incomming
+     */
     protected ByteBuffer inData;
-    /** encrypted data outgoing */
+    /**
+     * encrypted data outgoing
+     */
     protected ByteBuffer outCrypt;
-    /** encrypted data incoming */
+    /**
+     * encrypted data incoming
+     */
     protected ByteBuffer inCrypt;
 
-    /** the underlying channel */
+    /**
+     * the underlying channel
+     */
     protected SocketChannel socketChannel;
-    /** used to set interestOP SelectionKey.OP_WRITE for the underlying channel */
+    /**
+     * used to set interestOP SelectionKey.OP_WRITE for the underlying channel
+     */
     protected SelectionKey selectionKey;
 
     protected SSLEngineResult engineResult;
@@ -47,8 +57,8 @@ public class SSLSocketChannel2 implements ByteChannel, WrappedByteChannel {
 
     private SSLEngineResult.Status lastReadEngineStatus = SSLEngineResult.Status.BUFFER_UNDERFLOW;
 
-    public SSLSocketChannel2(SocketChannel channel , SSLEngine sslEngine , ExecutorService exec , SelectionKey key) throws IOException {
-        if(channel == null || sslEngine == null || exec == null)
+    public SSLSocketChannel2(SocketChannel channel, SSLEngine sslEngine, ExecutorService exec, SelectionKey key) throws IOException {
+        if (channel == null || sslEngine == null || exec == null)
             throw new IllegalArgumentException("parameter must not be null");
 
         this.socketChannel = channel;
@@ -56,7 +66,7 @@ public class SSLSocketChannel2 implements ByteChannel, WrappedByteChannel {
         this.exec = exec;
 
         tasks = new ArrayList<Future<?>>(3);
-        if(key != null) {
+        if (key != null) {
             key.interestOps(key.interestOps() | SelectionKey.OP_WRITE);
             this.selectionKey = key;
         }
@@ -72,35 +82,35 @@ public class SSLSocketChannel2 implements ByteChannel, WrappedByteChannel {
 
     private void handleHandshakeStatus(SSLEngineResult.HandshakeStatus status) throws IOException {
 
-        if(status == SSLEngineResult.HandshakeStatus.NEED_TASK) {
+        if (status == SSLEngineResult.HandshakeStatus.NEED_TASK) {
             consumeDelegatedTasks();
         }
 
         //Cleanup complete delegated tasks and run incomplete tasks ourselves if we're in blocking mode.
-        if(!tasks.isEmpty()) {
+        if (!tasks.isEmpty()) {
             Iterator<Future<?>> it = tasks.iterator();
             while (it.hasNext()) {
                 Future<?> f = it.next();
-                if(f.isDone()) {
+                if (f.isDone()) {
                     it.remove();
                 } else {
-                    if(isBlocking())
+                    if (isBlocking())
                         consumeFutureUninterruptible(f);
                     return;
                 }
             }
         }
 
-        if(status == SSLEngineResult.HandshakeStatus.NEED_WRAP) {
+        if (status == SSLEngineResult.HandshakeStatus.NEED_WRAP) {
             write(emptybuffer);
         }
 
         //Ditto for unwrap. Trigger a read.
-        if(status == SSLEngineResult.HandshakeStatus.NEED_UNWRAP) {
+        if (status == SSLEngineResult.HandshakeStatus.NEED_UNWRAP) {
             read(null);
         }
 
-        if(status == SSLEngineResult.HandshakeStatus.FINISHED) {
+        if (status == SSLEngineResult.HandshakeStatus.FINISHED) {
             //We've just completed a handshake, reinstantiate the buffers with new negotiated sizes.
             createBuffers(sslEngine.getSession());
         }
@@ -117,7 +127,7 @@ public class SSLSocketChannel2 implements ByteChannel, WrappedByteChannel {
                     interrupted = true;
                 }
             }
-            if(interrupted)
+            if (interrupted)
                 Thread.currentThread().interrupt();
         } catch (ExecutionException e) {
             throw new RuntimeException(e);
@@ -126,8 +136,8 @@ public class SSLSocketChannel2 implements ByteChannel, WrappedByteChannel {
 
     protected void consumeDelegatedTasks() {
         Runnable task;
-        while ( ( task = sslEngine.getDelegatedTask() ) != null ) {
-            tasks.add( exec.submit( task ) );
+        while ((task = sslEngine.getDelegatedTask()) != null) {
+            tasks.add(exec.submit(task));
         }
     }
 
@@ -135,16 +145,16 @@ public class SSLSocketChannel2 implements ByteChannel, WrappedByteChannel {
         int appBufferMax = session.getApplicationBufferSize();
         int netBufferMax = session.getPacketBufferSize();
 
-        if(inData == null) {
+        if (inData == null) {
             inData = ByteBuffer.allocate(appBufferMax);
             outCrypt = ByteBuffer.allocate(netBufferMax);
             inCrypt = ByteBuffer.allocate(netBufferMax);
         } else {
-            if(inData.capacity() != appBufferMax)
+            if (inData.capacity() != appBufferMax)
                 inData = ByteBuffer.allocate(appBufferMax);
-            if(outCrypt.capacity() != netBufferMax)
+            if (outCrypt.capacity() != netBufferMax)
                 outCrypt = ByteBuffer.allocate(netBufferMax);
-            if(inCrypt.capacity() != netBufferMax)
+            if (inCrypt.capacity() != netBufferMax)
                 inCrypt = ByteBuffer.allocate(netBufferMax);
         }
         inData.rewind();
@@ -159,16 +169,16 @@ public class SSLSocketChannel2 implements ByteChannel, WrappedByteChannel {
 
         int written = 0;
 
-        if(src != null) {
+        if (src != null) {
             outCrypt.compact();
             engineResult = sslEngine.wrap(src, outCrypt);
             outCrypt.flip();
         }
 
-        if(outCrypt.hasRemaining())
+        if (outCrypt.hasRemaining())
             written = socketChannel.write(outCrypt);
 
-        if(src != null) {
+        if (src != null) {
             if (engineResult.getStatus() == SSLEngineResult.Status.BUFFER_OVERFLOW) {
                 //Buffer isn't big enough. Resize to required.
                 ByteBuffer b = ByteBuffer.allocate(sslEngine.getSession().getPacketBufferSize() + outCrypt.position());
@@ -242,7 +252,7 @@ public class SSLSocketChannel2 implements ByteChannel, WrappedByteChannel {
         lastReadEngineStatus = engineResult.getStatus();
         inData.flip();
 
-        if(lastReadEngineStatus == SSLEngineResult.Status.BUFFER_OVERFLOW) {
+        if (lastReadEngineStatus == SSLEngineResult.Status.BUFFER_OVERFLOW) {
             //Resize the inData buffer.
             ByteBuffer b = ByteBuffer.allocate(sslEngine.getSession().getApplicationBufferSize() + inData.position());
             b.put(inData);
@@ -252,9 +262,13 @@ public class SSLSocketChannel2 implements ByteChannel, WrappedByteChannel {
     }
 
     public void close() throws IOException {
-        sslEngine.closeOutbound();
-        sslEngine.getSession().invalidate();
-        if(socketChannel.isOpen())
+        try {
+            sslEngine.closeOutbound();
+            sslEngine.getSession().invalidate();
+        } catch (Exception e) {
+            System.out.println("sslEngine.close:" + e);
+        }
+        if (socketChannel.isOpen())
             write(emptybuffer);
         socketChannel.close();
     }
@@ -291,15 +305,15 @@ public class SSLSocketChannel2 implements ByteChannel, WrappedByteChannel {
     private int transferTo(ByteBuffer from, ByteBuffer to) {
         int fremain = from.remaining();
         int toremain = to.remaining();
-        if(fremain > toremain ) {
+        if (fremain > toremain) {
             // FIXME there should be a more efficient transfer method
-            int limit = Math.min( fremain, toremain );
-            for( int i = 0 ; i < limit ; i++ ) {
-                to.put( from.get() );
+            int limit = Math.min(fremain, toremain);
+            for (int i = 0; i < limit; i++) {
+                to.put(from.get());
             }
             return limit;
         } else {
-            to.put( from );
+            to.put(from);
             return fremain;
         }
 

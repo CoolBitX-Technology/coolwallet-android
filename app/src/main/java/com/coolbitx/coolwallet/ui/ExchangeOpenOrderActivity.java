@@ -37,7 +37,7 @@ public class ExchangeOpenOrderActivity extends BaseActivity implements View.OnCl
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_exchange_verification);
+        setContentView(R.layout.activity_exchange_open_order);
         mContext = this;
 
         initViews();

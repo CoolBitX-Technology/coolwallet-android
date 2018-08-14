@@ -289,10 +289,10 @@ public class BTCUtils {
         }
         if (amountToSend < dustFee) {
             LogUtil.e("Insufficient amount to send " + amountToSend);
-            throw new ValidationException(mContext.getString(R.string.invalid_transaction)+
+            throw new ValidationException(mContext.getString(R.string.invalid_transaction) +
                     mContext.getString(R.string.transaction_lower_than_dust) +
                     new DecimalFormat("#.########").format(amountToSend * PublicPun.SATOSHI_RATE) +
-                    "\n"+mContext.getString(R.string.fees) + new DecimalFormat("#.########").format(fee * PublicPun.SATOSHI_RATE) + " btc)");
+                    "\n" + mContext.getString(R.string.fees) + new DecimalFormat("#.########").format(fee * PublicPun.SATOSHI_RATE) + " btc)");
         }
         return new FeeChangeAndSelectedOutputs(fee + extraFee, change, amountToSend, outputsToSpend, valueOfUnspentOutputs, isDust);
     }
@@ -353,6 +353,12 @@ public class BTCUtils {
 
 
     public static int getTxSize(Context context, int unspentCounts, boolean compressedPublicKey) throws ValidationException {
+        final int TX_EMPTY_SIZE = 4 + 1 + 1 + 4;
+        final int TX_INPUT_BASE = 32 + 4 + 1 + 4;
+//        int TX_INPUT_PUBKEYHASH = 106;
+        final int TX_OUTPUT_BASE = 8 + 1;
+        final int TX_OUTPUT_PUBKEYHASH = 25;
+
         if (unspentCounts == 0) {
             throw new ValidationException(context.getString(R.string.can_not_find_unspent));
         }
@@ -360,12 +366,14 @@ public class BTCUtils {
         int maxInputScriptLen = 73 + (compressedPublicKey ? 33 : 65);
 //        return 9 + unspentOutputInfos.size() * (41 + maxInputScriptLen) + outputsCount * 33;
         LogUtil.e("getTxSize 計算:INPUT=" + unspentCounts +
-                ";maxInputScriptLen=" + (41 + maxInputScriptLen));
-        int maxSize = 10 + unspentCounts * (41 + maxInputScriptLen) + 34;
+                ";maxInputScriptLen=" + (TX_INPUT_BASE + maxInputScriptLen));
+
+        int maxSize = TX_EMPTY_SIZE + unspentCounts * (TX_INPUT_BASE + maxInputScriptLen) + TX_OUTPUT_BASE + TX_OUTPUT_PUBKEYHASH;
 
         LogUtil.e("getTxSize=" + maxSize);
         return maxSize;
     }
+
 
     private static byte[] Sha256(byte[] data, int start, int len, int recursion) {
         if (recursion == 0) return data;

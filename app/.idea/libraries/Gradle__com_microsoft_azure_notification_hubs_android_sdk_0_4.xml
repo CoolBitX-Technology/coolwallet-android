@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="Gradle: com.microsoft.azure:notification-hubs-android-sdk-0.4">
+    <CLASSES>
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/notification-hubs-android-sdk-0.4.aar/c2146c3dd06731d370af34be7a01cdf7/res" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/notification-hubs-android-sdk-0.4.aar/c2146c3dd06731d370af34be7a01cdf7/jars/classes.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.microsoft.azure/notification-hubs-android-sdk/0.4/95e4d0c7e9f8dc00b875a9e590a0f90f16ab28a3/notification-hubs-android-sdk-0.4-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

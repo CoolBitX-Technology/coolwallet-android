@@ -15,6 +15,7 @@ buildscript {
 apply plugin: 'com.android.application'
 repositories {
     maven { url 'https://maven.fabric.io/public' }
+    google()
 }
 apply plugin: 'io.fabric'
 
@@ -22,7 +23,7 @@ apply plugin: 'io.fabric'
 
 android {
     compileSdkVersion 23
-    buildToolsVersion '25.0.0'
+    buildToolsVersion '27.0.3'
 
 
     dexOptions {
@@ -34,10 +35,11 @@ android {
         applicationId "com.coolbitx.coolwallet"
         minSdkVersion 18
         targetSdkVersion 22
-        versionCode 41
-        versionName "1.8.2(test)" //1.6.7
+        versionCode 46
+        versionName "1.8.7" //20180814
         multiDexEnabled = true
     }
+
 //    compileOptions {
 //        sourceCompatibility JavaVersion.VERSION_1_6
 //        targetCompatibility JavaVersion.VERSION_1_6
@@ -53,43 +55,48 @@ android {
         mavenCentral()
         maven { url "http://dl.bintray.com/journeyapps/maven" }
     }
-    sourceSets{
-        instrumentTest.setRoot('src/androidTest')
+    sourceSets {
+        androidTest.setRoot('src/androidTest')
+    }
+
+    lintOptions {
+
+        checkReleaseBuilds false
+        abortOnError false
     }
 }
 
+
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile project(':cwlib')
-    compile('com.crashlytics.sdk.android:crashlytics:2.6.8@aar') {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation project(':cwlib')
+    implementation('com.crashlytics.sdk.android:crashlytics:2.6.8@aar') {
         transitive = true;
     }
 
     // For firebase cloud message(google provided)
 //    compile 'com.google.firebase:firebase-messaging:10.0.1' //crush caused in this version
-    //for azure notification
-    // Enabling multidex support.
-    // for new version tabs design
 
 //    compile 'org.bitcoinj:bitcoinj-core:0.14.4'
-    compile 'com.android.support:appcompat-v7:23.1.0'
-    compile 'com.android.support:support-annotations:23.1.1'
-    compile 'com.android.support:design:23.1.0'
-    compile 'com.madgag.spongycastle:core:1.51.0.0'
-    compile 'com.madgag.spongycastle:prov:1.51.0.0'
-    compile 'com.madgag.spongycastle:pkix:1.51.0.0'
-    compile 'com.madgag.spongycastle:pg:1.51.0.0'
-    compile 'com.google.zxing:core:3.2.0'
-    compile 'com.journeyapps:zxing-android-embedded:2.3.0@aar'
-    compile 'com.journeyapps:zxing-android-integration:2.3.0@aar'
-    compile 'com.google.code.gson:gson:2.2.4'
-    compile 'org.java-websocket:Java-WebSocket:1.3.0'
-    compile 'com.google.firebase:firebase-messaging:9.0.2'
-    compile 'com.microsoft.azure:notification-hubs-android-sdk:0.4@aar'
-    compile 'com.microsoft.azure:azure-notifications-handler:1.0.1@aar'
-    compile 'com.android.support:multidex:1.0.1'
+    implementation 'com.android.support:appcompat-v7:23.1.0'
+    implementation 'com.android.support:support-annotations:23.1.1'
+    implementation 'com.android.support:design:23.1.0'
+    implementation 'com.madgag.spongycastle:core:1.51.0.0'
+    implementation 'com.madgag.spongycastle:prov:1.51.0.0'
+    implementation 'com.madgag.spongycastle:pkix:1.51.0.0'
+    implementation 'com.madgag.spongycastle:pg:1.51.0.0'
+    implementation 'com.google.zxing:core:3.2.0'
+    implementation 'com.journeyapps:zxing-android-embedded:2.3.0@aar'
+    implementation 'com.journeyapps:zxing-android-integration:2.3.0@aar'
+    implementation 'com.google.code.gson:gson:2.2.4'
+    implementation 'org.java-websocket:Java-WebSocket:1.3.0'
+    implementation 'com.google.firebase:firebase-messaging:9.0.2'
+    implementation 'com.microsoft.azure:notification-hubs-android-sdk:0.4@aar'
+    implementation 'com.microsoft.azure:azure-notifications-handler:1.0.1@aar'
+    implementation 'com.android.support:multidex:1.0.1'
+    androidTestImplementation 'junit:junit:4.12'
     //FCM add
-    compile 'com.google.android.gms:play-services-gcm:9.0.2'
+    implementation 'com.google.android.gms:play-services-gcm:9.0.2'
 //    compile 'com.android.support.constraint:constraint-layout:+'
 
 //    repositories {

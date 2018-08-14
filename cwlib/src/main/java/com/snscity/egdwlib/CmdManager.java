@@ -738,6 +738,15 @@ public class CmdManager {
         cmdProcessor.addCmd(cmdPacket);
     }
 
+    public void GetCurrencyRate( CmdResultCallback cmdResultCallback) {
+        CmdPacket cmdPacket = new CmdPacket.Builder()
+                .setCla(CmdCla.GET_CURR_RATE)
+                .setIns(CmdIns.GET_CURR_RATE)
+                .build();
+        cmdPacket.setCmdResultListener(cmdResultCallback);
+        cmdProcessor.addCmd(cmdPacket);
+    }
+
     /**
      * Switch Display Account
      */

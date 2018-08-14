@@ -262,19 +262,19 @@ public class ReceiveFragment extends BaseFragment implements View.OnClickListene
                     break;
 
                 case R.id.btn_edit_label:
-                    mTitle = "Edit Label";
+                    mTitle = getString(R.string.edit_label);
                     mMessage = "";
                     //-----------取得alert Layout reference--------
                     ClickFunction(mTitle, mPosition, mMessage, v);
                     break;
                 case R.id.btn_request:
-                    mTitle = "Request Payment";
+                    mTitle = getString(R.string.request_payment);
                     mMessage = "";
                     //-----------取得alert Layout reference--------
                     ClickFunction(mTitle, mPosition, mMessage, v);
                     break;
                 case R.id.btn_copy:
-                    mTitle = "Copied!";
+                    mTitle =  getString(R.string.copied);
                     mMessage = TabFragment.lisCwBtcAdd.get(mPosition).getAddress();
                     //-----------取得alert Layout reference--------
                     ClickFunction(mTitle, mPosition, mMessage, v);

@@ -1,4 +1,5 @@
 <resources>
+    <string name="icon_name">CW 2016</string>
     <string name="app_name">CoolWallet</string>
     <string name="action_settings">ログイン取引所OTP</string>
     <string name="img_logo1">logo1</string>
@@ -20,6 +21,9 @@
     <string name="label">ラベル</string>
     <string name="request">リクエスト</string>
     <string name="copy">コピー</string>
+    <string name="edit_label">ラベル編集</string>
+    <string name="request_payment">支払いリクエスト</string>
+    <string name="copied">コピーしました!</string>
     <string name="generating_new_address">G新しいアドレスを生成する</string>
     <string name="unable_create_new_address">できません新しいアドレスを生成する</string>
     <string name="maximum_unused_address">このアカウントで使用された未使用アドレスの最大数は5つです</string>
@@ -65,7 +69,7 @@
     <string name="get_unspents">取得使用されていないアドレス...</string>
     <string name="cmd_trxsign_error">コマンド \'TrxSign\' エラー</string>
     <string name="address">アドレス</string>
-    <string name="inputs">入力</string>
+    <string name="inputs">送金前残高</string>
 
 
     <!--HomeFragment-->
@@ -137,7 +141,6 @@
     <string name="str_unable_cancel">注文をキャンセルできません</string>
     <string name="reason">理由：</string>
 
-
     <!--Exchange Login-->
     <string name="login">ログイン...</string>
     <string name="login_failed">失敗したログイン</string>
@@ -173,7 +176,7 @@
     <string name="btc_to">btc には</string>
     <string name="failed_to_broadcast_transaction">トランザクションをBLOCKCHAINにブロードキャストできませんでした</string>
     <string name="failed_to_get_change_address">アドレスに変更取得できません</string>
-
+    <string name="amount">金額</string>
 
     <!--TabFragment-->
     <string name="create_account">アカウントを作成する</string>
@@ -205,7 +208,9 @@
     <string name="card_name">カード名</string>
     <string name="manual_fee">マニュアル手数料:</string>
     <string name="auto_fee">自動手数料:</string>
-
+    <string name="confirmed">接続</string>
+    <string name="empty">未接続</string>
+    <string name="registered">登録された</string>
 
     <!--security layout-->
     <string name="tv_security_otp">ワンタイムパスワード認証を有効にする</string>
@@ -308,20 +313,17 @@
     <string name="note_unspent">Blockchainを送信する前に残高を確認する必要があります。後でもう一度お試しください。</string>
     <string name="note_dust">この取引のビットコインダストは、マイニングに加算されます。(金額: %1$f)</string>
     この取引のビットコインダストは、マイニングに加算されます。
-
-
     <string name="send_hint_edit_address">受取先ビットコインアドレス</string>
     <string name="send_hint_edit_amount">金額を入力してください</string>
-
     <string name="send_all">全額送信</string>
-
     <string name="send_notification_str_failed_title">トランザクションが失敗しました</string>
     <string name="send_notification_str_failed_msg">タイムアウト。もう一度やり直してください</string>
     <string name="send_confirm_btn_send">送信</string>
     <string name="send_confirm_btn_cancel">キャンセル</string>
-    <string name="send_call_unspent_failed">APIから未使用トランザクションを取得できませんでした.</string>
-
+    <string name="send_call_unspent_failed">APIから未使用トランザクションを取得できませんでした</string>
     <string name="send_call_unspent_list_addresses">を含む複数のアドレス:\n</string>
+    <string name="dollar">円</string>
+    <string name="Send_to">宛先</string>
 
 
     <!--TransactionConfirmDialog-->
@@ -329,7 +331,7 @@
     <string name="send_confirm_str_fee">手数料</string>
     <string name="send_confirm_str_total">合計</string>
     <string name="send_confirm_str_payment">支払い</string>
-    <string name="send_confirm_str_change">チェンジ</string>
+    <string name="send_confirm_str_change">送金後残高</string>
     <string name="notice_fee_alert">設定手数料が平均以下のため、確認に30分以上かかる可能性があります。</string>
 
     <!--txs-->

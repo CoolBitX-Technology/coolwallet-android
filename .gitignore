@@ -52,4 +52,3 @@ captures/
 
 # API key files (e.g. Google APIs, Firebase or fabric)
 google-services.json
-fabric.properties

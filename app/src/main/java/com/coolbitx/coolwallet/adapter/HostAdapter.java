@@ -94,15 +94,15 @@ public class HostAdapter   extends BaseAdapter {
         String status = "";
         switch (bindStatus){
             case 0x00:
-                status = "Empty";
+                status = mContext.getString(R.string.empty);
                 break;
 
             case 0x01:
-                status = "Registered";
+                status = mContext.getString(R.string.registered);
                 break;
 
             case 0x02:
-                status = "Confirmed";
+                status = mContext.getString(R.string.confirmed);
                 break;
         }
 

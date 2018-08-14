@@ -29,9 +29,7 @@ public class EraseActivity extends BaseActivity implements View.OnClickListener 
     private Button btnCancel;
     private CmdManager cmdManager;
     private byte[] pinChllenge;
-    private String currentUuid;
     private ProgressDialog mProgress;
-    private CSVReadWrite mLoginCsv;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +38,6 @@ public class EraseActivity extends BaseActivity implements View.OnClickListener 
         context = this;
 
         cmdManager = new CmdManager();
-        mLoginCsv = new CSVReadWrite(EraseActivity.this);
         mProgress = new ProgressDialog(EraseActivity.this, ProgressDialog.THEME_HOLO_DARK);
         mProgress.setCancelable(false);
         mProgress.setIndeterminate(true);
@@ -114,7 +111,6 @@ public class EraseActivity extends BaseActivity implements View.OnClickListener 
         DatabaseHelper.deleteTable(EraseActivity.this, DbName.DB_TABLE_CURRENT);
         DatabaseHelper.deleteTable(EraseActivity.this, DbName.DB_TABLE_LOGIN);
         DatabaseHelper.deleteTable(EraseActivity.this, DbName.DB_TABLE_KEYINFO);
-        DatabaseHelper.deleteTable(EraseActivity.this, DbName.DB_TABLE_EXCEPTION);
 
     }
 
@@ -128,7 +124,6 @@ public class EraseActivity extends BaseActivity implements View.OnClickListener 
         } else if (v == btnErase) {
             //clear txs data;
 
-            LogUtil.e("Erase mode=" + PublicPun.card.getMode());
             if (PublicPun.card.getMode().equals("NOHOST")) {
                 cleanData();
                 PublicPun.toast(context, "Initial Success");

@@ -600,22 +600,22 @@ public class TabFragment extends Fragment {
                     final RefreshBlockChainInfo refreshBlockChainInfo = new RefreshBlockChainInfo(getActivity(), accountID);
                     refreshBlockChainInfo.FunQueryAccountInfo(cmdManager,new RefreshCallback() {
                         @Override
-                        public void success() {
+                        public void onSuccess() {
                             refreshBlockChainInfo.callTxsRunnable(new RefreshCallback() {
                                 @Override
-                                public void success() {
+                                public void onSuccess() {
 
                                     FunhdwSetAccInfo(accountID);
                                 }
                                 @Override
-                                public void fail(String msg) {
+                                public void onFailure(String msg) {
                                     PublicPun.showNoticeDialog(getActivity(), getString(R.string.unable_connect_internet), msg);
                                     mProgress.dismiss();
                                 }
                             });
                         }
                         @Override
-                        public void fail(String msg) {
+                        public void onFailure(String msg) {
                             PublicPun.showNoticeDialog(getActivity(), getString(R.string.error_msg), msg);
                             mProgress.dismiss();
                         }

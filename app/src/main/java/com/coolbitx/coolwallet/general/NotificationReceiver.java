@@ -96,12 +96,12 @@ public class NotificationReceiver extends BroadcastReceiver {
                         RefreshBlockChainInfo refreshBlockChainInfo = new RefreshBlockChainInfo(mContext, mAccount);
                         refreshBlockChainInfo.callTxsRunnable(new RefreshCallback() {
                             @Override
-                            public void success() {
+                            public void onSuccess() {
                                 RefreshSetAccInfo(mAccount);
                             }
 
                             @Override
-                            public void fail(String msg) {
+                            public void onFailure(String msg) {
                                 Toast.makeText(mContext, "Unstable internet connection", Toast.LENGTH_LONG);
                             }
                         });

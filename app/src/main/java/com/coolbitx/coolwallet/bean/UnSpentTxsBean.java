@@ -19,6 +19,7 @@ public class UnSpentTxsBean {
 
     private String tx;
     private double amount;//value
+
     private int n;//outputIndex
     private int confirmations;//confirmations
     private String script;//script

@@ -8,10 +8,10 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.os.NetworkOnMainThreadException;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -32,12 +32,13 @@ import com.coolbitx.coolwallet.DataBase.DbName;
 import com.coolbitx.coolwallet.R;
 import com.coolbitx.coolwallet.bean.Account;
 import com.coolbitx.coolwallet.bean.Constant;
-import com.coolbitx.coolwallet.bean.CwBtcTxs;
 import com.coolbitx.coolwallet.bean.dbAddress;
 import com.coolbitx.coolwallet.callback.RefreshCallback;
+import com.coolbitx.coolwallet.exception.ValidationException;
 import com.coolbitx.coolwallet.general.BtcUrl;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.coolbitx.coolwallet.general.RefreshBlockChainInfo;
+import com.coolbitx.coolwallet.httpRequest.BlockChainAPI;
 import com.coolbitx.coolwallet.httpRequest.CwBtcNetWork;
 import com.coolbitx.coolwallet.ui.Fragment.FragMainActivity;
 import com.coolbitx.coolwallet.util.BIP39;
@@ -47,6 +48,8 @@ import com.snscity.egdwlib.CmdManager;
 import com.snscity.egdwlib.cmd.CmdResultCallback;
 import com.snscity.egdwlib.utils.ByteUtil;
 import com.snscity.egdwlib.utils.LogUtil;
+
+import org.json.JSONException;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -79,7 +82,7 @@ public class RecovWalletActivity extends BaseActivity implements View.OnClickLis
 //    private Button btnCreateWallet2;
     private Spinner seedSpinner;
     private EditText edtHdWord;
-    private String[] strSeed = { "Words","Numbers"};
+    private String[] strSeed = {"Words", "Numbers"};
     private boolean isSeedOn = true;
     private CmdManager cmdManager;
     private ArrayAdapter<String> listSeed;
@@ -92,48 +95,7 @@ public class RecovWalletActivity extends BaseActivity implements View.OnClickLis
     private byte CwSecurityPolicyMaskWatchDog = 0x10;
     private byte CwSecurityPolicyMaskAddress = 0x20;
     private ProgressDialog mHorizontalDialog = null;
-    Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            Bundle data = msg.getData();
-            String result = data.getString("resultMsg");
-            switch (msg.what) {
-                case 1:
-                    addrAuccess++;
-                    LogUtil.i("addrAuccess=" + addrAuccess + " & " + String.valueOf(accountCNT * 2));
-                    mHorizontalDialog.incrementProgressBy(6);
-                    if (addrAuccess == accountCNT * 2) {
-                        //代表10個thread都跑完了(5個account再帶各自的ext、int)
 
-                        for (int i = 0; i < accountCNT; i++) {
-                            final int mAccount = i;
-                            RefreshBlockChainInfo refreshBlockChainInfo = new RefreshBlockChainInfo(mContext, mAccount);
-                            refreshBlockChainInfo.callTxsRunnable(new RefreshCallback() {
-                                @Override
-                                public void success() {
-                                    FunhdwSetAccInfo(mAccount);
-                                    mHorizontalDialog.incrementProgressBy(3);
-                                }
-
-                                @Override
-                                public void fail(String msg) {
-                                    PublicPun.showNoticeDialog(mContext, "Unstable internet connection", msg);
-                                    FunhdwSetAccInfo(mAccount);
-                                }
-
-                            });
-                        }
-                    }
-                    break;
-                case 0:
-//                    mProgress.dismiss();
-                    dialogDismiss();
-                    PublicPun.showNoticeDialog(mContext, "Erro Message", result);
-                    break;
-            }
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -414,7 +376,7 @@ public class RecovWalletActivity extends BaseActivity implements View.OnClickLis
                                 LogUtil.i("CwAccount " + accountId + " created!");
                                 mHorizontalDialog.incrementProgressBy(2);
                                 //Get public key & chainCode to generate  address
-                                FunQueryAccountKeyInfo(accountId);
+                                getAccountInfo(accountId);
                             }
                         }
                     });
@@ -426,7 +388,7 @@ public class RecovWalletActivity extends BaseActivity implements View.OnClickLis
         });
     }
 
-    private void FunQueryAccountKeyInfo(final int accountId) {
+    private void getAccountInfo(final int accountId) {
         final byte cwHdwAccountInfoName = 0x00;
         final byte cwHdwAccountInfoBalance = 0x01;
         final byte cwHdwAccountInfoExtKeyPtr = 0x02;
@@ -537,12 +499,10 @@ public class RecovWalletActivity extends BaseActivity implements View.OnClickLis
                                         chainCodeBytes[j - 64] = outputData[j];
                                     }
                                     //最後兩個字元一起
-                                    LogUtil.i("建地址的public key=" + LogUtil.byte2HexString(publicKeyBytes));
-                                    LogUtil.i("建地址的chainCodeBytes=" + LogUtil.byte2HexString(chainCodeBytes));
+                                    LogUtil.d("建地址的public key=" + LogUtil.byte2HexString(publicKeyBytes));
+                                    LogUtil.d("建地址的chainCodeBytes=" + LogUtil.byte2HexString(chainCodeBytes));
 
                                     int mFirstKey = Integer.parseInt(PublicPun.byte2HexString(publicKeyBytes[63]), 16);
-                                    LogUtil.i("public key的最後字元=" + PublicPun.byte2HexString(publicKeyBytes[63]) +
-                                            ";轉int=" + mFirstKey);
 
                                     //format last charactors
                                     if (mFirstKey % 2 == 0) {
@@ -566,13 +526,14 @@ public class RecovWalletActivity extends BaseActivity implements View.OnClickLis
                                 //getAddressesTxs
 
                                 new Thread(new MyRunnable(mHandler, cv, 0, 0)).start();
+                                //改為AsyncTask
                             }
                         }
                     }
                 });
     }
 
-    private void FunhdwSetAccInfo(int account) {
+    private void setAccInfo(int account) {
 
         LogUtil.e("這是FunhdwSetAccInfo=" + account);
 
@@ -684,7 +645,7 @@ public class RecovWalletActivity extends BaseActivity implements View.OnClickLis
                                     intent.putExtra("Parent", RecovWalletActivity.class.getSimpleName());
                                     startActivity(intent);
                                     finish();
-//                                    FunQueryAccountKeyInfo(0);
+//                                    getAccountInfo(0);
                                 }
                             } else {
                                 LogUtil.i("setAccountInfo failed.");
@@ -695,6 +656,195 @@ public class RecovWalletActivity extends BaseActivity implements View.OnClickLis
                         }
                     }
             );
+        }
+    }
+
+
+    Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            Bundle data = msg.getData();
+            String result = data.getString("resultMsg");
+            switch (msg.what) {
+                case 1:
+                    addrAuccess++;
+                    LogUtil.i("addrAuccess=" + addrAuccess + " & " + String.valueOf(accountCNT * 2));
+                    mHorizontalDialog.incrementProgressBy(6);
+                    if (addrAuccess == accountCNT * 2) {
+                        //代表10個thread都跑完了(5個account再帶各自的ext、int)
+
+                        for (int i = 0; i < accountCNT; i++) {
+                            final int mAccount = i;
+                            RefreshBlockChainInfo refreshBlockChainInfo = new RefreshBlockChainInfo(mContext, mAccount);
+                            refreshBlockChainInfo.callTxsRunnable(new RefreshCallback() {
+                                @Override
+                                public void onSuccess() {
+                                    setAccInfo(mAccount);
+                                    mHorizontalDialog.incrementProgressBy(3);
+                                }
+
+                                @Override
+                                public void onFailure(String msg) {
+                                    PublicPun.showNoticeDialog(mContext, "Unstable internet connection", msg);
+                                    setAccInfo(mAccount);
+                                }
+
+                            });
+                        }
+                    }
+                    break;
+                case 0:
+//                    mProgress.dismiss();
+                    dialogDismiss();
+                    PublicPun.showNoticeDialog(mContext, getString(R.string.error_msg), result);
+                    break;
+            }
+        }
+    };
+
+    private class MyRunnable implements Runnable {
+        ContentValues cv;
+        int what = -1;
+        Handler handler;
+        int interval;
+        String extralUrl;
+        byte kcId;
+        byte[] extendPub;
+        byte[] chainCodeBytes;
+        int kid;
+        int noTrsCnt;
+        int accountId;
+        int msgCnt;
+
+        public MyRunnable(Handler handler, ContentValues cv, int what, int interval) {
+            this.cv = cv;
+            this.what = what;
+            this.handler = handler;
+            this.interval = interval;
+
+            this.extralUrl = cv.getAsString("URL");
+            this.accountId = cv.getAsInteger("ACCOUNT_ID");
+            this.kcId = cv.getAsByte("KCID");
+            this.extendPub = cv.getAsByteArray("PUBLIC_KEY");
+            this.chainCodeBytes = cv.getAsByteArray("CHAIN_CODE");
+
+            this.noTrsCnt = 0;
+            this.kid = 0;
+            this.msgCnt = 0;
+        }
+
+        @Override
+        public void run() {
+            String result = "";
+
+            while (noTrsCnt < 5) {
+                //noTrsCnt累積到5就break,有交易的話就重新歸0
+                ExtendedKey km = ExtendedKey.createCwEk(extendPub, chainCodeBytes);
+                LogUtil.i("account=" + accountId + " ;kcid=" + kcId + " ;publicKey=" + LogUtil.byte2HexString(extendPub) + " ;chainCode=" + LogUtil.byte2HexString(chainCodeBytes) + " ;產地址的serializepub=" + km.serializepub(true));
+
+                ExtendedKey k = null;
+                String addr = "";
+                boolean isHaveTrs;
+                try {
+                    k = km.getChild(kid);
+                    addr = k.getAddress();
+                    LogUtil.d("account=" + accountId + " ;kcid=" + (kcId == 0 ? "Ext" : "Int") + "; addr=" + addr + " ;publicKey=" + LogUtil.byte2HexString(extendPub) + " ;chainCode=" + LogUtil.byte2HexString(chainCodeBytes) + " ;產地址的serializepub=" + km.serializepub(true));
+                    DatabaseHelper.insertAddress(mContext, accountId, addr, kcId, kid, 0, 0);
+                    cv.put("addresses", addr);
+                    cv.put("KID", kid);
+
+                } catch (Exception e) {
+                    LogUtil.i("ExtendedKey:" + kcId + " 第 " + String.valueOf(kid) + " 個地址,error:" + e.getMessage());
+                    Message msg = handler.obtainMessage();
+                    Bundle data = new Bundle();
+                    data.putString("resultMsg", "Recover error:" + e.getMessage());
+                    msg.setData(data);
+                    msgCnt = 0;
+                    msg.what = msgCnt;
+                    handler.sendMessage(msg);
+                    dialogDismiss();
+                }
+
+                //CALL BLOCKCHAIN to get Addresses info
+                result = cwBtcNetWork.doGet(cv, extralUrl, null);
+                if (TextUtils.isEmpty(result) || result.contains("errorCode")) {
+                    result = cwBtcNetWork.doGet(cv, BtcUrl.URL_SERVER_BC_CBX_IO + BtcUrl.URL_PATH_ADDR, "");
+                    if (TextUtils.isEmpty(result) || result.contains("errorCode")) {
+                        Message msg = handler.obtainMessage();
+                        Bundle data = new Bundle();
+                        data.putString("resultMsg", "Recover error:" + result);
+                        msg.setData(data);
+                        msgCnt = 0;
+                        msg.what = msgCnt;
+                        handler.sendMessage(msg);
+                        dialogDismiss();
+
+                    } else {
+                        try {
+                            if (!PublicPun.jsonParserRecoveryAddresses(mContext, result, cv, false,true)) {
+                                //no txs accumulate to 5 times,stop to get addresses.
+                                noTrsCnt++;
+                            } else {
+                                noTrsCnt = 0;
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            Message msg = handler.obtainMessage();
+                            Bundle data = new Bundle();
+                            data.putString("resultMsg", e.getMessage() + " recover error!");
+                            msg.setData(data);
+                            msgCnt = 0;
+                            msg.what = msgCnt;
+                            handler.sendMessage(msg);
+                            dialogDismiss();
+                        }
+
+                        if (noTrsCnt == 5) {
+                            msgCnt = 1;
+                            LogUtil.i("sendMessage:" + msgCnt);
+                            Message msg = handler.obtainMessage();
+                            Bundle data = new Bundle();
+                            data.putString("result", String.valueOf(accountId) + String.valueOf(kcId));
+                            msg.setData(data);
+                            msg.what = msgCnt;
+                            handler.sendMessage(msg);
+                        }
+                    }
+                } else {
+                    try {
+                        if (!PublicPun.jsonParserRecoveryAddresses(mContext, result, cv, false,false)) {
+                            //no txs accumulate to 5 times,stop to get addresses.
+                            noTrsCnt++;
+                        } else {
+                            noTrsCnt = 0;
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Message msg = handler.obtainMessage();
+                        Bundle data = new Bundle();
+                        data.putString("resultMsg", e.getMessage() + " recover error!");
+                        msg.setData(data);
+                        msgCnt = 0;
+                        msg.what = msgCnt;
+                        handler.sendMessage(msg);
+                        dialogDismiss();
+                    }
+
+                    if (noTrsCnt == 5) {
+                        msgCnt = 1;
+                        LogUtil.i("sendMessage:" + msgCnt);
+                        Message msg = handler.obtainMessage();
+                        Bundle data = new Bundle();
+                        data.putString("result", String.valueOf(accountId) + String.valueOf(kcId));
+                        msg.setData(data);
+                        msg.what = msgCnt;
+                        handler.sendMessage(msg);
+                    }
+                }
+
+                kid++;//addresses index(KID)
+            }
         }
     }
 
@@ -757,7 +907,7 @@ public class RecovWalletActivity extends BaseActivity implements View.OnClickLis
                 isSeedOn = true;
                 edtHdWord.setText("");
             }
-            LogUtil.i("choose seed type:" + position + "=" + (isSeedOn ? "words" : "numbers" ));
+            LogUtil.i("choose seed type:" + position + "=" + (isSeedOn ? "words" : "numbers"));
         }
     }
 
@@ -815,105 +965,5 @@ public class RecovWalletActivity extends BaseActivity implements View.OnClickLis
         super.onPause();
 
     }
-
-
-    private class MyRunnable implements Runnable {
-        ContentValues cv;
-        int what = -1;
-        Handler handler;
-        int interval;
-        String extralUrl;
-        byte kcId;
-        byte[] extendPub;
-        byte[] chainCodeBytes;
-        int getAddrKID;
-        int noTrsCnt;
-        int accountId;
-        int msgCnt;
-
-        public MyRunnable(Handler handler, ContentValues cv, int what, int interval) {
-            this.cv = cv;
-            this.what = what;
-            this.handler = handler;
-            this.interval = interval;
-
-            this.extralUrl = cv.getAsString("URL");
-            this.accountId = cv.getAsInteger("ACCOUNT_ID");
-            this.kcId = cv.getAsByte("KCID");
-            this.extendPub = cv.getAsByteArray("PUBLIC_KEY");
-            this.chainCodeBytes = cv.getAsByteArray("CHAIN_CODE");
-
-            this.noTrsCnt = 0;
-            this.getAddrKID = 0;
-            this.msgCnt = 0;
-        }
-
-        @Override
-        public void run() {
-            String result = "";
-
-            while (noTrsCnt < 5) {
-                //noTrsCnt累積到5就break,有交易的話就重新歸0
-                ExtendedKey km = ExtendedKey.createCwEk(extendPub, chainCodeBytes);
-                LogUtil.i("account=" + accountId + " ;kcid=" + kcId + " ;publicKey=" + LogUtil.byte2HexString(extendPub) + " ;chainCode=" + LogUtil.byte2HexString(chainCodeBytes) + " ;產地址的serializepub=" + km.serializepub(true));
-
-                ExtendedKey k = null;
-                String addr = "";
-                boolean isHaveTrs;
-                try {
-                    k = km.getChild(getAddrKID);
-                    addr = k.getAddress();
-                    LogUtil.i("ExtendedKey:第 " + accountId + "account的" + +kcId + "kcid的第 " + String.valueOf(getAddrKID) + " 個地址= " + k.getAddress());
-                    DatabaseHelper.insertAddress(mContext, accountId, addr, kcId, getAddrKID, 0, 0);
-                    //18xNmo8ZoiZwuCfUaLjACUtntbpwpZ2jc9; address which is no trs.
-                    cv.put("addresses", addr);
-
-                } catch (Exception e) {
-                    LogUtil.i("ExtendedKey:" + kcId + " 第 " + String.valueOf(getAddrKID) + " 個地址,error:" + e.getMessage());
-                    Message msg = handler.obtainMessage();
-                    Bundle data = new Bundle();
-                    data.putString("resultMsg", e.getMessage() + " create error!");
-                    msg.setData(data);
-                    msgCnt = 0;
-                    msg.what = msgCnt;
-                    handler.sendMessage(msg);
-//                    mProgress.dismiss();
-                    dialogDismiss();
-                }
-
-                try {
-                    //CALL BLOCKCHAIN to get Addresses info
-                    result = cwBtcNetWork.doGet(cv, extralUrl, null);
-                    ArrayList<CwBtcTxs> lisCwBtcTxs = new ArrayList<CwBtcTxs>();
-
-                    if (result != null && !result.contains("errorCode")) {
-                        if (!PublicPun.jsonParserRecoveryAddresses(mContext, result, accountId, addr, kcId, getAddrKID, false)) {
-                            //no txs accumulate to 5 times,stop to get addresses.
-                            noTrsCnt++;
-                        } else {
-                            noTrsCnt = 0;
-                        }
-                        LogUtil.i("ACCOUNT:" + accountId + "-" + kcId + "的noTrsCnt 數量:" + noTrsCnt);
-
-                        if (noTrsCnt == 5) {
-                            msgCnt = 1;
-                            LogUtil.i("sendMessage:" + msgCnt);
-                            Message msg = handler.obtainMessage();
-                            Bundle data = new Bundle();
-                            data.putString("result", String.valueOf(accountId) + String.valueOf(kcId));
-                            msg.setData(data);
-                            msg.what = msgCnt;
-                            handler.sendMessage(msg);
-                        }
-                    }
-                } catch (NetworkOnMainThreadException e) {
-                    LogUtil.i("doGet 錯誤:" + e.toString());
-                }
-                getAddrKID++;//addresses index(KID)
-            }
-        }
-    }
-
-
 
 }

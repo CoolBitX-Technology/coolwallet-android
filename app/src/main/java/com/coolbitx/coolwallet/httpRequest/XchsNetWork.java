@@ -243,7 +243,7 @@ public class XchsNetWork {
                 if (!jsonObjectType(response)) {
                     LogUtil.d("jSon object轉jSon array");
                     //return jSon array
-                    response = "{\"response\":success}";
+                    response = "{\"response\":onSuccess}";
                 }
 
             } else {

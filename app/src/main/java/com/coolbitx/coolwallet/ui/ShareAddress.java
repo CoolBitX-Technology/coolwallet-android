@@ -87,7 +87,7 @@ public class ShareAddress extends BaseActivity implements View.OnClickListener {
             mAddressSharingAPI.StartSharing(cwid, new APIResultCallback() {
                 @Override
                 public void success(String[] msg) {
-                    LogUtil.d("API success:" + msg[0]);
+                    LogUtil.d("API onSuccess:" + msg[0]);
 
                     int hostId = Integer.valueOf(msg[0]);
                     BindLogout();
@@ -123,7 +123,7 @@ public class ShareAddress extends BaseActivity implements View.OnClickListener {
                         mAddressSharingAPI.GenRspForChallenge(subAddr, new APIResultCallback() {
                             @Override
                             public void success(String[] msg) {
-                                LogUtil.d("API success:" + msg[0]);
+                                LogUtil.d("API onSuccess:" + msg[0]);
                                 byte[] resp = PublicPun.hexStringToByteArray(msg[0]);
                                 BindLogin(cwid, resp, hostId);
                             }
@@ -148,7 +148,7 @@ public class ShareAddress extends BaseActivity implements View.OnClickListener {
             @Override
             public void onSuccess(int status, byte[] outputData) {
                 if ((status + 65536) == 0x9000) {
-                    LogUtil.d("shareBindLogin success.");
+                    LogUtil.d("shareBindLogin onSuccess.");
                     getAccountKeyInfo(cwid, Constant.CwHdwAccountKeyInfoAddress, Constant.CwAddressKeyChainExternal, 0, 0);
                 }else{
                     failedAlert( "CoolWallet exec failed", LogUtil.byte2HexString(outputData));
@@ -166,7 +166,7 @@ public class ShareAddress extends BaseActivity implements View.OnClickListener {
                             if (outputData != null) {
 
                                 String KeyInfo = PublicPun.byte2HexStringNoBlank(outputData);
-                                LogUtil.d("getAccountKeyInfo success=" + KeyInfo);
+                                LogUtil.d("getAccountKeyInfo onSuccess=" + KeyInfo);
                                 mAddressSharingAPI.ShareAddress(cwid, PublicPun.card.getCardId(), KeyInfo, new APIResultCallback() {
                                     @Override
                                     public void success(String[] msg) {
@@ -214,7 +214,7 @@ public class ShareAddress extends BaseActivity implements View.OnClickListener {
             public void onSuccess(int status, byte[] outputData) {
                 if ((status + 65536) == 0x9000) {
                     if (outputData != null) {
-                        LogUtil.d("Logout success.");
+                        LogUtil.d("Logout onSuccess.");
                     }
                 }
             }

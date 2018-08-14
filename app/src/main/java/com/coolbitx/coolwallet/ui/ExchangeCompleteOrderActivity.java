@@ -6,8 +6,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
@@ -28,17 +26,17 @@ import com.coolbitx.coolwallet.bean.TrxBlks;
 import com.coolbitx.coolwallet.bean.TxsConfirm;
 import com.coolbitx.coolwallet.bean.UnSpentTxsBean;
 import com.coolbitx.coolwallet.bean.dbAddress;
+import com.coolbitx.coolwallet.callback.APIPostCallback;
 import com.coolbitx.coolwallet.callback.APIResultCallback;
 import com.coolbitx.coolwallet.callback.GetExchangeAddrCallback;
 import com.coolbitx.coolwallet.callback.TransactionConfirmCallback;
 import com.coolbitx.coolwallet.callback.UnSpentCallback;
 import com.coolbitx.coolwallet.general.AppPrefrence;
-import com.coolbitx.coolwallet.general.BtcUrl;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.coolbitx.coolwallet.httpRequest.CwBtcNetWork;
 import com.coolbitx.coolwallet.util.BTCUtils;
 import com.coolbitx.coolwallet.util.Base58;
-import com.coolbitx.coolwallet.general.BlockChainAPI;
+import com.coolbitx.coolwallet.httpRequest.BlockChainAPI;
 import com.coolbitx.coolwallet.util.ECKey;
 import com.coolbitx.coolwallet.general.ExchangeAPI;
 import com.coolbitx.coolwallet.exception.ValidationException;
@@ -57,9 +55,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.Timer;
-
-import static com.coolbitx.coolwallet.general.PublicPun.HANDLER_SEND_BTC_ERROR;
-import static com.coolbitx.coolwallet.general.PublicPun.HANDLER_SEND_BTC_FINISH;
 
 /**
  * Created by ShihYi on 2015/12/25.
@@ -83,8 +78,8 @@ public class ExchangeCompleteOrderActivity extends BaseActivity implements View.
     private ArrayList<dbAddress> lisCwBtcAdd = new ArrayList<dbAddress>();
     String InAddress;
     private List<UnSpentTxsBean> unSpentTxsBeanList;
-//    UnSpentTxsAsyncTask unSpentTxsAsyncTask;
-byte[] okTkn = new byte[4];
+    //    UnSpentTxsAsyncTask unSpentTxsAsyncTask;
+    byte[] okTkn = new byte[4];
     byte[] unblockTkn = new byte[16];
     double BTCFee = 0.0001;
     double amount = 0;
@@ -113,12 +108,12 @@ byte[] okTkn = new byte[4];
     Transaction.Input[] signedInputs;
     int inputCount;
     Transaction transaction;
-    String currUnsignedTx;
+    String signedTx;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_exchange_order);
+        setContentView(R.layout.sample_activity_exchange_complete_order);//activity_exchange_complete_order
         mContext = this;
         initToolbar();
         initViews();
@@ -165,37 +160,7 @@ byte[] okTkn = new byte[4];
 
         FunTrxFinish();
 
-        //本來是signLogin與signLogout之間失敗退出時重新進入執行以便清空block，but useless
-//        mExchangeAPI.doExGetTrxInfo(xchsOrder.getOrderId(), new APIResultCallback() {
-//            @Override
-//            public void success(final String[] msg) {
-//                LogUtil.d("doExGetTrxInfo ok " + msg[0]);
-//
-//                // orderId(4B)/okTkn(4B)/encBulkTkn(16B)/accId(4B)/dealAmnt(8B)/mac(32B)
-//                cmdManager.XchsTrxsignLogin(PublicPun.hexStringToByteArray(msg[0]), new CmdResultCallback() {
-//                    @Override
-//                    public void onSuccess(int status, byte[] outputData) {
-//                        if ((status + 65536) == 0x9000) {
-//                            trxHandle = outputData;
-//
-//                            XchsTrxLogout(trxHandle);
-//
-//                        } else {
-//                            CancelBlock();
-//                        }
-//                    }
-//                });
-//
-//            }
-//            @Override
-//            public void fail(String msg) {
-//
-//                LogUtil.d("doExGetTrxInfo failed:" + msg);
-//            }
-//        });
 
-
-        isBlockr = AppPrefrence.getIsBlockrApi(mContext);
         if (v == btnCompleteOrder) {
             getSecpo();
             int infoid = 1;//XCHS OTP
@@ -217,10 +182,15 @@ byte[] okTkn = new byte[4];
         } else if (v == btnCancelOrder || v == btnSubmittedOk) {
             LogUtil.d("cancel order");
             finish();
+        } else if (v == btnSubmittedOk) {
+            Intent intent = new Intent(ExchangeCompleteOrderActivity.this, ExchangeActivity.class);
+            startActivity(intent);
         }
     }
 
 
+    byte[] tempOkTkn = new byte[4];
+    byte[] tempUnblockTkn = new byte[16];
 
     private void BlockVerifyOtp() {
 
@@ -254,15 +224,21 @@ byte[] okTkn = new byte[4];
                             public void onSuccess(int status, byte[] outputData) {
 
                                 if ((status + 65536) == 0x9000) {//-28672//36864
-                                    LogUtil.d("XchsBlockBtc  success = " + PublicPun.byte2HexStringNoBlank(outputData));
+                                    LogUtil.d("XchsBlockBtc  onSuccess = " + PublicPun.byte2HexStringNoBlank(outputData));
 
                                     //blockSignature(32B)/okTkn(4B)/encUblkTkn(16B)/mac2(32B)/nonce(16B)
 
                                     System.arraycopy(outputData, 32, okTkn, 0, 4);
                                     System.arraycopy(outputData, 36, unblockTkn, 0, 16);
-//                                    XchsTrxLogout(trxHandle);
 
-                                    mExchangeAPI.doExWriteOKToken(orderID, PublicPun.byte2HexStringNoBlank(okTkn), PublicPun.byte2HexStringNoBlank(unblockTkn),
+//                                    System.arraycopy(outputData, 32, tempOkTkn, 0, 4);
+//                                    System.arraycopy(outputData, 36, tempUnblockTkn, 0, 16);
+
+//                                    okTkn = PublicPun.hexStringToByteArray("123");
+//                                    unblockTkn= PublicPun.hexStringToByteArray("456");
+
+
+                                    mExchangeAPI.doExWriteOKToken(orderID, PublicPun.byte2HexStringNoBlank(okTkn), PublicPun.byte2HexStringNoBlank(unblockTkn),//"123", "456",
                                             new APIResultCallback() {
                                                 @Override
                                                 public void success(String[] msg) {
@@ -277,11 +253,30 @@ byte[] okTkn = new byte[4];
                                                     LogUtil.d("ExWriteOKToken failed:" + msg);
                                                     mProgress.dismiss();
                                                     PublicPun.showNoticeDialog(mContext, getString(R.string.unable_to_block), getString(R.string.error) + ":" + msg);
+
+//                                                    mExchangeAPI.doExWriteOKToken(orderID, PublicPun.byte2HexStringNoBlank(tempOkTkn), PublicPun.byte2HexStringNoBlank(tempUnblockTkn),
+//                                                            new APIResultCallback() {
+//                                                                @Override
+//                                                                public void success(String[] msg) {
+//                                                                    LogUtil.d("ExWriteOKToken 2" + msg[0]);
+//                                                                    getBlockInfo(okTkn);
+//                                                                    completeOrder();
+//                                                                    mProgress.dismiss();
+//                                                                }
+//
+//                                                                @Override
+//                                                                public void fail(String msg) {
+//                                                                    //Failed to writeOkToken
+//                                                                    LogUtil.d("ExWriteOKToken failed:" + msg);
+//                                                                    mProgress.dismiss();
+//                                                                    PublicPun.showNoticeDialog(mContext, getString(R.string.unable_to_block), getString(R.string.error) + ":" + msg);
+//                                                                }
+//                                                            });
                                                 }
                                             });
 
                                 } else {
-                                    LogUtil.d("XchsBlockBtc fail");
+                                    LogUtil.d("XchsBlockBtc onFailure");
 
                                     mProgress.dismiss();
                                     PublicPun.showNoticeDialog(mContext, getString(R.string.unable_to_block), getString(R.string.error) + ":" + Integer.toHexString(status));
@@ -330,7 +325,6 @@ byte[] okTkn = new byte[4];
     }
 
 
-
     byte[] cancelBlkInfo;
 
     private void CancelBlock() {
@@ -358,20 +352,19 @@ byte[] okTkn = new byte[4];
                         LogUtil.e("cancelBlkInfo=trxID:" + msg[0] + ";cwOrder:" + msg[1] + ";OKTKN:" + msg[2] + ";UBLKTKN:" + msg[3] +
                                 ";MAC:" + msg[4] + ";NONCE:" + msg[5]);
 
+
                         cmdManager.XchsCancelBlock(cancelBlkInfo, new CmdResultCallback() {
                             @Override
                             public void onSuccess(int status, byte[] outputData) {
-
+                                mProgress.dismiss();
                                 if ((status + 65536) == 0x9000) {//-28672//36864
-                                    LogUtil.d("cmd XchsCancelBlock  success = " + PublicPun.byte2HexString(outputData));
+                                    LogUtil.d("cmd XchsCancelBlock  onSuccess = " + PublicPun.byte2HexString(outputData));
 //                                    cancelBlkInfo = outputData;
 
-                                    mProgress.dismiss();
-                                    finish();
-
+                                    Intent intent = new Intent(ExchangeCompleteOrderActivity.this, ExchangeActivity.class);
+                                    startActivity(intent);
                                 } else {
-                                    mProgress.dismiss();
-                                    LogUtil.d("XchsCancelBlock fail");
+                                    LogUtil.d("XchsCancelBlock onFailure");
                                     //for debug error code
                                     PublicPun.showNoticeDialog(mContext, getString(R.string.unable_to_cancel_block), getString(R.string.error) + ":" + Integer.toHexString(status)
                                             + "-" + PublicPun.byte2HexString(outputData));
@@ -432,23 +425,21 @@ byte[] okTkn = new byte[4];
         }
 
 
-        blockChainAPI.getUnspent(InAddress,new UnSpentCallback() {
+        new BlockChainAPI(mContext).getUnspent(InAddress, new UnSpentCallback() {
             @Override
-            public void onSuccess(List<UnSpentTxsBean> UnSpentTxsBeanList) {
-                LogUtil.d("UnSpentTxsBeans 取得完成有 " + UnSpentTxsBeanList.size() + " 筆");
-                unSpentTxsBeanList =UnSpentTxsBeanList;
+            public void onSuccess(List<UnSpentTxsBean> mUnSpentTxsBeanList) {
+                mProgress.dismiss();
+                unSpentTxsBeanList = mUnSpentTxsBeanList;
                 PreviousPrepareTransaction(xchsOrder.getAddr(), BTCUtils.BTCconvertToSatoshisValue(xchsOrder.getAmount()));
             }
 
             @Override
-            public void onException() {
-                PublicPun.showNoticeDialog(mContext, getString(R.string.error_msg), getString(R.string.note_unspent));
+            public void onException(String msg) {
                 mProgress.dismiss();
-                CancelBlock();
-
+                PublicPun.showNoticeDialog(mContext, mContext.getString(R.string.unable_to_send), mContext.getString(R.string.send_call_unspent_failed) + "-" + msg);
+                Crashlytics.log(mContext.getString(R.string.send_call_unspent_failed) + mContext.getString(R.string.send_call_unspent_list_addresses) + InAddress);
             }
         });
-
     }
 
 
@@ -457,16 +448,16 @@ byte[] okTkn = new byte[4];
     private void PreviousPrepareTransaction(final String outputAddress, final long amountToSend) {
 
         try {
-        long availableAmount = 0;
-        for (UnSpentTxsBean unSpentTxsBean : unSpentTxsBeanList) {
-            /**
-             *  DecimalFormat  can format a number in a customized format for a particular locale,ex. 0.5=>0,5(Europe).
-             */
+            long availableAmount = 0;
+            for (UnSpentTxsBean unSpentTxsBean : unSpentTxsBeanList) {
+                /**
+                 *  DecimalFormat  can format a number in a customized format for a particular locale,ex. 0.5=>0,5(Europe).
+                 */
 
-            availableAmount += BTCUtils.BTCconvertToSatoshisValue(unSpentTxsBean.getAmount());
-        }
-        long extraFee = BTCUtils.parseValue("0.0");
-        LogUtil.e("帳戶 " + xchsOrder.getAccount() + " 地址下有的餘額=" + availableAmount + " 要發出的金額=" + amountToSend);
+                availableAmount += BTCUtils.BTCconvertToSatoshisValue(unSpentTxsBean.getAmount());
+            }
+            long extraFee = BTCUtils.parseValue("0.0");
+            LogUtil.e("帳戶 " + xchsOrder.getAccount() + " 地址下有的餘額=" + availableAmount + " 要發出的金額=" + amountToSend);
 
             processedTxData =
                     BTCUtils.calcFeeChangeAndSelectOutputsToSpendii(mContext, unSpentTxsBeanList, amountToSend, extraFee, true, false);
@@ -704,6 +695,7 @@ byte[] okTkn = new byte[4];
                                                     });
 
                                                 }
+
                                                 @Override
                                                 public void fail(String msg) {
 
@@ -967,10 +959,10 @@ byte[] okTkn = new byte[4];
 //
 //                                    }
 
-                                        currUnsignedTx = genRawTxData(scriptSigs);
-                                        LogUtil.e("取得 currUnsignedTx=" + currUnsignedTx + ";length=" + currUnsignedTx.length());
-                                        LogUtil.e("byte長度=" + PublicPun.hexStringToByteArray(currUnsignedTx).length);
-                                        FunApiSubmit(PublicPun.hexStringToByteArray(currUnsignedTx));
+                                        signedTx = genRawTxData(scriptSigs);
+                                        LogUtil.e("取得 signedTx=" + signedTx + ";length=" + signedTx.length());
+                                        LogUtil.e("byte長度=" + PublicPun.hexStringToByteArray(signedTx).length);
+                                        FunApiSubmit(PublicPun.hexStringToByteArray(signedTx));
 
                                     }
                                 }
@@ -982,78 +974,47 @@ byte[] okTkn = new byte[4];
                 });
     }
 
+    private void broadcastTx(final String rawTx) {
 
-    private void PublishToNetwork() {
+        new BlockChainAPI(mContext).broacastTx(rawTx, new APIPostCallback() {
+            @Override
+            public void onSuccess() {
 
-        new Thread(runnable).start();
-    }
-
-    Runnable runnable = new Runnable() {
-        @Override
-        public void run() {
-            // TODO: http request.
-            int postDecodeResult = -1;
-            int postPushResult = -1;
-            int hadlerMsg = 0;
-
-            postDecodeResult = cwBtcNetWork.doPostII(BtcUrl.URL_BLOCKCHAIN_SERVER_SITE + BtcUrl.URL_BLICKCHAIN_DECODE, currUnsignedTx);
-            if (postDecodeResult == 200) {
-                postPushResult = cwBtcNetWork.doPostII(BtcUrl.URL_BLOCKCHAIN_SERVER_SITE + BtcUrl.URL_BLICKCHAIN_PUSH, currUnsignedTx);
-                if (postPushResult == 200) {
-                    hadlerMsg = HANDLER_SEND_BTC_FINISH;
-                } else {
-                    hadlerMsg = HANDLER_SEND_BTC_ERROR;
+                if (mTimer != null) {
+                    mTimer.cancel();
                 }
-            } else {
-                hadlerMsg = HANDLER_SEND_BTC_ERROR;
+                isTrxSuccess = true;
+
+                if (mProgress != null) {
+                    mProgress.dismiss();
+                }
+
+                FunTrxFinish();
+                PublicPun.showNoticeDialog(mContext, getString(R.string.sent), getString(R.string.sent) + " " + mTxsConfirm.getOutput_amount() + getString(R.string.btc_to) + " " + recvAddress);
+
+                PublicPun.CustomNoticeDialog(mContext, getString(R.string.sent), getString(R.string.sent) + " " + mTxsConfirm.getOutput_amount() + getString(R.string.btc_to) + " " + recvAddress)
+                        .setCancelable(false)
+                        .setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                Intent intent = new Intent(ExchangeCompleteOrderActivity.this, ExchangeActivity.class);
+                                startActivity(intent);
+
+                            }
+                        }).show();
             }
 
-            mHandler.sendMessage(mHandler.obtainMessage(hadlerMsg));
-        }
-    };
-    private Handler mHandler = new Handler() {
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            switch (msg.what) {
-                case HANDLER_SEND_BTC_FINISH:
-
-                    if (mTimer != null) {
-                        mTimer.cancel();
-                    }
-                    isTrxSuccess = true;
-                    //clear trx data
-
-                    if (mProgress != null) {
-                        mProgress.dismiss();
-                    }
-
-                    FunTrxFinish();
-
-                    PublicPun.showNoticeDialog(mContext, getString(R.string.sent), getString(R.string.sent) + " " + mTxsConfirm.getOutput_amount() + getString(R.string.btc_to) + " " + recvAddress);
-
-                    PublicPun.CustomNoticeDialog(mContext, getString(R.string.sent), getString(R.string.sent) + " " + mTxsConfirm.getOutput_amount() + getString(R.string.btc_to) + " " + recvAddress)
-                            .setCancelable(false)
-                            .setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int whichButton) {
-                                    finish();
-
-                                }
-                            }).show();
-
-
-                    break;
-                case HANDLER_SEND_BTC_ERROR:
-                    if (mProgress != null) {
-                        mProgress.dismiss();
-                    }
-                    if (mTimer != null) {
-                        mTimer.cancel();
-                    }
-                    PublicPun.showNoticeDialog(mContext, getString(R.string.error_msg), getString(R.string.failed_to_broadcast_transaction));
-                    break;
+            @Override
+            public void onFailure(int errorCode) {
+                if (mProgress != null) {
+                    mProgress.dismiss();
+                }
+                if (mTimer != null) {
+                    mTimer.cancel();
+                }
+                PublicPun.showNoticeDialog(mContext, getString(R.string.error_msg), getString(R.string.failed_to_broadcast_transaction));
             }
-        }
-    };
+        });
+    }
 
 
     private void ClickFunction(Context mContext, String mTitle, String mMessage) {
@@ -1175,7 +1136,7 @@ byte[] okTkn = new byte[4];
     }
 
 
-    private void XchsTrxLogout(byte[] trxHandle){
+    private void XchsTrxLogout(byte[] trxHandle) {
         byte[] bValue = new byte[16];
         new Random().nextBytes(bValue);
         nonce = bValue;
@@ -1186,11 +1147,12 @@ byte[] okTkn = new byte[4];
             public void onSuccess(int status, byte[] outputData) {
                 LogUtil.d("XchsTrxsignLogout 成功");
                 getBlockInfo(okTkn);
-            }});
+            }
+        });
     }
 
 
-    private void FunApiSubmit(final byte[] txHash) {
+    private void FunApiSubmit(final byte[] rawTx) {
 
 
         byte[] bValue = new byte[16];
@@ -1205,34 +1167,37 @@ byte[] okTkn = new byte[4];
 
                 final String trxReceipt = PublicPun.byte2HexStringNoBlank(outputData);
 
-                byte[] doubleSha256TxHash = PublicPun.encryptSHA256(PublicPun.encryptSHA256(txHash));
+                byte[] doubleSha256TxHash = PublicPun.encryptSHA256(PublicPun.encryptSHA256(rawTx));
                 String txId = PublicPun.byte2HexStringNoBlank(BTCUtils.reverse(doubleSha256TxHash));
                 String out2Addr = mTxsConfirm.getChange_address();
 
-                mExchangeAPI.doTrxSubmit(mTxsConfirm.getInput_count(), xchsOrder.getOrderId(), txId, out2Addr, trxReceipt, PublicPun.uid, PublicPun.byte2HexStringNoBlank(nonce), new APIResultCallback() {
-                    @Override
-                    public void success(String[] msg) {
-                        if (mProgress.isShowing()) {
-                            mProgress.dismiss();
-                        }
+                mProgress.dismiss();
+                Intent intent = new Intent(ExchangeCompleteOrderActivity.this, ExchangeActivity.class);
+                startActivity(intent);
 
-                        PublishToNetwork();
-
-                    }
-
-                    @Override
-                    public void fail(String msg) {
-                        //add cancel block
-
-                        failedTrx();
-
-                    }
-                });
+//                mExchangeAPI.doTrxSubmit(mTxsConfirm.getInput_count(), xchsOrder.getOrderId(), txId, out2Addr, trxReceipt, PublicPun.uid, PublicPun.byte2HexStringNoBlank(nonce), new APIResultCallback() {
+//                    @Override
+//                    public void success(String[] msg) {
+//                        if (mProgress.isShowing()) {
+//                            mProgress.dismiss();
+//                        }
+//
+//                        broadcastTx(PublicPun.byte2HexStringNoBlank(rawTx));
+//
+//                    }
+//
+//                    @Override
+//                    public void fail(String msg) {
+//                        //add cancel block
+//
+//                        failedTrx();
+//
+//                    }
+//                });
             }
         });
 
     }
-
 
 
     @Override

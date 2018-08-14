@@ -23,7 +23,7 @@ public class ServiceProviderActivity extends BaseActivity implements  CompoundBu
         initView();
         initToolbar();
 
-        apiSwitch.setChecked(AppPrefrence.getIsBlockrApi(this));
+//        apiSwitch.setChecked(AppPrefrence.getIsBlockrApi(this));
 
     }
 
@@ -47,7 +47,7 @@ public class ServiceProviderActivity extends BaseActivity implements  CompoundBu
 
     @Override
     public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-        AppPrefrence.saveIsBlockrApi(this,b);
-        LogUtil.d(String.valueOf(AppPrefrence.getIsBlockrApi(this)));
+//        AppPrefrence.saveIsBlockrApi(this,b);
+//        LogUtil.d(String.valueOf(AppPrefrence.getIsBlockrApi(this)));
     }
 }

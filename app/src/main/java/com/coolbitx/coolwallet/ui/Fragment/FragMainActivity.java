@@ -80,24 +80,24 @@ import java.util.TimerTask;
 //        FragmentActivity
 public class FragMainActivity extends BaseActivity {//implements CompoundButton.OnCheckedChangeListener
 
-//    //左側選單圖片
-    private static final int[] MENU_ITEMS_PIC = new int[]{
-            R.mipmap.host, R.mipmap.cwcard, R.mipmap.security, R.mipmap.settings, R.drawable.exchange,
-            R.drawable.exchange, R.mipmap.ic_feedback_white_24dp, R.mipmap.logout, R.mipmap.ic_share_white_24dp};
-    //     左側選單文字項目
-    private static final int[] MENU_ITEMS = new int[]{
-            R.string.host_devices, R.string.coolwallet_card, R.string.security, R.string.str_setting,
-            R.string.exchange,R.string.action_settings,
-            R.string.issue_feedback_title, R.string.logout, R.string.share_address_beta};
-
-//    private static final int[] MENU_ITEMS_PIC = new int[]
-//            {R.mipmap.host, R.mipmap.cwcard, R.mipmap.security, R.mipmap.settings,
-//                    R.mipmap.ic_feedback_white_24dp, R.mipmap.logout, R.mipmap.ic_share_white_24dp};
-//    // 左側選單文字項目
+    //左側選單圖片
+//    private static final int[] MENU_ITEMS_PIC = new int[]{
+//            R.mipmap.host, R.mipmap.cwcard, R.mipmap.security, R.mipmap.settings, R.drawable.exchange,
+//            R.drawable.exchange, R.mipmap.ic_feedback_white_24dp, R.mipmap.logout, R.mipmap.ic_share_white_24dp};
+//    //     左側選單文字項目
 //    private static final int[] MENU_ITEMS = new int[]{
 //            R.string.host_devices, R.string.coolwallet_card, R.string.security, R.string.str_setting,
-//            R.string.issue_feedback_title, R.string.logout, R.string.share_address_beta
-//    };
+//            R.string.exchange,R.string.action_settings,
+//            R.string.issue_feedback_title, R.string.logout, R.string.share_address_beta};
+
+    private static final int[] MENU_ITEMS_PIC = new int[]
+            {R.mipmap.host, R.mipmap.cwcard, R.mipmap.security, R.mipmap.settings,
+                    R.mipmap.ic_feedback_white_24dp, R.mipmap.logout, R.mipmap.ic_share_white_24dp};
+    // 左側選單文字項目
+    private static final int[] MENU_ITEMS = new int[]{
+            R.string.host_devices, R.string.coolwallet_card, R.string.security, R.string.str_setting,
+            R.string.issue_feedback_title, R.string.logout, R.string.share_address_beta
+    };
 
     public static int ACCOUNT_CNT = 0;//這裡要改為抓qryWalletInfo的
     public static boolean refreshFlag = false;
@@ -132,8 +132,7 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
             String val = data.getString("result");
             try {
                 if (val != null) {
-                    if (identify.equals(BtcUrl.URL_BLOCKCHAIN_EXCHANGE_RATE)) {
-
+                    if (identify.contains(BtcUrl.URL_BLOCKCHAIN_EXCHANGE_RATE)) {
                         SetCurrencyRate(mContext);
                         //card is not keep the setting.
                         if (AppPrefrence.getCurrency(mContext)) {
@@ -188,6 +187,11 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
             if (mParentActivityName != null) {
                 LogUtil.d("mParentActivityName=" + mParentActivityName + ";getSimpleName=" + RecovWalletActivity.class.getSimpleName());
                 isFromRecovery = mParentActivityName.equals(RecovWalletActivity.class.getSimpleName());
+                if(mParentActivityName.equals(RecovWalletActivity.class.getSimpleName())||mParentActivityName.equals(InitialCreateWalletIIActivity.class.getSimpleName())){
+                    //初始匯率
+                    AppPrefrence.saveCurrentCountry(this, "USD");
+
+                }
             }
 
         }
@@ -430,11 +434,11 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
                             final RefreshBlockChainInfo refreshBlockChainInfo = new RefreshBlockChainInfo(mContext, refreshAccount);
                             refreshBlockChainInfo.FunQueryAccountInfo(cmdManager, new RefreshCallback() {
                                 @Override
-                                public void success() {
+                                public void onSuccess() {
 
                                     refreshBlockChainInfo.callTxsRunnable(new RefreshCallback() {
                                         @Override
-                                        public void success() {
+                                        public void onSuccess() {
                                             initTabFragment(mSavedInstanceState);
                                             if (mProgress.isShowing()) {
                                                 mProgress.dismiss();
@@ -446,7 +450,7 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
                                         }
 
                                         @Override
-                                        public void fail(String msg) {
+                                        public void onFailure(String msg) {
                                             PublicPun.showNoticeDialog(mContext, getString(R.string.unable_connect_internet), msg);
                                             initTabFragment(mSavedInstanceState);
                                             if (mProgress.isShowing()) {
@@ -459,7 +463,7 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
                                 }
 
                                 @Override
-                                public void fail(String msg) {
+                                public void onFailure(String msg) {
                                     PublicPun.showNoticeDialog(mContext, getString(R.string.unable_connect_internet), msg);
                                     initTabFragment(mSavedInstanceState);
                                     if (mProgress.isShowing()) {
@@ -654,7 +658,7 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
     private void getCurrRate() {
         DatabaseHelper.deleteTable(mContext, DbName.DB_TABLE_CURRENT);
         ContentValues cv = new ContentValues();
-        new Thread(new MyRunnable(mHandler, cv, BtcUrl.URL_BLOCKCHAIN_EXCHANGE_RATE, 0, 60000 * 30, 0, cwBtcNetWork)).start();//1hr updated
+        new Thread(new MyRunnable(mHandler, cv, BtcUrl.URL_BLOCKCHAIN_SERVER_SITE+BtcUrl.URL_BLOCKCHAIN_EXCHANGE_RATE, 0, 60000 * 30, 0, cwBtcNetWork)).start();//1hr updated
         new Thread(new MyRunnable(mHandler, cv, BtcUrl.RECOMMENDED_TRANSACTION_FEES, 0, 60000 * 30, 0, cwBtcNetWork)).start();//1hr updated
     }
 
@@ -708,51 +712,51 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
                 intent = new Intent(getApplicationContext(), SettingActivity.class);
                 startActivityForResult(intent, 0);
                 break;
-//            case 4:
-//                IssueFeedBack();
-//                break;
-//            case 5:
-//                intent = new Intent(getApplicationContext(), LogOutActivity.class);
-//                startActivityForResult(intent, 0);
-//                break;
-//            case 6:
-//                //Share address service
-//                intent = new Intent(getApplicationContext(), ShareAddress.class);
-//                startActivityForResult(intent, 0);
-//                break;
-
-            //MARK XCHS
             case 4:
-                intent = new Intent(getApplicationContext(), ExchangeLogin.class);
-                startActivityForResult(intent, 0);
-                break;
-
-            case 5:
-                int infoid = 0;
-                cmdManager.XchsGetOtp(infoid, new CmdResultCallback() {
-                    @Override
-                    public void onSuccess(int status, byte[] outputData) {
-                        if ((status + 65536) == 0x9000) {//-28672//36864
-                            LogUtil.d("XchsGetOtp ok= " + outputData);
-                        } else {
-                            LogUtil.d("XchsGetOtp fail= " + outputData);
-
-                        }
-                    }
-                });
-                break;
-            case 6:
                 IssueFeedBack();
                 break;
-            case 7:
+            case 5:
                 intent = new Intent(getApplicationContext(), LogOutActivity.class);
                 startActivityForResult(intent, 0);
                 break;
-            case 8:
+            case 6:
                 //Share address service
                 intent = new Intent(getApplicationContext(), ShareAddress.class);
                 startActivityForResult(intent, 0);
                 break;
+
+            //MARK XCHS
+//            case 4:
+//                intent = new Intent(getApplicationContext(), ExchangeLogin.class);
+//                startActivityForResult(intent, 0);
+//                break;
+//
+//            case 5:
+//                int infoid = 0;
+//                cmdManager.XchsGetOtp(infoid, new CmdResultCallback() {
+//                    @Override
+//                    public void onSuccess(int status, byte[] outputData) {
+//                        if ((status + 65536) == 0x9000) {//-28672//36864
+//                            LogUtil.d("XchsGetOtp ok= " + outputData);
+//                        } else {
+//                            LogUtil.d("XchsGetOtp onFailure= " + outputData);
+//
+//                        }
+//                    }
+//                });
+//                break;
+//            case 6:
+//                IssueFeedBack();
+//                break;
+//            case 7:
+//                intent = new Intent(getApplicationContext(), LogOutActivity.class);
+//                startActivityForResult(intent, 0);
+//                break;
+//            case 8:
+//                //Share address service
+//                intent = new Intent(getApplicationContext(), ShareAddress.class);
+//                startActivityForResult(intent, 0);
+//                break;
 
 
         }
@@ -912,12 +916,15 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
         }
 
         tabFragment.AccountRefresh(tabFragment.getAccoutId());
+        if(mOnResumeFromBackCallBack==null){
+            registerOnResumeFromBackCallBack(mOnResumeFromBackCallBack);
+        }
         mOnResumeFromBackCallBack.onRefresh();
+
     }
 
     @Override
     protected void onResume() {
-        LogUtil.e("lifeCycle FragMainActivity onResume");
         super.onResume();
         if (cmdManager == null) {
             cmdManager = new CmdManager();
@@ -929,27 +936,23 @@ public class FragMainActivity extends BaseActivity {//implements CompoundButton.
     @Override
     protected void onStart() {
         super.onStart();
-        LogUtil.e("lifeCycle FragMainActivity onStart");
         registerBroadcast(this,cmdManager);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        LogUtil.e("lifeCycle FragMainActivity onPause");
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        LogUtil.e("lifeCycle FragMainActivity onStop");
         unRegisterBroadcast(this);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        LogUtil.e("lifeCycle FragMainActivity onDestroy");
         if (mProgress.isShowing()) {
             mProgress.dismiss();
         }

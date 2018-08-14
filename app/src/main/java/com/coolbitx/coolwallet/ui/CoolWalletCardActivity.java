@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -17,6 +18,7 @@ import com.coolbitx.coolwallet.general.AppPrefrence;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.snscity.egdwlib.CmdManager;
 import com.snscity.egdwlib.cmd.CmdResultCallback;
+import com.snscity.egdwlib.utils.LogUtil;
 
 /**
  * Created by ShihYi on 2015/12/25.
@@ -29,6 +31,8 @@ public class CoolWalletCardActivity extends BaseActivity implements View.OnClick
     private Button btnUpdateCardName;
     private Switch swtTurCurrency;
     private Boolean isturnCurrency;
+    String mCardName;
+    String cardNameStr;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +45,17 @@ public class CoolWalletCardActivity extends BaseActivity implements View.OnClick
         initValues();
         initToolbar();
         cmdManager = new CmdManager();
+        mCardName = new String(PublicPun.hexStringToByteArray(PublicPun.card.getCardId()));
+        getCurrentRate();
+    }
+
+    private void getCurrentRate() {
+        cmdManager.GetCurrencyRate(new CmdResultCallback() {
+            @Override
+            public void onSuccess(int status, byte[] outputData) {
+                LogUtil.e("匯率："+PublicPun.byte2HexString(outputData));
+            }
+        });
     }
 
     private void initViews() {
@@ -102,30 +117,32 @@ public class CoolWalletCardActivity extends BaseActivity implements View.OnClick
     public void onClick(View v) {
         if (v == btnUpdateCardName) {
 
-            final String cardNameStr = edtCardName.getText().toString().trim();
-            if (!TextUtils.isEmpty(cardNameStr)) {
-                cmdManager.setCardName(cardNameStr, new CmdResultCallback() {
-                    @Override
-                    public void onSuccess(int status, byte[] outputData) {
-                        if ((status + 65536) == 0x9000) {
-                            PublicPun.card.setCardName(cardNameStr);
-                            AppPrefrence.saveCardName(mContext, cardNameStr);
-                            PublicPun.showNoticeDialog(mContext, "Updated!", "");
-
-                            cmdManager.turnCurrency(isturnCurrency, new CmdResultCallback() {
-                                @Override
-                                public void onSuccess(int status, byte[] outputData) {
-                                    if ((status + 65536) == 0x9000) {
-                                        AppPrefrence.saveCurrency(mContext, isturnCurrency);
-//                                        PublicPun.toast(mContext, "fiat value updated!");
-                                        finish();
-                                    }
-                                }
-                            });
-                        }
-                    }
-                });
+            cardNameStr = edtCardName.getText().toString().trim();
+            if (TextUtils.isEmpty(cardNameStr)) {
+                cardNameStr = mCardName;
             }
+            LogUtil.e("卡片名稱："+cardNameStr);
+            cmdManager.setCardName(cardNameStr, new CmdResultCallback() {
+                @Override
+                public void onSuccess(int status, byte[] outputData) {
+                    if ((status + 65536) == 0x9000) {
+                        PublicPun.card.setCardName(cardNameStr);
+                        AppPrefrence.saveCardName(mContext, cardNameStr);
+                        PublicPun.showNoticeDialog(mContext, "Updated!", "");
+
+                        cmdManager.turnCurrency(isturnCurrency, new CmdResultCallback() {
+                            @Override
+                            public void onSuccess(int status, byte[] outputData) {
+                                if ((status + 65536) == 0x9000) {
+                                    AppPrefrence.saveCurrency(mContext, isturnCurrency);
+//                                        PublicPun.toast(mContext, "fiat value updated!");
+                                    finish();
+                                }
+                            }
+                        });
+                    }
+                }
+            });
         }
     }
 

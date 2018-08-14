@@ -370,6 +370,34 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
+    public static boolean updateBalance(Context context, String addr, int n_tx, long balance) {
+        DatabaseHelper mOpenHelper = new DatabaseHelper(context);
+        String nullColumnHack = "id";
+        boolean mResult = false;
+        long updateResultID;
+        // 取出資料庫物件, 並且是可以寫入狀態
+        // 當APP空間不夠時, 該方法會呈唯讀狀態
+        SQLiteDatabase mDatabase = mOpenHelper.getWritableDatabase();
+
+        try {
+            ContentValues values = new ContentValues();
+            values.put("WID", wid);
+            values.put("ADDRESS", addr);
+            values.put("N_TX", n_tx);
+            values.put("ADDRESS_BALANCE", balance);
+
+            updateResultID = mDatabase.update(DbName.DB_TABLE_ADDR, values, "WID='" + wid + "' AND ADDRESS='" + addr + "'", null);
+            LogUtil.i("sql update " + DbName.DB_TABLE_ADDR + "  result:" + updateResultID + " ,ADDR=" + addr);
+
+            mResult = updateResultID != -1;
+        } catch (Exception e) {
+            mResult = false;
+        } finally {
+            mDatabase.close();
+            return mResult;
+        }
+    }
+
     /***
      * update dividual address
      */

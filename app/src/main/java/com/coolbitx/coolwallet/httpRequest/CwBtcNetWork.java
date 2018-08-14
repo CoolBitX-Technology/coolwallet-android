@@ -11,6 +11,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -28,62 +29,27 @@ public class CwBtcNetWork {
 
     private int httpTimeOut = 60000;
 
-//    private byte[] hexStringToBytes(String hexStr) {
-//        return null;
-//    }
-//
-//    private String bytesToHexString(byte[] bytes) {
-//        return null;
-//    }
-//
-//    private byte[] HTTPRequestUsingGETMethodFrom() {
-//        return null;
-//    }
-//
-//    /**
-//     * 获取当前汇率
-//     *
-//     * @return
-//     */
-//    public double getCurrRate() {
-//        return 0;
-//    }
-//
-//    public void getTransactionByAccount(int accountId) {
-//
-//    }
-//
-//    public void registerNotifyByAccount(int accountId) {
-//
-//    }
-
-
-    public String doGet(ContentValues cv, String extraUrl, String params) {
+    public String doGet(ContentValues cv, String extraUrl, String option) {
         HttpURLConnection connection = null;
         InputStream inputStream = null;
         String resultString = "";
         String url = "";
+        String addr = cv.getAsString("addresses");
+        if (addr == null) {
+            addr = "";
+        }
         try {
-            if (extraUrl.equals(BtcUrl.URL_BLOCKR_UNSPENT)) {
-                url = BtcUrl.URL_BLOCKR_SERVER_SITE + extraUrl + cv.getAsString("addresses");
-            } else if (extraUrl.equals(URL_BLOCKCHAIN_UNSPENT)) {
-                url = BtcUrl.URL_BLOCKCHAIN_SERVER_SITE + extraUrl + cv.getAsString("addresses");
-            } else if (extraUrl.equals(BtcUrl.URL_BLOCKCHAIN_EXCHANGE_RATE)) {
-                url = BtcUrl.URL_BLOCKCHAIN_SERVER_SITE + extraUrl;
-            } else if (extraUrl.equals(BtcUrl.RECOMMENDED_TRANSACTION_FEES)) {
-                url = extraUrl;
-            } else if (extraUrl.equals(BtcUrl.URL_BLICKCHAIN_TXS_MULTIADDR)) {
-                if (params == null) {
+            url = extraUrl + addr + option;
+
+            if (extraUrl.equals(BtcUrl.URL_BLICKCHAIN_TXS_MULTIADDR)) {
+                if (option == null) {
                     url = BtcUrl.URL_BLOCKCHAIN_SERVER_SITE + extraUrl + cv.getAsString("addresses");
                 } else {
-                    url = BtcUrl.URL_BLOCKCHAIN_SERVER_SITE + "multiaddr?offset=" + params + "&active=" + cv.getAsString("addresses");
+                    url = BtcUrl.URL_BLOCKCHAIN_SERVER_SITE + "multiaddr?offset=" + option + "&active=" + cv.getAsString("addresses");
                 }
-            } else {
-                url = extraUrl;
             }
 
-            LogUtil.i(extraUrl + ":URL地址 = " + url);
-//            Crashlytics.log("doGet url=" + url);
+            LogUtil.i("URL地址 = " + url);
 
             URL getUrl = new URL(url);
             connection = (HttpURLConnection) getUrl.openConnection();
@@ -95,23 +61,12 @@ public class CwBtcNetWork {
             int code = connection.getResponseCode();
             LogUtil.i("http response code = " + code);
 
-            switch (code) {
-                case 200:
-                    resultString = jsonResult(connection);
-                    break;
-                case 404:
-                    resultString = "{\"errorCode\": 404}";
-                    break;
-                case 400:
-                    resultString = "{\"errorCode\": 400}";
-                    break;
-                case 500:
-                    resultString = "{\"errorCode\": 500}";
-                    break;
-                default:
-                    resultString = "{\"errorCode\":" + code + "}";
-                    break;
+            if (code == HttpURLConnection.HTTP_OK) {
+                resultString = jsonResult(connection);
+            } else {
+                resultString = "{\"errorCode\": " + code + "}";
             }
+
         } catch (Exception e) {
             e.printStackTrace();
             Crashlytics.logException(e);
@@ -150,125 +105,60 @@ public class CwBtcNetWork {
         }
     }
 
-//    public int doPost(String Url, String params) {
-//        String resultString;
-//        HttpURLConnection connection = null;
-//        InputStream inputStream = null;
-//        int code = -1;
-//        String urlParameters = "{\"hex\":\"" + params + "\"}";
-////        String urlParameters = "'tx='" + params;
-//        LogUtil.i("doPost para=" + urlParameters);
-//        try {
-//            String url = Url;
-//            LogUtil.i("doPost url=" + url);
-//            URL getUrl = new URL(url);
-//            connection = (HttpURLConnection) getUrl.openConnection();
-//            connection.setRequestMethod("POST");
-//            connection.setConnectTimeout(this.httpTimeOut);
-//            connection.setReadTimeout(this.httpTimeOut);
-//            connection.setDoOutput(false);
-//            connection.setDoInput(true);
-//
-//            OutputStream out = connection.getOutputStream();// 获得一个输出流,向服务器写数据
-//            out.write(urlParameters.getBytes());
-//            out.flush();
-//            out.close();
-//
-//            code = connection.getResponseCode();
-//            LogUtil.i("doPost code:" + code + ";" + connection.getResponseMessage());
-//            inputStream = connection.getInputStream();
-//            resultString = readString(inputStream);
-//            LogUtil.i("do post resultString=" + resultString);
-////            inputStream = connection.getInputStream();
-////            String resultString = readString(inputStream);
-////            LogUtil.i("doPost resultString =" + resultString);
-//            switch (code) {
-//                case 200:
-//                    break;
-//                case 201:
-//                    break;
-//                case 404:
-//                    resultString = "{\"errorCode\": 404}";
-//                    break;
-//                case 500:
-//                    resultString = "{\"errorCode\": 500}";
-//                    break;
-//            }
-//
-//        } catch (Exception e) {
-//            LogUtil.i("doPost error=" + e.getMessage() + ";" + connection.getResponseMessage());
-//            e.printStackTrace();
-//            Crashlytics.logException(e);
-//        } finally {
-//            if (connection != null) {
-//                connection.disconnect();
-//            }
-//            if (inputStream != null) {
-//                try {
-//                    inputStream.close();
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//            return code;
-//        }
-//    }
-
-    public int doPostII(String Url, String params) {
+    public int doPost(String Url, String params, boolean isNode) {
         String resultString;
         HttpURLConnection connection = null;
         InputStream inputStream = null;
         int code = -1;
-//        String urlParameters = "{\"hex\":\"" + params + "\"}";
-        String urlParameters = "tx=" + params;
-        LogUtil.i("doPost para=" + urlParameters);
+        String urlParameters;
+
+        if (isNode) {
+
+            urlParameters = "{" + " \"rawtx\":" + "\"" + params + "\"" + "}";
+        } else {
+            urlParameters = "tx=" + params;
+        }
         try {
             String url = Url;
-            LogUtil.i("doPost url=" + url);
+            LogUtil.d("doPost url=" + url + "  params:" + urlParameters);
             URL getUrl = new URL(url);
             connection = (HttpURLConnection) getUrl.openConnection();
 
             connection.setRequestMethod("POST");
-
-            connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+//            connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
             connection.setConnectTimeout(this.httpTimeOut);
             connection.setReadTimeout(this.httpTimeOut);
             connection.setDoOutput(true);
             connection.setDoInput(true);
 
-            DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
-            wr.write(urlParameters.getBytes());
-            wr.flush();
-            wr.close();
-//            OutputStream out = connection.getOutputStream();
-//            out.write(urlParameters.getBytes());
-//            out.flush();
-//            out.close();
-
-
-            code = connection.getResponseCode();
-            LogUtil.i("doPost code:" + code + ";" + connection.getResponseMessage());
-            inputStream = connection.getInputStream();
-            resultString = readString(inputStream);
-            LogUtil.i("do post resultString=" + resultString);
-//            inputStream = connection.getInputStream();
-//            String resultString = readString(inputStream);
-//            LogUtil.i("doPost resultString =" + resultString);
-            switch (code) {
-                case 200:
-                    break;
-                case 201:
-                    break;
-                case 404:
-                    resultString = "{\"errorCode\": 404}";
-                    break;
-                case 500:
-                    resultString = "{\"errorCode\": 500}";
-                    break;
+            if (isNode) {
+                connection.setRequestProperty("Content-Type", "application/json");
+                OutputStream outputStream = connection.getOutputStream();
+                outputStream.write(urlParameters.getBytes());
+                outputStream.flush();
+                outputStream.close();
+            } else {
+                connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
+                wr.write(urlParameters.getBytes());
+                wr.flush();
+                wr.close();
             }
 
+            code = connection.getResponseCode();
+            LogUtil.d("doPost code:" + code + ";" + connection.getResponseMessage());
+            inputStream = connection.getInputStream();
+            resultString = readString(inputStream);
+            LogUtil.d("do post resultString=" + resultString);
+
+//            if (code == HttpURLConnection.HTTP_OK) {
+//                resultString = jsonResult(connection);
+//            } else {
+//                resultString = "{\"errorCode\": " + code + "}";
+//            }
+
         } catch (Exception e) {
-            LogUtil.i("doPost error=" + e.getMessage() + ";" + connection.getResponseMessage());
+            LogUtil.d("doPost error=" + e.getMessage() + ";" + connection.getResponseMessage());
             e.printStackTrace();
             Crashlytics.logException(e);
         } finally {
