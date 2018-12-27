@@ -963,7 +963,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener, 
             @Override
             public void onFailure(int errorCode) {
                 finishTx();
-                PublicPun.showNoticeDialog(mContext, "Notification", "Send BTC to BLOCKCHAIN failed!");
+                PublicPun.showNoticeDialog(mContext, "Notification", "Sending failed.");
             }
         });
     }

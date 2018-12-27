@@ -20,7 +20,8 @@ public class BtcUrl {
     public static final String URL_BLICKCHAIN_DECODE = "decode-tx";
 
     public static final String URL_BLOCKCHAIN_EXCHANGE_RATE = "ticker";
-    public static final String RECOMMENDED_TRANSACTION_FEES = "https://bitcoinfees.21.co/api/v1/fees/recommended";
+
+    public static final String RECOMMENDED_TRANSACTION_FEES = "https://bitcoinfees.earn.com/api/v1/fees/recommended";
     public static final String SOCKET_BLOCK_IO = "wss://n.block.io:443/socket";
     public static final String CW_XHCS_SITE = "http://xsm.coolbitx.com:8080/logout";
 

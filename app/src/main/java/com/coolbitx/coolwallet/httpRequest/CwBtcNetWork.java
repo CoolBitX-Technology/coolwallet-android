@@ -111,9 +111,9 @@ public class CwBtcNetWork {
         InputStream inputStream = null;
         int code = -1;
         String urlParameters;
+        String rspMsg="";
 
         if (isNode) {
-
             urlParameters = "{" + " \"rawtx\":" + "\"" + params + "\"" + "}";
         } else {
             urlParameters = "tx=" + params;
@@ -121,11 +121,11 @@ public class CwBtcNetWork {
         try {
             String url = Url;
             LogUtil.d("doPost url=" + url + "  params:" + urlParameters);
+            Crashlytics.log("Params of sending failed:"+urlParameters);
             URL getUrl = new URL(url);
             connection = (HttpURLConnection) getUrl.openConnection();
 
             connection.setRequestMethod("POST");
-//            connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
             connection.setConnectTimeout(this.httpTimeOut);
             connection.setReadTimeout(this.httpTimeOut);
             connection.setDoOutput(true);
@@ -146,21 +146,17 @@ public class CwBtcNetWork {
             }
 
             code = connection.getResponseCode();
-            LogUtil.d("doPost code:" + code + ";" + connection.getResponseMessage());
+            rspMsg = connection.getResponseMessage();
             inputStream = connection.getInputStream();
             resultString = readString(inputStream);
             LogUtil.d("do post resultString=" + resultString);
 
-//            if (code == HttpURLConnection.HTTP_OK) {
-//                resultString = jsonResult(connection);
-//            } else {
-//                resultString = "{\"errorCode\": " + code + "}";
-//            }
-
         } catch (Exception e) {
-            LogUtil.d("doPost error=" + e.getMessage() + ";" + connection.getResponseMessage());
+            LogUtil.d("doPost error=" + e.getMessage() + " / code: "+code +" / msg: "+ connection.getResponseMessage());
+            Crashlytics.logException(new Throwable("doPost error=" + e.getMessage()
+                    +" / code: "+connection.getResponseCode()
+                    +" / msg: " + rspMsg));
             e.printStackTrace();
-            Crashlytics.logException(e);
         } finally {
             if (connection != null) {
                 connection.disconnect();

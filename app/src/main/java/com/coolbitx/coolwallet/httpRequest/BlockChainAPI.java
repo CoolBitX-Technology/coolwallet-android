@@ -22,6 +22,7 @@ import com.snscity.egdwlib.utils.LogUtil;
 
 import org.json.JSONException;
 
+import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -66,7 +67,7 @@ public class BlockChainAPI {
             @Override
             protected Integer doInBackground(String... strings) {
                 int code = new CwBtcNetWork().doPost(BtcUrl.URL_BLOCKCHAIN_SERVER_SITE + BtcUrl.URL_BLICKCHAIN_PUSH, rawTx, false);
-                if (code != 200) {
+                if (code != HttpURLConnection.HTTP_OK) {
                     code = new CwBtcNetWork().doPost(BtcUrl.URL_SERVER_BC_CBX_IO + BtcUrl.URL_PATH_PUSH, rawTx, true);
                 }
                 return code;
@@ -75,7 +76,7 @@ public class BlockChainAPI {
             @Override
             protected void onPostExecute(Integer responseCode) {
 
-                if (responseCode == 200) {
+                if (responseCode == HttpURLConnection.HTTP_OK) {
                     apiPostCallback.onSuccess();
                 } else {
                     apiPostCallback.onFailure(responseCode);

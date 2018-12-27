@@ -22,7 +22,7 @@ apply plugin: 'io.fabric'
 
 
 android {
-    compileSdkVersion 23
+    compileSdkVersion 26
     buildToolsVersion '27.0.3'
 
 
@@ -34,9 +34,9 @@ android {
     defaultConfig {
         applicationId "com.coolbitx.coolwallet"
         minSdkVersion 18
-        targetSdkVersion 22
-        versionCode 46
-        versionName "1.8.7" //20180814
+        targetSdkVersion 26
+        versionCode 48
+        versionName "1.8.11" //20181226
         multiDexEnabled = true
     }
 

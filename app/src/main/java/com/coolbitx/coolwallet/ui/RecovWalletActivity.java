@@ -923,8 +923,14 @@ public class RecovWalletActivity extends BaseActivity implements View.OnClickLis
     }
 
     private void dialogDismiss() {
-        if (mHorizontalDialog != null) mHorizontalDialog.dismiss();
-        pop.dismiss();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (mHorizontalDialog != null)
+                    mHorizontalDialog.dismiss();
+                pop.dismiss();
+            }
+        });
     }
 
     @Override
