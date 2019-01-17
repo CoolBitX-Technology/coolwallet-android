@@ -188,9 +188,6 @@ public class BleActivity extends BaseActivity {
                             }
                         } else {
                             try {
-//                                if (mLoginCsv.setReadFileName(PublicPun.csvFilename)) {
-//                                    LogUtil.i("ReadFileName has been created before");
-//                                    isNewLgoin = mLoginCsv.readFromCSV(address);
                                 ArrayList<String> arrayLoginList = new ArrayList<String>();
                                 arrayLoginList = DatabaseHelper.queryLogin(mContext);
                                 isNewUser = arrayLoginList.size() <= 0;
@@ -491,17 +488,6 @@ public class BleActivity extends BaseActivity {
                                     PublicPun.user.setEncKey(encKey);
                                     PublicPun.user.setMacKey(macKey);
 
-//                                    try {
-//                                        mLoginCsv.setSaveFileName(PublicPun.csvFilename, true);
-//                                        mLoginCsv.saveLoginToCSV(PublicPun.user);
-//                                    DatabaseHelper.insertLogin(mContext, currentUuid, currentOptCode);
-//                                    } catch (IOException e) {
-//                                        LogUtil.i("saveLoginToCSV錯誤:" + e.getMessage());
-//                                        e.printStackTrace();
-//                                    }
-
-//                                    PublicPun.toast(BleActivity.this, "Login successful");
-
                                     cmdManager.getModeState(new CmdResultCallback() {
                                         @Override
                                         public void onSuccess(int status, byte[] outputData) {
@@ -579,84 +565,6 @@ public class BleActivity extends BaseActivity {
         return true;
     }
 
-//    private void getRegInfo() {
-//
-//        final byte first = 0x00;
-//        final byte second = 0x01;
-//        final byte third = 0x02;
-//
-//        cmdManager.bindRegInfo(first, new CmdResultCallback() {
-//            @Override
-//            public void onSuccess(int status, byte[] outputData) {
-//                if ((status + 65536) == 0x9000) {
-//                    if (outputData != null) {
-//                        LogUtil.i("bindRegInfo 第一個:" + dealRegInfo(outputData));
-//                        addHostList(outputData, first);
-//                    }
-//                }
-//            }
-//        });
-//        cmdManager.bindRegInfo(second, new CmdResultCallback() {
-//            @Override
-//            public void onSuccess(int status, byte[] outputData) {
-//                if ((status + 65536) == 0x9000) {
-//                    if (outputData != null) {
-//                        LogUtil.i("bindRegInfo 第二個:" + dealRegInfo(outputData));
-//                        addHostList(outputData, second);
-//                    }
-//                }
-//            }
-//        });
-//        cmdManager.bindRegInfo(third, new CmdResultCallback() {
-//            @Override
-//            public void onSuccess(int status, byte[] outputData) {
-//                if ((status + 65536) == 0x9000) {
-//                    if (outputData != null) {
-//                        LogUtil.i("bindRegInfo 第三個:" + dealRegInfo(outputData));
-//                        addHostList(outputData, third);
-//                    }
-//                }
-//            }
-//        });
-//    }
-//
-//    private String dealRegInfo(byte[] outputData) {
-//
-//        if (outputData == null) return "";
-//        StringBuilder sb = new StringBuilder();
-//        int length = outputData.length;
-//        if (length > 0) {
-//            sb.append("注册状态是:");
-//            byte bindState = outputData[0];
-//            if (bindState == 0x00) {
-//                sb.append("未注册");
-//            } else if (bindState == 0x01) {
-//                sb.append("已注册");
-//            } else if (bindState == 0x02) {
-//                sb.append("已确认");
-//            }
-//        } else {
-//            return "";
-//        }
-//
-//        if (length > 1) {
-//            byte[] desc = new byte[length - 1];
-//            int descLen = desc.length;
-//            for (int i = 0; i < descLen; i++) {
-//                desc[i] = outputData[i + 1];
-//            }
-//
-//            String s = new String(desc, Constant.UTF8).toString().trim();
-//            sb.append(" 卡片描述是:");
-//            if (s.equals("")) {
-//                sb.append("空");
-//            } else {
-//                sb.append(s);
-//            }
-//        }
-//
-//        return sb.toString();
-//    }
 
     private boolean contains(String address) {
         boolean flag = false;
