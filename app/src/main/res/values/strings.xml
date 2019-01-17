@@ -148,7 +148,7 @@
     <string name="cmd_trxsign_error">Command \'TrxSign\' error</string>
     <string name="address">address</string>
     <string name="inputs">Inputs</string>
-
+    <string name="snackbar_network_connect_message_str">Please enable your Internet connection.</string>
 
     <!--HomeFragment-->
     <string name="synchronizing_data">Synchronizing data</string>

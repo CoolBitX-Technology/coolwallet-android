@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
@@ -42,6 +43,7 @@ import com.coolbitx.coolwallet.util.BTCUtils;
 import com.coolbitx.coolwallet.util.Base58;
 import com.coolbitx.coolwallet.util.ECKey;
 import com.coolbitx.coolwallet.exception.ValidationException;
+import com.coolbitx.coolwallet.util.HttpUtils;
 import com.crashlytics.android.Crashlytics;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
@@ -201,6 +203,23 @@ public class SendFragment extends BaseFragment implements View.OnClickListener, 
         if (v == btnSend) {
             errorCnt = 0;
 
+            boolean isConnect = HttpUtils.isNetworkAvailable(mContext);
+            if (!isConnect) {
+
+                AlertDialog.Builder mBuilder =
+                        PublicPun.CustomNoticeDialog(mContext, "Unable to send", getString(R.string.snackbar_network_connect_message_str));
+                mBuilder.setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        Intent intent = new Intent(android.provider.Settings.ACTION_SETTINGS);
+                        startActivity(intent);
+                    }
+                }).setNegativeButton(getString(R.string.strCancel), new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                    }
+                }).show();
+                return;
+
+            }
 
             if (editSendAddress.getText().toString().isEmpty()) {
                 PublicPun.showNoticeDialog(mContext, "Unable to send", "You didn't enter an address.");

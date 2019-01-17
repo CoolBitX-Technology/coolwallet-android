@@ -147,7 +147,7 @@
     <string name="cmd_trxsign_error">команда \'TrxSign\' ошибка</string>
     <string name="address">адрес</string>
     <string name="inputs">ввода</string>
-
+    <string name="snackbar_network_connect_message_str">Пожалуйста, включите ваше интернет-соединение.</string>
 
     <!--HomeFragment-->
     <string name="synchronizing_data">Синхронизация данных</string>

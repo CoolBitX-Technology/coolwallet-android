@@ -18,6 +18,7 @@ import com.coolbitx.coolwallet.exception.ValidationException;
 import com.coolbitx.coolwallet.general.BtcUrl;
 import com.coolbitx.coolwallet.general.PublicPun;
 import com.coolbitx.coolwallet.util.ExtendedKey;
+import com.coolbitx.coolwallet.util.HttpUtils;
 import com.snscity.egdwlib.utils.LogUtil;
 
 import org.json.JSONException;

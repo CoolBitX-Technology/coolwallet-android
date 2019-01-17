@@ -35,8 +35,8 @@ android {
         applicationId "com.coolbitx.coolwallet"
         minSdkVersion 18
         targetSdkVersion 26
-        versionCode 48
-        versionName "1.8.11" //20181226
+        versionCode 49
+        versionName "1.8.12" //20190117
         multiDexEnabled = true
     }
 
@@ -74,13 +74,10 @@ dependencies {
         transitive = true;
     }
 
-    // For firebase cloud message(google provided)
-//    implementation 'com.google.firebase:firebase-messaging:10.0.1' //crush caused in this version
-//    implementation 'org.bitcoinj:bitcoinj-core:0.14.4'
 
     implementation 'com.android.support:appcompat-v7:23.1.0'
     implementation 'com.android.support:support-annotations:23.1.1'
-    implementation 'com.android.support:design:26.1.0'
+    implementation 'com.android.support:design:23.1.0'
     implementation 'com.madgag.spongycastle:core:1.51.0.0'
     implementation 'com.madgag.spongycastle:prov:1.51.0.0'
     implementation 'com.madgag.spongycastle:pkix:1.51.0.0'
@@ -95,16 +92,7 @@ dependencies {
     implementation 'com.microsoft.azure:azure-notifications-handler:1.0.1@aar'
     implementation 'com.android.support:multidex:1.0.1'
     androidTestImplementation 'junit:junit:4.12'
-    //FCM add 9.0.2
-    implementation 'com.google.android.gms:play-services-gcm:9.0.2'
-//    implementation 'com.android.support.constraint:constraint-layout:+'
 
-
-//    repositories {
-//        maven {
-//            url "http://dl.bintray.com/microsoftazuremobile/SDK"
-//        }
-//    }
 }
 
 

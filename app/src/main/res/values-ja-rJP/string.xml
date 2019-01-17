@@ -70,7 +70,7 @@
     <string name="cmd_trxsign_error">コマンド \'TrxSign\' エラー</string>
     <string name="address">アドレス</string>
     <string name="inputs">送金前残高</string>
-
+    <string name="snackbar_network_connect_message_str">インターネットに接続してください</string>
 
     <!--HomeFragment-->
     <string name="synchronizing_data">データの同期</string>

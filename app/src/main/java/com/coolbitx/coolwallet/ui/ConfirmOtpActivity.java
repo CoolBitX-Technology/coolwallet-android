@@ -63,9 +63,9 @@ public class ConfirmOtpActivity extends BaseActivity implements View.OnClickList
 
         //通過當前狀態 判断是否是第一次注册
         isFirst = true;
-        if (PublicPun.card.getMode().equals("NOHOST")) {
+        if ("NOHOST".equals(PublicPun.card.getMode())) {
             isFirst = true;
-        } else if (PublicPun.card.getMode().equals("DISCONN")) {
+        } else if ("DISCONN".equals(PublicPun.card.getMode())) {
             isFirst = false;
         }
         boolean isRegistered = getIntent().getBooleanExtra("isRegistered", false);
