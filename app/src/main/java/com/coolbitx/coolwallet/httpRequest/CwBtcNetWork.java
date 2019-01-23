@@ -34,6 +34,8 @@ public class CwBtcNetWork {
         InputStream inputStream = null;
         String resultString = "";
         String url = "";
+        int code = -1;
+        String rspMsg = "";
         String addr = cv.getAsString("addresses");
         if (addr == null) {
             addr = "";
@@ -58,8 +60,8 @@ public class CwBtcNetWork {
             connection.setReadTimeout(this.httpTimeOut);
             connection.setDoOutput(false);
             connection.setDoInput(true);
-            int code = connection.getResponseCode();
-            LogUtil.i("http response code = " + code);
+            code = connection.getResponseCode();
+            rspMsg = connection.getResponseMessage();
 
             if (code == HttpURLConnection.HTTP_OK) {
                 resultString = jsonResult(connection);
@@ -68,8 +70,11 @@ public class CwBtcNetWork {
             }
 
         } catch (Exception e) {
+            LogUtil.d("doPost error=" + e.getMessage() + " / code: " + code + " / msg: " + rspMsg);
+            Crashlytics.logException(new Throwable("doPost error=" + e.getMessage()
+                    + " / code: " + code
+                    + " / msg: " + rspMsg));
             e.printStackTrace();
-            Crashlytics.logException(e);
         } finally {
             if (connection != null) {
                 connection.disconnect();
@@ -106,12 +111,12 @@ public class CwBtcNetWork {
     }
 
     public int doPost(String Url, String params, boolean isNode) {
-        String resultString;
+        String resultString = "";
         HttpURLConnection connection = null;
         InputStream inputStream = null;
         int code = -1;
         String urlParameters;
-        String rspMsg="";
+//        String rspMsg = "";
 
         if (isNode) {
             urlParameters = "{" + " \"rawtx\":" + "\"" + params + "\"" + "}";
@@ -121,7 +126,7 @@ public class CwBtcNetWork {
         try {
             String url = Url;
             LogUtil.d("doPost url=" + url + "  params:" + urlParameters);
-            Crashlytics.log("Params of sending failed:"+urlParameters);
+            Crashlytics.log("Params of sending failed:" + urlParameters);
             URL getUrl = new URL(url);
             connection = (HttpURLConnection) getUrl.openConnection();
 
@@ -145,17 +150,21 @@ public class CwBtcNetWork {
                 wr.close();
             }
 
+            if (code >= HttpURLConnection.HTTP_OK && code < HttpURLConnection.HTTP_BAD_REQUEST) {
+                inputStream = connection.getInputStream();
+            } else {
+                inputStream = connection.getErrorStream();
+            }
             code = connection.getResponseCode();
-            rspMsg = connection.getResponseMessage();
-            inputStream = connection.getInputStream();
+//            rspMsg = connection.getResponseMessage();
             resultString = readString(inputStream);
             LogUtil.d("do post resultString=" + resultString);
 
         } catch (Exception e) {
-            LogUtil.d("doPost error=" + e.getMessage() + " / code: "+code +" / msg: "+ connection.getResponseMessage());
+            LogUtil.d("doPost error=" + e.getMessage() + " / code: " + code + " / msg: " + resultString);
             Crashlytics.logException(new Throwable("doPost error=" + e.getMessage()
-                    +" / code: "+connection.getResponseCode()
-                    +" / msg: " + rspMsg));
+                    + " / code: " + code
+                    + " / msg: " + resultString));
             e.printStackTrace();
         } finally {
             if (connection != null) {
