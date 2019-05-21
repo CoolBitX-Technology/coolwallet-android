@@ -7,8 +7,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -45,6 +47,7 @@ import com.coolbitx.coolwallet.util.ECKey;
 import com.coolbitx.coolwallet.exception.ValidationException;
 import com.coolbitx.coolwallet.util.HttpUtils;
 import com.crashlytics.android.Crashlytics;
+
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.snscity.egdwlib.CmdManager;
@@ -63,6 +66,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 import static com.coolbitx.coolwallet.ui.BaseActivity.settingOptions;
 import static com.coolbitx.coolwallet.util.BTCUtils.dustFee;
@@ -191,10 +195,15 @@ public class SendFragment extends BaseFragment implements View.OnClickListener, 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.activity_send_bitcoin, container, false);
         LogUtil.e("onCreateView");
-        initView(view);
-        setListener();
 
         return view;
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        initView();
+        setListener();
     }
 
     @Override
@@ -232,8 +241,7 @@ public class SendFragment extends BaseFragment implements View.OnClickListener, 
 
             try {
 
-                double value = NumberFormat.getInstance().parse(editSendBtc.getText().toString()).floatValue();
-//                LogUtil.e("send value="+editSendBtc.getText().toString()+";"+String.valueOf(value));
+                double value = NumberFormat.getInstance().parse(editSendBtc.getText().toString()).doubleValue();
                 if (value <= dustFee * PublicPun.SATOSHI_RATE) {
                     PublicPun.showNoticeDialog(mContext, "Unable to send", "Output value must higher than dust (5460 Satoshi).");
                     return;
@@ -244,21 +252,22 @@ public class SendFragment extends BaseFragment implements View.OnClickListener, 
             }
             recvAddress = editSendAddress.getText().toString().trim();
             if (tvSendAmountBottom.getText().toString().equals("BTC")) {
-                spendAmountStr = editSendBtc.getText().toString().trim();// for some Europe's money format
+                spendAmountStr = editSendBtc.getText().toString().trim();
             } else {
-                spendAmountStr = editSendUsd.getText().toString().trim();// for some Europe's money format
+                spendAmountStr = editSendUsd.getText().toString().trim();
             }
-//            spendAmountStr = spendAmountStr.replace(",", ".");
-            //Double.parseDouble(spendAmountStr);
 
+            NumberFormat formatter = NumberFormat.getNumberInstance();
+            formatter.setMaximumFractionDigits(8);
             try {
-                spendAmount = NumberFormat.getInstance().parse(spendAmountStr).floatValue();
-                LogUtil.e("click後對方接收地址=" + recvAddress + ";發送的金額=" + String.valueOf(spendAmountStr));
+                spendAmount = formatter.parse(spendAmountStr).doubleValue();
+                Log.e("測試","spendAmount:"+spendAmount);
+                spendAmountStr = String.valueOf(spendAmount);
+                LogUtil.e("click後對方接收地址=" + recvAddress + ";發送的金額=" + spendAmountStr);
                 if (!BTCUtils.ValidateBitcoinAddress(recvAddress)) {
                     PublicPun.showNoticeDialog(mContext, getString(R.string.unable_to_send), getString(R.string.plz_enter_valid_address));
                     return;
                 }
-                LogUtil.d("valid address ok");
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -313,23 +322,25 @@ public class SendFragment extends BaseFragment implements View.OnClickListener, 
         }
         multiAddr = multiAddr.substring(0, multiAddr.length() - 1);//remove the last separator
 
-        new BlockChainAPI(mContext).getUnspent(multiAddr, new UnSpentCallback() {
-            @Override
-            public void onSuccess(List<UnSpentTxsBean> mUnSpentTxsBeanList) {
-                mProgress.dismiss();
-                unSpentTxsBeanList = mUnSpentTxsBeanList;
-                PreviousPrepareTransaction(recvAddress, BTCUtils.convertToSatoshisValueForDIsplay(spendAmountStr));
-            }
+        try {
+            new BlockChainAPI(mContext).getUnspent(multiAddr, new UnSpentCallback() {
+                @Override
+                public void onSuccess(List<UnSpentTxsBean> mUnSpentTxsBeanList) {
+                    mProgress.dismiss();
+                    unSpentTxsBeanList = mUnSpentTxsBeanList;
+                    PreviousPrepareTransaction(recvAddress, BTCUtils.convertToSatoshisValueForDIsplay(spendAmountStr));
+                }
 
-            @Override
-            public void onException(String msg) {
-                mProgress.dismiss();
-                LogUtil.e("走這");
-                PublicPun.showNoticeDialog(mContext, mContext.getString(R.string.unable_to_send), mContext.getString(R.string.send_call_unspent_failed) + ":" + msg);
-                Crashlytics.log(mContext.getString(R.string.send_call_unspent_failed) + mContext.getString(R.string.send_call_unspent_list_addresses) + multiAddr);
-            }
-        });
-
+                @Override
+                public void onException(String msg) {
+                    mProgress.dismiss();
+                    PublicPun.showNoticeDialog(mContext, mContext.getString(R.string.unable_to_send), mContext.getString(R.string.send_call_unspent_failed) + ":" + msg);
+                    Crashlytics.log(mContext.getString(R.string.send_call_unspent_failed) + mContext.getString(R.string.send_call_unspent_list_addresses) + multiAddr);
+                }
+            });
+        }catch (Exception e){
+            Log.e("測試","錯誤:"+e.getMessage());
+        }
     }
 
     //產生收零地址(of output)
@@ -1041,21 +1052,21 @@ public class SendFragment extends BaseFragment implements View.OnClickListener, 
     }
 
 
-    private void initView(View view) {
-        tvSendTitle = (TextView) view.findViewById(R.id.tv_send_title);
-        tvSendSubtitle = (TextView) view.findViewById(R.id.tv_send_subtitle);
-        tvSendSubtitle_country = (TextView) view.findViewById(R.id.tv_send_subtitle_country);
-        editSendAddress = (EditText) view.findViewById(R.id.edit_send_address);
-        imagScan = (ImageView) view.findViewById(R.id.imageView);
-        editSendBtc = (EditText) view.findViewById(R.id.edit_send_btc);
-        editSendUsd = (EditText) view.findViewById(R.id.edit_send_usd);
-        btnSend = (Button) view.findViewById(R.id.btn_send);
-        switchSendAll = (Switch) view.findViewById(R.id.switch_send_all);
+    private void initView() {
+        tvSendTitle = (TextView) getView().findViewById(R.id.tv_send_title);
+        tvSendSubtitle = (TextView) getView().findViewById(R.id.tv_send_subtitle);
+        tvSendSubtitle_country = (TextView) getView().findViewById(R.id.tv_send_subtitle_country);
+        editSendAddress = (EditText) getView().findViewById(R.id.edit_send_address);
+        imagScan = (ImageView) getView().findViewById(R.id.imageView);
+        editSendBtc = (EditText) getView().findViewById(R.id.edit_send_btc);
+        editSendUsd = (EditText) getView().findViewById(R.id.edit_send_usd);
+        btnSend = (Button) getView().findViewById(R.id.btn_send);
+        switchSendAll = (Switch) getView().findViewById(R.id.switch_send_all);
         switchSendAll.setOnCheckedChangeListener(this);
         btnSend.setOnClickListener(this);
         imagScan.setOnClickListener(this);
-        tvSendAmountTop = (TextView) view.findViewById(R.id.tv_send_amount_top);
-        tvSendAmountBottom = (TextView) view.findViewById(R.id.tv_send_amount_bottom);
+        tvSendAmountTop = (TextView) getView().findViewById(R.id.tv_send_amount_top);
+        tvSendAmountBottom = (TextView) getView().findViewById(R.id.tv_send_amount_bottom);
         tvSendAmountTop.setOnClickListener(this);
         tvSendAmountBottom.setOnClickListener(this);
 
@@ -1117,21 +1128,26 @@ public class SendFragment extends BaseFragment implements View.OnClickListener, 
     }
 
     public void refresh(int account, IntentResult scanningResult) {
-        currentAccount = account;
-        long final_balance = 0;
-        double btcAmt = 0;
-        for (int i = 0; i < TabFragment.lisCwBtcAdd.size(); i++) {
-            final_balance += TabFragment.lisCwBtcAdd.get(i).getBalance();
-        }
-        btcAmt = final_balance * PublicPun.SATOSHI_RATE;
-        tvSendTitle.setText(new DecimalFormat("#.########").format(btcAmt));
-        tvSendSubtitle_country.setText(AppPrefrence.getCurrentCountry(mContext));
-        tvSendAmountTop.setText(AppPrefrence.getCurrentCountry(mContext));
-        double currRate = btcAmt * AppPrefrence.getCurrentRate(mContext);
-        tvSendSubtitle.setText(new DecimalFormat("#.##").format(currRate));
+        try {
+            currentAccount = account;
+            long final_balance = 0;
+            double btcAmt = 0;
+            for (int i = 0; i < TabFragment.lisCwBtcAdd.size(); i++) {
+                final_balance += TabFragment.lisCwBtcAdd.get(i).getBalance();
+            }
+            btcAmt = final_balance * PublicPun.SATOSHI_RATE;
+            tvSendTitle.setText(new DecimalFormat("#.########").format(btcAmt));
+            tvSendSubtitle_country.setText(AppPrefrence.getCurrentCountry(mContext));
+            tvSendAmountTop.setText(AppPrefrence.getCurrentCountry(mContext));
+            double currRate = btcAmt * AppPrefrence.getCurrentRate(mContext);
+            tvSendSubtitle.setText(new DecimalFormat("#.##").format(currRate));
 
-        // QR code result
-        onQRcodeResult();
+            // QR code result
+            onQRcodeResult();
+        }catch (Exception e){
+            Log.e("測試","錯誤:"+e.getMessage());
+            Crashlytics.logException(e);
+        }
     }
 
     @Override

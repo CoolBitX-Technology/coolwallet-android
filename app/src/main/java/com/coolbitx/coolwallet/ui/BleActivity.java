@@ -19,6 +19,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.view.ActionMode;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.ExpandableListView;
@@ -42,6 +43,8 @@ import com.snscity.egdwlib.ble.BleStateCallback;
 import com.snscity.egdwlib.cmd.CmdResultCallback;
 import com.snscity.egdwlib.utils.LogUtil;
 import com.snscity.egdwlib.utils.UUIDGenerator;
+
+import org.bouncycastle.crypto.tls.TlsAgreementCredentials;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -100,39 +103,29 @@ public class BleActivity extends BaseActivity {
         @Override
         public void onBleDeviceDiscovered(BluetoothDevice device, int rssi, byte[] scanRecord) {
             String address = device.getAddress();
-//            LogUtil.e("BleScanCallback address:" + address);
 
-            if (!TextUtils.isEmpty(address)) {
-                if (!contains(address)) {
-                    String name = device.getName();
+            if (address == null) return;
+            if (TextUtils.isEmpty(address)) return;
+            if (contains(address)) return;
 
-                    //filter condition, user change card's name just for CWxxxxxx
-
-                    if (name == null || !name.startsWith("CoolWallet ")) {
-//                    if (name == null ) {
-                        return;
-                    }
-
-
-                    imgSearch.setVisibility(View.INVISIBLE);
-                    txtSearch.setVisibility(View.INVISIBLE);
-                    txtSearchDetail.setVisibility(View.INVISIBLE);
-                    //列表中沒有該藍牙設備，添加設備到列表中
-
-                    MyDevice myDevice = new MyDevice();
-                    myDevice.setName(name == null ? "unknown device" : name);
-                    myDevice.setAddress(address == null ? "unknown address" : address);
-                    myDevice.setRssi(String.valueOf(rssi));
-                    LogUtil.e("裝置名稱："+name);
-                    myDeviceList.add(myDevice);
-                    adapter.refresh();
-                    try {
-                        listView.expandGroup(adapter.getGroupCount() - 1);
-                    } catch (Exception e) {
-
-                    }
-                }
+            String name = device.getName();
+            if (name == null || TextUtils.isEmpty(name) || !name.startsWith("CoolWallet ")) {
+                return;
             }
+
+            imgSearch.setVisibility(View.INVISIBLE);
+            txtSearch.setVisibility(View.INVISIBLE);
+            txtSearchDetail.setVisibility(View.INVISIBLE);
+
+            //列表中沒有該藍牙設備，添加設備到列表中
+            MyDevice myDevice = new MyDevice();
+            myDevice.setName(name == null ? "unknown device" : name);
+            myDevice.setAddress(address == null ? "unknown address" : address);
+            myDevice.setRssi(String.valueOf(rssi));
+            myDeviceList.add(myDevice);
+            adapter.refresh();
+            listView.expandGroup(adapter.getGroupCount() - 1);
+
         }
     };
     private BleStateCallback bleStateCallback = new BleStateCallback() {
@@ -281,18 +274,18 @@ public class BleActivity extends BaseActivity {
 
 
         Bundle params = getIntent().getExtras();
-        if (params!= null) {
-            boolean temp = params.getBoolean ("Disconnection_Notify") ;
-            if(temp){
+        if (params != null) {
+            boolean temp = params.getBoolean("Disconnection_Notify");
+            if (temp) {
                 bleManager.disConnectBle();
                 String noteMsg;
-                String title = "CoolWallet "+getString(R.string.disconnected);
+                String title = "CoolWallet " + getString(R.string.disconnected);
                 if (PublicPun.card.getCardId() == null) {
                     noteMsg = "CoolWallet Disconnected";
                 } else {
                     noteMsg = new String(PublicPun.hexStringToByteArray(PublicPun.card.getCardId()));
                 }
-                PublicPun.showNoticeDialog(mContext, title, noteMsg+" "+getString(R.string.disconnected));
+                PublicPun.showNoticeDialog(mContext, title, noteMsg + " " + getString(R.string.disconnected));
                 systemNotification(title, noteMsg);
             }
         }
@@ -333,7 +326,7 @@ public class BleActivity extends BaseActivity {
         }
 
 //        pbarBleConnecting=(ProgressBar) findViewById(R.id.pBarConnecting);
-              /* Initialize the progress dialog */
+        /* Initialize the progress dialog */
         mProgress = new ProgressDialog(mContext, ProgressDialog.THEME_HOLO_DARK);
         mProgress.setCancelable(false);
         mProgress.setIndeterminate(true);
@@ -380,7 +373,7 @@ public class BleActivity extends BaseActivity {
                         @Override
                         public void run() {
                             super.run();
-                                       /* Show the progress. */
+                            /* Show the progress. */
                             runOnUiThread(new Runnable() {
 
                                 @Override
@@ -431,7 +424,7 @@ public class BleActivity extends BaseActivity {
                         @Override
                         public void run() {
                             super.run();
-                                       /* Show the progress. */
+                            /* Show the progress. */
                             runOnUiThread(new Runnable() {
 
                                 @Override
@@ -594,7 +587,6 @@ public class BleActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        LogUtil.d("BleActivity onResume");
 
         if (bleManager == null) {
             bleManager = new BleManager(this);
@@ -649,7 +641,7 @@ public class BleActivity extends BaseActivity {
     private void disconnBroadCast() {
         Intent SocketIntent = new Intent(BTConfig.DISCONN_NOTIFICATION);
         LogUtil.i("DISCONN_NOTIFICATION");
-        if(mProgress.isShowing()){
+        if (mProgress.isShowing()) {
             mProgress.dismiss();
         }
         LocalBroadcastManager.getInstance(this).sendBroadcast(SocketIntent);
