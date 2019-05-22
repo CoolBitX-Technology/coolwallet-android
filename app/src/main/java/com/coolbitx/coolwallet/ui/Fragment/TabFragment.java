@@ -127,7 +127,7 @@ public class TabFragment extends Fragment {
 
         fragments = new LinkedList<BaseFragment>();
         getFragments(mPageType);
-        adapter = new TabFragmentPagerAdapter(getFragmentManager(), fragments);
+        adapter = new TabFragmentPagerAdapter(getChildFragmentManager(), fragments);
 
         //pager
         pager = (ViewPager) view.findViewById(R.id.pager);
@@ -278,7 +278,7 @@ public class TabFragment extends Fragment {
 
         getFragments(mPageType);
         tabs.setOnPageChangeListener(null);
-        adapter = new TabFragmentPagerAdapter(getFragmentManager(), fragments);
+        adapter = new TabFragmentPagerAdapter(getChildFragmentManager(), fragments);
         pager.setAdapter(adapter);
         tabs.setViewPager(pager);
 
@@ -678,7 +678,7 @@ public class TabFragment extends Fragment {
                         mPageCurItem = pager.getCurrentItem();
                         getFragments(mPageType);
                         tabs.setOnPageChangeListener(null);
-                        adapter = new TabFragmentPagerAdapter(getFragmentManager(), fragments);
+                        adapter = new TabFragmentPagerAdapter(getChildFragmentManager(), fragments);
                         pager.setAdapter(adapter);
                         tabs.setViewPager(pager);
                         pager.setCurrentItem(mPageCurItem);

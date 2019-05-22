@@ -1,7 +1,7 @@
 package com.coolbitx.coolwallet.adapter;
 
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.app.FragmentTransaction;
 
 import com.coolbitx.coolwallet.ui.Fragment.BaseFragment;
@@ -10,7 +10,7 @@ import java.util.LinkedList;
 /**
  * Created by ShihYi on 2015/12/15.
  */
-public class TabFragmentPagerAdapter extends FragmentPagerAdapter {
+public class TabFragmentPagerAdapter extends FragmentStatePagerAdapter {
 
     LinkedList<BaseFragment> fragments = null;
     private FragmentManager fm = null;
