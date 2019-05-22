@@ -72,7 +72,7 @@ public class TabFragment extends Fragment {
     private Boolean isAddFrag = false;
     private ProgressDialog mProgress;
     private Timer mTimer;
-    CmdManager cmdManager ;
+    CmdManager cmdManager;
 
 
     public static Fragment newInstance() {
@@ -214,11 +214,10 @@ public class TabFragment extends Fragment {
      */
     private void getFragments(int type) {
 
-        if (fragments != null) {
-            if (fragments.size() > 0) {
-                adapter.clearFragment(fragments);
-                fragments.clear();
-            }
+        if (fragments == null) return;
+        if (fragments.size() > 0) {
+            adapter.clearFragment(fragments);
+            fragments.clear();
         }
 
         for (int i = 1; i <= FragMainActivity.ACCOUNT_CNT; i++) {
@@ -397,7 +396,7 @@ public class TabFragment extends Fragment {
 
                                 if (flag[0] && flag[1] && flag[2] && flag[3]) {
                                     mProgress.dismiss();
-                                    cmdManager.McuSetAccountState((byte)account, new CmdResultCallback() {
+                                    cmdManager.McuSetAccountState((byte) account, new CmdResultCallback() {
                                                 @Override
                                                 public void onSuccess(int status, byte[] outputData) {
 
@@ -411,7 +410,7 @@ public class TabFragment extends Fragment {
                                 }
                             } else {
                                 LogUtil.i("setAccountInfo failed.");
-                                PublicPun.showNoticeDialog(getActivity(), getString(R.string.error_msg), getString(R.string.error)+":" + Integer.toHexString(status));
+                                PublicPun.showNoticeDialog(getActivity(), getString(R.string.error_msg), getString(R.string.error) + ":" + Integer.toHexString(status));
                                 mProgress.dismiss();
                             }
                         }
@@ -462,7 +461,7 @@ public class TabFragment extends Fragment {
                     });
                 } else {
                     mProgress.dismiss();
-                    PublicPun.showNoticeDialog(getActivity(), getString(R.string.error_msg), getString(R.string.error)+":" + Integer.toHexString(status));
+                    PublicPun.showNoticeDialog(getActivity(), getString(R.string.error_msg), getString(R.string.error) + ":" + Integer.toHexString(status));
                 }
             }
         });
@@ -573,14 +572,14 @@ public class TabFragment extends Fragment {
             final int accountID = position;
             LogUtil.i("切換標籤account=" + accountID);
             if (fragments.get(position).getTitle().equals("+")) {
-                mProgress.setMessage(getString(R.string.create_account)+"...");
+                mProgress.setMessage(getString(R.string.create_account) + "...");
                 mProgress.show();
                 CreateNewAccount(accountID);
                 addFragmentToList(mPageType);
             } else {
                 //當切換位置
                 if (!PublicPun.accountRefresh[accountID]) {
-                    mProgress.setMessage(getString(R.string.synchronizing_data)+"...");
+                    mProgress.setMessage(getString(R.string.synchronizing_data) + "...");
                     mProgress.show();
                     mTimer = new Timer();
                     mTimer.schedule(new TimerTask() {
@@ -598,7 +597,7 @@ public class TabFragment extends Fragment {
                         }
                     }, 15000);////15s沒成功就自動cacel
                     final RefreshBlockChainInfo refreshBlockChainInfo = new RefreshBlockChainInfo(getActivity(), accountID);
-                    refreshBlockChainInfo.FunQueryAccountInfo(cmdManager,new RefreshCallback() {
+                    refreshBlockChainInfo.FunQueryAccountInfo(cmdManager, new RefreshCallback() {
                         @Override
                         public void onSuccess() {
                             refreshBlockChainInfo.callTxsRunnable(new RefreshCallback() {
